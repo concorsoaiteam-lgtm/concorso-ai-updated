@@ -1794,14 +1794,17 @@
       position: fixed;
       inset: 0;
       z-index: 120;
-      display: grid;
-      place-items: center;
+      display: none;
       padding: 18px;
       background:
         radial-gradient(circle at 50% 40%, rgba(37,99,235,.14), transparent 24rem),
         rgba(247,251,255,.72);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
+    }
+    .briefing-overlay.open {
+      display: grid;
+      place-items: center;
     }
 
     .briefing-card {
@@ -2671,14 +2674,14 @@
 
     function playBriefingAnimation(done) {
       if (!briefingOverlay || !window.gsap) return done();
-      briefingOverlay.classList.remove('hidden');
+      briefingOverlay.classList.add('open');
       
       let animationDone = false;
       const finishAnimation = () => {
         if (animationDone) return;
         animationDone = true;
         gsap.killTweensOf('*'); // ferma tutte le animazioni GSAP
-        briefingOverlay.classList.add('hidden');
+        briefingOverlay.classList.remove('open');
         done();
       };
       
