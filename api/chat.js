@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   console.log('API Key presente:', !!process.env.BLUESMINDS_API_KEY);
   console.log('Body ricevuto:', JSON.stringify(req.body).slice(0, 100));
 
