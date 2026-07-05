@@ -2389,14 +2389,7 @@
     let questionIndex = 1;
     let totalQuestions = 8;
     let feedback = { clarity: 5, structure: 5, content: 5 };
-    let chatHistory = []; // Memorizza la cronologia della chat per l'AI
-
-    const placeholderQuestions = [
-      'Bene. Mi esponga in modo sintetico i punti principali del bando che ha caricato e perché sono rilevanti per la preparazione.',
-      'Ora provi a collegare questo argomento a un principio generale della materia. Voglio una risposta ordinata: definizione, esempio, conseguenza pratica.',
-      'Le faccio una domanda più concreta: come applicherebbe questo concetto in un caso operativo dentro una pubblica amministrazione?',
-      'Ultima precisazione: quali errori commetterebbe un candidato impreparato su questo tema?'
-    ];
+    let storicoMessaggi = [];
 
     function initAmbientMotion() {
       const glow = document.querySelector('.premium-grid-glow');
@@ -2758,140 +2751,236 @@
         ? selectedBandi.length + ' bandi attivi · difficoltà ' + selectedDifficulty.toLowerCase() + ' · durata ' + selectedDuration + ' minuti'
         : selectedBandi[0].filename + ' · difficoltà ' + selectedDifficulty.toLowerCase() + ' · durata ' + selectedDuration + ' minuti';
       startTimer(selectedDuration);
-      
-      // Aggiungi messaggio di inizio alla cronologia
-      const welcomeMessage = 'Buongiorno. Da questo momento ragioniamo come in prova orale: risposta diretta, ordine logico e capacità di collegare gli argomenti. Se una risposta resta generica, la incalzerò.';
-      addMessage('assistant', welcomeMessage);
-      chatHistory.push({ role: 'assistant', content: welcomeMessage });
-      
-      // Ottieni la prima domanda reale dall'AI
-      getAIResponse();
+
+      avviaCommissario();
     }
 
-    async function getAIResponse() {
-      const thinkingRow = addMessage('assistant', '', true);
+    // System prompt del commissario
+    function buildSystemPrompt(config) {
+      return `Sei un commissario d'esame per un concorso pubblico italiano.
+Il tuo nome è "Commissario ConcorsoAI".
+
+RUOLO: Conduci un esame orale simulato. Sei formale, freddo, neutro.
+Dai sempre del Lei al candidato. Mai del tu.
+Non sei un tutor. Sei un esaminatore.
+
+CONTESTO ESAME:
+- Bando: ${config.bandoNome}
+- Difficoltà: ${config.difficolta}
+- Durata: ${config.durata} minuti
+- Tempo rimasto: ${config.tempoRimasto} minuti
+
+MATERIALE DEL CANDIDATO:
+${config.chunks}
+
+REGOLE:
+1. Fai UNA sola domanda alla volta.
+2. Dopo la risposta fai UN follow-up collegato.
+3. Se il candidato sbaglia NON correggere. Dì solo "Capisco" o "Passiamo avanti".
+4. Se non sa rispondere: "Passiamo alla prossima domanda."
+5. Non dire mai "ottimo", "bravo", "esatto". Al massimo: "Bene."
+6. Cita sempre articoli specifici e leggi reali.
+7. Alterna teoria e scenari pratici.
+
+IN BASE ALLA DIFFICOLTÀ:
+- Facile: domande lineari, meno pressione
+- Realistico: follow-up normali, tono professionale
+- Difficile: incalzante, cambi materia improvvisi, scenari complessi
+
+FORMATO RISPOSTA — rispondi SEMPRE con questo JSON:
+{"messaggio": "testo per il candidato", "feedback": {"chiarezza": 5, "struttura": 5, "contenuto": 5}, "tipo": "domanda"}
+
+Il campo "tipo" può essere: "domanda", "approfondimento", "cambio_materia", "fine"
+
+APERTURA: inizia sempre con "Buongiorno." poi vai subito alla prima domanda.
+LINGUA: italiano formale. Niente emoji. Frasi precise.`;
+    }
+
+    // Funzione principale chiamata AI con streaming
+    async function chiamaCommissario(messaggi, config) {
+      const systemPrompt = buildSystemPrompt(config);
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'deepseek-v4-flash',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            ...messaggi
+          ],
+          temperature: 0.4,
+          max_tokens: 300,
+          stream: true
+        })
+      });
+
+      return response;
+    }
+
+    // Mostra la thinking animation
+    function mostraThinking() {
       isThinking = true;
       answerInput.disabled = true;
       sendButton.disabled = true;
+    }
+
+    // Nasconde la thinking animation
+    function nascondiThinking() {
+      isThinking = false;
+      answerInput.disabled = false;
+      sendButton.disabled = false;
+      answerInput.focus();
+    }
+
+    // Aggiunge messaggio commissario nella chat con streaming
+    async function aggiungiMessaggioCommissario(response) {
+      nascondiThinking();
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = '';
+      let currentMessageRow = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6).trim();
+            if (data === '[DONE]') continue;
+            try {
+              const parsed = JSON.parse(data);
+              const token = parsed.choices?.[0]?.delta?.content || '';
+              fullText += token;
+
+              if (!currentMessageRow) {
+                currentMessageRow = addMessage('assistant', fullText);
+              } else {
+                const bubble = currentMessageRow.querySelector('.bubble');
+                if (bubble) bubble.textContent = fullText;
+              }
+            } catch(e) {}
+          }
+        }
+      }
+
+      // Parse finale del JSON completo
+      try {
+        const parsed = JSON.parse(fullText);
+        if (currentMessageRow) {
+          const bubble = currentMessageRow.querySelector('.bubble');
+          if (bubble) bubble.textContent = parsed.messaggio || fullText;
+        }
+        if (parsed.feedback) {
+          aggiornafeedbackLive(parsed.feedback);
+        }
+        return parsed.messaggio || fullText;
+      } catch(e) {
+        return fullText;
+      }
+    }
+
+    // Aggiorna le barre feedback live
+    function aggiornafeedbackLive(feedback) {
+      const map = { chiarezza: 'clarity', struttura: 'structure', contenuto: 'content' };
+      Object.entries(map).forEach(([key, engKey]) => {
+        const val = feedback[key];
+        const fill = document.getElementById(engKey + 'Fill');
+        const score = document.getElementById(engKey + 'Score');
+        if (fill && val) {
+          fill.style.width = (val * 10) + '%';
+          fill.style.background = val < 5 ? '#EF4444' : val <= 7 ? '#2563EB' : '#22C55E';
+        }
+        if (score && val) {
+          score.textContent = val + '/10';
+          score.style.color = val < 5 ? '#EF4444' : val <= 7 ? '#2563EB' : '#22C55E';
+        }
+      });
+    }
+
+    // Invia messaggio utente
+    async function inviaMessaggio(testo) {
+      if (!testo.trim() || isThinking) return;
+
+      addMessage('user', testo);
+      storicoMessaggi.push({ role: 'user', content: testo });
+
+      mostraThinking();
 
       try {
-        const selectedBandoIds = selectedBandi.map(b => b.id);
-        
-        // 1. Recupera le ultime 2 simulazioni per adaptive learning
-        let userLastSimulations = [];
-        try {
-          const { data: lastSims } = await supabaseClient
-            .from('simulazioni')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .order('created_at', { ascending: false })
-            .limit(2);
-          
-          userLastSimulations = lastSims || [];
-        } catch (e) {
-          console.warn('Nessuna simulazione precedente trovata');
+        const chunks = await recuperaChunks();
+        const config = {
+          bandoNome: sessionStorage.getItem('bandoNome') || 'Concorso pubblico',
+          difficolta: sessionStorage.getItem('difficolta') || 'Realistico',
+          durata: sessionStorage.getItem('durata') || '20',
+          tempoRimasto: Math.floor(timeLeft / 60),
+          chunks: chunks
+        };
+
+        const response = await chiamaCommissario(storicoMessaggi, config);
+        const testoRisposta = await aggiungiMessaggioCommissario(response);
+
+        storicoMessaggi.push({ role: 'assistant', content: testoRisposta });
+
+        // Riassunto ogni 10 messaggi per risparmiare token
+        if (storicoMessaggi.length > 10) {
+          storicoMessaggi = storicoMessaggi.slice(-6);
         }
+      } catch(error) {
+        nascondiThinking();
+        console.error('Errore commissario:', error);
+        showToast('Errore di comunicazione con il commissario', 'error');
+      }
+    }
 
-        // 2. Chiamata all'API - solo se disponibile
-        let aiResponse = '';
-        let apiSuccess = false;
-        try {
-          const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              messages: chatHistory,
-              selectedBandoIds,
-              difficulty: selectedDifficulty,
-              userLastSimulations
-            }),
-          });
+    // Recupera chunks dal bando selezionato
+    async function recuperaChunks() {
+      try {
+        const bandoIds = JSON.parse(sessionStorage.getItem('bandoIds') || '[]');
+        if (bandoIds.length === 0) return 'Nessun materiale specifico caricato.';
 
-          if (response.ok) {
-            apiSuccess = true;
-            // 3. Gestione streaming risposta
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let currentMessageRow = null;
+        const { data } = await supabaseClient
+          .from('chunks')
+          .select('content')
+          .in('bando_id', bandoIds)
+          .limit(5);
 
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
+        if (!data || data.length === 0) return 'Nessun chunk trovato.';
+        return data.map(c => c.content).join('\n\n');
+      } catch(e) {
+        return 'Errore nel recupero del materiale.';
+      }
+    }
 
-              const chunk = decoder.decode(value);
-              const lines = chunk.split('\n').filter(line => line.trim());
+    // Prima domanda del commissario all'avvio
+    async function avviaCommissario() {
+      mostraThinking();
 
-              for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                  const dataStr = line.slice(6).trim();
-                  if (dataStr === '[DONE]') break;
-                  
-                  try {
-                    const data = JSON.parse(dataStr);
-                    const delta = data.choices?.[0]?.delta?.content;
-                    
-                    if (delta) {
-                      aiResponse += delta;
-                      
-                      if (!currentMessageRow) {
-                        removeThinking(thinkingRow);
-                        currentMessageRow = addMessage('assistant', aiResponse);
-                      } else {
-                        const bubble = currentMessageRow.querySelector('.bubble');
-                        if (bubble) bubble.textContent = aiResponse;
-                      }
-                    }
-                  } catch (e) { /* ignore */ }
-                }
-              }
-            }
-          }
-        } catch (e) {
-          console.warn('API non disponibile:', e);
-        }
+      const chunks = await recuperaChunks();
+      const durata = sessionStorage.getItem('durata') || '20';
+      const config = {
+        bandoNome: sessionStorage.getItem('bandoNome') || 'Concorso pubblico',
+        difficolta: sessionStorage.getItem('difficolta') || 'Realistico',
+        durata: durata,
+        tempoRimasto: parseInt(durata),
+        chunks: chunks
+      };
 
-        // 4. FALLBACK A DOMANDE PREDEFINITE
-        if (!apiSuccess || !aiResponse) {
-          removeThinking(thinkingRow);
-          aiResponse = placeholderQuestions[(questionIndex - 1) % placeholderQuestions.length];
-          addMessage('assistant', aiResponse);
+      storicoMessaggi = [];
+      storicoMessaggi.push({ role: 'user', content: 'Inizia l\'esame.' });
 
-          // Aggiorna anche i feedback casualmente
-          feedback.clarity = Math.min(10, Math.max(4, feedback.clarity + (Math.random() > .45 ? 1 : 0)));
-          feedback.struttura = Math.min(10, Math.max(4, feedback.struttura + (Math.random() > .55 ? 1 : 0)));
-          feedback.content = Math.min(10, Math.max(4, feedback.content + (Math.random() > .5 ? 1 : 0)));
-          updateFeedback();
-        } else {
-          // Analizza feedback JSON se disponibile
-          const jsonMatch = aiResponse.match(/\{[\s\S]*"chiarezza"[\s\S]*\}/) || aiResponse.match(/\{[\s\S]*"clarity"[\s\S]*\}/);
-          if (jsonMatch) {
-            try {
-              const scores = JSON.parse(jsonMatch[0]);
-              feedback.clarity = scores.chiarezza || scores.clarity || feedback.clarity;
-              feedback.struttura = scores.struttura || scores.structure || feedback.struttura;
-              feedback.content = scores.contenuto || scores.content || feedback.content;
-              updateFeedback();
-            } catch (e) {
-              console.warn('Impossibile parsare punteggi');
-            }
-          }
-        }
-
-        chatHistory.push({ role: 'assistant', content: aiResponse });
-
-      } catch (error) {
-        console.error('Errore AI generale:', error);
-        removeThinking(thinkingRow);
-        const fallbackQuestion = placeholderQuestions[(questionIndex - 1) % placeholderQuestions.length];
-        addMessage('assistant', fallbackQuestion);
-        chatHistory.push({ role: 'assistant', content: fallbackQuestion });
-        showToast('Modalità demo attiva.', 'warning');
-      } finally {
-        isThinking = false;
-        answerInput.disabled = false;
-        sendButton.disabled = false;
-        sendButton.classList.remove('sending');
-        answerInput.focus();
+      try {
+        const response = await chiamaCommissario(storicoMessaggi, config);
+        const testoRisposta = await aggiungiMessaggioCommissario(response);
+        storicoMessaggi.push({ role: 'assistant', content: testoRisposta });
+      } catch(error) {
+        nascondiThinking();
+        console.error('Errore avvio commissario:', error);
       }
     }
 
@@ -2907,20 +2996,15 @@
 
       sendButton.classList.add('sending');
       celebrateSend();
-      addMessage('user', text);
       answerInput.value = '';
       updateAnswerMeter();
       autoResizeInput();
-      
-      // Aggiungi risposta utente alla cronologia
-      chatHistory.push({ role: 'user', content: text });
-      
-      // Aggiorna indice domanda
+
       questionIndex = Math.min(totalQuestions, questionIndex + 1);
       updateQuestionCounter();
-      
-      // Ottieni prossima risposta AI
-      await getAIResponse();
+
+      await inviaMessaggio(text);
+      sendButton.classList.remove('sending');
     }
 
     function autoResizeInput() {
@@ -2944,13 +3028,15 @@
         await supabaseClient.from('simulazioni').insert({
           user_id: currentUser.id,
           bando_id: selectedBandi[0].id,
-          difficulty: selectedDifficulty,
-          duration_minutes: selectedDuration,
-          questions_total: questionIndex,
-          time_used_seconds: usedSeconds,
-          clarity_score: feedback.clarity,
-          structure_score: feedback.structure,
-          content_score: feedback.content
+          modalita: selectedDifficulty,
+          durata_minuti: selectedDuration,
+          status: 'completata',
+          voto_finale: Math.round((feedback.clarity + feedback.structure + feedback.content) / 3),
+          feedback_chiarezza: feedback.clarity,
+          feedback_struttura: feedback.structure,
+          feedback_contenuto: feedback.content,
+          started_at: new Date(startedAt).toISOString(),
+          ended_at: new Date().toISOString()
         });
       } catch (error) {
         console.warn('Simulazioni table non disponibile o policy mancante:', error);
@@ -3039,6 +3125,10 @@
         const exists = selectedBandi.some(item => String(item.id) === String(id));
         selectedBandi = exists ? selectedBandi.filter(item => String(item.id) !== String(id)) : [...selectedBandi, bando];
         card.classList.toggle('active', !exists);
+
+        sessionStorage.setItem('bandoIds', JSON.stringify(selectedBandi.map(b => b.id)));
+        sessionStorage.setItem('bandoNome', selectedBandi.length > 0 ? selectedBandi[0].filename : '');
+
         if (!exists && window.gsap) {
           const spark = document.createElement('span');
           spark.className = 'selection-spark';
@@ -3053,6 +3143,7 @@
           difficultyCards.forEach(item => item.classList.remove('active'));
           card.classList.add('active');
           selectedDifficulty = card.dataset.difficulty;
+          sessionStorage.setItem('difficolta', selectedDifficulty);
           if (window.gsap) {
             gsap.from(card, {
               scale: 0.98,
@@ -3068,6 +3159,7 @@
           durationButtons.forEach(item => item.classList.remove('active'));
           button.classList.add('active');
           selectedDuration = Number(button.dataset.duration);
+          sessionStorage.setItem('durata', selectedDuration.toString());
         });
       });
 
