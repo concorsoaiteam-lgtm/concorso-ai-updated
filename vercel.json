@@ -1,8 +1,8 @@
 {
-  "outputDirectory": ".",
   "rewrites": [
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/auth", "destination": "/auth.html" },
-    { "source": "/simulation", "destination": "/simulation.html" }
+    { "source": "/simulation", "destination": "/simulation.html" },
+    { "source": "/api/(.*)", "destination": "/api/$1" }
   ]
 }
