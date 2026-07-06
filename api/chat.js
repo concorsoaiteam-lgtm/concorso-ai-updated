@@ -31,7 +31,7 @@ module.exports = async function handler(req, res) {
     // ma lasciamo passare temperature, max_tokens, messages, stream.
     const forwardBody = {
   ...(req.body || {}),
-  model: 'minimax-m3',
+  model: 'deepseek-v4-flash',
   stream: false
 };
 
@@ -70,8 +70,8 @@ module.exports = async function handler(req, res) {
     }
 
     // Inoltriamo lo stesso status code cosi il client puo distinguere
-    // 401/429/500 upstream e mostrare un messaggio sensato.
-    return res.status(upstream.status).json(data);
+    // 401/429/500 ureturn res.status(upstream.status).json(data);pstream e mostrare un messaggio sensato.
+    
   } catch (error) {
     // Gestione esplicita del timeout upstream (AbortController)
     if (error && error.name === 'AbortError') {
