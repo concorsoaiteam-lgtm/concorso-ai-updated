@@ -1116,7 +1116,16 @@
     function renderRecent() {
       const container = document.getElementById('recentList');
       if (!state.recent.length) {
-        container.innerHTML = '<p class="empty-state">Nessuna simulazione ancora.</p>';
+        // FASE 3.3 — empty state con CTA motivante invece di testo piatto
+        container.innerHTML =
+          '<div class="empty-bandi empty-cta-card" role="status">' +
+            '<span class="empty-bandi-icon" aria-hidden="true">🎯</span>' +
+            '<div class="empty-bandi-body">' +
+              '<p class="empty-bandi-title">La tua prima simulazione ti aspetta</p>' +
+              '<p class="empty-bandi-msg">Hai gi\u00e0 caricato dei bandi? Scegline uno e inizia. Il commissario AI ti guider\u00e0 passo passo.</p>' +
+              '<a href="simulation.html" class="empty-bandi-cta">Vai alla simulazione \u2192</a>' +
+            '</div>' +
+          '</div>';
         return;
       }
 

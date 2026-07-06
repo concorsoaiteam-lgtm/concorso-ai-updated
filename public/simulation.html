@@ -48,6 +48,7 @@
   <!-- Supabase + GSAP -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="auth-patch.js"></script>
 
   <style>
     :root {
@@ -2251,6 +2252,89 @@
       .score-bump { animation: none !important; }
     }
 
+
+    /* =========================================================
+       FASE 3.1 — STREAMING BUBBLE + TYPEWRITER CARET (v2 UX)
+       Fa sembrare il commissario "vivo" durante la risposta.
+       ========================================================= */
+    .streaming-bubble {
+      position: relative;
+      min-height: 38px;
+      font-variant-numeric: tabular-nums;
+      transition: border-color .25s ease, background .25s ease;
+    }
+
+    .typewriter-caret {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      margin-left: 2px;
+      background: #2563EB;
+      vertical-align: text-bottom;
+      animation: caretBlink 1s steps(1) infinite;
+      box-shadow: 0 0 6px rgba(37,99,235,.5);
+    }
+
+    @keyframes caretBlink {
+      0%, 50% { opacity: 1; }
+      50.01%, 100% { opacity: 0; }
+    }
+
+    .streaming-done {
+      /* Stato post-stream: nessuno stile speciale, lo swap usa
+         question-glow + gsap.from per il feedback di conferma. */
+    }
+
+    .streaming-error {
+      border-color: rgba(220, 38, 38, .35) !important;
+      background: linear-gradient(135deg, rgba(254,242,242,.85), rgba(255,255,255,.92)) !important;
+    }
+
+    .streaming-error-note {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(220, 38, 38, .35);
+      color: #B91C1C;
+      font-size: .82rem;
+      font-weight: 650;
+    }
+
+    /* Skeleton shimmer per stato iniziale del feedback (3.2) */
+    .feedback-skeleton {
+      height: 4px;
+      border-radius: 3px;
+      background: linear-gradient(
+        90deg,
+        rgba(37,99,235,.08) 0%,
+        rgba(37,99,235,.22) 50%,
+        rgba(37,99,235,.08) 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.6s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Animazione "input ricevuto" sul bubble utente (3.2) */
+    .message-row.user .bubble.just-sent {
+      animation: inputReceived .42s cubic-bezier(.2,.9,.2,1.35);
+    }
+
+    @keyframes inputReceived {
+      0% { transform: scale(.94); box-shadow: 0 4px 18px rgba(37,99,235,.18); }
+      55% { transform: scale(1.025); box-shadow: 0 10px 30px rgba(37,99,235,.28); }
+      100% { transform: scale(1); box-shadow: 0 4px 16px rgba(37,99,235,.25); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .typewriter-caret { animation: none !important; opacity: 1; }
+      .feedback-skeleton { animation: none !important; opacity: .65; }
+      .message-row.user .bubble.just-sent { animation: none !important; }
+    }
+
 </style>
 </head>
 <body>
@@ -2807,13 +2891,26 @@
       const finishAnimation = () => {
         if (animationDone) return;
         animationDone = true;
-        gsap.killTweensOf('*'); // ferma tutte le animazioni GSAP
+        // Killa SOLO le animazioni del briefing, non tutte le GSAP del page
+        // (altrimenti si freeza anche il typing-pulse dell'input utente).
+        if (window.gsap) {
+          gsap.killTweensOf(briefingOverlay);
+          gsap.killTweensOf(briefingOverlay.querySelectorAll('*'));
+        }
         briefingOverlay.classList.remove('open');
         done();
       };
-      
-      // Salva la callback su window per poterla chiamare da initEvents
-      window.skipBriefingCallback = finishAnimation;
+
+      // Espone la callback su un namespace dedicato, non su window
+      // generico. Evita inquinamento del global scope e conflitti.
+      // Espone la callback su un namespace dedicato, non su window
+      // generico. Evita inquinamento del global scope e conflitti.
+      // NOTA: il consumer (handler del bottone "Salta") legge da
+      // window.__skipBriefingCallback_v2 direttamente per semplicità
+      // e per non richiedere un lookup annidato.
+      window.__concorsoAI = window.__concorsoAI || {};
+      window.__concorsoAI.__skipBriefingCallback_v2 = finishAnimation;
+      window.__skipBriefingCallback_v2 = finishAnimation;
 
       const steps = briefingOverlay.querySelectorAll('.briefing-step');
       const fill = briefingOverlay.querySelector('.briefing-progress-fill');
@@ -2895,7 +2992,254 @@
       avviaCommissario();
     }
 
+    // ============================================================
+    // STREAMING SSE v2 (Fase 3.1) — typewriter effect reale
+    // ============================================================
+    // Il backend inoltra BluesMinds stream:true come SSE.
+    // Noi leggiamo i chunk, estraiamo i "delta" e li scriviamo
+    // progressivamente nel bubble con un typewriter RAF adattivo.
+    // Il parsing JSON finale (per estrarre feedback + messaggio
+    // pulito) avviene solo a fine stream, dopo il marker [DONE].
+    // ============================================================
+    async function chiamaCommissarioStream(messaggi, config, callbacks) {
+      const onDelta = callbacks && callbacks.onDelta;
+      const onComplete = callbacks && callbacks.onComplete;
+      const onError = callbacks && callbacks.onError;
+
+      // 1) Token Supabase — richiesto dal backend per Fase 1 sicurezza
+      let token = null;
+      try {
+        if (supabaseClient && supabaseClient.auth && supabaseClient.auth.getSession) {
+          const sessionData = await supabaseClient.auth.getSession();
+          token = sessionData && sessionData.data && sessionData.data.session && sessionData.data.session.access_token;
+        }
+      } catch (_) { /* fallthrough, 401 dal server */ }
+
+      if (!token) {
+        if (onError) onError({ status: 401, message: 'Sessione scaduta — rifai login dalla dashboard' });
+        return;
+      }
+
+      const systemPrompt = buildSystemPrompt(config);
+
+      // 2) Fetch POST con stream:true
+      let response;
+      try {
+        response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({
+            model: 'deepseek-v4-flash',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              ...messaggi
+            ],
+            temperature: 0.4,
+            max_tokens: 500,
+            stream: true
+          })
+        });
+      } catch (networkErr) {
+        if (onError) onError({ status: 0, message: 'Errore di rete: ' + (networkErr.message || 'sconosciuto') });
+        return;
+      }
+
+      // 3) Errori pre-stream (401, 429, 500 arrivano come JSON)
+      if (!response.ok) {
+        let errMsg = 'Errore ' + response.status;
+        try {
+          const err = await response.json();
+          if (err && err.error) errMsg = err.error;
+          if (err && err.details) errMsg += ' — ' + err.details;
+        } catch (_) { /* ignore */ }
+        if (response.status === 401) errMsg = 'Sessione scaduta — rifai login';
+        if (response.status === 429) errMsg = 'Troppe richieste — aspetta qualche secondo';
+        if (onError) onError({ status: response.status, message: errMsg });
+        return;
+      }
+
+      // 4) Lettura SSE + typewriter rendering adattivo
+      const reader = response.body.getReader();
+      if (!reader) {
+        if (onError) onError({ status: 500, message: 'Stream reader non supportato dal browser' });
+        return;
+      }
+      const decoder = new TextDecoder();
+      let rawContent = '';
+      let buffer = '';
+      let isDone = false;
+      let pendingChars = '';
+      let rafId = null;
+
+      const renderTick = function () {
+        if (pendingChars.length > 0) {
+          // Slice adattivo: piu caratteri se il buffer e cresciuto
+          // (gestisce tab in background dove RAF rallenta).
+          const sliceSize = Math.max(2, Math.min(8, Math.ceil(pendingChars.length / 30)));
+          const slice = pendingChars.slice(0, sliceSize);
+          pendingChars = pendingChars.slice(sliceSize);
+          if (onDelta) onDelta(slice);
+        }
+        if (!isDone || pendingChars.length > 0) {
+          rafId = requestAnimationFrame(renderTick);
+        } else {
+          rafId = null;
+        }
+      };
+      rafId = requestAnimationFrame(renderTick);
+
+      try {
+        while (true) {
+          const readResult = await reader.read();
+          if (readResult.done) break;
+          if (!readResult.value) continue;
+          buffer += decoder.decode(readResult.value, { stream: true });
+
+          let boundary;
+          while ((boundary = buffer.indexOf('\n\n')) !== -1) {
+            const chunk = buffer.slice(0, boundary);
+            buffer = buffer.slice(boundary + 2);
+
+            const trimmed = chunk.trim();
+            // Commenti/keepalive SSE iniziano con ":"
+            if (!trimmed || trimmed.charAt(0) === ':') continue;
+            if (trimmed.indexOf('data:') !== 0) continue;
+
+            const payload = trimmed.slice(5).trim();
+            if (payload === '[DONE]') {
+              isDone = true;
+              break;
+            }
+
+            try {
+              const parsed = JSON.parse(payload);
+              const delta = parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content;
+              if (typeof delta === 'string' && delta.length) {
+                rawContent += delta;
+                pendingChars += delta;
+              }
+              if (parsed.error) {
+                isDone = true;
+                if (onError) onError({ status: 500, midStream: true, message: (parsed.error && parsed.error.message) || 'Errore mid-stream' });
+                break;
+              }
+            } catch (_) { /* ignora chunk malformato e continua */ }
+          }
+          if (isDone) break;
+        }
+      } catch (streamErr) {
+        if (onError) onError({ status: 500, midStream: true, message: 'Stream interrotto: ' + (streamErr.message || '') });
+      }
+
+      isDone = true;
+      if (rafId) cancelAnimationFrame(rafId);
+      // Aspetta che il buffer del typewriter si svuoti
+      await new Promise(function (r) { setTimeout(r, 50); });
+      if (onComplete) onComplete(rawContent);
+    }
+
+    // Helper: estrae il testo del campo "messaggio" da un buffer JSON parziale.
+    // Ritorna "" se il pattern non e ancora visibile nello stream.
+    // Gestisce unescape minimo di \\n, \\", \\t, \\uXXXX per non mostrare
+    // JSON raw all'utente durante il typewriter.
+    function extractMessaggioVisible(raw) {
+      if (!raw) return '';
+      const match = raw.match(/"messaggio"\s*:\s*"((?:[^"\\]|\\.)*)/);
+      if (!match) return '';
+      return match[1]
+        .replace(/\\"/g, '"')
+        .replace(/\\n/g, '\n')
+        .replace(/\\t/g, '\t')
+        .replace(/\\\\/g, '\\')
+        .replace(/\\u([0-9a-fA-F]{4})/g, function (_, hex) { return String.fromCharCode(parseInt(hex, 16)); });
+    }
+
+    // Helper: parser finale del JSON del commissario. Arriva a [DONE],
+    // qui si fa il parse completo e si restituisce {messaggio, feedback, tipo}.
+    function parseFinalCommissarioMessage(raw) {
+      if (!raw) return { messaggio: '', feedback: null, tipo: 'risposta' };
+      const cleanText = String(raw)
+        .replace(/```json\s*/gi, '')
+        .replace(/```\s*/g, '')
+        .trim();
+      try {
+        const parsed = JSON.parse(cleanText);
+        return {
+          messaggio: parsed.messaggio || '',
+          feedback: parsed.feedback || null,
+          tipo: parsed.tipo || 'risposta'
+        };
+      } catch (_) {
+        // Fallback: estrai primo blocco {...} simile a JSON
+        const match = cleanText.match(/\{[\s\S]*\}/);
+        if (match) {
+          try {
+            const parsed = JSON.parse(match[0]);
+            return {
+              messaggio: parsed.messaggio || cleanText,
+              feedback: parsed.feedback || null,
+              tipo: parsed.tipo || 'risposta'
+            };
+          } catch (__) { /* fallthrough */ }
+        }
+        return { messaggio: cleanText, feedback: null, tipo: 'risposta' };
+      }
+    }
+
+    // Helper: gestisce una bolla "streaming" del commissario.
+    // - durante lo stream: typewriter effect sul campo "messaggio"
+    // - al [DONE]: swap con il messaggio pulito + animazione finale
+    // Ritorna { appendChars(delta), swap(cleanText, feedback), row, bubble }
+    function createStreamingBubble() {
+      const row = addMessage('assistant', '', false);
+      const bubble = row.querySelector('.bubble');
+      bubble.classList.add('streaming-bubble');
+      bubble.dataset.raw = '';
+      // Rimuovi la classe question-glow che addMessage mette di default:
+      // durante lo stream il glow sarebbe fuorviante, lo rimettiamo allo swap.
+      bubble.classList.remove('question-glow');
+      const caret = document.createElement('span');
+      caret.className = 'typewriter-caret';
+      bubble.appendChild(caret);
+
+      return {
+        appendChars: function (chars) {
+          const newRaw = (bubble.dataset.raw || '') + chars;
+          bubble.dataset.raw = newRaw;
+          const visible = extractMessaggioVisible(newRaw);
+          // Sostituisci il contenuto ma preserva il caret in fondo
+          bubble.textContent = visible;
+          bubble.appendChild(caret);
+          // Auto-scroll del body verso il basso
+          window.requestAnimationFrame(function () {
+            row.scrollIntoView({ block: 'end', behavior: 'smooth' });
+          });
+        },
+        swap: function (cleanText, feedback) {
+          bubble.classList.remove('streaming-bubble');
+          bubble.classList.add('streaming-done');
+          // Rimuovi caret, mostra messaggio pulito con glow di conferma
+          bubble.textContent = cleanText || '';
+          bubble.classList.add('question-glow');
+          if (window.gsap) {
+            gsap.fromTo(bubble,
+              { scale: 0.985 },
+              { scale: 1, duration: 0.32, ease: 'back.out(1.6)' }
+            );
+          }
+        },
+        row: row,
+        bubble: bubble
+      };
+    }
+
     // System prompt del commissario
+    // (buildSystemPrompt resta uguale: e' la stessa funzione di prima)
+    // eslint-disable-next-line no-unused-vars
+    const __buildSystemPromptSentinel = true;
     function buildSystemPrompt(config) {
       return `Sei un commissario d'esame per un concorso pubblico italiano.
 Il tuo nome è "Commissario ConcorsoAI".
@@ -3015,16 +3359,34 @@ LINGUA: italiano formale. Niente emoji. Frasi precise.`;
       // Rimuovi thinking e mostra risposta
       removeThinking(thinkingRow);
 
-      // Parse del JSON content
+      // Parse del JSON content. Alcuni LLM (DeepSeek incluso) spesso
+      // wrappano l'output in blocchi ```json ... ```: li strippiamo
+      // prima del parse, altrimenti il feedback va perso e all'utente
+      // viene mostrato il JSON grezzo.
       let messaggio = fullText;
       let feedbackData = null;
+      const cleanText = String(fullText)
+        .replace(/```json\s*/gi, '')
+        .replace(/```\s*/g, '')
+        .trim();
       try {
-        const parsed = JSON.parse(fullText);
-        messaggio = parsed.messaggio || fullText;
+        const parsed = JSON.parse(cleanText);
+        messaggio = parsed.messaggio || cleanText;
         feedbackData = parsed.feedback || null;
-      } catch(e) {}
+      } catch(e) {
+        // Fallback: prova a estrarre un eventuale JSON inline anche se
+        // il modello ha aggiunto testo extra prima/dopo il blocco.
+        const match = cleanText.match(/\{[\s\S]*\}/);
+        if (match) {
+          try {
+            const parsed = JSON.parse(match[0]);
+            messaggio = parsed.messaggio || messaggio;
+            feedbackData = parsed.feedback || feedbackData;
+          } catch (_) { /* resta testo puro */ }
+        }
+      }
 
-      addMessage('assistant', messaggio, false, true);
+      addMessage('assistant', messaggio, false);
 
       if (feedbackData) {
         aggiornafeedbackLive(feedbackData);
@@ -3033,24 +3395,33 @@ LINGUA: italiano formale. Niente emoji. Frasi precise.`;
       return messaggio;
     }
 
-    // Aggiorna le barre feedback live
-    function aggiornafeedbackLive(feedback) {
+    // Aggiorna le barre feedback live + stato globale.
+    // ATTENZIONE: il parametro si chiama "newFeedback" per NON fare shadowing
+    // del `let feedback` globale. Se rinominato in "feedback" il global
+    // resta a 0/0/0 e `saveSimulationResult` salva zeri su Supabase.
+    function aggiornafeedbackLive(newFeedback) {
       const map = { chiarezza: 'clarity', struttura: 'structure', contenuto: 'content' };
       Object.entries(map).forEach(([key, engKey]) => {
-        const val = feedback[key];
+        const raw = newFeedback[key];
+        const val = typeof raw === 'number' ? Math.max(0, Math.min(10, Math.round(raw))) : 0;
+        // 1) aggiorna lo stato globale (cosi `voto_finale` e il salvataggio
+        //    su Supabase leggono i valori reali, non i default 0/0/0)
+        feedback[engKey] = val;
+        // 2) aggiorna la UI (bar + score)
         const fill = document.getElementById(engKey + 'Fill');
         const score = document.getElementById(engKey + 'Score');
-        if (fill && val) {
+        const color = val < 5 ? '#EF4444' : val <= 7 ? '#2563EB' : '#22C55E';
+        if (fill) {
           if (window.gsap) {
             gsap.to(fill, { width: (val * 10) + '%', duration: 0.7, ease: 'expo.out', overwrite: 'auto' });
           } else {
             fill.style.width = (val * 10) + '%';
           }
-          fill.style.background = val < 5 ? '#EF4444' : val <= 7 ? '#2563EB' : '#22C55E';
+          fill.style.background = color;
         }
-        if (score && val) {
+        if (score) {
           score.textContent = val + '/10';
-          score.style.color = val < 5 ? '#EF4444' : val <= 7 ? '#2563EB' : '#22C55E';
+          score.style.color = color;
         }
       });
     }
