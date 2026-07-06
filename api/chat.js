@@ -30,9 +30,10 @@ module.exports = async function handler(req, res) {
     // Forziamo il modello per coerenza con la scelta di prodotto,
     // ma lasciamo passare temperature, max_tokens, messages, stream.
     const forwardBody = {
-      ...(req.body || {}),
-      model: 'minimax-m3'
-    };
+  ...(req.body || {}),
+  model: 'minimax-m3',
+  stream: false
+};
 
     // Timeout di sicurezza: 25 secondi. Se BluesMinds si impunta,
     // abortiamo la richiesta e rispondiamo 504 invece di lasciar
