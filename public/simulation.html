@@ -73,11 +73,12 @@
 
     * { box-sizing: border-box; }
 
-    html, body { min-height: 100%; }
+    html { height: 100%; overflow: hidden; }
+    body { min-height: 100%; height: 100%; }
 
     body {
       margin: 0;
-      overflow-x: hidden;
+      overflow: hidden;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text);
       background:
@@ -401,14 +402,15 @@
     }
 
     .sim-phase {
-      min-height: 100vh;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       padding-bottom: 112px;
     }
 
     .sim-navbar {
-      position: sticky;
-      top: 0;
-      z-index: 40;
+      flex-shrink: 0;
       border-bottom: 1px solid rgba(37,99,235,0.1);
       background: rgba(255,255,255,0.85);
       backdrop-filter: blur(12px);
@@ -440,9 +442,7 @@
     }
 
     .info-bar {
-      position: sticky;
-      top: 64px;
-      z-index: 35;
+      flex-shrink: 0;
       border-bottom: 1px solid rgba(37,99,235,.10);
       background: transparent;
       backdrop-filter: blur(14px);
@@ -480,18 +480,21 @@
     }
 
     .sim-layout {
-      max-width: 1120px;
+      max-width: 1060px;
       margin: 0 auto;
       padding: 18px 16px 0;
       display: grid;
-      grid-template-columns: minmax(0, 720px) 280px;
+      grid-template-columns: 1fr 280px;
       justify-content: center;
-      gap: 22px;
+      gap: 24px;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
     }
 
     .chat-area {
-      height: calc(100vh - 64px - 58px - 116px);
-      min-height: 360px;
+      flex: 1;
+      min-height: 0;
       overflow-y: auto;
       padding: 8px 4px 24px;
       scroll-behavior: smooth;
@@ -577,7 +580,7 @@
     .feedback-panel {
       align-self: start;
       position: sticky;
-      top: 142px;
+      top: 18px;
       background: rgba(255,255,255,0.95);
       border-color: rgba(37,99,235,0.1);
     }
@@ -755,7 +758,7 @@
       }
       .info-bar { top: 58px; }
       .info-pill { padding: 7px 10px; font-size: .76rem; }
-      .chat-area { height: calc(100vh - 58px - 90px - 106px); }
+      .chat-area { flex: 1; min-height: 0; }
       .bubble-wrap { max-width: 88%; }
       .config-card { padding: 20px; border-radius: 20px; }
     }
@@ -1388,7 +1391,6 @@
 
     .feedback-fill {
       border-radius: 3px !important;
-      transition: width .6s cubic-bezier(.4,0,.2,1), background .25s ease !important;
     }
 
     .feedback-label span:last-child { font-weight: 600 !important; }
@@ -1551,11 +1553,22 @@
       45% { height: 16px; opacity: 1; transform: translateY(-2px); }
     }
 
+    /* Commissioner streaming aura */
+    .bubble.streaming-aura {
+      animation: commissionerAura 1.8s ease-in-out infinite;
+    }
+
+    @keyframes commissionerAura {
+      0%, 100% { box-shadow: 0 2px 8px rgba(37,99,235,0.06); }
+      50% { box-shadow: 0 4px 24px rgba(37,99,235,0.10), 0 0 48px rgba(37,99,235,0.05); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .commissioner-thinking::before,
       .thinking-orb::before,
       .thinking-orb::after,
-      .thinking-wave span { animation: none !important; }
+      .thinking-wave span,
+      .bubble.streaming-aura { animation: none !important; }
     }
 
 
@@ -2284,16 +2297,16 @@
       <aside id="feedbackPanel" class="feedback-panel card">
         <h2 class="feedback-title">📊 Feedback live</h2>
         <div class="feedback-row">
-          <div class="feedback-label"><span>Chiarezza</span><span id="clarityScore">5/10</span></div>
-          <div class="feedback-track"><div id="clarityFill" class="feedback-fill"></div></div>
+          <div class="feedback-label"><span>Chiarezza</span><span id="clarityScore">0/10</span></div>
+          <div class="feedback-track"><div id="clarityFill" class="feedback-fill" style="width:0%"></div></div>
         </div>
         <div class="feedback-row">
-          <div class="feedback-label"><span>Struttura</span><span id="structureScore">5/10</span></div>
-          <div class="feedback-track"><div id="structureFill" class="feedback-fill"></div></div>
+          <div class="feedback-label"><span>Struttura</span><span id="structureScore">0/10</span></div>
+          <div class="feedback-track"><div id="structureFill" class="feedback-fill" style="width:0%"></div></div>
         </div>
         <div class="feedback-row">
-          <div class="feedback-label"><span>Contenuto</span><span id="contentScore">5/10</span></div>
-          <div class="feedback-track"><div id="contentFill" class="feedback-fill"></div></div>
+          <div class="feedback-label"><span>Contenuto</span><span id="contentScore">0/10</span></div>
+          <div class="feedback-track"><div id="contentFill" class="feedback-fill" style="width:0%"></div></div>
         </div>
       </aside>
     </section>
@@ -2388,7 +2401,7 @@
     let isThinking = false;
     let questionIndex = 1;
     let totalQuestions = 8;
-    let feedback = { clarity: 5, structure: 5, content: 5 };
+    let feedback = { clarity: 0, structure: 0, content: 0 };
     let storicoMessaggi = [];
 
     function initAmbientMotion() {
@@ -2511,7 +2524,11 @@
         const fill = document.getElementById(key + 'Fill');
         const score = document.getElementById(key + 'Score');
         const color = feedbackColor(value);
-        fill.style.width = (value * 10) + '%';
+        if (window.gsap) {
+          gsap.to(fill, { width: (value * 10) + '%', duration: 0.7, ease: 'expo.out', overwrite: 'auto' });
+        } else {
+          fill.style.width = (value * 10) + '%';
+        }
         fill.style.background = color;
         score.textContent = value + '/10';
         score.style.color = color;
@@ -2554,12 +2571,9 @@
 
       bandoList.innerHTML = '';
 
-      // Se non ci sono bandi, aggiungiamo quelli demo per il testing
       if (!bandi.length) {
-        bandi = [
-          { id: 'demo1', filename: 'Bando di concorso - Profilo A (2024).pdf' },
-          { id: 'demo2', filename: 'Regolamento procedure concorsuali.pdf' }
-        ];
+        emptyBandi.classList.remove('hidden');
+        return;
       }
 
       emptyBandi.classList.add('hidden');
@@ -2739,12 +2753,18 @@
 
     function startSimulationUI() {
       if (window.gsap) {
-        gsap.from(['.sim-navbar', '.info-bar', '#commissionerCard', '.feedback-panel', '.input-shell'], {
+        const tl = gsap.timeline();
+        tl.from('.sim-navbar', { opacity: 0, y: -12, duration: 0.4, ease: 'power3.out' })
+          .from('.info-bar', { opacity: 0, y: -10, duration: 0.35, ease: 'power3.out' }, '-=0.1')
+          .from('#commissionerCard', { opacity: 0, y: 12, scale: 0.97, duration: 0.4, ease: 'power3.out' }, '-=0.1')
+          .from('.feedback-panel', { opacity: 0, x: 8, duration: 0.35, ease: 'power3.out' }, '-=0.1')
+          .from('.input-shell', { opacity: 0, y: 14, duration: 0.35, ease: 'power3.out' }, '-=0.1');
+        gsap.from('.send-btn', {
+          scale: 0.8,
           opacity: 0,
-          y: (index) => index < 2 ? -8 : 10,
-          duration: 0.36,
-          stagger: 0.06,
-          ease: 'power2.out'
+          duration: 0.5,
+          ease: 'back.out(1.2)',
+          delay: 0.6
         });
       }
       commissionerContext.textContent = selectedBandi.length > 1
@@ -2833,6 +2853,15 @@ LINGUA: italiano formale. Niente emoji. Frasi precise.`;
       answerInput.focus();
     }
 
+    // Estrae il campo messaggio dal JSON in streaming
+    function estraiMessaggioDaStream(raw) {
+      const full = raw.match(/"messaggio"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+      if (full) return full[1];
+      const partial = raw.match(/"messaggio"\s*:\s*"((?:[^"\\]|\\.)*)$/);
+      if (partial) return partial[1];
+      return null;
+    }
+
     // Aggiunge messaggio commissario nella chat con streaming
     async function aggiungiMessaggioCommissario(response) {
       nascondiThinking();
@@ -2841,6 +2870,7 @@ LINGUA: italiano formale. Niente emoji. Frasi precise.`;
       const decoder = new TextDecoder();
       let fullText = '';
       let currentMessageRow = null;
+      let auraTween = null;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -2858,14 +2888,40 @@ LINGUA: italiano formale. Niente emoji. Frasi precise.`;
               const token = parsed.choices?.[0]?.delta?.content || '';
               fullText += token;
 
+              const cleanText = estraiMessaggioDaStream(fullText) || fullText.replace(/^[\s{[,]+/, '').replace(/[\s}\]]+$/, '').trim();
+
               if (!currentMessageRow) {
-                currentMessageRow = addMessage('assistant', fullText);
+                currentMessageRow = addMessage('assistant', cleanText);
+                const bubble = currentMessageRow.querySelector('.bubble');
+                if (bubble) bubble.classList.add('streaming-aura');
+                if (window.gsap) {
+                  auraTween = gsap.to(bubble, {
+                    boxShadow: '0 0 24px rgba(37,99,235,0.12), 0 0 60px rgba(37,99,235,0.06)',
+                    duration: 0.8,
+                    ease: 'sine.inOut',
+                    yoyo: true,
+                    repeat: -1
+                  });
+                }
               } else {
                 const bubble = currentMessageRow.querySelector('.bubble');
-                if (bubble) bubble.textContent = fullText;
+                if (bubble) bubble.textContent = cleanText;
               }
             } catch(e) {}
           }
+        }
+      }
+
+      if (auraTween) auraTween.kill();
+      if (currentMessageRow) {
+        const bubble = currentMessageRow.querySelector('.bubble');
+        if (bubble) bubble.classList.remove('streaming-aura');
+        if (window.gsap) {
+          gsap.to(bubble, {
+            boxShadow: '0 2px 8px rgba(37,99,235,0.06)',
+            duration: 0.4,
+            ease: 'power2.out'
+          });
         }
       }
 
@@ -2893,7 +2949,11 @@ LINGUA: italiano formale. Niente emoji. Frasi precise.`;
         const fill = document.getElementById(engKey + 'Fill');
         const score = document.getElementById(engKey + 'Score');
         if (fill && val) {
-          fill.style.width = (val * 10) + '%';
+          if (window.gsap) {
+            gsap.to(fill, { width: (val * 10) + '%', duration: 0.7, ease: 'expo.out', overwrite: 'auto' });
+          } else {
+            fill.style.width = (val * 10) + '%';
+          }
           fill.style.background = val < 5 ? '#EF4444' : val <= 7 ? '#2563EB' : '#22C55E';
         }
         if (score && val) {
@@ -2914,10 +2974,13 @@ LINGUA: italiano formale. Niente emoji. Frasi precise.`;
 
       try {
         const chunks = await recuperaChunks();
+        const bandoNome = selectedBandi.length > 0
+          ? (selectedBandi.length > 1 ? selectedBandi.length + ' bandi' : selectedBandi[0].filename)
+          : 'Concorso pubblico';
         const config = {
-          bandoNome: sessionStorage.getItem('bandoNome') || 'Concorso pubblico',
-          difficolta: sessionStorage.getItem('difficolta') || 'Realistico',
-          durata: sessionStorage.getItem('durata') || '20',
+          bandoNome: bandoNome,
+          difficolta: selectedDifficulty,
+          durata: String(selectedDuration),
           tempoRimasto: Math.floor(timeLeft / 60),
           chunks: chunks
         };
@@ -2962,12 +3025,14 @@ LINGUA: italiano formale. Niente emoji. Frasi precise.`;
       mostraThinking();
 
       const chunks = await recuperaChunks();
-      const durata = sessionStorage.getItem('durata') || '20';
+      const bandoNome = selectedBandi.length > 0
+        ? (selectedBandi.length > 1 ? selectedBandi.length + ' bandi' : selectedBandi[0].filename)
+        : 'Concorso pubblico';
       const config = {
-        bandoNome: sessionStorage.getItem('bandoNome') || 'Concorso pubblico',
-        difficolta: sessionStorage.getItem('difficolta') || 'Realistico',
-        durata: durata,
-        tempoRimasto: parseInt(durata),
+        bandoNome: bandoNome,
+        difficolta: selectedDifficulty,
+        durata: String(selectedDuration),
+        tempoRimasto: selectedDuration,
         chunks: chunks
       };
 
@@ -2994,6 +3059,12 @@ LINGUA: italiano formale. Niente emoji. Frasi precise.`;
       const text = answerInput.value.trim();
       if (!text || isThinking) return;
 
+      if (window.gsap) {
+        gsap.fromTo(sendButton,
+          { scale: 0.92 },
+          { scale: 1, duration: 0.4, ease: 'back.out(1.2)', overwrite: 'auto' }
+        );
+      }
       sendButton.classList.add('sending');
       celebrateSend();
       answerInput.value = '';
