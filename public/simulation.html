@@ -2478,19 +2478,140 @@
 
       <aside id="feedbackPanel" class="feedback-panel card">
         <h2 class="feedback-title">📊 Feedback live</h2>
-        <div class="feedback-row">
+        <p class="mt-1 text-[11px] font-semibold leading-5 text-brand-600">Clicca una barra per il <strong>dettaglio</strong> · usa “Non sono d'accordo” per <strong>correggere</strong> il commissario.</p>
+        <div class="feedback-row" data-trust="clarity">
           <div class="feedback-label"><span>Chiarezza</span><span id="clarityScore">0/10</span></div>
-          <div class="feedback-track"><div id="clarityFill" class="feedback-fill" style="width:0%"></div></div>
+          <div class="feedback-track" role="button" tabindex="0" aria-label="Mostra dettaglio chiarezza"><div id="clarityFill" class="feedback-fill" style="width:0%"></div></div>
+          <button class="trust-detail hidden mt-2 w-full rounded-lg border border-brand-200 bg-brand-50/60 px-2.5 py-2 text-left text-[11px] font-semibold leading-5 text-brand-800" type="button" data-detail-for="clarity">↳ <strong>Dettaglio:</strong> in attesa della tua prima risposta.</button>
         </div>
-        <div class="feedback-row">
+        <div class="feedback-row" data-trust="structure">
           <div class="feedback-label"><span>Struttura</span><span id="structureScore">0/10</span></div>
-          <div class="feedback-track"><div id="structureFill" class="feedback-fill" style="width:0%"></div></div>
+          <div class="feedback-track" role="button" tabindex="0" aria-label="Mostra dettaglio struttura"><div id="structureFill" class="feedback-fill" style="width:0%"></div></div>
+          <button class="trust-detail hidden mt-2 w-full rounded-lg border border-brand-200 bg-brand-50/60 px-2.5 py-2 text-left text-[11px] font-semibold leading-5 text-brand-800" type="button" data-detail-for="structure">↳ <strong>Dettaglio:</strong> in attesa della tua prima risposta.</button>
         </div>
-        <div class="feedback-row">
+        <div class="feedback-row" data-trust="content">
           <div class="feedback-label"><span>Contenuto</span><span id="contentScore">0/10</span></div>
-          <div class="feedback-track"><div id="contentFill" class="feedback-fill" style="width:0%"></div></div>
+          <div class="feedback-track" role="button" tabindex="0" aria-label="Mostra dettaglio contenuto"><div id="contentFill" class="feedback-fill" style="width:0%"></div></div>
+          <button class="trust-detail hidden mt-2 w-full rounded-lg border border-brand-200 bg-brand-50/60 px-2.5 py-2 text-left text-[11px] font-semibold leading-5 text-brand-800" type="button" data-detail-for="content">↳ <strong>Dettaglio:</strong> in attesa della tua prima risposta.</button>
+        </div>
+        <div class="mt-4 flex items-center gap-2">
+          <button id="disagreeBtn" type="button" class="trust-correction inline-flex items-center gap-1.5 rounded-full border border-brand-300 bg-white px-3 py-1.5 text-[11px] font-black text-brand-700 transition hover:border-brand-400 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500" aria-expanded="false" aria-controls="correctionPanel">🤝 Non sono d'accordo</button>
+        </div>
+        <div id="correctionPanel" class="mt-2 hidden rounded-xl border border-brand-200 bg-brand-50/60 p-3">
+          <label for="correctionInput" class="block text-[11px] font-bold text-brand-800">Cosa non va secondo te?</label>
+          <textarea id="correctionInput" rows="2" maxlength="240" placeholder='Es. "Ho citato l\'art. 3 L. 241/90, non l\'art. 1"' class="mt-1.5 w-full rounded-lg border border-brand-200 bg-white px-2.5 py-2 text-[12px] font-semibold text-brand-900 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15"></textarea>
+          <div class="mt-2 flex items-center justify-end gap-2">
+            <button id="correctionCancelBtn" type="button" class="rounded-full px-3 py-1.5 text-[11px] font-bold text-brand-600 transition hover:bg-brand-100">Annulla</button>
+            <button id="correctionSubmitBtn" type="button" class="rounded-full bg-brand-600 px-3 py-1.5 text-[11px] font-black text-white shadow-sm transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white">Invia correzione</button>
+          </div>
         </div>
       </aside>
+      <script>
+      (function () {
+        function buildDetail(key, score) {
+          if (score === 0) return '↳ <strong>Dettaglio:</strong> in attesa della tua prima risposta.';
+          if (score < 5) {
+            if (key === 'clarity') return '↳ <strong>Dettaglio:</strong> frase lunga, concetti non distinti. Suggerimento: una sola idea per periodo, aggancia a un esempio concreto.';
+            if (key === 'structure') return '↳ <strong>Dettaglio:</strong> parti dal caso prima del principio. Suggerimento: <em>generale → specifico → chiusura</em>.';
+            return '↳ <strong>Dettaglio:</strong> mancano riferimenti normativi o sentenze chiave. Suggerimento: cita almeno un articolo o principio.';
+          }
+          if (score <= 7) {
+            if (key === 'clarity') return '↳ <strong>Dettaglio:</strong> buona scansione. Per salire: chiudi ogni concetto con un esempio in 1 frase.';
+            if (key === 'structure') return '↳ <strong>Dettaglio:</strong> struttura solida. Per salire: introduci prima la regola, poi l\'eccezione, poi il caso.';
+            return '↳ <strong>Dettaglio:</strong> sostanza presente. Per salire: aggiungi la giurisprudenza più rilevante.';
+          }
+          if (key === 'clarity') return '↳ <strong>Dettaglio:</strong> esposizione cristallina. Continua così.';
+          if (key === 'structure') return '↳ <strong>Dettaglio:</strong> architettura argomentativa completa: regola → eccezione → caso.';
+          return '↳ <strong>Dettaglio:</strong> citazioni pertinenti, analisi autonoma. OTTIMO.';
+        }
+        function attachTrustLadder() {
+          var rows = document.querySelectorAll('#feedbackPanel .feedback-row');
+          rows.forEach(function (row) {
+            var key = row.getAttribute('data-trust');
+            var track = row.querySelector('.feedback-track');
+            var detail = row.querySelector('.trust-detail');
+            if (!key || !track || !detail) return;
+            var toggle = function () {
+              var score = Number(((window['feedback'] || {})[key]) || 0);
+              detail.innerHTML = buildDetail(key, score);
+              detail.classList.toggle('hidden');
+            };
+            track.addEventListener('click', toggle);
+            track.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+            });
+          });
+          // Aggiorna dinamicamente il testo del dettaglio quando lo score cambia
+          var originalUpdateFeedback = window.updateFeedback;
+          if (typeof originalUpdateFeedback === 'function') {
+            window.updateFeedback = function () {
+              originalUpdateFeedback.apply(this, arguments);
+              rows.forEach(function (row) {
+                var key = row.getAttribute('data-trust');
+                var score = Number(((window['feedback'] || {})[key]) || 0);
+                var detail = row.querySelector('.trust-detail');
+                if (!detail || detail.classList.contains('hidden')) return;
+                detail.innerHTML = buildDetail(key, score);
+              });
+            };
+          }
+          var disagree = document.getElementById('disagreeBtn');
+          var panel = document.getElementById('correctionPanel');
+          var cancelBtn = document.getElementById('correctionCancelBtn');
+          var submitBtn = document.getElementById('correctionSubmitBtn');
+          var input = document.getElementById('correctionInput');
+          var closePanel = function () { if (!panel) return; panel.classList.add('hidden'); if (disagree) disagree.setAttribute('aria-expanded', 'false'); if (input) input.value = ''; };
+          if (disagree && panel) {
+            disagree.addEventListener('click', function () {
+              var willOpen = panel.classList.contains('hidden');
+              panel.classList.toggle('hidden');
+              disagree.setAttribute('aria-expanded', String(willOpen));
+              if (willOpen && input) setTimeout(function () { input.focus(); }, 60);
+            });
+          }
+          if (cancelBtn) cancelBtn.addEventListener('click', closePanel);
+          if (submitBtn && input) {
+            submitBtn.addEventListener('click', function () {
+              var text = (input.value || '').trim();
+              if (!text) {
+                // toast errore inline (auto-rimuove) — non dipende da simboli interni.
+                var errToast = document.createElement('div');
+                errToast.className = 'toast toast-error';
+                errToast.textContent = 'Scrivi prima cosa non va, poi invia.';
+                document.body.appendChild(errToast);
+                setTimeout(function () { if (errToast.parentNode) errToast.remove(); }, 2400);
+                return;
+              }
+              // Riusa il flow di invio esistente: scrive nell'answerInput e
+              // triggera click sul sendButton. Il browser esegue l'handler
+              // "inviaMessaggio" già presente nel secondo <script> della
+              // pagina via bubbling nativo, senza bisogno di esporre
+              // simboli su window o modificare l'IIFE principale.
+              var answerField = document.getElementById('answerInput');
+              var sendButtonEl = document.getElementById('sendButton');
+              if (answerField && sendButtonEl) {
+                answerField.value = '[Correzione candidato] ' + text;
+                // dispatch input per aggiornare il meter del composer
+                try { answerField.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) { /* native */ }
+                sendButtonEl.click();
+              }
+              // toast successo inline (auto-rimuove).
+              var okToast = document.createElement('div');
+              okToast.className = 'toast';
+              okToast.textContent = 'Correzione inviata · il commissario la considera nella prossima domanda.';
+              document.body.appendChild(okToast);
+              setTimeout(function () { if (okToast.parentNode) okToast.remove(); }, 2400);
+              closePanel();
+            });
+          }
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', attachTrustLadder);
+        } else {
+          attachTrustLadder();
+        }
+      })();
+      </script>
     </section>
 
     <section class="input-shell">

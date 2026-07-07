@@ -16,6 +16,18 @@
   feedback live → summary punteggi.
 - **Pubblico**: candidati a concorsi pubblici in Italia.
 - **Mercato-target** (landing): "500.000+ candidati".
+- **Stato founding (07/07/2026)**: 1 founder (Ruman), startup early-stage.
+- **Deadline lancio sito**: **metà Agosto 2026** (~5 settimane).
+- **Budget**: **€0** → solo free tier / hobby / oss: Vercel free,
+  Supabase free, BluesMinds free/skills, Claude/Buffy. Niente servizi
+  paid. Niente stock photo. Niente font premium. Vaniglia + CDN.
+- **Sequenza di lavoro concordata**: **sito marketing prima** (landing
+  refresh completa), **poi simulazione** (auth.html / dashboard.html /
+  simulation.html). Test dentro simulazione = post-lancio sito.
+- **Vincoli stringenti di copy**: niente emoji nel copy del commissario,
+  brand voice COI italiano formale, NO "cool vibes" anglosassone.
+  Ogni CTA orientata al **risultato del candidato** (vincere l'orale),
+  mai alla "modalità/funzione" — vedi §14.3.
 
 ---
 
@@ -212,11 +224,16 @@ che gli girano mille domande.
 - **Decidi tu**: se il contesto del progetto suggerisce una scelta
   ragionevole, falla. Non chiedere per questioni che puoi risolvere da
   solo leggendo i file o applicando le convenzioni sopra.
-- **Banditi i `ask_user` multi-select lunghi**: l'utente li percepisce
-  come rumorosi e li "perde a fondo pagina" perché il layout della
-  CLI li copre. Se proprio devi chiedere qualcosa, **scrivilo come
-  testo libero in italiano**: una domanda breve per messaggio, massimo
-  due, dirette. Niente radio button, niente "label + description".
+- **Domande OK, anche lunghe, ma sempre SCRITTE**: chiedere è lecito e
+  apprezzato — pure multi-punto, pure verbose — **purché la domanda
+  sia persistentata**. Quindi: scrivila come testo libero in italiano,
+  oppure mettila direttamente in `AGENT_MEMORY.md` (sezione "Domande
+  aperte per l'utente" se serve). **Mai** usare il form interattivo
+  radio/checkbox che si può chiudere senza rispondere e si perde a
+  fondo pagina.
+- **Se chiudi la chat senza rispondere a una domanda scritta**, l'utente
+  la ritroverà in `AGENT_MEMORY.md` la prossima sessione. Le domande
+  scritte sono il modo preferito di lasciare "TODO aperti" cross-chat.
 - **Conferma SOLO le azioni costose o irreversibili**: `git push`,
   `vercel --prod`, drop di tabelle Supabase, cancellazione di file
   importanti, commit che vanno sul main. Per tutto il resto (modifiche
@@ -487,4 +504,99 @@ vuole allenarsi, non essere intervistata.
 
 ---
 
-*Ultimo aggiornamento: 07/07/2026 (skill set + 5 principi aggiunti).*
+## 15. Workflow skill — quando usare quale
+
+Questa è la **matrice operativa**. Scegli la skill in base al tipo di
+task, non a caso. Per ogni task durante una sessione, chiediti:
+"di quale skill ho bisogno qui?".
+
+### 🔍 Matrice task → skill
+
+| Tipo di task                                           | Skill da usare                                              |
+|--------------------------------------------------------|-------------------------------------------------------------|
+| Comprendere il codice esistente senza modificare       | `file-picker` + `code-searcher` (built-in Buffy agents)     |
+| Pianificare modifiche complesse                        | `writing-plans` + `brainstorming` (Matt Pocock)             |
+| Stress-testare un design / architettura                | `grill-me`, `grill-with-docs`, `domain-modeling`            |
+| Riscrivere copy / microcopy / CTA                      | `impeccable` + `copy-editing` + §14.3 Risultati>Funzioni   |
+| Audit visivo/UI/UX di una pagina                       | `impeccable` + `design-taste-*`                             |
+| Audit architetturale / refactor plan                   | `improve-codebase-architecture`                             |
+| Aggiungere/modificare auth, JWT, RLS                   | `better-auth-best-practices` + `supabase-postgres-best-practices` |
+| Ottimizzare DB, indici, schema Supabase                | `supabase-postgres-best-practices` + `supabase`             |
+| Deploy su Vercel / check env vars                      | `deploy-to-vercel`                                          |
+| Animazioni GSAP avanzate                               | `gsap`                                                      |
+| Tailwind utility composition                           | `tailwind`                                                  |
+| E2E test del flow utente                               | `webapp-testing` + Playwright MCP                           |
+| Decision-making / quando sei incerto                   | `grill-me`, `grill-with-docs`, `verification-before-completion` |
+| Anti-AI-slop design check                              | `frontend-design` (Anthropic), `design-taste-*` (Leonxlnx) |
+| Marketing conversion / churn / sales                   | `cro`, `churn-prevention`, `sales-enablement`               |
+| Copywriting persuasivo in ITALIANO                     | `copywriting` + `copy-editing` + `marketing-psychology`     |
+| **Trovare NUOVE skill da usare**                       | **`find-skills` (Vercel Labs, 2.4M install)**               |
+
+### 🚀 Flusso tipico di sessione (decision tree)
+
+```
+Apri una nuova chat su ConcorsoAI
+   ↓
+1. Leggi AGENT_MEMORY.md (§§1-15)
+   ↓
+2. Identifica il task → scegli skill da matrice sopra
+   ↓
+3. Se task è complesso:
+     → spawna writing-plans + brainstorming in parallelo
+     → grill-me / grill-with-docs sul piano
+     ↓
+4. Esegui il piano:
+     → use impeccable/design-taste per UI
+     → use supabase/better-auth per backend
+     → use copy-editing per copy
+     ↓
+5. Review: code-reviewer-minimax-m3
+   ↓
+6. AGGIORNA AGENT_MEMORY.md se cambi qualcosa di strutturale
+   ↓
+7. Se serve skill nuova: usa find-skills, installa, aggiungi a §13
+   ↓
+8. Commit locale (push solo se l'utente conferma)
+```
+
+### 🧰 Sub-agent INTEGRATI in Buffy (NON skill esterne)
+
+Questi **sono già disponibili** in questa CLI, NON servono install:
+
+| Agente                       | Quando usarlo                                                |
+|------------------------------|--------------------------------------------------------------|
+| `file-picker`                | Esplorare un progetto sconosciuto                            |
+| `code-searcher`              | Cercare pattern (regex, function names) nel codice           |
+| `researcher-docs`            | Documentazione ufficiale di una libreria                     |
+| `researcher-web`             | Ricerca web + leaderboard skill/MCP                          |
+| `basher`                     | Eseguire un comando (richiede bash/WSL/Git Bash)             |
+| `tmux-cli`                   | Test interattivo di CLI app                                  |
+| `browser-use`                | Test/verifica UI nel browser (richiede Chrome)               |
+| `code-reviewer-minimax-m3`   | Review diff dopo modifiche                                   |
+| `thinker-with-files-gemini`  | Decisioni/problemi non-banali (vedi file + globale)          |
+| `thinker-gpt`                | Decisioni non-banali (solo globale)                          |
+| `context-pruner`             | Pulizia automatica del context                               |
+| `find-skills` (skill, ❗)     | **Scopre NUOVE skill da GitHub** — installala, usala spesso  |
+
+`find-skills` è la **meta-skill operativa**: ogni volta che il task
+non è coperto dalla matrice sopra, prima di brancolare, fai
+`npx skills find <query>` (vedi §13D per il pattern).
+
+### 📋 Regola pratica "1 task = almeno 1 skill"
+
+Quando lavori su un task, chiediti: "sto applicando almeno una skill
+rilevante?". Se la risposta è no, **fermati e cerca** nella matrice
+sopra o usa `find-skills`. Mai procedere "a braccio" su task
+non-banali.
+
+### 📝 Domande aperte per l'utente (cross-chat)
+
+Questa sotto-sezione è per domande scritte che l'utente non ha ancora
+risposto ma che è importante ricordare:
+
+- _(vuota per ora — l'utente può aggiungere qui le sue domande lasciate
+  in sospeso, così la prossima sessione le ritrova subito)_
+
+---
+
+*Ultimo aggiornamento: 07/07/2026 (skill workflow §15 + founding state §1 + copy landing §14.3).*
