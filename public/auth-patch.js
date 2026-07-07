@@ -115,7 +115,10 @@
           if (streamError) {
             return {
               ok: false,
-              status: 500,
+              // Propaga lo status originale dell'errore upstream (es. 401
+              // per sessione scaduta) invece di hardcodare 500. Default
+              // 500 solo se l'errore non aveva uno status associato.
+              status: streamError.status || 500,
               json: function () { return Promise.resolve({ error: streamError.message }); }
             };
           }

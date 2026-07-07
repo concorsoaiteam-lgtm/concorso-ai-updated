@@ -2359,6 +2359,78 @@
     }
 
 
+    /* =========================================================
+       BANDO SELECTION v2 — anti-slop, info-rich, animato
+       (sviluppato dopo review utente: "fatta male, no animazioni,
+       ui ai slop"). Gerarchia info + micro-interazione sobria.
+       Rispetta prefers-reduced-motion.
+       ========================================================= */
+    .bando-meta {
+      display: block;
+      margin-top: 4px;
+      color: #4B6F8E;
+      font-size: .8125rem;
+      font-weight: 600;
+      letter-spacing: -.005em;
+    }
+
+    .bando-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      border: 1px solid rgba(37,99,235,.16);
+      background: rgba(255,255,255,.7);
+      color: #4B6F8E;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: -.005em;
+      transition: background .22s cubic-bezier(.2,.7,.2,1),
+                  border-color .22s cubic-bezier(.2,.7,.2,1),
+                  color .22s cubic-bezier(.2,.7,.2,1),
+                  box-shadow .22s cubic-bezier(.2,.7,.2,1);
+      white-space: nowrap;
+    }
+
+    .bando-icon svg { width: 100%; height: 100%; display: block; }
+
+    .bando-indicator-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 10px;
+      height: 10px;
+      opacity: 0;
+      transform: scale(0.55);
+      transition: opacity .22s ease,
+                  transform .36s cubic-bezier(.2,.9,.2,1.4);
+    }
+    .bando-indicator-check svg { width: 100%; height: 100%; display: block; }
+
+    .bando-card.active .bando-indicator {
+      background: #2563EB;
+      border-color: #2563EB;
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(37,99,235,.32);
+    }
+    .bando-card.active .bando-indicator-check {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* v3: focus-visible coerente con il focus ring brand-500 del button parent */
+    .bando-card:focus-visible .bando-indicator {
+      box-shadow: 0 0 0 3px rgba(37,99,235,.20);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bando-card.active .bando-indicator-check { transform: none; transition: none; }
+      .bando-indicator { transition: none; }
+      .bando-card:focus-visible .bando-indicator { transition: none; }
+    }
+
+
 </style>
 </head>
 <body>
@@ -2730,6 +2802,26 @@
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char];
       });
     }
+    // Bando selection v2: meta info (pagine + data) per togliere "AI slop"
+    function formatBandoMeta(bando) {
+      const parts = [];
+      if (bando.total_pages) parts.push(bando.total_pages + (bando.total_pages === 1 ? ' pagina' : ' pagine'));
+      parts.push(relativeBandoDate(bando.created_at));
+      return parts.join(' · ');
+    }
+    function relativeBandoDate(iso) {
+      if (!iso) return 'Data non disponibile';
+      try {
+        const diff = Date.now() - new Date(iso).getTime();
+        if (diff < 0) return 'oggi';
+        const days = Math.floor(diff / 86400000);
+        if (days === 0) return 'oggi';
+        if (days === 1) return 'ieri';
+        if (days < 30) return days + ' giorni fa';
+        if (days < 365) return Math.floor(days / 30) + ' mesi fa';
+        return Math.floor(days / 365) + ' anno/i fa';
+      } catch (_) { return 'Data non disponibile'; }
+    }
 
     let currentUser = null;
     let bandi = [];
@@ -2902,7 +2994,7 @@
       try {
         const { data, error } = await supabaseClient
           .from('bandi')
-          .select('id, filename')
+          .select('id, filename, total_pages, file_size, created_at')
           .eq('user_id', currentUser.id);
 
         if (error) throw error;
@@ -2922,13 +3014,13 @@
       emptyBandi.classList.add('hidden');        // escapeAttr su title/aria-label: filename con virgolette o apostrofi
         // romperebbe l'attributo. escapeHtml su bando-name protegge il <span>.
         bandoList.innerHTML = bandi.map(bando => `
-        <button type="button" class="bando-card" data-bando-id="${bando.id}" title="${escapeAttr(bando.filename)}" aria-label="Seleziona bando ${escapeAttr(bando.filename)}">
-          <span class="bando-icon">📄</span>
+        <button type="button" class="bando-card" role="checkbox" data-bando-id="${bando.id}" aria-checked="false" title="${escapeAttr(bando.filename)}" aria-label="Seleziona bando ${escapeAttr(bando.filename)}">
+          <span class="bando-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linejoin="round" d="M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path stroke-linejoin="round" stroke-linecap="round" d="M14 3v6h6"/><path stroke-linecap="round" d="M9 14h6M9 17h4"/></svg></span>
           <span class="min-w-0">
             <span class="bando-name">${escapeHtml(bando.filename)}</span>
-            <span class="bando-date">Caricato di recente</span>
+            <span class="bando-meta">${escapeHtml(formatBandoMeta(bando))}</span>
           </span>
-          <span class="bando-check" aria-hidden="true">✓</span>
+          <span class="bando-indicator"><span class="bando-indicator-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7"/></svg></span><span class="bando-indicator-label">Seleziona</span></span>
         </button>
       `).join('');
       updateStartState();
