@@ -2431,6 +2431,110 @@
     }
 
 
+    /* =========================================================
+       REMAKE BANDO SELECTION v3
+       Anti-slop, motion sobrio, palette bianco+blu, a11y first
+       ========================================================= */
+    :root {
+      --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+      --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --dur-fast: 0.2s;
+      --dur-slow: 0.5s;
+      --dur-shimmer: 3.2s;
+    }
+
+    @keyframes bandoIconIdle {
+      0%, 100% { transform: scale(1); opacity: 0.85; }
+      50% { transform: scale(1.06); opacity: 1; }
+    }
+    @keyframes bandoRingFocus {
+      from { box-shadow: 0 0 0 0 rgba(37,99,235,0); }
+      to { box-shadow: 0 0 0 3px rgba(37,99,235,0.30); }
+    }
+    @keyframes bandoShimmerSweep {
+      0% { background-position: -120% 0; }
+      100% { background-position: 220% 0; }
+    }
+    @keyframes bandoCountBump {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.16); background: rgba(37,99,235,0.14); }
+      100% { transform: scale(1); }
+    }
+    @keyframes bandoSonicWave {
+      0% { box-shadow: 0 0 0 0 rgba(37,99,235,0.40); }
+      100% { box-shadow: 0 0 0 18px rgba(37,99,235,0); }
+    }
+    @keyframes bandoGhostFloat {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-5px) rotate(2deg); }
+    }
+
+    /* IDLE: pulse icona discreto per far sembrare il file carrier vivo */
+    .bando-icon svg { animation: bandoIconIdle 4.5s ease-in-out infinite; }
+
+    /* HOVER: morph meta → CTA, fade-in micro-CTA, lift ombra */
+    .bando-cta-hover {
+      font-size: .74rem;
+      font-weight: 800;
+      color: #2563EB;
+      letter-spacing: -.005em;
+      opacity: 0;
+      transform: translateX(-5px);
+      transition: opacity var(--dur-fast) var(--ease-soft),
+                  transform var(--dur-fast) var(--ease-soft);
+      margin-top: 2px;
+      display: inline-block;
+      pointer-events: none;
+    }
+    .bando-card:hover:not(.active) { transform: translateY(-2px); }
+    .bando-card:hover:not(.active) .bando-meta { opacity: 0; transition: opacity .15s ease; }
+    .bando-card:hover:not(.active) .bando-cta-hover { opacity: 1; transform: translateX(0); }
+
+    /* SELECTED: shimmer sweep sull'indicator pill + gradient leggermente pi\u00f9 scuro */
+    .bando-card.active .bando-indicator {
+      background: linear-gradient(110deg, #2563EB 0%, #0F4C81 50%, #2563EB 100%) !important;
+      background-size: 200% 100% !important;
+      animation: bandoShimmerSweep 3.2s linear infinite !important;
+      color: #FFFFFF !important;
+      border-color: #2563EB !important;
+      box-shadow: 0 4px 14px rgba(37,99,235,.32) !important;
+    }
+
+    /* START BUTTON: aura wave quando ready */
+    .start-btn.ready::after {
+      content: "";
+      position: absolute;
+      inset: -5px;
+      z-index: -1;
+      border-radius: inherit;
+      animation: bandoSonicWave 2.4s ease-out infinite;
+      pointer-events: none;
+    }
+
+    /* COUNT chip bump quando cambia */
+    .selected-count.chip-bump { animation: bandoCountBump 0.34s var(--ease-bounce); }
+
+    /* EMPTY state icon oscillazione lenta */
+    .empty-bandi-icon { animation: bandoGhostFloat 4s ease-in-out infinite; display: inline-block; }
+
+    /* Focus-visible: ring esterno animato */
+    .bando-card:focus-visible { animation: bandoRingFocus var(--dur-fast) ease-out forwards; }
+
+    /* Reduced-motion fallback COMPLETO */
+    @media (prefers-reduced-motion: reduce) {
+      .bando-card:focus-visible { animation: none !important; box-shadow: 0 0 0 3px rgba(37,99,235,.30); }
+      .bando-icon svg,
+      .bando-card.active .bando-indicator,
+      .start-btn.ready::after,
+      .empty-bandi-icon,
+      .selected-count.chip-bump { animation: none !important; }
+      .bando-cta-hover { display: none; }
+      .bando-card:hover:not(.active) .bando-meta { opacity: 1 !important; }
+      .bando-card.active .bando-indicator { background: #2563EB !important; }
+      .start-btn.ready::after { display: none; }
+    }
+
+
 </style>
 </head>
 <body>
@@ -2806,8 +2910,8 @@
     function formatBandoMeta(bando) {
       const parts = [];
       if (bando.total_pages) parts.push(bando.total_pages + (bando.total_pages === 1 ? ' pagina' : ' pagine'));
-      parts.push(relativeBandoDate(bando.created_at));
-      return parts.join(' · ');
+      if (bando.created_at) parts.push(relativeBandoDate(bando.created_at));
+      if (!parts.length) return 'Bando pronto'; return parts.join(' · ');
     }
     function relativeBandoDate(iso) {
       if (!iso) return 'Data non disponibile';
@@ -3018,14 +3122,18 @@
           <span class="bando-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linejoin="round" d="M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path stroke-linejoin="round" stroke-linecap="round" d="M14 3v6h6"/><path stroke-linecap="round" d="M9 14h6M9 17h4"/></svg></span>
           <span class="min-w-0">
             <span class="bando-name">${escapeHtml(bando.filename)}</span>
-            <span class="bando-meta">${escapeHtml(formatBandoMeta(bando))}</span>
+            <span class="bando-meta">${escapeHtml(maybeLastSimulated(bando.id) ? '\u00daltima simulazione: ' + escapeHtml(maybeLastSimulated(bando.id)) : formatBandoMeta(bando))}</span>
+            <span class="bando-cta-hover" aria-hidden="true">Simula da questo \u2192</span>
           </span>
           <span class="bando-indicator"><span class="bando-indicator-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7"/></svg></span><span class="bando-indicator-label">Seleziona</span></span>
         </button>
       `).join('');
       updateStartState();
       if (window.gsap) {
-        gsap.from('.bando-card', { opacity: 0, y: 10, duration: .34, stagger: .045, ease: 'power2.out' });
+        var revealCardsAll = document.querySelectorAll('.bando-card');
+      var revealSlice = Array.prototype.slice.call(revealCardsAll, 0, 12);
+      gsap.from(revealSlice, { opacity: 0, y: 14, scale: 0.94, duration: 0.46, stagger: 0.06, ease: 'power2.out', clearProps: 'all' });
+      attachBandoObserver();
       }
     }
 
