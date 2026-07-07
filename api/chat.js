@@ -1,22 +1,37 @@
 // ============================================================
-// ConcorsoAI — Proxy serverless verso BluesMinds (v3)
+// ConcorsoAI — Proxy serverless verso BluesMinds (v4)
+// ============================================================
+// Cambiamenti rispetto a v3:
+//   1) SUPABASE_ANON_KEY: aggiunto fallback hardcoded offuscato in
+//      stile simulation.html (chiave publishable per design Supabase,
+//      formato sb_publishable_*). Env var resta prioritaria (rotazione
+//      1-click da Vercel). Override della convenzione fail-closed
+//      originaria — decisione utente 07/07/2026.
 // ============================================================
 // Cambiamenti rispetto a v2:
 //   1) Rispetta la preferenza di stream del client:
 //      - stream: true (o non specificato) -> SSE forward
 //      - stream: false                    -> bufferizza upstream SSE
 //                                            e ritorna JSON OpenAI-compat
-//   2) SUPABASE_ANON_KEY: fail-closed (nessun fallback hardcoded).
-//   3) Rate limit Map: sweep periodica ogni 60s rimuove record scaduti
+//   [Nota: la SUPABASE_ANON_KEY fail-closed di v2 è stata sostituita
+//    dal fallback hardcoded introdotto in v4 — vedi sopra.]
+//   2) Rate limit Map: sweep periodica ogni 60s rimuove record scaduti
 //      per evitare memory leak su istanze warm.
-//   4) Auth check + body validation identici a v2 (mantiene sicurezza).
+//   3) Auth check + body validation identici a v2 (mantiene sicurezza).
 // ============================================================
 
 const { createClient } = require('@supabase/supabase-js');
 
 // --- Config (fail-closed: nessun fallback hardcoded) ---
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xhifnparcouxsypkjcmn.supabase.co';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY; // OBBLIGATORIA, no fallback
+// SUPABASE_ANON_KEY: env var prioritaria (rotazione 1-click da Vercel),
+// fallback hardcoded offuscato in stile simulation.html. Chiave
+// publishable per design Supabase (formato sb_publishable_*) -> sicura
+// da esporre pubblicamente. Override della convenzione fail-closed
+// originaria (07/07/2026). Per cambiare progetto Supabase: aggiorna
+// entrambi (env var + fallback hardcoded).
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY
+  || ['sb_publishable_','dVYESGcHAV13d5aI1uC7wQ','_pQ0r1qT2'].join('');
 const BLUESMINDS_URL = 'https://api.bluesminds.com/v1/chat/completions';
 const UPSTREAM_TIMEOUT_MS = 30000;
 const FIXED_MODEL = 'deepseek-v4-flash';
@@ -135,11 +150,14 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Metodo non consentito. Usa POST.' });
   }
 
-  // 1) FAIL-CLOSED: SUPABASE_ANON_KEY obbligatoria
+  // 1) DIFESA IN PROFONDITÀ: ora SUPABASE_ANON_KEY ha fallback hardcoded
+  //    (vedi v4 changelog in cima al file), ma se qualcuno rimuove sia
+  //    env var sia fallback (es. refactor accidentale) vogliamo bloccare
+  //    qui invece di crashare in modo silenzioso dentro Supabase auth.
   if (!SUPABASE_ANON_KEY) {
     return res.status(500).json({
       error: 'Configurazione server incompleta',
-      details: 'Variabile SUPABASE_ANON_KEY mancante su Vercel'
+      details: 'SUPABASE_ANON_KEY mancante sia come env var sia come fallback hardcoded'
     });
   }
 

@@ -160,9 +160,12 @@ avviaCommissario()
   testalo su un PDF reale.
 - **CORS whitelist in `api/chat.js`** (`ALLOWED_ORIGINS`): se aggiungi un
   dominio custom, ricordati di aggiornare la lista.
-- **`SUPABASE_URL` HA fallback hardcoded** in `api/chat.js`,
-  **`SUPABASE_ANON_KEY` NO** (fail-closed). Se cambi progetto Supabase,
-  aggiorna entrambi (env var + fallback hardcoded solo per URL).
+- **`SUPABASE_URL` ha fallback hardcoded** in `api/chat.js`.
+  **`SUPABASE_ANON_KEY` ha fallback hardcoded con offuscamento
+  `.join('')+sb_publishable_*`** (override convenzione fail-closed
+  del 07/07/2026 — vedi §8 e changelog v4 in `api/chat.js`). Env var
+  sempre prioritaria per chi vuole rotazione 1-click. Per cambiare
+  progetto Supabase: aggiorna env var + valore fallback in `api/chat.js`.
 
 ---
 
@@ -171,12 +174,14 @@ avviaCommissario()
 | Chiave               | Obbligatoria | Fallback hardcoded?                            | Dove recuperare                      |
 |----------------------|--------------|-----------------------------------------------|--------------------------------------|
 | `BLUESMINDS_API_KEY` | SÌ           | ❌ (→ 500)                                      | Console BluesMinds (rotational)       |
-| `SUPABASE_ANON_KEY`  | SÌ           | ❌ (→ 500 fail-closed)                          | Supabase → Settings → API (`anon`)   |
+| `SUPABASE_ANON_KEY`  | consigliata  | ✅ fallback in `api/chat.js` (publishable key) | Supabase → Settings → API (`anon`)   |
 | `SUPABASE_URL`       | consigliata  | ✅ `https://xhifnparcouxsypkjcmn.supabase.co` | Supabase → Settings → API            |
 
-> **Fail-closed**: senza `ANON_KEY` o `BLUESMINDS_API_KEY` → 500 su
-> **QUALSIASI** chiamata `/api/chat`, anche doc `/api/chat` con payload
-> valido. Controlla le env PRIMA del primo deploy.
+> **Fail-closed**: solo `BLUESMINDS_API_KEY` ora (manca fallback per la
+> key upstream). Senza → 500 su **QUALSIASI** chiamata `/api/chat`. Le
+> variabili Supabase (URL, ANON_KEY) hanno fallback hardcoded e non
+> sono più bloccanti. **Controlla sempre `BLUESMINDS_API_KEY` prima del
+> primo deploy.**
 
 ---
 
