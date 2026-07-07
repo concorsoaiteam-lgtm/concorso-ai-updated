@@ -169,6 +169,9 @@ avviaCommissario()
 
 ---
 
+- **Runtime storage keys `localStorage`** (convenzione 07/07/2026):
+  - `concorsoai_history` — JSON `{ [bandoId]: <ISO date string> }`, letto da `window.maybeLastSimulated(bandoId)` in `public/auth-patch.js` (FASE 4 polyfill). Se la chiave è assente/corrotta, la funzione ritorna `null` e il template di `simulation.html` fallback su `formatBandoMeta(bando)` (pagine + data relativa). Lo **scrittore** non è ancora implementato: quando si attiverà il flow "ultima simulazione per bando", il payload andrà scritto/aggiornato in questa stessa chiave (vedi TODO `simulation.html`).
+
 ## 8. Variabili d'ambiente Vercel (obbligatorie)
 
 | Chiave               | Obbligatoria | Fallback hardcoded?                            | Dove recuperare                      |

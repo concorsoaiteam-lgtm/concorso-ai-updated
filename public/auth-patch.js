@@ -161,4 +161,178 @@
       }
     }
   });
+    // ============================================================
+    // FASE 4 — Polyfill helpers + style alignment per la bando selection
+    // Auth-patch.js viene caricato PRIMA dello script inline di
+    // simulation.html. Definiamo qui le funzioni mancanti che il
+    // template bando-card chiama (maybeLastSimulated, animateCountChip,
+    // attachBandoObserver) e iniettiamo il CSS di allineamento con
+    // i tokens della landing+auth. Il CSS ha specificity sufficiente
+    // (cascade + !important) per sovrascrivere il blocco v3 "REMAKE
+    // BANDO SELECTION" presente in simulation.html.
+    // ============================================================
+    window.maybeLastSimulated = function (id) {
+      try {
+        var h = JSON.parse(localStorage.getItem('concorsoai_history') || '{}');
+        if (h && h[id] && typeof window.relativeBandoDate === 'function') {
+          return window.relativeBandoDate(h[id]);
+        }
+      } catch (_) { /* storage assente o corrotto, fallback silenzioso */ }
+      return null;
+    };
+
+    window.__prevBandoCount = 0;
+    window.animateCountChip = function (n) {
+      var chip = document.getElementById('selectedBandiCount');
+      if (!chip) return;
+      chip.textContent = n === 1 ? '1 selezionato' : n + ' selezionati';
+      if (n !== window.__prevBandoCount) {
+        chip.classList.remove('chip-bump');
+        void chip.offsetWidth;
+        chip.classList.add('chip-bump');
+      }
+      window.__prevBandoCount = n;
+    };
+
+    window.bandoStateObserver = new MutationObserver(function (muts) {
+      muts.forEach(function (m) {
+        var el = m.target;
+        if (el && el.classList && el.classList.contains('bando-card')) {
+          el.setAttribute('aria-checked', String(el.classList.contains('active')));
+        }
+      });
+    });
+
+    window.attachBandoObserver = function () {
+      if (window.bandoStateObserver) window.bandoStateObserver.disconnect();
+      var cards = document.querySelectorAll('.bando-card');
+      cards.forEach(function (c) {
+        c.setAttribute('aria-checked', String(c.classList.contains('active')));
+        window.bandoStateObserver.observe(c, { attributes: true, attributeFilter: ['class'] });
+      });
+    };
+
+    // Big spark 9x sovrapposto al piccolo spark del click handler
+    // inline di simulation.html. Rispetta prefers-reduced-motion.
+    document.addEventListener('click', function (e) {
+      var t = e.target;
+      var card = t && t.closest ? t.closest('.bando-card') : null;
+      if (!card) return;
+      var wasActive = card.classList.contains('active');
+      window.setTimeout(function () {
+        if (!card.classList.contains('active') || wasActive) return;
+        var prm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prm || !window.gsap) return;
+        if (card.querySelector(':scope > .bando-spark-big')) return;
+        var big = document.createElement('span');
+        big.className = 'bando-spark-big';
+        big.style.cssText = 'position:absolute;inset:0;border-radius:24px;pointer-events:none;z-index:1;';
+        card.appendChild(big);
+        window.gsap.fromTo(big,
+          { scale: 0.6, opacity: 0.95, boxShadow: '0 0 0 0 rgba(37,99,235,.42)' },
+          { scale: 9, opacity: 0, boxShadow: '0 0 0 32px rgba(37,99,235,0)', duration: 0.5, ease: 'power2.out',
+            onComplete: function () { big.remove(); } }
+        );
+      }, 0);
+    });
+
+    // ============================================================
+    // Bando-card style alignment con landing+auth (cascade override).
+    // Tokens usati: glass-card, .card-hover, btn-primary shine, cubic-
+    // bezier(.2,.8,.2,1), prefers-reduced-motion hard-reset. Stesso
+    // vocabolario di index.html / auth.html per coerenza visiva.
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function () {
+      try {
+        var s = document.createElement('style');
+        s.setAttribute('data-concorsoai', 'bando-align');
+        s.textContent =
+          '.bando-card {' +
+            'background: rgba(255,255,255,.82) !important;' +
+            '-webkit-backdrop-filter: blur(18px);' +
+            'backdrop-filter: blur(18px);' +
+            'border: 1px solid #D6E8FF !important;' +
+            'border-radius: 24px !important;' +
+            'transition: transform .18s cubic-bezier(.2,.8,.2,1),' +
+              'border-color .18s cubic-bezier(.2,.8,.2,1),' +
+              'box-shadow .18s cubic-bezier(.2,.8,.2,1),' +
+              'background-color .18s cubic-bezier(.2,.8,.2,1) !important;' +
+          '}' +
+          '.bando-card:hover:not(.active) {' +
+            'transform: translateY(-4px) !important;' +
+            'border-color: #A9CDF8 !important;' +
+            'box-shadow: 0 30px 90px rgba(15,76,129,.16) !important;' +
+          '}' +
+          '.bando-card.active {' +
+            'background: rgba(255,255,255,.92) !important;' +
+            'border: 2px solid #2563EB !important;' +
+            'box-shadow: 0 0 0 3px rgba(37,99,235,.18), 0 30px 90px rgba(37,99,235,.22) !important;' +
+            'transform: translateY(-2px) !important;' +
+          '}' +
+          '.bando-card.active .bando-indicator, .bando-card.active .bando-check {' +
+            'background: linear-gradient(135deg, #0F4C81 0%, #2563EB 100%) !important;' +
+            'color: #FFFFFF !important;' +
+            'border: none !important;' +
+            'position: relative;' +
+            'overflow: hidden;' +
+          '}' +
+          '@keyframes bandoShine {' +
+            '0%, 45% { left: -42%; }' +
+            '70%, 100% { left: 120%; }' +
+          '}' +
+          '.bando-card.active .bando-indicator::after, .bando-card.active .bando-check::after {' +
+            'content: "";' +
+            'position: absolute;' +
+            'inset: -120% auto auto -40%;' +
+            'width: 36%;' +
+            'height: 280%;' +
+            'transform: rotate(22deg);' +
+            'background: linear-gradient(90deg, transparent, rgba(255,255,255,.32), transparent);' +
+            'animation: bandoShine 5.5s ease-in-out infinite;' +
+          '}' +
+          '@keyframes bandoIdleFloat {' +
+            '0%, 100% { transform: translateY(0); }' +
+            '50% { transform: translateY(-3px); }' +
+          '}' +
+          '@keyframes bandoCountBump {' +
+            '0% { transform: scale(1); }' +
+            '45% { transform: scale(1.16); background: rgba(37,99,235,0.14); }' +
+            '100% { transform: scale(1); }' +
+          '}' +
+          '@keyframes bandoSelectionRing {' +
+            '0% { box-shadow: 0 0 0 3px rgba(37,99,235,0); }' +
+            '60% { box-shadow: 0 0 0 6px rgba(37,99,235,.18); }' +
+            '100% { box-shadow: 0 0 0 3px rgba(37,99,235,.18); }' +
+          '}' +
+          '.bando-card .bando-icon {' +
+            'animation: bandoIdleFloat 6s ease-in-out infinite;' +
+          '}' +
+          '.selected-count.chip-bump {' +
+            'animation: bandoCountBump 0.36s cubic-bezier(.2,.8,.2,1);' +
+          '}' +
+          '.bando-card.active {' +
+            'animation: bandoSelectionRing 0.42s cubic-bezier(.2,.8,.2,1);' +
+          '}' +
+          '.bando-card:focus-visible {' +
+            'outline: none !important;' +
+            'box-shadow: 0 0 0 4px rgba(37,99,235,.30) !important;' +
+          '}' +
+          '@media (prefers-reduced-motion: reduce) {' +
+            '.bando-card, .bando-card:hover:not(.active), .bando-card.active,' +
+            ' .bando-card .bando-icon,' +
+            ' .bando-card.active .bando-indicator::after,' +
+            ' .bando-card.active .bando-check::after,' +
+            ' .selected-count.chip-bump {' +
+              'animation: none !important;' +
+              'transition: none !important;' +
+              'transform: none !important;' +
+            '}' +
+          '}';
+        document.head.appendChild(s);
+      } catch (e) {
+        if (typeof console !== 'undefined' && console.debug) {
+          console.debug('[ConcorsoAI] bando-align style inject:', e && e.message ? e.message : e);
+        }
+      }
+    });
 })();
