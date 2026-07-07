@@ -1411,7 +1411,7 @@
     .message-row { margin: 0 0 16px !important; }
 
     .message-row.assistant .bubble {
-      background: rgba(255,255,255,.95) !important;
+      background: linear-gradient(135deg, rgba(247,251,255,.97), rgba(234,244,255,.78)) !important;
       border: 1px solid rgba(37,99,235,.10) !important;
       box-shadow: 0 2px 8px rgba(37,99,235,.06) !important;
       border-radius: 4px 16px 16px 16px !important;
@@ -2335,6 +2335,30 @@
       .message-row.user .bubble.just-sent { animation: none !important; }
     }
 
+
+    /* =========================================================
+       PARITY CON LANDING — micro-floating del commissioner-card
+       Allinea visivamente simulation.html al mockup della landing
+       (`index.html` `.floating` su `.glass-card`). Mantenuto sobrio
+       (8s, 4px) per non interferire con lo scroll mobile e con la
+       sticky position del feedback-panel su desktop. Rispetta
+       prefers-reduced-motion.AGENT_MEMORY §3.
+       ========================================================= */
+    .commissioner-card.floating-card {
+      will-change: transform;
+      animation: parityFloating 8s ease-in-out infinite;
+    }
+
+    @keyframes parityFloating {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .commissioner-card.floating-card { animation: none !important; }
+    }
+
+
 </style>
 </head>
 <body>
@@ -2462,7 +2486,7 @@
 
     <section class="sim-layout">
       <div id="chatArea" class="chat-area" aria-live="polite">
-        <section class="commissioner-card" id="commissionerCard">
+        <section class="commissioner-card floating-card" id="commissionerCard">
           <div class="commissioner-avatar-large">CA<span class="online-dot"></span></div>
           <div class="commissioner-info">
             <h2 class="commissioner-name">Commissario ConcorsoAI</h2>
