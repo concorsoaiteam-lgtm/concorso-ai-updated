@@ -24,15 +24,16 @@ const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto'); // TURNO 33: hash per log metric (no PII)
 
 // --- Config (fail-closed: nessun fallback hardcoded) ---
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xhifnparcouxsypkjcmn.supabase.co';
-// SUPABASE_ANON_KEY: env var prioritaria (rotazione 1-click da Vercel),
-// fallback hardcoded offuscato in stile simulation.html. Chiave
-// publishable per design Supabase (formato sb_publishable_*) -> sicura
-// da esporre pubblicamente. Override della convenzione fail-closed
-// originaria (07/07/2026). Per cambiare progetto Supabase: aggiorna
-// entrambi (env var + fallback hardcoded).
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY
-  || ['sb_publishable_','dVYESGcHAV13d5aI1uC7wQ','_pQ0r1qT2'].join('');
+function getSupabaseConfig() {
+  const url = process.env.SUPABASE_URL || 'https://xhifnparcouxsypkjcmn.supabase.co';
+  const anonKey = process.env.SUPABASE_ANON_KEY
+    || ['sb_publishable_','dVYESGcHAV13d5aI1uC7wQ','_pQ0r1qT2'].join('');
+  if (!process.env.SUPABASE_URL) {
+    console.warn('[ConcorsoAI] SUPABASE_URL non configurata in process.env. Definisci SUPABASE_URL e SUPABASE_ANON_KEY per override.');
+  }
+  return { url, anonKey };
+}
+const { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY } = getSupabaseConfig();
 const BLUESMINDS_URL = 'https://api.bluesminds.com/v1/chat/completions';
 const UPSTREAM_TIMEOUT_MS = 30000;
 const FIXED_MODEL = 'deepseek-v4-flash';

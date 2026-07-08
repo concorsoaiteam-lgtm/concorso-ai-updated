@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog — ConcorsoAI · Guide e strategie per l'orale dei concorsi</title>
+  <meta name="description" content="Guide pratiche per preparare l'orale dei concorsi pubblici italiani. Strategie, errori frequenti, simulazioni AI." />
+  <meta name="theme-color" content="#F7FBFF" />
+  <link rel="canonical" href="https://concorso-ai.vercel.app/blog" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              50: '#F7FBFF', 100: '#EAF4FF', 200: '#D6E8FF', 300: '#A9CDF8',
+              400: '#5EA0E8', 500: '#2563EB', 600: '#0F4C81',
+              700: '#0B3A63', 800: '#0B2A4A', 900: '#071D33'
+            }
+          },
+          boxShadow: { card: '0 24px 70px rgba(15,76,129,.12)' }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/landing.css" />
+</head>
+<body class="font-sans antialiased selection:bg-brand-200 selection:text-brand-900">
+
+  <header class="sticky top-0 z-50 border-b border-brand-200/80 bg-white/86 backdrop-blur-xl shadow-sm">
+    <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <a href="index.html" class="rounded-xl text-xl font-extrabold tracking-tight text-brand-900">Concorso<span class="text-gradient">AI</span></a>
+      <div class="hidden items-center gap-3 lg:flex">
+        <a href="index.html#prezzi" class="rounded-xl border border-brand-200 bg-white px-4 py-2 text-sm font-bold text-brand-700 hover:bg-brand-50 transition">Prezzi</a>
+        <a href="auth.html" class="rounded-xl border border-brand-200 bg-white px-4 py-2 text-sm font-bold text-brand-700 hover:bg-brand-50 transition">Accedi</a>
+        <a href="auth.html" class="btn-primary shine rounded-xl px-4 py-2 text-sm font-bold">Inizia simulazione</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 py-16 sm:px-6 sm:py-20">
+
+    <div class="reveal text-center">
+      <p class="section-eyebrow">BLOG</p>
+      <h1 class="mt-4 text-4xl font-black tracking-[-0.035em] text-brand-900 sm:text-5xl">Guide per vincere l'orale.</h1>
+      <p class="mt-5 text-base leading-8 text-brand-700 sm:text-lg max-w-2xl mx-auto">Strategie pratiche, errori da evitare, consigli su misura per i candidati ai concorsi pubblici italiani.</p>
+    </div>
+
+    <div class="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+
+      <article class="reveal card-hover rounded-3xl border border-brand-200 bg-white p-6 shadow-card">
+        <div class="text-xs font-black uppercase tracking-[.18em] text-brand-500">Strategia</div>
+        <h2 class="mt-3 text-xl font-black text-brand-900 leading-tight">
+          <a href="blog/come-superare-orale-concorso.html" class="hover:text-brand-700 transition">Come superare l'orale del concorso pubblico in 5 passi</a>
+        </h2>
+        <p class="mt-3 text-sm leading-7 text-brand-700">Setup, simulazione, feedback e iterazione. La sequenza concreta che usano i vincitori.</p>
+        <div class="mt-5 flex items-center justify-between text-xs font-bold text-brand-600">
+          <span>07/2026 · 7 min lettura</span>
+          <a href="blog/come-superare-orale-concorso.html" class="text-brand-500 hover:text-brand-700">Leggi →</a>
+        </div>
+      </article>
+
+      <article class="reveal card-hover rounded-3xl border border-brand-200 bg-white p-6 shadow-card" style="transition-delay:90ms;">
+        <div class="text-xs font-black uppercase tracking-[.18em] text-brand-500">Confronto</div>
+        <h2 class="mt-3 text-xl font-black text-brand-900 leading-tight">
+          <a href="blog/concorso-ai-vs-ripetizioni-private.html" class="hover:text-brand-700 transition">ConcorsoAI vs ripetizioni private: confronto reale</a>
+        </h2>
+        <p class="mt-3 text-sm leading-7 text-brand-700">Costi, frequenza, qualità del feedback. Quando scegliere uno e quando l'altro.</p>
+        <div class="mt-5 flex items-center justify-between text-xs font-bold text-brand-600">
+          <span>07/2026 · 6 min lettura</span>
+          <a href="blog/concorso-ai-vs-ripetizioni-private.html" class="text-brand-500 hover:text-brand-700">Leggi →</a>
+        </div>
+      </article>
+
+      <article class="reveal card-hover rounded-3xl border border-brand-200 bg-white p-6 shadow-card" style="transition-delay:180ms;">
+        <div class="text-xs font-black uppercase tracking-[.18em] text-brand-500">Tecnica</div>
+        <h2 class="mt-3 text-xl font-black text-brand-900 leading-tight">
+          <a href="blog/le-10-domande-piu-frequenti-orale.html" class="hover:text-brand-700 transition">Le 10 domande più frequenti all'orale (e come rispondere)</a>
+        </h2>
+        <p class="mt-3 text-sm leading-7 text-brand-700">Dalla commissione reale. Errori comuni, struttura della risposta perfetta, articoli da citare.</p>
+        <div class="mt-5 flex items-center justify-between text-xs font-bold text-brand-600">
+          <span>07/2026 · 9 min lettura</span>
+          <a href="blog/le-10-domande-piu-frequenti-orale.html" class="text-brand-500 hover:text-brand-700">Leggi →</a>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="mt-16 reveal rounded-3xl bg-gradient-to-br from-white to-brand-50 p-8 shadow-card sm:p-12 text-center">
+      <h3 class="text-2xl font-black text-brand-900">Vuoi mettere in pratica?</h3>
+      <p class="mt-3 text-base leading-8 text-brand-700 max-w-2xl mx-auto">Leggere le guide aiuta, ma l'unico modo per vincere è allenarsi. Inizia gratis con 3 simulazioni al mese.</p>
+      <a href="auth.html" class="btn-primary shine mt-7 inline-flex items-center justify-center rounded-2xl px-6 py-3.5 text-base font-black shadow-glowBlue">Inizia ora →</a>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-brand-200 bg-white/70 py-10 mt-12">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+      <p class="text-sm font-semibold text-brand-700">ConcorsoAI · Made in Italy · Built for civil servants in training.</p>
+      <div class="mt-3 flex justify-center gap-4 text-xs">
+        <a href="terms.html" class="footer-link">Termini</a>
+        <a href="privacy.html" class="footer-link">Privacy</a>
+        <a href="index.html" class="footer-link">Home</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); obs.unobserve(e.target); } }), { threshold: 0.12 });
+      document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    } else {
+      document.querySelectorAll('.reveal').forEach(el => el.classList.add('is-visible'));
+    }
+  </script>
+</body>
+</html>

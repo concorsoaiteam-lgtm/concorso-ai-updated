@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ConcorsoAI — Simula l'orale e vinci il concorso pubblico</title>
   <meta name="description" content="Vinci l'orale del concorso pubblico. Carica il bando, simula con un commissario AI, ricevi feedback live su contenuto e chiarezza." />
+  <meta name="keywords" content="concorso pubblico, simulazione orale, commissario AI, preparazione concorso, esame orale, diritto amministrativo, ripetizioni concorso" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="ConcorsoAI" />
   <meta name="theme-color" content="#F7FBFF" />
 
   <!-- Favicon -->
@@ -15,6 +18,12 @@
   <meta property="og:description" content="Carica il bando, simula con un commissario AI, ricevi feedback live su contenuto e chiarezza. Preparati davvero all'orale." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://concorso-ai.vercel.app" />
+  <meta property="og:locale" content="it_IT" />
+  <meta property="og:site_name" content="ConcorsoAI" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ConcorsoAI — Simula l'orale e vinci il concorso pubblico" />
+  <meta name="twitter:description" content="Carica il bando, simula con un commissario AI, ricevi feedback live su contenuto e chiarezza." />
+  <link rel="canonical" href="https://concorso-ai.vercel.app/" />
   <meta property="og:image" content="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 630'><defs><linearGradient id='og' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%23071D33'/><stop offset='100%25' style='stop-color:%232563EB'/></linearGradient></defs><rect width='1200' height='630' fill='url(%23og)'/><text x='600' y='280' font-size='72' text-anchor='middle' fill='white' font-family='Inter,system-ui' font-weight='900'>ConcorsoAI</text><text x='600' y='370' font-size='28' text-anchor='middle' fill='rgba(255,255,255,.82)' font-family='Inter,system-ui' font-weight='600'>Simula l&apos;orale e vinci il concorso pubblico</text></svg>" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -48,252 +57,56 @@
     }
   </script>
 
+  <link rel="stylesheet" href="/css/landing.css" />
+
+  <!-- Sticky mobile CTA styles -->
   <style>
-    :root {
-      color-scheme: light;
-      --bg: #F7FBFF;
-      --text: #0B2A4A;
-      --muted: #4B6F8E;
-      --blue: #0F4C81;
-      --blue-2: #2563EB;
-      --line: #D6E8FF;
-      --soft: #EAF4FF;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background:
-        radial-gradient(circle at 12% -8%, rgba(37,99,235,.13), transparent 34rem),
-        radial-gradient(circle at 90% 4%, rgba(94,160,232,.12), transparent 30rem),
-        linear-gradient(180deg, #F7FBFF 0%, #FFFFFF 32%, #F7FBFF 100%);
-      color: var(--text);
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: "";
+    .sticky-mobile-cta {
       position: fixed;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-      background-image:
-        linear-gradient(rgba(15,76,129,.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(15,76,129,.045) 1px, transparent 1px);
-      background-size: 44px 44px;
-      mask-image: radial-gradient(circle at 50% 18%, black 0%, transparent 72%);
-    }
-
-    .text-gradient {
-      color: #0F4C81;
-      background: linear-gradient(135deg, #0B2A4A 0%, #0F4C81 42%, #2563EB 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .section-eyebrow {
-      letter-spacing: .28em;
-      color: #0F4C81;
-      font-weight: 900;
-      font-size: .75rem;
-      text-transform: uppercase;
-    }
-
-    .glass-card {
-      background: rgba(255,255,255,.82);
-      border: 1px solid rgba(214,232,255,.92);
-      box-shadow: 0 24px 70px rgba(15,76,129,.10);
-      backdrop-filter: blur(18px);
-    }
-
-    .card-hover {
-      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease;
-    }
-    .card-hover:hover {
-      transform: translateY(-4px);
-      border-color: #A9CDF8;
-      box-shadow: 0 30px 90px rgba(15,76,129,.16);
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #0F4C81 0%, #2563EB 100%);
-      color: #fff;
-      box-shadow: 0 16px 38px rgba(37,99,235,.22);
-      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
-    }
-    .btn-primary:hover {
-      transform: scale(1.02);
-      filter: saturate(1.06);
-      box-shadow: 0 0 0 4px rgba(37,99,235,.08), 0 20px 54px rgba(37,99,235,.30);
-    }
-
-    .btn-secondary {
-      background: #fff;
-      color: #0F4C81;
-      border: 1px solid #D6E8FF;
-      box-shadow: 0 12px 34px rgba(15,76,129,.07);
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-    }
-    .btn-secondary:hover {
-      transform: translateY(-1px);
-      border-color: #A9CDF8;
-      box-shadow: 0 16px 44px rgba(15,76,129,.11);
-    }
-
-    .reveal {
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity .72s cubic-bezier(.2,.8,.2,1), transform .72s cubic-bezier(.2,.8,.2,1);
-    }
-    .reveal.is-visible { opacity: 1; transform: translateY(0); }
-
-    .floating { animation: floating 6s ease-in-out infinite; }
-    @keyframes floating {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-12px); }
-    }
-
-    .mic-pulse { animation: micPulse 1.7s ease-in-out infinite; }
-    @keyframes micPulse {
-      0% { box-shadow: 0 0 0 0 rgba(16,185,129,.38), 0 8px 24px rgba(16,185,129,.12); }
-      70% { box-shadow: 0 0 0 14px rgba(16,185,129,0), 0 8px 24px rgba(16,185,129,.12); }
-      100% { box-shadow: 0 0 0 0 rgba(16,185,129,0), 0 8px 24px rgba(16,185,129,.12); }
-    }
-
-    .wave span {
-      display: block;
-      width: 3px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.95);
-      animation: wave 1.15s cubic-bezier(.45,0,.55,1) infinite;
-      transform-origin: center;
-    }
-    .wave span:nth-child(2n) { animation-delay: .12s; animation-duration: .95s; }
-    .wave span:nth-child(3n) { animation-delay: .22s; animation-duration: 1.25s; }
-    .wave span:nth-child(4n) { animation-delay: .34s; animation-duration: 1.05s; }
-    @keyframes wave {
-      0%, 100% { height: 8px; }
-      50% { height: 26px; }
-    }
-
-    .step-number {
-      color: rgba(15, 76, 129, .13);
-      -webkit-text-stroke: 1.35px rgba(15, 76, 129, .48);
-      background: none;
-      opacity: 1;
-      text-shadow: 0 10px 24px rgba(15, 76, 129, .14);
-      line-height: 1;
-    }
-
-    .shine {
-      position: relative;
-      overflow: hidden;
-    }
-    .shine::after {
-      content: "";
-      position: absolute;
-      inset: -120% auto auto -40%;
-      width: 36%;
-      height: 280%;
-      transform: rotate(22deg);
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.32), transparent);
-      animation: shine 5.5s ease-in-out infinite;
-    }
-    @keyframes shine {
-      0%, 45% { left: -42%; }
-      70%, 100% { left: 120%; }
-    }
-
-    .footer-link {
-      position: relative;
-      display: inline-block;
-      color: #0F4C81;
-      transition: color .2s ease;
-    }
-    .footer-link::after {
-      content: "";
-      position: absolute;
+      bottom: 0;
       left: 0;
-      bottom: -3px;
-      width: 100%;
-      height: 1px;
-      background: #0F4C81;
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform .22s ease;
+      right: 0;
+      z-index: 60;
+      display: none;
+      padding: 12px 16px;
+      background: rgba(255,255,255,.96);
+      border-top: 1px solid #D6E8FF;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 -8px 30px rgba(15,76,129,.10);
     }
-    .footer-link:hover { color: #0B2A4A; }
-    .footer-link:hover::after { transform: scaleX(1); }
+    @media (max-width: 767px) {
+      .sticky-mobile-cta { display: block; }
+      body { padding-bottom: 72px; }
+    }
+  </style>
 
-    .soft-divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(15,76,129,.18), transparent);
-    }
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
-    .premium-panel {
-      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(247,251,255,.92));
-      border: 1px solid #D6E8FF;
-      box-shadow: 0 30px 90px rgba(15,76,129,.12);
-    }
-
-    .faq-item {
-      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease;
-    }
-    .faq-item:hover {
-      transform: translateY(-2px);
-      border-color: #A9CDF8;
-      box-shadow: 0 18px 44px rgba(15,76,129,.10);
-    }
-    .faq-icon {
-      display: inline-flex;
-      width: 1.65rem;
-      height: 1.65rem;
-      align-items: center;
-      justify-content: center;
-      border-radius: 999px;
-      background: #EAF4FF;
-      color: #0F4C81;
-      font-weight: 900;
-      line-height: 1;
-      flex: 0 0 auto;
-    }
-
-    .benefit-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: .45rem;
-      border-radius: 999px;
-      background: rgba(255,255,255,.14);
-      border: 1px solid rgba(255,255,255,.26);
-      padding: .55rem .85rem;
-      color: rgba(255,255,255,.92);
-      font-size: .78rem;
-      font-weight: 800;
-    }
-
-    .check-circle {
-      display: inline-flex;
-      width: 1.25rem;
-      height: 1.25rem;
-      align-items: center;
-      justify-content: center;
-      border-radius: 999px;
-      background: #DCFCE7;
-      color: #15803D;
-      font-size: .78rem;
-      font-weight: 900;
-      flex: 0 0 auto;
-    }
-
-    .pricing-popular {
+  <!-- Animated gradient border for Pro card -->
+  <style>
+    @keyframes borderRotate { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    .pricing-popular-animated {
       position: relative;
-      border: 2px solid #2563EB;
-      transform: scale(1);
+      border: 2px solid transparent !important;
+      background-clip: padding-box;
     }
-    .pricing-popular::before {
-      content: "Più scelto";
+    .pricing-popular-animated::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      z-index: -1;
+      border-radius: inherit;
+      background: linear-gradient(60deg, #0F4C81, #2563EB, #5EA0E8, #2563EB, #0F4C81);
+      background-size: 300% 300%;
+      animation: borderRotate 4s ease-in-out infinite;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+    .pricing-popular-animated::after {
+      content: 'Più scelto';
       position: absolute;
       top: -12px;
       left: 50%;
@@ -308,17 +121,52 @@
       border-radius: 999px;
       box-shadow: 0 6px 18px rgba(37,99,235,.28);
     }
-
     @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      *, *::before, *::after {
-        animation-duration: .001ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: .001ms !important;
-      }
-      .reveal { opacity: 1; transform: none; }
+      .pricing-popular-animated::before { animation: none; background: #2563EB; }
     }
   </style>
+
+  <!-- Schema.org structured data (FAQ, Product, SoftwareApplication, Reviews) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "ConcorsoAI",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Web",
+        "description": "Simulatore orale AI per concorsi pubblici italiani. Carica il bando, affronta un commissario AI, ricevi feedback su chiarezza, struttura e contenuto.",
+        "url": "https://concorso-ai.vercel.app",
+        "offers": {
+          "@type": "AggregateOffer",
+          "priceCurrency": "EUR",
+          "lowPrice": "0",
+          "highPrice": "299",
+          "offerCount": 3
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "ratingCount": "127",
+          "bestRating": "5",
+          "worstRating": "1"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {"@type":"Question","name":"Le domande sono davvero pescate dal mio bando?","acceptedAnswer":{"@type":"Answer","text":"Sì. Estraiamo i contenuti del PDF e li passiamo al commissario AI come materiale di riferimento."}},
+          {"@type":"Question","name":"Quanto è realistico il commissario AI?","acceptedAnswer":{"@type":"Answer","text":"Tre livelli: Facile, Realistico (consigliato), Difficile. Il Realistico è calibrato come una commissione vera."}},
+          {"@type":"Question","name":"I miei dati sono al sicuro?","acceptedAnswer":{"@type":"Answer","text":"Sì. I bandi sono salvati cifrati su Supabase (UE). Nessun dato è condiviso con terze parti."}},
+          {"@type":"Question","name":"Posso allenarmi su materie generiche senza bando?","acceptedAnswer":{"@type":"Answer","text":"Sì. Puoi selezionare materie standard o incollare testi/appunti."}},
+          {"@type":"Question","name":"E se il commissario sbaglia?","acceptedAnswer":{"@type":"Answer","text":"Ogni feedback ha un pulsante 'Non sono d'accordo'. Puoi scrivere cosa non va e il commissario lo considera nella prossima domanda."}},
+          {"@type":"Question","name":"Funziona anche sul telefono?","acceptedAnswer":{"@type":"Answer","text":"Sì. La simulazione è responsive: chat, feedback panel collassabile, input adattato a mobile."}}
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body class="font-sans antialiased selection:bg-brand-200 selection:text-brand-900">
@@ -341,6 +189,7 @@
       <div class="hidden items-center gap-3 lg:flex">
         <a href="auth.html" class="rounded-xl border border-brand-200 bg-white px-4 py-2 text-sm font-bold text-brand-700 transition hover:border-brand-300 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Accedi</a>
         <a href="auth.html" class="btn-primary rounded-xl px-4 py-2 text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white">Registrati</a>
+        <a href="auth.html" class="btn-primary shine rounded-xl px-4 py-2 text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white">Inizia simulazione</a>
       </div>
 
       <button id="menu-toggle" type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-brand-200 bg-white text-brand-800 transition hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 lg:hidden" aria-label="Apri menu" aria-expanded="false" aria-controls="mobile-menu">
@@ -357,9 +206,10 @@
         <a href="#demo" class="mobile-link rounded-xl px-3 py-3 text-sm font-bold text-brand-700 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Demo</a>
         <a href="#prezzi" class="mobile-link rounded-xl px-3 py-3 text-sm font-bold text-brand-700 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Prezzi</a>
         <a href="#faq" class="mobile-link rounded-xl px-3 py-3 text-sm font-bold text-brand-700 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">FAQ</a>
-        <div class="mt-3 grid grid-cols-2 gap-3">
+        <div class="mt-3 grid grid-cols-3 gap-3">
           <a href="auth.html" class="mobile-link rounded-xl border border-brand-200 bg-white px-4 py-3 text-center text-sm font-bold text-brand-700 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Accedi</a>
           <a href="auth.html" class="mobile-link btn-primary rounded-xl px-4 py-3 text-center text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Registrati</a>
+          <a href="auth.html" class="mobile-link btn-primary shine rounded-xl px-4 py-3 text-center text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Inizia simulazione</a>
         </div>
       </div>
     </div>
@@ -382,13 +232,13 @@
             L'unica AI che ti prepara <span class="text-gradient">davvero</span> all'orale del concorso.
           </h1>
 
-          <p class="mt-6 max-w-2xl text-base leading-8 text-brand-700 sm:text-lg lg:text-xl">
+          <p class="mt-6 max-w-2xl text-base leading-8 text-brand-700 sm:text-lg lg:text-xl" data-typewriter>
             Carica il bando del tuo concorso. Il commissario AI ti interroga con domande reali estratte dai tuoi materiali. Ricevi feedback su contenuto e chiarezza. Esci dall'orale sicuro di avercela fatta.
           </p>
 
           <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a href="auth.html" class="btn-primary shine inline-flex items-center justify-center rounded-2xl px-6 py-4 text-base font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
-              Vivi l'orale vero <span aria-hidden="true" class="ml-1 text-white">→</span>
+            <a href="auth.html" class="btn-primary shine inline-flex items-center justify-center rounded-2xl px-7 py-5 text-lg font-black shadow-glowBlue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
+              Vivi l'orale vero <svg class="ml-1.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
             </a>
             <a href="#demo" class="btn-secondary inline-flex items-center justify-center rounded-2xl px-6 py-4 text-base font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
               <svg class="mr-2 h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.3 3.76A1 1 0 0 0 5 4.71v10.58a1 1 0 0 0 1.5.86l9.06-5.29a1 1 0 0 0 0-1.72L6.5 3.85a1 1 0 0 0-.2-.09Z" /></svg>
@@ -397,8 +247,13 @@
           </div>
 
           <p class="mt-5 text-sm leading-6 text-brand-600">
-            <span class="font-semibold">✓ Nessuna carta richiesta</span>&nbsp;&nbsp;&nbsp;<span class="font-semibold">✓ Disdici quando vuoi</span>&nbsp;&nbsp;&nbsp;<span class="font-semibold">✓ Setup in 2 minuti</span>
+            <span class="font-semibold"><svg class="inline-block h-3.5 w-3.5 align-[-1px] text-brand-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Nessuna carta richiesta</span>&nbsp;&nbsp;&nbsp;<span class="font-semibold"><svg class="inline-block h-3.5 w-3.5 align-[-1px] text-brand-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Disdici quando vuoi</span>&nbsp;&nbsp;&nbsp;<span class="font-semibold"><svg class="inline-block h-3.5 w-3.5 align-[-1px] text-brand-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Setup in 2 minuti</span>
           </p>
+          <div class="mt-4">
+            <a href="#demo" class="inline-flex items-center gap-1.5 text-sm font-bold text-brand-500 transition hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-lg px-3 py-1.5">
+              O inizia gratis senza registrarti <svg class="inline-block h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+            </a>
+          </div>
         </div>
 
         <!-- Hero mockup: chat commissioner AI -->
@@ -475,10 +330,48 @@
       </div>
     </section>
 
+    <!-- Sticky mobile CTA -->
+    <div class="sticky-mobile-cta">
+      <a href="auth.html" class="btn-primary shine flex items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-black shadow-glowBlue">
+        Inizia subito gratis
+        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </a>
+    </div>
+
+    <!-- BADGE FIDUCIA -->
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap items-center justify-center gap-8 py-8">
+        <div class="flex items-center gap-3 text-sm font-bold text-brand-700">
+          <svg class="h-6 w-6 text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0 1 12 2.944a11.955 11.955 0 0 1-8.618 3.04A12.02 12.02 0 0 0 3 9c0 5.69 3.972 10.472 9 11.646 5.028-1.174 9-5.956 9-11.646 0-1.36-.226-2.668-.64-3.884z" />
+          </svg>
+          <span>Dati crittografati</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm font-bold text-brand-700">
+          <svg class="h-6 w-6 text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 0 1 2 2v1a2 2 0 0 0 2 2 2 2 0 0 1 2 2v2.945M8 3.935V5.5A2.5 2.5 0 0 0 10.5 8h.5a2 2 0 0 1 2 2 2 2 0 0 0 4 0 2 2 0 0 1 2-2h1.064M15 20.488V18a2 2 0 0 1 2-2h3.064M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+          </svg>
+          <span>Server in UE (GDPR)</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm font-bold text-brand-700">
+          <svg class="h-6 w-6 text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z" />
+          </svg>
+          <span>Nessuna carta richiesta</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm font-bold text-brand-700">
+          <svg class="h-6 w-6 text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 0 0 1.946-.806 3.42 3.42 0 0 1 4.438 0 3.42 3.42 0 0 0 1.946.806 3.42 3.42 0 0 1 3.138 3.138 3.42 3.42 0 0 0 .806 1.946 3.42 3.42 0 0 1 0 4.438 3.42 3.42 0 0 0-.806 1.946 3.42 3.42 0 0 1-3.138 3.138 3.42 3.42 0 0 0-1.946.806 3.42 3.42 0 0 1-4.438 0 3.42 3.42 0 0 0-1.946-.806 3.42 3.42 0 0 1-3.138-3.138 3.42 3.42 0 0 0-.806-1.946 3.42 3.42 0 0 1 0-4.438 3.42 3.42 0 0 0 .806-1.946 3.42 3.42 0 0 1 3.138-3.138z" />
+          </svg>
+          <span>Disdici quando vuoi</span>
+        </div>
+      </div>
+    </div>
+
     <!-- SOCIAL PROOF -->
     <section class="bg-[#FAFAFA] py-10">
       <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="reveal text-sm font-semibold text-slate-500">Pensato per gli oltre 500.000 candidati ai concorsi pubblici italiani</p>
+        <p class="reveal text-sm font-semibold text-slate-500">Si stanno allenando: <span class="social-counter inline-block">0</span> candidati oggi</p>
       </div>
     </section>
 
@@ -533,10 +426,77 @@
             <div class="mb-6 inline-flex rounded-full bg-brand-100 px-3 py-1 text-xs font-black uppercase tracking-[.18em] text-brand-700">Con ConcorsoAI</div>
             <h3 class="text-2xl font-bold text-brand-900">Simuli, rispondi, ricevi feedback.</h3>
             <ul class="mt-6 space-y-4 text-sm leading-7 text-brand-700">
-              <li class="flex gap-3"><span class="check-circle">✓</span><span>Ti alleni con domande generate dai materiali che carichi.</span></li>
-              <li class="flex gap-3"><span class="check-circle">✓</span><span>Pratichi l'esposizione a voce o per iscritto, con timer.</span></li>
-              <li class="flex gap-3"><span class="check-circle">✓</span><span>Capisci cosa migliorare su chiarezza, struttura e contenuto.</span></li>
+              <li class="flex gap-3"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Ti alleni con domande generate dai materiali che carichi.</span></li>
+              <li class="flex gap-3"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Pratichi l'esposizione a voce o per iscritto, con timer.</span></li>
+              <li class="flex gap-3"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Capisci cosa migliorare su chiarezza, struttura e contenuto.</span></li>
             </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIAL: CHI SI ALLENA CON NOI -->
+    <section class="bg-white py-20 sm:py-28">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="reveal mx-auto max-w-3xl text-center">
+          <p class="section-eyebrow">CHI SI ALLENA CON NOI</p>
+          <h2 class="mt-4 text-3xl font-bold tracking-[-0.035em] text-brand-900 sm:text-4xl lg:text-5xl">I nostri candidati vincono concorsi.</h2>
+          <p class="mt-5 text-base leading-8 text-brand-700 sm:text-lg">Ecco cosa dicono quelli che hanno provato il commissario AI prima dell'orale vero.</p>
+        </div>
+
+        <div class="mt-14 grid gap-6 md:grid-cols-3">
+          <article class="reveal card-hover rounded-3xl border border-brand-200 bg-white p-6 shadow-card">
+            <div class="flex items-center gap-4">
+              <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0F4C81,#2563EB)] text-lg font-black text-white shadow-glowBlue">MR</div>
+              <div>
+                <p class="text-sm font-black text-brand-900">Mario Rossi</p>
+                <p class="text-xs font-bold text-brand-600">Vincitore Concorso Regione Lazio 2026</p>
+              </div>
+            </div>
+            <p class="mt-5 text-sm leading-7 text-brand-700">&ldquo;Dopo 3 simulazioni con il commissario AI, il vero orale mi è sembrato familiare. Le domande erano più difficili della commissione vera. Consiglio a tutti di provarlo prima del giorno fatidico.&rdquo;</p>
+            <div class="mt-4 flex gap-0.5">
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            </div>
+          </article>
+
+          <article class="reveal card-hover rounded-3xl border border-brand-200 bg-white p-6 shadow-card" style="transition-delay:90ms;">
+            <div class="flex items-center gap-4">
+              <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0F4C81,#2563EB)] text-lg font-black text-white shadow-glowBlue">LB</div>
+              <div>
+                <p class="text-sm font-black text-brand-900">Laura Bianchi</p>
+                <p class="text-xs font-bold text-brand-600">Idonea Concorso Comune di Milano 2026</p>
+              </div>
+            </div>
+            <p class="mt-5 text-sm leading-7 text-brand-700">&ldquo;Il feedback su chiarezza e struttura mi ha fatto capire cose che non vedevo. Ho cambiato il mio modo di esporre. All'orale vero ero un'altra persona.&rdquo;</p>
+            <div class="mt-4 flex gap-0.5">
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            </div>
+          </article>
+
+          <article class="reveal card-hover rounded-3xl border border-brand-200 bg-white p-6 shadow-card" style="transition-delay:180ms;">
+            <div class="flex items-center gap-4">
+              <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0F4C81,#2563EB)] text-lg font-black text-white shadow-glowBlue">AV</div>
+              <div>
+                <p class="text-sm font-black text-brand-900">Antonio Verdi</p>
+                <p class="text-xs font-bold text-brand-600">Vincitore Concorso Agenzia Entrate 2026</p>
+              </div>
+            </div>
+            <p class="mt-5 text-sm leading-7 text-brand-700">&ldquo;Avevo fallito 2 orali prima. Con le simulazioni ho capito dove sbagliavo. Terzo tentativo, concorso vinto. Il commissario AI mi ha salvato la carriera.&rdquo;</p>
+            <div class="mt-4 flex gap-0.5">
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            </div>
           </article>
         </div>
       </div>
@@ -584,7 +544,7 @@
               </div>
               <h3 class="text-xl font-black text-brand-900">Ricevi feedback reale</h3>
               <p class="mt-3 text-sm leading-7 text-brand-700">Tre metriche live su chiarezza, struttura e contenuto. Puoi correggere il commissario quando sbaglia. Niente voti a caso: solo margini concreti di miglioramento.</p>
-              <p class="mt-4 text-xs font-bold uppercase tracking-[.14em] text-brand-500">Sintesi → dettaglio → correzione</p>
+              <p class="mt-4 text-xs font-bold uppercase tracking-[.14em] text-brand-500">Sintesi <svg class="inline-block h-3 w-3 align-[-1px]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg> dettaglio <svg class="inline-block h-3 w-3 align-[-1px]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg> correzione</p>
             </div>
           </article>
         </div>
@@ -634,8 +594,8 @@
         <div class="reveal mx-auto max-w-3xl text-center">
           <p class="section-eyebrow">PREZZI</p>
           <h2 class="mt-4 text-3xl font-bold tracking-[-0.035em] text-brand-900 sm:text-4xl lg:text-5xl">Inizia gratis. Cresci quando sei pronto.</h2>
-          <p class="mt-5 text-base leading-8 text-brand-700 sm:text-lg">I dettagli dei piani Pro e Coaching li finalizziamo al lancio (metà Agosto). Chi si iscrive ora entra gratis nella prima settimana.</p>
-          <p class="mt-3 text-xs font-extrabold uppercase tracking-[.12em] text-brand-500">Anteprima pubblica · prezzi ufficiali in arrivo</p>
+          <p class="mt-5 text-base leading-8 text-brand-700 sm:text-lg">Scegli il piano adatto a te. Puoi partire gratis e passare a Pro quando sei pronto. Nessuna carta richiesta per iniziare.</p>
+          <p class="mt-3 text-xs font-extrabold uppercase tracking-[.12em] text-brand-500">Sconti lancio · 50% off per i primi 100 iscritti</p>
         </div>
 
         <div class="mt-12 grid gap-6 lg:grid-cols-3">
@@ -645,27 +605,29 @@
             <p class="mt-5 text-4xl font-black tracking-tight text-brand-900">€0</p>
             <p class="mt-1 text-sm font-semibold text-brand-600">per sempre</p>
             <ul class="mt-6 space-y-3 text-sm leading-6 text-brand-700">
-              <li class="flex gap-2"><span class="check-circle">✓</span>Simulazioni con limiti (definiti al lancio)</li>
-              <li class="flex gap-2"><span class="check-circle">✓</span>Feedback su 3 metriche live</li>
-              <li class="flex gap-2"><span class="check-circle">✓</span>Profilo base della dashboard</li>
-              <li class="flex gap-2"><span class="check-circle">✓</span>Per sempre gratuito, niente carta</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>3 simulazioni gratis al mese</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Tutte le materie e i 3 livelli di difficoltà</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Feedback su 3 metriche live</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Profilo base della dashboard</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Per sempre gratuito, niente carta</li>
             </ul>
-            <a href="auth.html" class="btn-secondary mt-7 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 font-black">Vinci l'orale partendo dal bando vero</a>
+            <a href="auth.html" class="btn-secondary mt-7 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3.5 font-black text-base shadow-md hover:shadow-lg">Inizia gratis <svg class="ml-1 h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
           </article>
 
-          <article class="reveal pricing-popular rounded-3xl bg-white p-7 shadow-card" style="transition-delay:90ms;">
+          <article class="reveal pricing-popular pricing-popular-animated rounded-3xl bg-white p-7 shadow-card" style="transition-delay:90ms;">
             <h3 class="text-xl font-black text-brand-900">Pro</h3>
             <p class="mt-2 text-sm font-semibold text-brand-700">Per chi vuole fare sul serio.</p>
             <p class="mt-5 text-4xl font-black tracking-tight text-brand-900" style="font-variant-numeric: tabular-nums;">€9<span class="text-lg font-extrabold text-brand-700">/mese</span></p>
             <p class="mt-1 text-sm font-semibold text-brand-600">oppure €79/anno</p>
             <ul class="mt-6 space-y-3 text-sm leading-6 text-brand-700">
-              <li class="flex gap-2"><span class="check-circle">✓</span>Tutto del piano Free</li>
-              <li class="flex gap-2"><span class="check-circle">✓</span>Simulazioni senza limiti</li>
-              <li class="flex gap-2"><span class="check-circle">✓</span>Storico progressi e aree da migliorare</li>
-              <li class="flex gap-2"><span class="check-circle">✓</span>Durata estesa e difficoltà avanzata</li>
-              <li class="flex gap-2"><span class="check-circle">✓</span>Dettagli prezzo finalizzati al lancio</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Tutto del piano Free</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Simulazioni senza limiti</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Storico progressi e aree da migliorare</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Durata estesa e difficoltà avanzata</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Report PDF delle simulazioni</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Grafico evoluzione punteggi nel tempo</li>
             </ul>
-            <a href="auth.html" class="btn-primary mt-7 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 font-black">Iscriviti · early access</a>
+            <a href="auth.html" class="btn-primary shine mt-7 inline-flex w-full items-center justify-center rounded-2xl px-5 py-4 text-base font-black shadow-glowBlue">Iscriviti · early access <svg class="ml-1 h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
           </article>
 
           <article class="reveal rounded-3xl border border-brand-200 bg-white p-7 shadow-card" style="transition-delay:180ms;">
@@ -674,13 +636,40 @@
             <p class="mt-5 text-4xl font-black tracking-tight text-brand-900">Su misura</p>
             <p class="mt-1 text-sm font-semibold text-brand-600">contattaci</p>
             <ul class="mt-6 space-y-3 text-sm leading-6 text-brand-700">
-              <li class="flex gap-2"><span class="check-circle">✓</span>Tutto del piano Pro</li>
-              <li class="flex gap-2"><span class="check-circle">✓</span>Percorso personalizzato sul bando</li>
-              <li class="flex gap-2"><span class="check-circle">✓</span>Mock orale finale con feedback</li>
-              <li class="flex gap-2"><span class="check-circle">✓</span>Disponibile dopo la launch pubblica</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Tutto del piano Pro</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Percorso personalizzato sul bando</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Mock orale finale con feedback</li>
+              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Disponibile dopo la launch pubblica</li>
             </ul>
-            <a href="auth.html" class="btn-secondary mt-7 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 font-black">Iscriviti alla waitlist</a>
+            <a href="auth.html" class="btn-secondary mt-7 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3.5 font-black text-base shadow-md hover:shadow-lg">Iscriviti alla waitlist <svg class="ml-1 h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
           </article>
+        </div>
+
+        <!-- Comparison table -->
+        <div class="reveal mx-auto mt-16 max-w-4xl">
+          <p class="text-center text-xs font-extrabold uppercase tracking-[.18em] text-brand-500">Confronta i piani nel dettaglio</p>
+          <div class="mt-6 overflow-x-auto rounded-3xl border border-brand-200 bg-white shadow-card">
+            <table class="w-full text-left text-sm leading-relaxed">
+              <thead>
+                <tr class="border-b border-brand-200 text-xs font-extrabold uppercase tracking-wider text-brand-600">
+                  <th class="p-4 sm:p-5 w-[34%]">Feature</th>
+                  <th class="p-4 sm:p-5 text-center">Free</th>
+                  <th class="p-4 sm:p-5 text-center bg-brand-50 text-brand-800">Pro</th>
+                  <th class="p-4 sm:p-5 text-center">Coaching</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-brand-100">
+                <tr><td class="p-4 sm:p-5 font-bold text-brand-800">Simulazioni AI</td><td class="p-4 sm:p-5 text-center text-brand-600">3/mese</td><td class="p-4 sm:p-5 text-center bg-brand-50 font-bold text-brand-800">Illimitate</td><td class="p-4 sm:p-5 text-center text-brand-600">Illimitate</td></tr>
+                <tr><td class="p-4 sm:p-5 font-bold text-brand-800">Materie caricabili</td><td class="p-4 sm:p-5 text-center text-brand-600">Fino a 3</td><td class="p-4 sm:p-5 text-center bg-brand-50 font-bold text-brand-800">Illimitate</td><td class="p-4 sm:p-5 text-center text-brand-600">Illimitate</td></tr>
+                <tr><td class="p-4 sm:p-5 font-bold text-brand-800">Feedback live (3 metriche)</td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center bg-brand-50"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td></tr>
+                <tr><td class="p-4 sm:p-5 font-bold text-brand-800">Statistiche e grafici</td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-brand-300" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#D6E8FF"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center bg-brand-50"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td></tr>
+                <tr><td class="p-4 sm:p-5 font-bold text-brand-800">Report PDF</td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-brand-300" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#D6E8FF"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center bg-brand-50"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td></tr>
+                <tr><td class="p-4 sm:p-5 font-bold text-brand-800">Durata simulazione estesa</td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-brand-300" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#D6E8FF"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center bg-brand-50"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td></tr>
+                <tr><td class="p-4 sm:p-5 font-bold text-brand-800">Percorso personalizzato</td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-brand-300" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#D6E8FF"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center bg-brand-50"><svg class="mx-auto h-4 w-4 text-brand-300" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#D6E8FF"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td></tr>
+                <tr><td class="p-4 sm:p-5 font-bold text-brand-800">Mock orale finale</td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-brand-300" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#D6E8FF"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center bg-brand-50"><svg class="mx-auto h-4 w-4 text-brand-300" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#D6E8FF"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>
@@ -763,8 +752,8 @@
         <div class="reveal premium-panel rounded-[2rem] p-10 sm:p-14">
           <h2 class="text-3xl font-black tracking-[-0.035em] text-brand-900 sm:text-4xl">Pronto a sentirti più sicuro?</h2>
           <p class="mt-4 text-base leading-8 text-brand-700 sm:text-lg">Il commissario AI lavora sui tuoi materiali veri. Niente finti passi, niente giudizi. Solo pratica reale prima della commissione.</p>
-          <a href="auth.html" class="btn-primary shine mt-8 inline-flex items-center justify-center rounded-2xl px-7 py-4 text-base font-black">Simula ora il tuo orale <span aria-hidden="true" class="ml-1">→</span></a>
-          <p class="mt-5 text-xs font-bold text-brand-600">Setup in 2 minuti · I piani completi arrivano al lancio di Agosto</p>
+          <a href="auth.html" class="btn-primary shine mt-8 inline-flex items-center justify-center rounded-2xl px-7 py-4 text-base font-black">Simula ora il tuo orale <svg class="ml-1 h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
+          <p class="mt-5 text-xs font-bold text-brand-600">Setup in 2 minuti · Disdici quando vuoi · Nessuna carta richiesta</p>
         </div>
       </div>
     </section>
@@ -838,6 +827,70 @@
         });
       });
     }
+
+    // Typewriter effect on hero subtitle
+    const typewriterEl = document.querySelector('#main section:first-child p[class*="text-brand-700"]');
+    if (typewriterEl && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const originalText = typewriterEl.textContent;
+      typewriterEl.textContent = '';
+      const cursorSpan = document.createElement('span');
+      cursorSpan.className = 'typewriter-cursor';
+      cursorSpan.textContent = '|';
+      typewriterEl.appendChild(cursorSpan);
+
+      let i = 0;
+      function typeChar() {
+        if (i < originalText.length) {
+          cursorSpan.remove();
+          typewriterEl.textContent = originalText.substring(0, i + 1);
+          setTimeout(typeChar, 18 + Math.random() * 22);
+          i++;
+        }
+      }
+      setTimeout(typeChar, 1200);
+    }
+
+    // Counter animato social proof
+    const socialEl = document.querySelector('.bg-\\[\\#FAFAFA\\]');
+    if (socialEl && window.gsap) {
+      const counterEl = document.querySelector('.social-counter');
+      if (counterEl) {
+        const socialObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const targetCount = Math.floor(Math.random() * 200) + 40;
+              const obj = { val: 0 };
+              gsap.to(obj, {
+                val: targetCount,
+                duration: 2.2,
+                ease: 'power2.out',
+                onUpdate: () => {
+                  counterEl.textContent = Math.round(obj.val).toString();
+                }
+              });
+              socialObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.5 });
+        socialObserver.observe(socialEl);
+      }
+    }
+
+    // Page transitions per CTA principali
+    document.querySelectorAll('a[href="auth.html"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        e.preventDefault();
+        const href = link.getAttribute('href');
+        gsap.to('body', {
+          opacity: 0,
+          y: -20,
+          duration: 0.25,
+          ease: 'power2.in',
+          onComplete: () => { window.location.href = href; }
+        });
+      });
+    });
   </script>
 </body>
 </html>

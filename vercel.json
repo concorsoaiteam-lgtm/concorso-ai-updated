@@ -4,6 +4,15 @@
     { "source": "/auth",       "destination": "/auth.html" },
     { "source": "/simulation", "destination": "/simulation.html" },
     { "source": "/terms",      "destination": "/terms.html" },
-    { "source": "/privacy",    "destination": "/privacy.html" }
+    { "source": "/privacy",    "destination": "/privacy.html" },
+    { "source": "/blog",       "destination": "/blog.html" },
+    { "source": "/blog/come-superare-orale-concorso", "destination": "/blog/come-superare-orale-concorso.html" },
+    { "source": "/blog/concorso-ai-vs-ripetizioni-private", "destination": "/blog/concorso-ai-vs-ripetizioni-private.html" },
+    { "source": "/blog/le-10-domande-piu-frequenti-orale", "destination": "/blog/le-10-domande-piu-frequenti-orale.html" },
+    { "source": "/history",    "destination": "/history.html" }
+  ],
+  "headers": [
+    { "source": "/sitemap.xml", "headers": [{ "key": "Content-Type", "value": "application/xml" }] },
+    { "source": "/robots.txt", "headers": [{ "key": "Content-Type", "value": "text/plain" }] }
   ]
 }

@@ -24,6 +24,75 @@
 - **Sequenza di lavoro concordata**: **sito marketing prima** (landing
   refresh completa), **poi simulazione** (auth.html / dashboard.html /
   simulation.html). Test dentro simulazione = post-lancio sito.
+
+## 16. Nuovi endpoint backend (TURNO 35, 08/07/2026)
+
+Aggiunti 4 nuovi endpoint serverless in /api/ accanto a chat.js.
+Tutti rispettano convention fail-closed + `[ConcorsoAI-METRIC]` prefix.
+
+| Endpoint | Metodo | Auth | Env richieste |
+|----------|--------|------|---------------|
+| `/api/stripe-webhook` | POST | Stripe HMAC signature | `STRIPE_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY` |
+| `/api/email/welcome` | POST | HMAC custom (`X-ConcorsoAI-Signature` + Timestamp) | `RESEND_API_KEY`, `WELCOME_API_SECRET`, `WELCOME_FROM_ADDRESS` |
+| `/api/track` | POST | HMAC custom (stesso secret condiviso) | `WELCOME_API_SECRET` |
+| `/api/quota` | GET/POST | Bearer Supabase JWT | (env opzionali, fallback hardcoded) |
+
+**Stripe webhook** riceve `checkout.session.completed`,
+`customer.subscription.updated`, `customer.subscription.deleted`
+e aggiorna `auth.users.user_metadata.plan` via Supabase service role.
+**Email welcome** trigger dopo signup (client HMAC-signed payload).
+**Track** endpoint per analytics eventi (PII hash, ALLOWED_EVENTS whitelist).
+**Quota** restituisce `plan + quota (3/mese) + used + remaining + resetAt`
+per piano Free, `quota: null` se Pro/Coaching.
+
+## 17. Nuove pagine pubbliche (TURNO 35, 08/07/2026)
+
+- `public/blog.html` — landing blog SEO-driven
+- `public/blog/come-superare-orale-concorso.html` — guida 5 step
+- `public/blog/concorso-ai-vs-ripetizioni-private.html` — confronto con tabella features
+- `public/blog/le-10-domande-piu-frequenti-orale.html` — top 10 domande orale
+- `public/history.html` — storico simulazioni con sparkline SVG inline (3 metriche)
+- `public/sitemap.xml` — 9 URL con lastmod/changefreq/priority
+- Schema.org JSON-LD aggiunto a index.html (SoftwareApplication + FAQPage + Reviews)
+
+## 18. Convenzione HMAC custom (TURNO 35, v1.4 in T36)
+
+Per `/api/email/welcome` e `/api/track` la firma é:
+```
+X-ConcorsoAI-Timestamp: <unix seconds>
+X-ConcorsoAI-Request-Id: <UUID v4>
+X-ConcorsoAI-Signature: sha256(secret + "." + timestamp + "." + requestId + "." + rawBody)
+```
+Tolleranza timestamp 5 min. Il secret é `EMAIL_API_SECRET` (welcome) o
+`TRACK_API_SECRET` (track) — separati per blast-radius isolation.
+Anti-replay: Map `seenNonces` con TTL 10min, key = timestamp+'|'+requestId.
+Body size cap 16KB. Vercel ignora /api/_lib/ e /api/_*.js (prefix underscore).
+Client helper: `__concorsoai_hmac_helper.js` (TODO prossima sessione).
+Rate limit: 30/min welcome, 60/min track.
+
+## 19. Helper condivisi (TURNO 36, v1.6 in T36)
+
+- `api/_lib/security.js` — escapeHtml, getClientIp, readRawBody,
+  checkRateLimit(map+TTL), verifyHmac({secret, timestamp, signature,
+  requestId, rawBody}), checkAndStoreNonce, startSweeps(intervals).
+  Vercel esclude `/api/_lib/` dal routing endpoint (prefix underscore).
+- `api/_lib/email-helpers.js` — sendViaResend, buildWelcomeEmail,
+  validateEmailStrict, extractSupabaseUserFields. Riusato da welcome.js
+  + welcome-supabase.js. SPOSTATO da `api/email/welcome.lib.js` in T36
+  (P0 fix: Vercel esponeva `.lib.js` come endpoint pubblico).
+- `api/email/welcome-supabase.js` v1.6 — endpoint dedicato Supabase
+  webhook, Bearer SUPABASE_WEBHOOK_SECRET, rate limit 60/min.
+  Separato da welcome.js dopo P0 review (eliminato auth-by-body-shape).
+  Idempotency dedup TTL 24h + grace release 60s (FIX P1 race retry).
+  Shape validation: type='INSERT' + table='users' + record.id|email
+  (FIX P1 collision `'user_created|unknown'` → 400 subito).
+- `api/email/welcome.js` v1.4.2 — solo HMAC client. Source whitelist
+  ALLOWED_SOURCES = {signup, magic_link, admin_resend, manual} (FIX P1
+  log PII injection via body.source).
+- `api/email/welcome.lib.js` STUB — Vercel lo espone come endpoint.
+  Ritorna 404. Da cancellare con `rm` o `Move-Item api\email\welcome.lib.js
+  api\_lib\_deprecated\` al prossimo maintenance window (non eseguibile
+  da Codebuff CLI senza bash; agent su Windows richiede utente).
 - **Vincoli stringenti di copy**: niente emoji nel copy del commissario,
   brand voice COI italiano formale, NO "cool vibes" anglosassone.
   Ogni CTA orientata al **risultato del candidato** (vincere l'orale),
