@@ -21,6 +21,7 @@
 // ============================================================
 
 const { createClient } = require('@supabase/supabase-js');
+const crypto = require('crypto'); // TURNO 33: hash per log metric (no PII)
 
 // --- Config (fail-closed: nessun fallback hardcoded) ---
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xhifnparcouxsypkjcmn.supabase.co';
@@ -36,7 +37,8 @@ const BLUESMINDS_URL = 'https://api.bluesminds.com/v1/chat/completions';
 const UPSTREAM_TIMEOUT_MS = 30000;
 const FIXED_MODEL = 'deepseek-v4-flash';
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const RATE_LIMIT_MAX_PER_WINDOW = 30;
+const RATE_LIMIT_MAX_PER_WINDOW = 30; // per IP (uno IP puó essere molti utenti dietro NAT)
+const RATE_LIMIT_MAX_PER_WINDOW_PER_USER = 60; // TURNO 31: per user (piú generoso del per-IP)
 const RATE_LIMIT_SWEEP_INTERVAL_MS = 60 * 1000;
 
 // --- CORS whitelist ---
@@ -50,33 +52,79 @@ const ALLOWED_ORIGINS = [
 
 // --- Rate limit (in-memory, con sweep) ---
 const rateLimits = new Map();
+const userRateLimits = new Map(); // TURNO 31: per-user rate limit
 
 // Sweep periodica: rimuove record scaduti dalla Map.
 // Necessaria per evitare memory leak su istanze warm (Vercel serverless).
+// TURNO 31: estesa per pulire anche userRateLimits.
 const rateLimitSweep = setInterval(function () {
   const now = Date.now();
   for (const [ip, record] of rateLimits) {
     if (record.resetAt < now) rateLimits.delete(ip);
   }
+  for (const [uid, record] of userRateLimits) {
+    if (record.resetAt < now) userRateLimits.delete(uid);
+  }
 }, RATE_LIMIT_SWEEP_INTERVAL_MS);
 // Evita che il timer tenga vivo il processo Node se moduli parent terminano
 if (typeof rateLimitSweep.unref === 'function') rateLimitSweep.unref();
 
-function checkRateLimit(ip) {
+// --- Rate limit helpers (TURNO 32: estratta funzione generica) ---
+// Logica comune per checkRateLimit/checkUserRateLimit. Le 2 funzioni
+// specifiche sono thin wrapper che passano Map + max corretti.
+function checkRateLimitMap(map, key, max) {
   const now = Date.now();
-  const record = rateLimits.get(ip);
+  const record = map.get(key);
   if (!record || record.resetAt < now) {
-    rateLimits.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return { ok: true, remaining: RATE_LIMIT_MAX_PER_WINDOW - 1 };
+    map.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return { ok: true, remaining: max - 1 };
   }
-  if (record.count >= RATE_LIMIT_MAX_PER_WINDOW) {
+  if (record.count >= max) {
     return { ok: false, remaining: 0, retryAfterMs: record.resetAt - now };
   }
   record.count++;
-  return { ok: true, remaining: RATE_LIMIT_MAX_PER_WINDOW - record.count };
+  return { ok: true, remaining: max - record.count };
+}
+
+// Wrapper thin: limite per IP (30/min). Limite piú stretto del per-user
+// perché un IP puó rappresentare piú utenti (NAT, proxy, ecc.).
+function checkRateLimit(ip) {
+  return checkRateLimitMap(rateLimits, ip, RATE_LIMIT_MAX_PER_WINDOW);
+}
+
+// Wrapper thin: limite per user (60/min). Limite piú generoso del per-IP
+// perché un utente legittimo puó trovarsi dietro NAT condiviso con altri.
+// Previene abusi da singolo account anche se bypassa il limite per-IP.
+function checkUserRateLimit(userId) {
+  return checkRateLimitMap(userRateLimits, userId, RATE_LIMIT_MAX_PER_WINDOW_PER_USER);
 }
 
 // --- CORS helper ---
+// --- Metriche logging (TURNO 33) ---
+// Prefisso [ConcorsoAI-METRIC] per filtering facile in log aggregator.
+// userId/IP hash prime 8 char di sha256 (no PII, no PII reversal possibile).
+// Caveat: 8 hex = 32 bit → collisioni birthday paradox a ~65k utenti/IP.
+// Non usare per conteggi esatti, solo per trend e cardinality approssimata.
+function hashUserId(userId) {
+  if (!userId) return 'anon';
+  return crypto.createHash('sha256').update(String(userId)).digest('hex').slice(0, 8);
+}
+
+function hashIp(ip) {
+  if (!ip) return 'unknown';
+  return crypto.createHash('sha256').update(String(ip)).digest('hex').slice(0, 8);
+}
+
+function logMetric(event, fields) {
+  const payload = Object.assign({
+    ts: new Date().toISOString(),
+    route: '/api/chat',
+    event: event
+  }, fields || {});
+  try { console.log('[ConcorsoAI-METRIC] ' + JSON.stringify(payload)); }
+  catch (_) { /* swallow: logging non deve mai crashare la response */ }
+}
+
 function setCorsHeaders(req, res) {
   const origin = req.headers.origin;
   if (origin && ALLOWED_ORIGINS.indexOf(origin) !== -1) {
@@ -155,6 +203,7 @@ module.exports = async function handler(req, res) {
   //    env var sia fallback (es. refactor accidentale) vogliamo bloccare
   //    qui invece di crashare in modo silenzioso dentro Supabase auth.
   if (!SUPABASE_ANON_KEY) {
+    logMetric('config_error', { reason: 'supabase_anon_key_missing' });
     return res.status(500).json({
       error: 'Configurazione server incompleta',
       details: 'SUPABASE_ANON_KEY mancante sia come env var sia come fallback hardcoded'
@@ -165,6 +214,7 @@ module.exports = async function handler(req, res) {
   const authHeader = req.headers.authorization || '';
   const tokenMatch = authHeader.match(/^Bearer\s+(.+)$/i);
   if (!tokenMatch) {
+    logMetric('auth_fail', { reason: 'missing_bearer' });
     return res.status(401).json({ error: 'Token di autenticazione mancante' });
   }
   const userJwt = tokenMatch[1].trim();
@@ -177,10 +227,15 @@ module.exports = async function handler(req, res) {
     });
     const { data, error } = await supabase.auth.getUser();
     if (error || !data || !data.user) {
+      logMetric('auth_fail', { reason: 'supabase_rejected' });
       return res.status(401).json({ error: 'Token non valido o scaduto' });
     }
     supabaseUser = data.user;
   } catch (authErr) {
+    // TURNO 34: sanitize err message per evitare PII leak (Supabase error
+    // puó contenere email o user_id). Logga solo il tipo di errore.
+    const errType = (authErr && (authErr.name || authErr.code)) || 'unknown';
+    logMetric('auth_fail', { reason: 'supabase_throw', errType: errType });
     return res.status(401).json({ error: 'Verifica auth fallita' });
   }
 
@@ -190,15 +245,30 @@ module.exports = async function handler(req, res) {
   res.setHeader('X-RateLimit-Remaining', String(rate.remaining));
   if (!rate.ok) {
     res.setHeader('Retry-After', String(Math.ceil(rate.retryAfterMs / 1000)));
+    logMetric('rate_limit', { scope: 'ip', ip: hashIp(ip), retryAfterS: Math.ceil(rate.retryAfterMs / 1000) });
     return res.status(429).json({
       error: 'Troppe richieste',
       details: 'Limite di ' + RATE_LIMIT_MAX_PER_WINDOW + ' richieste al minuto. Riprova tra ' + Math.ceil(rate.retryAfterMs / 1000) + 's'
     });
   }
 
+  // 3b) Rate limit per user (TURNO 31) — dopo auth, previene abusi
+  //     da singolo account anche se bypassa il limite per-IP (NAT condiviso).
+  const userRate = checkUserRateLimit(supabaseUser.id);
+  res.setHeader('X-UserRateLimit-Remaining', String(userRate.remaining));
+  if (!userRate.ok) {
+    res.setHeader('Retry-After', String(Math.ceil(userRate.retryAfterMs / 1000)));
+    logMetric('rate_limit', { scope: 'user', userId: hashUserId(supabaseUser.id), retryAfterS: Math.ceil(userRate.retryAfterMs / 1000) });
+    return res.status(429).json({
+      error: 'Troppe richieste per utente',
+      details: 'Limite di ' + RATE_LIMIT_MAX_PER_WINDOW_PER_USER + ' richieste al minuto per utente. Riprova tra ' + Math.ceil(userRate.retryAfterMs / 1000) + 's'
+    });
+  }
+
   // 4) API key BluesMinds
   const apiKey = process.env.BLUESMINDS_API_KEY;
   if (!apiKey) {
+    logMetric('config_error', { reason: 'bluesminds_api_key_missing' });
     return res.status(500).json({
       error: 'Configurazione server incompleta',
       details: 'Variabile BLUESMINDS_API_KEY mancante su Vercel'
@@ -208,6 +278,7 @@ module.exports = async function handler(req, res) {
   // 5) Body validation
   const v = validateBody(req.body);
   if (!v.ok) {
+    logMetric('validation_fail', { reason: v.error });
     return res.status(v.status).json({ error: v.error });
   }
 
@@ -237,8 +308,10 @@ module.exports = async function handler(req, res) {
   } catch (fetchErr) {
     clearTimeout(timeoutId);
     if (fetchErr && fetchErr.name === 'AbortError') {
+      logMetric('upstream_timeout', { userId: hashUserId(supabaseUser.id) });
       return res.status(504).json({ error: 'Timeout upstream', details: 'BluesMinds non ha risposto entro ' + (UPSTREAM_TIMEOUT_MS / 1000) + 's' });
     }
+    logMetric('upstream_fetch_fail', { userId: hashUserId(supabaseUser.id), errType: (fetchErr && (fetchErr.name || fetchErr.code)) || 'unknown' });
     return res.status(502).json({ error: 'Fetch upstream fallita', details: fetchErr.message || String(fetchErr) });
   }
 
@@ -248,6 +321,7 @@ module.exports = async function handler(req, res) {
     try { errBody = await upstream.json(); } catch (_) {
       try { errBody = { error: await upstream.text() }; } catch (__) { errBody = {}; }
     }
+    logMetric('upstream_status_error', { userId: hashUserId(supabaseUser.id), status: upstream.status });
     return res.status(upstream.status).json({ error: 'Upstream error', details: errBody });
   }
 

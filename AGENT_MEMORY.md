@@ -155,6 +155,13 @@ avviaCommissario()
   evitare la doppia scrollbar insieme a
   `.sim-phase { height: 100vh }` + `.chat-area { overflow-y: auto }`.
   Se cambi layout, **rispetta questa regola** o romprai la UX Claude-style.
+- **`simulation.html` — CSS refactor completato**: i 7+ blocchi
+  `.bando-card` sovrapposti sono stati consolidati in un unico blocco
+  base (riga 266) che funge da single source of truth. Zero `!important`
+  su selettori `.bando-card`. Rimossi tutti i `!important` non essenziali
+  dal file (~35 rimossi, 9 rimasti solo in @media prefers-reduced-motion
+  per accessibilità).
+- **`simulation.html` ha superato il limite 100k char del tool `str_replace`** (TURNO 30, 08/07/2026): il file è ora ~142k char e il tool fallisce in modo permanente con errore `FILE_TOO_LARGE`. Per continuare a modificarlo serve prima ridurne la dimensione (rimuovere sezioni CSS obsolete, keyframes non usati, commenti vuoti). Workaround temporanei: lavorare su file piú piccoli (`auth.html`, `dashboard.html`, `index.html`, `api/chat.js`, `auth-patch.js`, file di config e metadata come `AGENT_MEMORY.md`, `RIEPILOGO_TURNI.md`, `DOCS.md`, `package.json`, `vercel.json`).
 - **`PDF.js` worker**: l'estrazione PDF nella dashboard richiede che
   il worker sia caricato correttamente. Se cambi `pdfjsLib.GlobalWorkerOptions.workerSrc`,
   testalo su un PDF reale.
@@ -523,8 +530,8 @@ task, non a caso. Per ogni task durante una sessione, chiediti:
 | Tipo di task                                           | Skill da usare                                              |
 |--------------------------------------------------------|-------------------------------------------------------------|
 | Comprendere il codice esistente senza modificare       | `file-picker` + `code-searcher` (built-in Buffy agents)     |
-| Pianificare modifiche complesse                        | `writing-plans` + `brainstorming` (Matt Pocock)             |
-| Stress-testare un design / architettura                | `grill-me`, `grill-with-docs`, `domain-modeling`            |
+| Pianificare modifiche complesse                        | `writing-plans` + `brainstorming` (Matt Pocock)             || Stress-testare un design / architettura                | `grill-me`, `grill-with-docs`, `domain-modeling`             |
+| Refactor CSS su file già polishati (.bando-card, .commissioner-card, .config-card accumulati) | `thinker-with-files-gemini` (mappa blocchi sovrapposti) → `str_replace` chirurgici → `code-reviewer-minimax-m3` → `browser-use` (verifica hover/active/keyboard nav/reduced-motion) |
 | Riscrivere copy / microcopy / CTA                      | `impeccable` + `copy-editing` + §14.3 Risultati>Funzioni   |
 | Audit visivo/UI/UX di una pagina                       | `impeccable` + `design-taste-*`                             |
 | Audit architetturale / refactor plan                   | `improve-codebase-architecture`                             |
@@ -607,4 +614,4 @@ risposto ma che è importante ricordare:
 
 ---
 
-*Ultimo aggiornamento: 07/07/2026 (skill workflow §15 + founding state §1 + copy landing §14.3).*
+*Ultimo aggiornamento: 08/07/2026 (Turno 22-27.1: CSS .bando-card consolidato, zero !important; UI redesign summary/navbar/commissioner/bubbles; bug fix emoji/mobile toggle/retry).*
