@@ -12,3 +12,15 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.log
+
+# Agent runtime context (NON è codice del progetto — è prompt dell'agente)
+System_prompt
+
+# AI collaboration workspace (output di sessione agent, non codice progetto)
+agent-context/
+conversation/
+
+# Side-project fuori scope (clone Minecraft dichiarato legacy 2026-07-08)
+src/
+docs/superpowers/
+/index.html

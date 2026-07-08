@@ -1204,14 +1204,27 @@
           const totalAvg = scores.reduce((sum, s) => sum + ((s.clarity_score || 0) + (s.structure_score || 0) + (s.content_score || 0)) / 3, 0);
           state.average = totalAvg / scores.length;
 
-          // Calcola streak (giorni consecutivi con simulazioni)
-          const dates = [...new Set(scores.map(s => s.created_at?.split('T')[0]).filter(Boolean))].sort().reverse();
-          state.streak = 1;
+          // Calcola streak (giorni consecutivi con simulazioni, calendario locale utente)
+          // Il precedente approccio `created_at?.split('T')[0]` estrae la data UTC; per
+          // un candidato italiano (CEST/CET) una simulazione alle 00:30 locale finisce
+          // nel giorno UTC precedente, fondendo due giorni consecutivi in uno.
+          function localDayKey(iso) {
+            const d = new Date(iso);
+            return d.getFullYear() + '-' +
+              String(d.getMonth() + 1).padStart(2, '0') + '-' +
+              String(d.getDate()).padStart(2, '0');
+          }
+          const dates = [...new Set(scores.map(s => s.created_at ? localDayKey(s.created_at) : null).filter(Boolean))]
+            .sort()
+            .reverse();
+          state.streak = dates.length > 0 ? 1 : 0;
           for (let i = 1; i < dates.length; i++) {
-            const curr = new Date(dates[i-1]);
-            const prev = new Date(dates[i]);
-            const diff = (curr - prev) / 86400000;
-            if (diff <= 1.5) state.streak++;
+            const [y1, m1, d1] = dates[i-1].split('-').map(Number);
+            const [y2, m2, d2] = dates[i].split('-').map(Number);
+            const newer = Date.UTC(y1, m1 - 1, d1);
+            const older = Date.UTC(y2, m2 - 1, d2);
+            const diffDays = Math.round((newer - older) / 86400000);
+            if (diffDays === 1) state.streak++;
             else break;
           }
 

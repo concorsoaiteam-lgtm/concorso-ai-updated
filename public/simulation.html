@@ -48,7 +48,7 @@
   <!-- Supabase + GSAP -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
-  <script src="auth-patch.js"></script>
+  <script src="/auth-patch.js"></script>
 
   <style>
     :root {
@@ -396,7 +396,16 @@
       transition: all .2s ease;
     }
 
-    .difficulty-card .difficulty-icon { font-size: 24px; line-height: 1; }
+    .difficulty-card .difficulty-icon {
+      display: inline-block;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+    .difficulty-card[data-difficulty="Facile"] .difficulty-icon { background: #22C55E; }
+    .difficulty-card[data-difficulty="Realistico"] .difficulty-icon { background: #EAB308; }
+    .difficulty-card[data-difficulty="Difficile"] .difficulty-icon { background: #EF4444; }
 
     .difficulty-card:hover {
       transform: translateY(-1px);
@@ -441,15 +450,11 @@
       box-shadow: 0 8px 22px rgba(37,99,235,.20);
     }
 
-    .empty-bandi {
-      border: 1px solid rgba(37,99,235,.14);
-      border-radius: 16px;
-      padding: 14px;
-      background: rgba(234,244,255,.62);
-      color: var(--text-muted);
-      font-size: .9rem;
-      font-weight: 750;
-    }
+    /* La regola .empty-bandi "fallback" (border/padding semplice) è stata
+       rimossa: sovrascriveva il layout grid 36px/1fr definito sopra
+       (premium polish "Empty-state bandi: messaggio + CTA più chiari")
+       e rompeva la meta+CTA della empty-state. Se serve un fallback
+       minimale senza icona/body, usare una classe dedicata. */
 
     .sim-phase {
       min-height: 100vh;
@@ -2572,7 +2577,7 @@
            NON usiamo role="listbox" perché i figli sono <button>, non option. -->
       <div id="bandoList" class="bando-list" role="group" aria-label="Lista bandi disponibili" aria-live="polite"></div>
         <div id="emptyBandi" class="empty-bandi mt-3 hidden" role="status">
-          <span class="empty-bandi-icon" aria-hidden="true">📂</span>
+          <span class="empty-bandi-icon" aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v3.5c0 .414.336.75.75.75h14.5a.75.75 0 0 0 .75-.75v-3.5A1.75 1.75 0 0 0 16.25 3H3.75Z"/><path d="M2 10.25v3.5c0 .966.784 1.75 1.75 1.75h12.5a1.75 1.75 0 0 0 1.75-1.75v-3.5a.75.75 0 0 0-.75-.75H2.75a.75.75 0 0 0-.75.75Z"/></svg></span>
           <div class="empty-bandi-body">
             <p class="empty-bandi-title">Nessun bando ancora caricato</p>
             <p class="empty-bandi-msg">Carica il PDF del concorso dalla dashboard per iniziare la simulazione con materiali reali.</p>
@@ -2586,7 +2591,7 @@
         <div class="grid gap-3">
           <button type="button" class="difficulty-card" data-difficulty="Facile">
             <div class="flex items-start gap-3">
-              <span class="difficulty-icon">🟢</span>
+              <span class="difficulty-icon"></span>
               <div>
                 <h3 class="font-black text-brand-900">Facile</h3>
                 <p class="mt-1 text-sm font-bold text-brand-700">Per prendere ritmo</p>
@@ -2599,7 +2604,7 @@
           <button type="button" class="difficulty-card active" data-difficulty="Realistico">
             <span class="recommended-badge">Consigliato</span>
             <div class="flex items-start gap-3 pr-20">
-              <span class="difficulty-icon">🟡</span>
+              <span class="difficulty-icon"></span>
               <div>
                 <h3 class="font-black text-brand-900">Realistico</h3>
                 <p class="mt-1 text-sm font-bold text-brand-700">Commissione vera</p>
@@ -2611,7 +2616,7 @@
 
           <button type="button" class="difficulty-card" data-difficulty="Difficile">
             <div class="flex items-start gap-3">
-              <span class="difficulty-icon">🔴</span>
+              <span class="difficulty-icon"></span>
               <div>
                 <h3 class="font-black text-brand-900">Difficile</h3>
                 <p class="mt-1 text-sm font-bold text-brand-700">Commissione severa</p>
@@ -2642,7 +2647,7 @@
   <main id="simulationPhase" class="sim-phase hidden">
     <nav class="sim-navbar">
       <div class="sim-navbar-inner">
-        <a href="dashboard.html" class="justify-self-start rounded-xl text-lg font-extrabold tracking-tight text-brand-600 outline-none transition hover:text-brand-800 focus-visible:ring-2 focus-visible:ring-brand-500">⚡ ConcorsoAI</a>
+        <a href="dashboard.html" class="justify-self-start rounded-xl text-lg font-extrabold tracking-tight text-brand-600 outline-none transition hover:text-brand-800 focus-visible:ring-2 focus-visible:ring-brand-500"><svg class="-ml-0.5 mr-1 inline-block h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M11.983 1.907a.75.75 0 0 0-1.292-.657l-8.5 9.5A.75.75 0 0 0 2.75 12h5.572l-1.305 6.093a.75.75 0 0 0 1.292.657l8.5-9.5A.75.75 0 0 0 17.25 8h-5.572l1.305-6.093Z"/></svg>ConcorsoAI</a>
         <p id="navBandoName" class="bando-title">Bando selezionato</p>
         <button id="endButton" type="button" class="btn-danger justify-self-end">Termina</button>
       </div>
@@ -2695,7 +2700,7 @@
           <button class="trust-detail hidden mt-2 w-full rounded-lg border border-brand-200 bg-brand-50/60 px-2.5 py-2 text-left text-[11px] font-semibold leading-5 text-brand-800" type="button" data-detail-for="content">↳ <strong>Dettaglio:</strong> in attesa della tua prima risposta.</button>
         </div>
         <div class="mt-4 flex items-center gap-2">
-          <button id="disagreeBtn" type="button" class="trust-correction inline-flex items-center gap-1.5 rounded-full border border-brand-300 bg-white px-3 py-1.5 text-[11px] font-black text-brand-700 transition hover:border-brand-400 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500" aria-expanded="false" aria-controls="correctionPanel">🤝 Non sono d'accordo</button>
+          <button id="disagreeBtn" type="button" class="trust-correction inline-flex items-center gap-1.5 rounded-full border border-brand-300 bg-white px-3 py-1.5 text-[11px] font-black text-brand-700 transition hover:border-brand-400 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500" aria-expanded="false" aria-controls="correctionPanel"><svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M1 12.5A4.5 4.5 0 0 0 5.5 17H15a4 4 0 0 0 1.075-.145A3.5 3.5 0 0 0 19 13.5V13a2 2 0 0 0-4 0v.5A1.5 1.5 0 0 1 13.5 15H11a.5.5 0 0 1 0-1h2.5a.5.5 0 0 0 0-1H5.5a3 3 0 0 1 0-6h6.5a2.5 2.5 0 0 1 2.065 1.034A2.5 2.5 0 0 0 16.5 8h.04a2.5 2.5 0 0 1 2.027 1.158A2.5 2.5 0 0 0 18 8.5V8a3 3 0 0 0-3-3H9.44a3.5 3.5 0 0 1-3.222-2.132l-.06-.148a1 1 0 0 0-.928-.62A1.23 1.23 0 0 0 4 3.438V7.05a4.49 4.49 0 0 0-3 4.45Z"/></svg> Non sono d'accordo</button>
         </div>
         <div id="correctionPanel" class="mt-2 hidden rounded-xl border border-brand-200 bg-brand-50/60 p-3">
           <label for="correctionInput" class="block text-[11px] font-bold text-brand-800">Cosa non va secondo te?</label>

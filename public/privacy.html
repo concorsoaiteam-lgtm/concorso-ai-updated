@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — ConcorsoAI</title>
+  <meta name="description" content="Privacy Policy di ConcorsoAI — come trattiamo i tuoi dati personali nella preparazione ai concorsi pubblici." />
+  <meta name="theme-color" content="#F7FBFF" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              50: '#F7FBFF', 100: '#EAF4FF', 200: '#D6E8FF', 300: '#A9CDF8',
+              400: '#5EA0E8', 500: '#2563EB', 600: '#0F4C81',
+              700: '#0B3A63', 800: '#0B2A4A', 900: '#071D33'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root { color-scheme: light; --text: #0B2A4A; --muted: #4B6F8E; }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh; margin: 0; font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      background: radial-gradient(circle at 12% -8%, rgba(37,99,235,.13), transparent 34rem),
+                  radial-gradient(circle at 90% 4%, rgba(94,160,232,.12), transparent 30rem),
+                  linear-gradient(180deg, #F7FBFF 0%, #FFFFFF 32%, #F7FBFF 100%);
+      color: var(--text);
+    }
+    .text-gradient {
+      background: linear-gradient(135deg, #0B2A4A 0%, #0F4C81 48%, #2563EB 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    }
+  </style>
+</head>
+<body class="font-sans antialiased selection:bg-brand-200 selection:text-brand-900">
+  <header class="sticky top-0 z-50 border-b border-brand-200/80 bg-white/86 backdrop-blur-xl shadow-sm">
+    <nav class="mx-auto flex h-16 max-w-3xl items-center justify-between px-4 sm:px-6">
+      <a href="index.html" class="rounded-xl text-xl font-extrabold tracking-tight text-brand-900">Concorso<span class="text-gradient">AI</span></a>
+      <a href="index.html" class="rounded-xl border border-brand-200 bg-white px-4 py-2 text-sm font-bold text-brand-700 hover:bg-brand-50 transition">← Indietro</a>
+    </nav>
+  </header>
+
+  <main class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
+    <h1 class="text-3xl font-black tracking-[-0.035em] text-brand-900 sm:text-4xl">Privacy Policy</h1>
+    <p class="mt-2 text-sm font-semibold text-brand-600">Ultimo aggiornamento: 08/07/2026</p>
+
+    <div class="mt-10 space-y-8 text-brand-700 leading-7">
+      <section>
+        <h2 class="text-xl font-black text-brand-900">1. Titolare del trattamento</h2>
+        <p class="mt-3">ConcorsoAI tratta i dati personali nel rispetto del Regolamento UE 2016/679 (GDPR) e del D.Lgs. 196/2003. I dati sono trattati esclusivamente per erogare il servizio di simulazione orale.</p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-black text-brand-900">2. Dati raccolti</h2>
+        <p class="mt-3">Raccogliamo: (a) email e nome forniti in fase di registrazione, (b) bandi PDF caricati dall'utente, (c) testo delle risposte durante le simulazioni, (d) punteggi e metriche di feedback. Non raccogliamo dati di navigazione tramite cookie di profilazione.</p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-black text-brand-900">3. Finalità del trattamento</h2>
+        <p class="mt-3">I dati sono trattati esclusivamente per: (a) erogare il servizio di simulazione, (b) calcolare statistiche di progresso personali, (c) migliorare la qualità dei feedback AI. Nessun dato è utilizzato per finalità commerciali o di marketing senza consenso esplicito.</p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-black text-brand-900">4. Base giuridica</h2>
+        <p class="mt-3">Il trattamento si basa sull'esecuzione del contratto di servizio (art. 6.1.b GDPR) per i dati necessari all'erogazione, e sul legittimo interesse (art. 6.1.f GDPR) per il miglioramento del servizio.</p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-black text-brand-900">5. Conservazione dei dati</h2>
+        <p class="mt-3">I dati personali sono conservati per tutta la durata dell'account e per un periodo massimo di 12 mesi dopo la cancellazione. I bandi caricati sono cifrati su Supabase (server UE). L'utente può richiedere la cancellazione immediata in qualsiasi momento dalla dashboard.</p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-black text-brand-900">6. Condivisione con terze parti</h2>
+        <p class="mt-3">I dati sono trattati tramite: Supabase (database e autenticazione, server UE), BluesMinds (API AI per generazione risposte), Vercel (hosting). Nessun dato è venduto o ceduto a terzi per finalità commerciali.</p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-black text-brand-900">7. Diritti dell'utente</h2>
+        <p class="mt-3">L'utente ha diritto di: accedere ai propri dati, rettificarli, cancellarli, limitarne il trattamento, opporsi al trattamento, richiedere la portabilità. Per esercitare questi diritti, utilizzare la funzione di cancellazione nella dashboard o contattarci.</p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-black text-brand-900">8. Cookie</h2>
+        <p class="mt-3">ConcorsoAI utilizza esclusivamente cookie tecnici essenziali per il funzionamento della piattaforma (autenticazione Supabase). Non utilizziamo cookie di profilazione, tracciamento o marketing.</p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-black text-brand-900">9. Contatti</h2>
+        <p class="mt-3">Per domande sulla privacy o per esercitare i tuoi diritti, contattaci tramite la dashboard del tuo account.</p>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

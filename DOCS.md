@@ -391,6 +391,6 @@ URL puliti senza estensione `.html`.
 | `simulazioni` | Storico simulazioni, punteggi | dashboard, simulation |
 | `auth.users` | Gestita da Supabase Auth | auth |
 
----
+
 
 *Documentazione generata il 06/07/2026.*

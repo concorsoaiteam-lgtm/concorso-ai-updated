@@ -1,8 +1,9 @@
 {
-  "outputDirectory": "public",
-  "rewrites": [
+  "outputDirectory": "public",  "rewrites": [
     { "source": "/dashboard", "destination": "/dashboard.html" },
-    { "source": "/auth", "destination": "/auth.html" },
-    { "source": "/simulation", "destination": "/simulation.html" }
+    { "source": "/auth",       "destination": "/auth.html" },
+    { "source": "/simulation", "destination": "/simulation.html" },
+    { "source": "/terms",      "destination": "/terms.html" },
+    { "source": "/privacy",    "destination": "/privacy.html" }
   ]
 }

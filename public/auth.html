@@ -245,7 +245,7 @@
                 </button>
               </div>
               <div class="mt-2 text-right">
-                <a href="#" class="text-xs font-bold text-brand-600 transition hover:text-brand-800 hover:underline">Password dimenticata?</a>
+                <a href="auth.html" class="text-xs font-bold text-brand-600 transition hover:text-brand-800 hover:underline">Password dimenticata?</a>
               </div>
             </div>
 
@@ -317,9 +317,9 @@
               <input id="terms-checkbox" type="checkbox" class="mt-1 h-4 w-4 rounded border-brand-300 text-brand-600 focus:ring-brand-500" />
               <span>
                 Accetto i
-                <a href="#" class="font-black text-brand-600 hover:text-brand-800 hover:underline">Termini di Servizio</a>
+                <a href="terms.html" class="font-black text-brand-600 hover:text-brand-800 hover:underline">Termini di Servizio</a>
                 e la
-                <a href="#" class="font-black text-brand-600 hover:text-brand-800 hover:underline">Privacy Policy</a>
+                <a href="privacy.html" class="font-black text-brand-600 hover:text-brand-800 hover:underline">Privacy Policy</a>
               </span>
             </label>
 
@@ -450,18 +450,30 @@
         return { level: 'empty', label: 'Inserisci una password', width: '0%', color: 'bg-transparent', textColor: 'text-brand-600' };
       }
 
-      if (password.length < 6) {
-        return { level: 'weak', label: 'Debole', width: '33%', color: 'bg-red-500', textColor: 'text-red-600' };
+      // Guard di lunghezza: la registrazione richiede minlength="8".
+      // Qualsiasi password < 8 caratteri è Debole a prescindere dalla
+      // varietà (es. "aB3!" +=4 char con up+sym NON può essere Media):
+      // darebbe false sense of security.
+      if (password.length < 8) {
+        return { level: 'weak', label: 'Troppo corta (min 8)', width: '33%', color: 'bg-red-500', textColor: 'text-red-600' };
       }
 
-      if (password.length >= 10 && hasUppercase && hasNumberOrSymbol) {
+      // Score base: lunghezza + varietà. Il ladder deve restituire
+      // sempre un livello coerente: niente password di 12 caratteri
+      // con simboli classificata come "Debole" solo perché manca una
+      // maiuscola.
+      let score = 0;
+      if (password.length >= 10) score++;
+      if (password.length >= 14) score++;
+      if (hasUppercase)          score++;
+      if (hasNumberOrSymbol)     score++;
+
+      if (score >= 4) {
         return { level: 'strong', label: 'Forte', width: '100%', color: 'bg-emerald-500', textColor: 'text-emerald-700' };
       }
-
-      if (password.length >= 6 && password.length <= 9 && hasUppercase) {
+      if (score >= 2) {
         return { level: 'medium', label: 'Media', width: '66%', color: 'bg-amber-500', textColor: 'text-amber-700' };
       }
-
       return { level: 'weak', label: 'Debole', width: '33%', color: 'bg-red-500', textColor: 'text-red-600' };
     }
 
@@ -595,5 +607,5 @@
       input.addEventListener('input', clearError);
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a12cad0bbdc7ee59',t:'MTc4MjY0OTU0NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
