@@ -80,7 +80,7 @@
 
       <div class="bando-section config-anim mt-7">
         <div class="section-kicker">
-          <p class="section-label">1. Seleziona bando</p>
+          <p class="section-label"><span class="step-marker">Passo 1/3</span>Seleziona bando</p>
           <span id="selectedBandiCount" class="selected-count">0 selezionati</span>
         </div>
         <p class="mb-3 text-sm font-semibold text-gray-500">Seleziona uno o pi&ugrave; bandi da usare nella simulazione</p>
@@ -96,7 +96,7 @@
       </div>
 
       <div class="difficulty-section config-anim mt-7">
-        <p class="section-label">2. Difficolt&agrave;</p>
+        <p class="section-label"><span class="step-marker">Passo 2/3</span>Difficolt&agrave;</p>
         <div class="grid gap-3">
           <button type="button" class="difficulty-card" data-difficulty="Facile">
             <div class="flex items-start gap-3">
@@ -138,7 +138,7 @@
       </div>
 
       <div class="duration-section config-anim mt-7">
-        <p class="section-label">3. Durata</p>
+        <p class="section-label"><span class="step-marker">Passo 3/3</span>Durata</p>
         <div class="flex gap-2">
           <button type="button" class="duration-btn" data-duration="10">10 min</button>
           <button type="button" class="duration-btn active" data-duration="20">20 min</button>
@@ -1558,19 +1558,31 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
 
       const usedSeconds = Math.max(0, Math.round((Date.now() - startedAt) / 1000));
       const avgScore = Math.round((feedback.clarity + feedback.structure + feedback.content) / 3);
-      const scoreColor = avgScore < 5 ? 'text-red-600' : avgScore <= 7 ? 'text-brand-500' : 'text-green-600';
+      const scoreColor = avgScore < 5 ? '#EF4444' : avgScore <= 7 ? '#2563EB' : '#22C55E';
       const scoreBg = avgScore < 5 ? 'bg-red-50' : avgScore <= 7 ? 'bg-brand-50' : 'bg-green-50';
+      const circumference = 2 * Math.PI * 32;
+      const progressOffset = circumference - (avgScore / 10) * circumference;
       summaryPhase.innerHTML = `
-        <section class="card w-full max-w-xl text-center" style="padding: 40px 32px;">
-          <div class="mx-auto grid h-16 w-16 place-items-center rounded-full ${scoreBg} ${scoreColor} text-2xl font-black">${avgScore}</div>
-          <h1 class="mt-5 text-2xl font-black tracking-tight text-brand-900">Simulazione completata</h1>
+        <section class="card w-full max-w-xl text-center" style="padding: 44px 36px;">
+          <div class="relative mx-auto h-28 w-28">
+            <svg class="h-28 w-28 -rotate-90" viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="32" fill="none" stroke="rgba(37,99,235,.08)" stroke-width="5"/>
+              <circle cx="36" cy="36" r="32" fill="none" stroke="${scoreColor}" stroke-width="5" stroke-dasharray="${circumference}" stroke-dashoffset="${progressOffset}" stroke-linecap="round" style="transition: stroke-dashoffset .8s cubic-bezier(.4,0,.2,1), stroke .3s ease"/>
+            </svg>
+            <div class="absolute inset-0 grid place-items-center">
+              <div class="grid h-16 w-16 place-items-center rounded-full ${scoreBg}" style="color: ${scoreColor}">
+                <span class="text-2xl font-black">${avgScore}</span>
+              </div>
+            </div>
+          </div>
+          <h1 class="mt-6 text-2xl font-black tracking-tight text-brand-900">Simulazione completata</h1>
           <p class="mt-1 text-sm font-semibold text-brand-700">Ecco come hai performato</p>
           <div class="mt-8 grid gap-3 text-left sm:grid-cols-2">
-            <div class="rounded-xl border border-brand-100 bg-white p-4 shadow-sm"><p class="text-[11px] font-black uppercase tracking-widest text-gray-400">Domande</p><p class="mt-1 text-2xl font-black text-brand-900">${questionIndex}</p></div>
-            <div class="rounded-xl border border-brand-100 bg-white p-4 shadow-sm"><p class="text-[11px] font-black uppercase tracking-widest text-gray-400">Tempo usato</p><p class="mt-1 text-2xl font-black text-brand-900" style="font-variant-numeric: tabular-nums">${formatTime(usedSeconds)}</p></div>
-            <div class="rounded-xl border border-brand-100 bg-white p-4 shadow-sm"><p class="text-[11px] font-black uppercase tracking-widest text-gray-400">Chiarezza</p><p class="mt-1 text-2xl font-black" style="color: ${feedbackColor(feedback.clarity)}">${feedback.clarity}/10</p></div>
-            <div class="rounded-xl border border-brand-100 bg-white p-4 shadow-sm"><p class="text-[11px] font-black uppercase tracking-widest text-gray-400">Struttura</p><p class="mt-1 text-2xl font-black" style="color: ${feedbackColor(feedback.structure)}">${feedback.structure}/10</p></div>
-            <div class="rounded-xl border border-brand-100 bg-white p-4 shadow-sm sm:col-span-2"><p class="text-[11px] font-black uppercase tracking-widest text-gray-400">Contenuto</p><p class="mt-1 text-2xl font-black" style="color: ${feedbackColor(feedback.content)}">${feedback.content}/10</p></div>
+            <div class="summary-stat"><p class="summary-stat-label">Domande</p><p class="summary-stat-value text-brand-900">${questionIndex}</p></div>
+            <div class="summary-stat"><p class="summary-stat-label">Tempo usato</p><p class="summary-stat-value text-brand-900" style="font-variant-numeric: tabular-nums">${formatTime(usedSeconds)}</p></div>
+            <div class="summary-stat"><p class="summary-stat-label">Chiarezza</p><p class="summary-stat-value" style="color: ${feedbackColor(feedback.clarity)}">${feedback.clarity}/10</p></div>
+            <div class="summary-stat"><p class="summary-stat-label">Struttura</p><p class="summary-stat-value" style="color: ${feedbackColor(feedback.structure)}">${feedback.structure}/10</p></div>
+            <div class="summary-stat sm:col-span-2"><p class="summary-stat-label">Contenuto</p><p class="summary-stat-value" style="color: ${feedbackColor(feedback.content)}">${feedback.content}/10</p></div>
           </div>
           <div class="mt-8 flex flex-col gap-3 sm:flex-row">
             <a href="dashboard.html" class="btn-primary flex-1">Torna alla Dashboard</a>
