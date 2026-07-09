@@ -716,7 +716,7 @@
         }
 
         state.recent = (recentResult.data || []).map(r => ({
-          subject: 'Simulazione ' + (r.difficulty || 'orale'),
+          subject: 'Simulazione ' + (r.modalita || 'orale'),
           created_at: r.created_at,
           score: r.clarity_score && r.structure_score && r.content_score
             ? (r.clarity_score + r.structure_score + r.content_score) / 3

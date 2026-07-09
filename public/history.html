@@ -138,9 +138,9 @@
       const cx = i => PAD + (i / Math.max(1, recent.length - 1)) * (W - PAD * 2);
       const cy = (val, j) => PAD + (1 - val / 10) * (H - PAD * 2);
       const series = [
-        { key: 'clarity', color: '#2563EB', label: 'Chiarezza' },
-        { key: 'structure', color: '#0F4C81', label: 'Struttura' },
-        { key: 'content', color: '#16A34A', label: 'Contenuto' }
+        { key: 'clarity_score', color: '#2563EB', label: 'Chiarezza' },
+        { key: 'structure_score', color: '#0F4C81', label: 'Struttura' },
+        { key: 'content_score', color: '#16A34A', label: 'Contenuto' }
       ];
       let svgContent = '';
       // gridlines
@@ -163,7 +163,7 @@
       const trend = document.getElementById('trendLabel');
       if (trend && recent.length >= 2) {
         const first = recent[0], last = recent[recent.length - 1];
-        const delta = (((last.clarity || 0) + (last.structure || 0) + (last.content || 0)) / 3) - (((first.clarity || 0) + (first.structure || 0) + (first.content || 0)) / 3);
+        const delta = (((last.clarity_score || 0) + (last.structure_score || 0) + (last.content_score || 0)) / 3) - (((first.clarity_score || 0) + (first.structure_score || 0) + (first.content_score || 0)) / 3);
         trend.textContent = (delta >= 0 ? '↑ +' : '↓ ') + delta.toFixed(1) + ' pt nelle ultime sessioni';
         trend.style.color = delta >= 0 ? '#16A34A' : '#DC2626';
       }

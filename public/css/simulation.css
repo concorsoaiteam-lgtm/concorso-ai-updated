@@ -588,22 +588,32 @@
       padding: 18px 16px 0;
     }
 
+    .sim-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
     /* Da desktop: layout a 2 colonne, chat a sinistra, feedback-panel
        sticky a destra mentre l'utente scorre la conversazione.
        top: 132px = navbar (64) + info-bar (~64) + piccolo buffer. */
     @media (min-width: 1024px) {
-      .sim-layout {
+      .sim-content {
         max-width: 1080px;
         display: grid;
         grid-template-columns: minmax(0, 1fr) 300px;
         gap: 28px;
         align-items: start;
       }
+      .sim-layout {
+        max-width: none;
+        padding: 18px 0 0;
+      }
       .feedback-panel {
         margin-top: 0;
         position: sticky;
         top: 132px;
       }
+      .feedback-drawer-toggle { display: none; }
     }
 
     .chat-area {
@@ -706,10 +716,32 @@
       border-color: rgba(37,99,235,0.1);
     }
 
+    .feedback-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
     .feedback-title {
       color: var(--text);
       font-weight: 950;
       letter-spacing: -.02em;
+    }
+    .feedback-close-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1px solid rgba(37,99,235,.12);
+      background: rgba(255,255,255,.8);
+      color: #0F4C81;
+      cursor: pointer;
+      transition: background .15s ease;
+    }
+    .feedback-close-btn:hover { background: rgba(37,99,235,.08); }
+    @media (max-width: 1024px) {
+      .feedback-close-btn { display: inline-flex; }
     }
 
     .feedback-row { margin-top: 16px; }
@@ -738,15 +770,25 @@
       transition: width .5s ease, background .5s ease;
     }
 
-    .mobile-feedback-toggle {
+    .feedback-drawer-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: rgba(15,76,129,.24);
+      backdrop-filter: blur(2px);
+      transition: opacity .25s ease;
+    }
+    .feedback-drawer-overlay.hidden-soft { opacity: 0; pointer-events: none; }
+
+    .feedback-drawer-toggle {
       display: inline-flex;
       gap: 6px;
       align-items: center;
+      justify-content: center;
       position: fixed;
-      left: 50%;
+      right: 16px;
       bottom: 96px;
       z-index: 45;
-      transform: translateX(-50%);
       border: 1px solid rgba(37,99,235,.14);
       border-radius: 999px;
       padding: 8px 14px;
@@ -757,14 +799,15 @@
       font-weight: 750;
       box-shadow: 0 8px 24px rgba(15,76,129,.10);
       transition: opacity .2s ease, transform .2s ease, box-shadow .2s ease;
+      cursor: pointer;
     }
-    .mobile-feedback-toggle:hover {
+    .feedback-drawer-toggle:hover {
       box-shadow: 0 10px 30px rgba(15,76,129,.14);
     }
-    .mobile-feedback-toggle.feedback-hidden {
+    .feedback-drawer-toggle.hidden-soft {
       opacity: 0;
       pointer-events: none;
-      transform: translateX(-50%) translateY(6px);
+      transform: translateY(6px);
     }
 
     .input-shell {
@@ -903,20 +946,35 @@
     .toast-error { border-color: rgba(239,68,68,.2); border-left-color: var(--error); color: #B91C1C; }
 
     @media (max-width: 1024px) {
+      .sim-content { position: relative; }
       .feedback-panel {
-        margin-top: 16px;
-        transition: opacity .25s ease, transform .25s ease, max-height .35s ease;
-        overflow: hidden;
-        max-height: 600px;
-        opacity: 1;
-      }
-      .feedback-panel.collapsed {
-        max-height: 0;
-        opacity: 0;
-        padding: 0 24px;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: min(85vw, 360px);
+        height: 100vh;
+        height: 100dvh;
+        z-index: 100;
         margin-top: 0;
-        border-width: 0;
-        pointer-events: none;
+        border-radius: 20px 0 0 20px;
+        box-shadow: -8px 0 40px rgba(15,76,129,.12);
+        overflow-y: auto;
+        transition: right .32s cubic-bezier(.2,.9,.2,1);
+        padding: 24px 20px;
+      }
+      .feedback-panel.open {
+        right: 0;
+      }
+      .feedback-panel::before {
+        content: "";
+        position: sticky;
+        top: 0;
+        display: block;
+        width: 32px;
+        height: 4px;
+        margin: 0 auto 16px;
+        border-radius: 999px;
+        background: rgba(37,99,235,.15);
       }
     }
 
@@ -1509,7 +1567,7 @@
     .config-card {
       max-width: 680px;
       padding: 0;
-      overflow: clip;
+      overflow: hidden;
       background: rgba(255,255,255,.94);
     }
 

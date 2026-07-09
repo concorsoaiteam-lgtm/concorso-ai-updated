@@ -171,10 +171,11 @@
       </div>
       <div class="session-progress"><div id="sessionProgressFill" class="session-progress-fill"></div></div>
     </section>
-
-        <button id="feedbackToggle" type="button" class="mobile-feedback-toggle"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg> Feedback</button>
     <button id="scrollBottomButton" type="button" class="scroll-bottom-btn hidden-soft">Nuovi messaggi ↓</button>
+    <div id="feedbackDrawerOverlay" class="feedback-drawer-overlay hidden-soft"></div>
+    <button id="feedbackDrawerToggle" type="button" class="feedback-drawer-toggle" aria-label="Feedback">Feedb.</button>
 
+    <div class="sim-content">
     <section class="sim-layout">
       <div id="chatArea" class="chat-area" aria-live="polite">
         <section class="commissioner-card floating-card" id="commissionerCard">
@@ -190,9 +191,10 @@
           </div>
         </section>
       </div>
+    </section>
 
       <aside id="feedbackPanel" class="feedback-panel card">
-        <h2 class="feedback-title"><svg class="inline-block h-4 w-4 -mt-0.5 mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>Feedback live</h2>
+        <div class="feedback-title-row"><h2 class="feedback-title"><svg class="inline-block h-4 w-4 -mt-0.5 mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>Feedback live</h2><button id="feedbackCloseBtn" type="button" class="feedback-close-btn" aria-label="Chiudi feedback"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
         <p class="mt-1 text-[11px] font-semibold leading-5 text-brand-600">Clicca una barra per il <strong>dettaglio</strong> · usa “Non sono d'accordo” per <strong>correggere</strong> il commissario.</p>
         <div class="feedback-row" data-trust="clarity">
           <div class="feedback-label"><span>Chiarezza</span><span id="clarityScore">0/10</span></div>
@@ -327,7 +329,7 @@
         }
       })();
       </script>
-    </section>
+    </div>
 
     <section class="input-shell">
       <div class="input-inner">
@@ -360,6 +362,26 @@
   </div>
 
 
+
+  <div id="paywallModal" class="modal-backdrop hidden">
+    <section class="card max-w-md w-full text-center">
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 text-amber-600"><svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg></div>
+      <h2 class="mt-4 text-xl font-black tracking-tight text-brand-900">Limite mensile raggiunto</h2>
+      <p class="mt-2 text-sm font-semibold leading-6 text-brand-700">Con il piano Free hai diritto a <strong>3 simulazioni al mese</strong>. Hai già usato le tue per questo periodo.</p>
+      <div class="mt-6 rounded-2xl border border-brand-200 bg-brand-50 p-4 text-left">
+        <p class="text-sm font-black text-brand-900">Passa a Pro e ottieni:</p>
+        <ul class="mt-2 space-y-1.5 text-sm font-semibold text-brand-700">
+          <li class="flex items-center gap-2"><svg class="h-4 w-4 shrink-0 text-emerald-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/></svg> Simulazioni illimitate</li>
+          <li class="flex items-center gap-2"><svg class="h-4 w-4 shrink-0 text-emerald-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/></svg> Feedback illimitato</li>
+          <li class="flex items-center gap-2"><svg class="h-4 w-4 shrink-0 text-emerald-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/></svg> Nessun limite mensile</li>
+        </ul>
+      </div>
+      <div class="mt-6 flex flex-col gap-2">
+        <a href="dashboard.html" class="btn-primary shine inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-black">Passa a Pro — in arrivo</a>
+        <button id="paywallDismissBtn" type="button" class="rounded-full px-4 py-2 text-sm font-bold text-brand-600 transition hover:bg-brand-100">Torna alla dashboard</button>
+      </div>
+    </section>
+  </div>
 
   <div id="briefingOverlay" class="briefing-overlay hidden" aria-live="polite">
     <section class="briefing-card">
@@ -414,7 +436,8 @@
     const confirmModal = document.getElementById('confirmModal');
     const cancelEndButton = document.getElementById('cancelEndButton');
     const confirmEndButton = document.getElementById('confirmEndButton');
-    const feedbackToggle = document.getElementById('feedbackToggle');
+    const feedbackToggle = document.getElementById('feedbackDrawerToggle');
+    const feedbackOverlay = document.getElementById('feedbackDrawerOverlay');
     const scrollBottomButton = document.getElementById('scrollBottomButton');
     const answerMeterText = document.getElementById('answerMeterText');
     const answerMeterFill = document.getElementById('answerMeterFill');
@@ -806,8 +829,26 @@
       setTimeout(finishAnimation, 3000);
     }
 
-    function startSimulation() {
+    async function startSimulation() {
       if (!selectedBandi.length) return;
+
+      // Quota check: chiama /api/quota prima di avviare
+      try {
+        var token = typeof window.__getCommAuthToken === 'function' ? window.__getCommAuthToken() : null;
+        if (token) {
+          var qres = await fetch('/api/quota', {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (qres.ok) {
+            var quota = await qres.json();
+            if (quota.plan === 'free' && quota.remaining !== null && quota.remaining <= 0) {
+              showPaywall(quota);
+              return;
+            }
+          }
+        }
+      } catch (_) { /* fallback: allow simulation if quota check fails */ }
 
       totalQuestions = selectedDuration === 10 ? 5 : selectedDuration === 20 ? 8 : 12;
       questionIndex = 1;
@@ -1483,6 +1524,12 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       if (window.gsap) gsap.from(confirmModal.querySelector('.card'), { opacity: 0, y: 12, scale: .98, duration: .22, ease: 'power2.out' });
     }
 
+    function showPaywall(quota) {
+      var modal = document.getElementById('paywallModal');
+      modal.classList.remove('hidden');
+      if (window.gsap) gsap.from(modal.querySelector('.card'), { opacity: 0, y: 12, scale: .98, duration: .22, ease: 'power2.out' });
+    }
+
     async function saveSimulationResult() {
       try {
         if (!selectedBandi.length) return;
@@ -1494,9 +1541,9 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
           durata_minuti: selectedDuration,
           status: 'completata',
           voto_finale: Math.round((feedback.clarity + feedback.structure + feedback.content) / 3),
-          feedback_chiarezza: feedback.clarity,
-          feedback_struttura: feedback.structure,
-          feedback_contenuto: feedback.content,
+          clarity_score: feedback.clarity,
+          structure_score: feedback.structure,
+          content_score: feedback.content,
           started_at: new Date(startedAt).toISOString(),
           ended_at: new Date().toISOString()
         });
@@ -1750,10 +1797,15 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
           if (window.gsap) animateInConfig();
         }
       });
-      feedbackToggle.addEventListener('click', () => {
-        feedbackPanel.classList.toggle('collapsed');
-        feedbackToggle.classList.toggle('feedback-hidden');
-      });
+      function toggleFeedbackDrawer(open) {
+        feedbackPanel.classList.toggle('open', open);
+        feedbackToggle.classList.toggle('hidden-soft', open);
+        feedbackOverlay.classList.toggle('hidden-soft', !open);
+      }
+      feedbackToggle.addEventListener('click', () => toggleFeedbackDrawer(true));
+      feedbackOverlay.addEventListener('click', () => toggleFeedbackDrawer(false));
+      document.getElementById('feedbackCloseBtn').addEventListener('click', () => toggleFeedbackDrawer(false));
+      document.getElementById('paywallDismissBtn').addEventListener('click', function () { window.location.href = 'dashboard.html'; });
       scrollBottomButton.addEventListener('click', () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }));
       chatArea.addEventListener('scroll', updateScrollButton, { passive: true });
       answerInput.addEventListener('focus', () => document.querySelector('.input-shell').classList.add('composer-active'));
