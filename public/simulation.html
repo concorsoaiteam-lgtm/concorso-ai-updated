@@ -120,7 +120,7 @@
                 <h3 class="font-black text-brand-900">Realistico</h3>
                 <p class="mt-1 text-sm font-bold text-brand-700">Commissione vera</p>
                 <p class="mt-2 text-sm leading-6 text-gray-600"><strong>Pro:</strong> Il miglior indicatore se sei pronto davvero</p>
-                <p class="mt-1 text-sm leading-6 text-gray-500"><strong>Contro:</strong> Ti mette davanti ai buchi reali</p>
+                <p class="mt-1 text-sm leading-6 text-gray-500"><strong>Contro:</strong> Mette a nudo le tue lacune</p>
               </div>
             </div>
           </button>
@@ -588,6 +588,7 @@
     }
 
     function updateFeedback() {
+      window.feedback = feedback;
       ['clarity', 'structure', 'content'].forEach(key => {
         const value = feedback[key];
         const fill = document.getElementById(key + 'Fill');
@@ -901,6 +902,8 @@
       // 2) Fetch POST con stream:true
       let response;
       try {
+        const tempMap = { Facile: 0.3, Realistico: 0.5, Difficile: 0.7 };
+        const temperature = tempMap[config.difficolta] || 0.5;
         response = await fetch('/api/chat', {
           method: 'POST',
           headers: {
@@ -913,8 +916,8 @@
               { role: 'system', content: systemPrompt },
               ...messaggi
             ],
-            temperature: 0.4,
-            max_tokens: 500,
+            temperature: temperature,
+            max_tokens: 700,
             stream: true
           })
         });
@@ -1117,60 +1120,65 @@
     // eslint-disable-next-line no-unused-vars
     const __buildSystemPromptSentinel = true;
     function buildSystemPrompt(config) {
-      return `Sei un commissario d'esame per un concorso pubblico italiano.
-Il tuo nome è "Commissario ConcorsoAI".
+      return `Sei un commissario d'esame per un concorso pubblico italiano. Il tuo nome è "Commissario ConcorsoAI".
 
-RUOLO: Conduci un esame orale simulato. Sei formale, freddo, neutro.
-Dai sempre del Lei al candidato. Mai del tu.
-Non sei un tutor. Sei un esaminatore.
+Sei formale. Dai del Lei. Non sei un tutor, sei un esaminatore.
 
 CONTESTO ESAME:
 - Bando: ${config.bandoNome}
 - Difficoltà: ${config.difficolta}
 - Durata: ${config.durata} minuti
-- Tempo rimasto: ${config.tempoRimasto} minuti
 
 MATERIALE DEL CANDIDATO:
-${config.chunks}
+${config.chunks || 'Nessun bando caricato. Usa materie generali: Diritto Costituzionale, Diritto Amministrativo, Contabilità Pubblica.'}
 
 REGOLE:
-1. Fai UNA sola domanda alla volta.
-2. Dopo la risposta fai UN follow-up collegato.
-3. Se il candidato sbaglia NON correggere. Dì solo "Capisco" o "Passiamo avanti".
-4. Se non sa rispondere: "Passiamo alla prossima domanda."
-5. Non dire mai "ottimo", "bravo", "esatto". Al massimo: "Bene."
-6. Cita sempre articoli specifici e leggi reali.
-7. Alterna teoria e scenari pratici.
+1. Fai una domanda alla volta, poi un follow-up collegato.
+2. Cita articoli e leggi specifiche.
+3. Alterna teoria e scenari pratici.
+4. Se il candidato esita, aspetta o riformula con gentilezza.
 
 IN BASE ALLA DIFFICOLTÀ:
 - Facile: domande lineari, meno pressione
 - Realistico: follow-up normali, tono professionale
 - Difficile: incalzante, cambi materia improvvisi, scenari complessi
 
-FORMATO RISPOSTA — rispondi SEMPRE con questo JSON:
-{"messaggio": "testo per il candidato", "feedback": {"chiarezza": 5, "struttura": 5, "contenuto": 5}, "tipo": "domanda"}
+FORMATO RISPOSTA — JSON:
+{"messaggio": "testo", "feedback": {"chiarezza": 5, "struttura": 5, "contenuto": 5}, "tipo": "domanda"}
+"tipo": "domanda" | "approfondimento" | "cambio_materia" | "fine"
 
-Il campo "tipo" può essere: "domanda", "approfondimento", "cambio_materia", "fine"
-
-APERTURA: inizia sempre con "Buongiorno." poi vai subito alla prima domanda.
-LINGUA: italiano formale. Niente emoji. Frasi precise.`;
+APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi precise.`;
     }
 
     // Funzione principale chiamata AI
     async function chiamaCommissario(messaggi, config) {
       const systemPrompt = buildSystemPrompt(config);
 
+      let token = null;
+      try {
+        if (supabaseClient && supabaseClient.auth && supabaseClient.auth.getSession) {
+          const sessionData = await supabaseClient.auth.getSession();
+          token = sessionData && sessionData.data && sessionData.data.session && sessionData.data.session.access_token;
+        }
+      } catch (_) {}
+
+      const tempMap = { Facile: 0.3, Realistico: 0.5, Difficile: 0.7 };
+      const temperature = tempMap[config.difficolta] || 0.5;
+
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify({
           model: 'deepseek-v4-flash',
           messages: [
             { role: 'system', content: systemPrompt },
             ...messaggi
           ],
-          temperature: 0.4,
-          max_tokens: 500
+          temperature: temperature,
+          max_tokens: 700
         })
       });
 
@@ -1205,7 +1213,14 @@ LINGUA: italiano formale. Niente emoji. Frasi precise.`;
       }
 
       if (!response.ok) {
-        showToast('Errore ' + response.status + ': ' + (data.error || 'risposta non valida'), 'error');
+        const statusErrors = {
+          401: 'Sessione scaduta — rifai login dalla dashboard',
+          403: 'Accesso negato — contatta il supporto',
+          429: 'Troppe richieste — attendi qualche secondo e riprova',
+          502: 'BluesMinds non risponde — riprova tra poco',
+          503: 'Servizio temporaneamente non disponibile'
+        };
+        showToast(statusErrors[response.status] || ('Errore ' + response.status + ': ' + (data.error || 'risposta non valida')), 'error');
         return '';
       }
 
@@ -1336,7 +1351,16 @@ LINGUA: italiano formale. Niente emoji. Frasi precise.`;
       } catch(error) {
         nascondiThinking();
         console.error('Errore commissario:', error);
-        showToast('Errore di comunicazione con il commissario', 'error');
+        const msg = error && error.message && (
+          error.message.includes('Failed to fetch') || error.message.includes('NetworkError')
+            ? 'Connessione al server AI fallita — verifica la rete'
+            : error.message.includes('401') || error.message.includes('Unauthorized')
+              ? 'Sessione scaduta — rifai login'
+              : error.message.includes('502') || error.message.includes('503')
+                ? 'BluesMinds temporaneamente giù — riprova tra poco'
+                : null
+        );
+        showToast(msg || 'Errore di comunicazione con il commissario', 'error');
       }
     }
 

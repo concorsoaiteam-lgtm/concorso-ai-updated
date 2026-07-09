@@ -263,12 +263,18 @@
 
     .stat-action {
       display: inline-flex;
-      margin-top: 12px;
+      align-items: center;
+      margin-top: 8px;
+      gap: 2px;
       font-size: .82rem;
       font-weight: 900;
       color: var(--accent-2);
       text-decoration: none;
       transition: color .18s ease, transform .18s ease;
+    }
+
+    .stat-action svg {
+      margin-top: 1px;
     }
 
     .stat-action:hover {
@@ -280,7 +286,7 @@
       margin-top: 12px;
       font-size: .82rem;
       font-weight: 800;
-      color: #6B7280;
+      color: var(--accent-2);
     }
 
     .cards-grid {
@@ -387,8 +393,17 @@
       box-shadow: 0 10px 24px rgba(37,99,235,.18);
     }
 
-    .upload-panel { margin-top: 16px; }
-    .upload-panel.hidden { display: none; }
+    .upload-panel {
+      margin-top: 16px;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    .upload-panel.hidden {
+      display: none;
+    }
+    .upload-panel.is-fading {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
 
     .upload-drop {
       border: 2px dashed rgba(169,205,248,.8);
@@ -787,6 +802,103 @@
 
     .wizard-dot.done {
       background: #16A34A;
+    }
+
+    .coach-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 95;
+      background: rgba(7,29,51,.58);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      cursor: pointer;
+      transition: opacity .35s ease;
+    }
+
+    .coach-highlight {
+      position: fixed;
+      z-index: 96;
+      border-radius: 16px;
+      box-shadow: 0 0 0 4px rgba(37,99,235,.5), 0 0 30px rgba(37,99,235,.25);
+      transition: all .4s cubic-bezier(.22,1,.36,1);
+      pointer-events: none;
+    }
+
+    .coach-tooltip {
+      position: fixed;
+      z-index: 97;
+      max-width: 340px;
+      background: rgba(255,255,255,.97);
+      border: 1px solid #D6E8FF;
+      border-radius: 18px;
+      padding: 20px 22px;
+      box-shadow: 0 24px 70px rgba(15,76,129,.18);
+      pointer-events: auto;
+      cursor: pointer;
+      animation: coachIn .4s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .coach-tooltip-title {
+      font-size: 1rem;
+      font-weight: 900;
+      color: #0B2A4A;
+    }
+
+    .coach-tooltip-text {
+      margin-top: 8px;
+      font-size: .85rem;
+      line-height: 1.6;
+      color: #315B7D;
+      font-weight: 550;
+    }
+
+    .coach-tooltip-cta {
+      margin-top: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #2563EB;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-size: .85rem;
+      font-weight: 900;
+      cursor: pointer;
+      transition: background .2s ease;
+    }
+
+    .coach-tooltip-cta:hover { background: #0F4C81; }
+
+    .coach-dots {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 97;
+      display: flex;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .coach-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.35);
+      transition: all .3s ease;
+    }
+
+    .coach-dot.active { background: #fff; transform: scale(1.4); }
+
+    @keyframes coachIn {
+      from { opacity: 0; transform: translateY(12px) scale(.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (max-width: 767px) {
+      .coach-tooltip { max-width: calc(100vw - 32px); left: 16px !important; right: 16px !important; }
+      .coach-highlight { border-radius: 12px; }
     }
 
     @media (prefers-reduced-motion: reduce) {

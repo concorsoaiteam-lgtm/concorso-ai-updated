@@ -2263,4 +2263,30 @@
       .start-btn.ready::after { display: none; }
     }
 
+    .wave {
+      display: flex;
+      align-items: center;
+      height: 8px;
+      gap: 1.5px;
+    }
+    .wave span {
+      display: block;
+      width: 3px;
+      height: 100%;
+      border-radius: 999px;
+      background: rgba(255,255,255,.7);
+      animation: animWave 1.15s cubic-bezier(.45,0,.55,1) infinite;
+    }
+    .wave span:nth-child(2n) { animation-delay: .12s; animation-duration: .95s; }
+    .wave span:nth-child(3n) { animation-delay: .22s; animation-duration: 1.25s; }
+    .wave span:nth-child(4n) { animation-delay: .34s; animation-duration: 1.05s; }
+    @keyframes animWave {
+      0%, 100% { transform: scaleY(.45); opacity: .5; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+    .mic-pulse { animation: micPulse 1.7s ease-in-out infinite; }
+    @keyframes micPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,.35); }
+      50% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+    }
 

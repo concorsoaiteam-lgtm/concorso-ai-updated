@@ -44,6 +44,26 @@
     }
   </script>
 
+  <!-- =========================================================
+       Animazione transizione accedi <-> registrati
+       (item 11 TODO: transizione semplice ma fatta bene)
+       ========================================================= -->
+  <style>
+    #login-panel, #register-panel {
+      transition: opacity .22s ease-out, transform .22s ease-out;
+    }
+    #login-panel.is-fading,
+    #register-panel.is-fading {
+      opacity: 0;
+      transform: translateY(6px);
+      pointer-events: none;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #login-panel, #register-panel { transition: none; }
+      #login-panel.is-fading, #register-panel.is-fading { transform: none; }
+    }
+  </style>
+
   <!-- Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -247,8 +267,36 @@
 
     const DASHBOARD_URL = '/dashboard.html';
 
+    // Item 12 TODO: parametro URL ?register=1 o ?mode=register
+    // apre direttamente la tab Registrati (i link "Registrati" dalla
+    // landing portano qui con questo parameto per non finire nel tab
+    // sbagliato).
+    (function () {
+      try {
+        var p = new URLSearchParams(window.location.search);
+        if (p.get('mode') === 'register' || p.get('register') === '1') {
+          var lp = document.getElementById('login-panel');
+          var rp = document.getElementById('register-panel');
+          if (lp) lp.classList.add('hidden');
+          if (rp) rp.classList.remove('hidden');
+          var lt = document.getElementById('login-tab');
+          var rt = document.getElementById('register-tab');
+          if (lt && rt) {
+            lt.setAttribute('aria-selected', 'false');
+            rt.setAttribute('aria-selected', 'true');
+            lt.classList.remove('text-brand-900');
+            lt.classList.add('text-brand-600');
+            rt.classList.remove('text-brand-600');
+            rt.classList.add('text-brand-900');
+          }
+          var ind = document.getElementById('tab-indicator');
+          if (ind) ind.style.transform = 'translateX(100%)';
+        }
+      } catch (e) { /* parametri URL assenti: lasciamo default login */ }
+    })();
+
     const state = {
-      mode: 'login',
+      mode: new URLSearchParams(window.location.search).get('mode') === 'register' ? 'register' : 'login',
       loading: false,
       errorTimeout: null
     };
@@ -278,8 +326,27 @@
       clearError();
 
       const isLogin = mode === 'login';
-      els.loginPanel.classList.toggle('hidden', !isLogin);
-      els.registerPanel.classList.toggle('hidden', isLogin);
+      const outgoing = isLogin ? els.registerPanel : els.loginPanel;
+      const incoming = isLogin ? els.loginPanel : els.registerPanel;
+
+      // Animazione "fade + slide" (item 11): il pannello uscente svanisce,
+      // quello entrante prende il posto con traduzioncina. Rispetta
+      // prefers-reduced-motion via CSS.
+      if (outgoing && incoming && !outgoing.classList.contains('hidden')) {
+        outgoing.classList.add('is-fading');
+        window.setTimeout(function () {
+          outgoing.classList.add('hidden');
+          outgoing.classList.remove('is-fading');
+          incoming.classList.remove('hidden');
+          incoming.classList.add('is-fading');
+          // force reflow per far partire il fade-in in modo affidabile
+          void incoming.offsetWidth;
+          incoming.classList.remove('is-fading');
+        }, 200);
+      } else {
+        els.loginPanel.classList.toggle('hidden', !isLogin);
+        els.registerPanel.classList.toggle('hidden', isLogin);
+      }
       els.tabIndicator.style.transform = isLogin ? 'translateX(0)' : 'translateX(100%)';
 
       els.loginTab.setAttribute('aria-selected', String(isLogin));
@@ -463,6 +530,9 @@
         els.registerSubmit.disabled = !els.termsCheckbox.checked;
       }
     }
+
+    // Init mode from URL param
+    setMode(state.mode);
 
     // Event listeners: tabs
     els.loginTab.addEventListener('click', () => setMode('login'));

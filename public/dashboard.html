@@ -51,6 +51,108 @@
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 
   <link rel="stylesheet" href="/css/dashboard.css" />
+
+  <!-- ===================================================
+       Item 19: Transizioni smooth tra tab upload (PDF/testo/materie)
+       Item 16: note statistiche NON blu quando valore manca
+       Item 17: fiamma Streak piu bella e piu grande
+       (vincolo progetto: CSS additivo inline, override di dashboard.css)
+       =================================================== -->
+  <style>
+    /* Item 19: stessa transizione di auth.html login<->register */
+    .upload-panel {
+      transition: opacity .22s ease-out, transform .22s ease-out;
+    }
+    .upload-panel.is-fading {
+      opacity: 0;
+      transform: translateY(6px);
+      pointer-events: none;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .upload-panel { transition: none; }
+      .upload-panel.is-fading { transform: none; }
+    }
+
+    /* Item 16: "Nessun dato ancora" e "Allenati oggi" NON blu.
+       Override del blu brand di dashboard.css .stat-note. */
+    .stat-note.stat-note-muted {
+      color: #475569 !important; /* slate-600 (grigio scuro, leggibile) */
+    }
+
+    /* Item 17: fiamma piu grande + glow coerente con brand */
+    .streak-flame {
+      filter: drop-shadow(0 2px 6px rgba(249,115,22,.35));
+      transition: transform .25s cubic-bezier(.2,.8,.2,1);
+    }
+    .stat-card:hover .streak-flame {
+      transform: scale(1.08) rotate(-3deg);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .streak-flame { transition: none; }
+      .stat-card:hover .streak-flame { transform: none; }
+    }
+
+    /* ====================================================
+       Item 15: il tutorial wizard NON è al centro.
+       Spostato in basso a destra, in overlay leggero (no backdrop full-screen).
+       L'utente puo toccare lo schermo sotto, e ogni step "Continua"
+       evidenzia un elemento specifico (via .wizard-highlight su target).
+       Vincolo: non introduciamo dipendenze, solo CSS + behavior CSS-only.
+       ==================================================== */
+    .wizard-overlay {
+      background: transparent !important;
+      align-items: flex-end !important;
+      justify-content: flex-end !important;
+      padding: 20px !important;
+      pointer-events: none; /* click-through sotto al wizard */
+    }
+    .wizard-card {
+      position: relative !important;
+      max-width: 340px !important;
+      margin: 0 !important;
+      pointer-events: auto; /* ma la card stessa cattura click */
+      background: rgba(255,255,255,.96) !important;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: 1.25rem !important;
+      box-shadow: 0 24px 70px rgba(15,76,129,.22), 0 0 0 1px rgba(37,99,235,.12) !important;
+      padding: 1.5rem !important;
+      transform-origin: bottom right;
+    }
+    /* Evidenzia l'elemento target dello step corrente con un ring blu. */
+    .wizard-target {
+      position: relative;
+      isolation: isolate;
+    }
+    .wizard-target::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 14px;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.55), 0 8px 24px rgba(37,99,235,.25);
+      animation: wizardTargetPulse 1.6s ease-in-out infinite;
+      pointer-events: none;
+      z-index: -1;
+    }
+    @keyframes wizardTargetPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .65; transform: scale(1.01); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .wizard-target::after { animation: none; opacity: .55; }
+    }
+    /* Su mobile, sposta al bottom-center per non bloccare navbar e tab. */
+    @media (max-width: 767px) {
+      .wizard-overlay {
+        align-items: flex-end !important;
+        justify-content: center !important;
+        padding: 12px !important;
+      }
+      .wizard-card {
+        max-width: calc(100vw - 24px) !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -137,7 +239,7 @@
           </div>
           <p class="stat-label">Simulazioni</p>
           <p id="statSimulations" class="stat-number skeleton skeleton-number" data-count="0" data-delay="0.05">0</p>
-          <a id="statSimulationsAction" href="#" class="stat-action hidden">Inizia la prima <svg class="inline-block h-3.5 w-3.5 align-[-1px]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
+          <a id="statSimulationsAction" href="simulation.html" class="stat-action hidden">Inizia la prima <svg class="inline-block h-3.5 w-3.5 align-middle" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
         </article>
         <article class="card stat-card">
           <div class="stat-icon">
@@ -150,7 +252,7 @@
               <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l5-6 5 6"/></svg>
             </span>
           </div>
-          <p id="statAverageNote" class="stat-note hidden">Nessun dato ancora</p>
+          <p id="statAverageNote" class="stat-note hidden stat-note-muted">Nessun dato ancora</p>
         </article>
         <article class="card stat-card">
           <div class="stat-icon">
@@ -162,11 +264,11 @@
         </article>
         <article class="card stat-card">
           <div class="stat-icon">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2s5 5 5 10a5 5 0 0 1-10 0C7 7 12 2 12 2Z"/></svg>
+            <svg class="h-8 w-8 streak-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path fill="#F97316" stroke="#C2410C" stroke-linejoin="round" d="M12 2.5c1.5 2.5 4 5 4 9 0 3.5-2.5 6.5-4 7.5-1.5-1-4-4-4-7.5 0-1.7.7-3 1.4-4.2.4 1 .9 1.7 1.6 2 .4-2 0-4 1-6.8z"/><path fill="#FCD34D" d="M9 16.5c.5 1.5 1.7 2.5 3 3-2 .5-4-.5-4.5-2.5z" stroke="none"/></svg>
           </div>
           <p class="stat-label">Streak</p>
           <p id="statStreak" class="stat-number skeleton skeleton-number" data-count="0" data-delay="0.2">0</p>
-          <p id="statStreakNote" class="stat-note hidden">Allenati oggi</p>
+          <p id="statStreakNote" class="stat-note hidden stat-note-muted">Allenati oggi</p>
         </article>
       </div>
 
@@ -274,54 +376,9 @@
 
     <!-- ONBOARDING WIZARD OVERLAY -->
     <div id="wizardOverlay" class="wizard-overlay hidden" role="dialog" aria-modal="true">
-      <div class="wizard-card">
+      <div class="wizard-card text-center">
         <button id="wizardSkip" type="button" class="absolute right-5 top-5 text-sm font-bold text-brand-600 transition-colors hover:text-brand-900">Salta</button>
-
-        <div class="flex justify-center gap-2.5 mb-10">
-          <span class="wizard-dot active" data-wizdot="1"></span>
-          <span class="wizard-dot" data-wizdot="2"></span>
-          <span class="wizard-dot" data-wizdot="3"></span>
-        </div>
-
-        <div class="wizard-step" data-wizstep="1">
-          <div class="text-center">
-            <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-100 text-brand-600 shadow-sm">
-              <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5"/></svg>
-            </div>
-            <h3 class="text-2xl font-black text-brand-900">Carica il tuo bando</h3>
-            <p class="mt-3 text-sm leading-7 text-brand-700">Importa il PDF del tuo concorso o incolla il testo. Il commissario AI estrarrà i contenuti per preparare domande sui tuoi materiali veri.</p>
-            <button id="wizardToUpload" type="button" class="btn-primary mt-6 px-6 py-3 text-base">Carica ora</button>
-          </div>
-        </div>
-
-        <div class="wizard-step hidden" data-wizstep="2">
-          <div class="text-center">
-            <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-100 text-brand-600 shadow-sm">
-              <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm7-3a7 7 0 0 1-14 0"/></svg>
-            </div>
-            <h3 class="text-2xl font-black text-brand-900">Scegli materia e difficoltà</h3>
-            <p class="mt-3 text-sm leading-7 text-brand-700">Seleziona la materia su cui vuoi essere interrogato. Scegli il livello: Facile, Realistico (consigliato) o Difficile. Ogni livello calibra la pressione della commissione.</p>
-          </div>
-        </div>
-
-        <div class="wizard-step hidden" data-wizstep="3">
-          <div class="text-center">
-            <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 shadow-sm">
-              <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <h3 class="text-2xl font-black text-brand-900">Avvia la simulazione</h3>
-            <p class="mt-3 text-sm leading-7 text-brand-700">Sei pronto? Il commissario AI ti guiderà domanda dopo domanda, con feedback live su chiarezza, struttura e contenuto. Come un orale vero.</p>
-            <a href="simulation.html" class="btn-primary shine mt-6 inline-flex items-center gap-2 px-6 py-3 text-base">
-              Inizia la simulazione
-              <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-            </a>
-          </div>
-        </div>
-
-        <div class="mt-8 flex items-center justify-between border-t border-brand-200 pt-6">
-          <button id="wizardBack" type="button" class="invisible text-sm font-bold text-brand-600 transition-colors hover:text-brand-900">&larr; Indietro</button>
-          <button id="wizardNext" type="button" class="btn-primary px-5 py-2.5 text-sm">Continua</button>
-        </div>
+        <p class="text-sm font-semibold leading-7 text-brand-700">Riceverai un tutorial interattivo che ti guiderà attraverso la dashboard.</p>
       </div>
     </div>
   </div>
@@ -368,8 +425,6 @@
     const materieGrid = document.getElementById('materieGrid');
     const saveMaterieButton = document.getElementById('saveMaterieButton');
     let currentUser = null;
-    let wizardStep = 1;
-
     if (window.pdfjsLib) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
     }
@@ -672,7 +727,7 @@
       renderStats();
 
       if (state.simulations === 0 && !localStorage.getItem('concorsoai_wizard_done')) {
-        setTimeout(showWizard, 900);
+        setTimeout(function () { showCoachStep(0); }, 900);
       }
     }
 
@@ -1023,7 +1078,21 @@
 
     function switchUploadTab(tab) {
       uploadTabs.forEach(button => button.classList.toggle('active', button.dataset.uploadTab === tab));
-      Object.entries(uploadPanels).forEach(([key, panel]) => panel.classList.toggle('hidden', key !== tab));
+      const incoming = uploadPanels[tab];
+      Object.entries(uploadPanels).forEach(([key, panel]) => {
+        if (key === tab) return;
+        panel.classList.add('is-fading');
+        setTimeout(() => {
+          panel.classList.add('hidden');
+          panel.classList.remove('is-fading');
+        }, 200);
+      });
+      if (incoming) {
+        incoming.classList.remove('hidden');
+        incoming.classList.add('is-fading');
+        void incoming.offsetWidth;
+        incoming.classList.remove('is-fading');
+      }
     }
 
     function renderMaterieButtons() {
@@ -1090,77 +1159,93 @@
       ctaButton.addEventListener('click', () => window.location.href = 'simulation.html');
     }
 
-    function showWizardStep(n) {
-      const step = Math.max(1, Math.min(n, 3));
-      wizardStep = step;
+    var coachSteps = [
+      { selector: '.hero-title', title: 'I tuoi progressi', text: 'Qui vedi le tue statistiche: simulazioni fatte, voto medio, bandi caricati e la tua striscia di allenamento.', placement: 'bottom' },
+      { selector: '.stats-grid', title: 'Statistiche in tempo reale', text: 'Ogni numero è aggiornato dopo ogni simulazione. Tocca per vedere i dettagli.', placement: 'top' },
+      { selector: '.cards-grid', title: 'Risultati e aree da migliorare', text: 'Qui trovi le ultime simulazioni e i punti su cui concentrarti. Usa "Vedi tutto" per lo storico completo.', placement: 'top' },
+      { selector: '.upload-section', title: 'Carica il tuo bando', text: 'Aggiungi PDF, incolla testo o scegli materie generali. Il commissario AI userà questi materiali per le domande.', placement: 'top' }
+    ];
+    var coachStepIndex = 0;
 
-      document.querySelectorAll('.wizard-step').forEach(el => {
-        const s = parseInt(el.dataset.wizstep, 10);
-        if (s === step) {
-          el.classList.remove('hidden');
-          if (window.gsap) gsap.fromTo(el, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' });
-        } else {
-          el.classList.add('hidden');
-        }
-      });
+    function showCoachStep(index) {
+      coachStepIndex = index;
+      removeCoachUI();
 
-      document.querySelectorAll('.wizard-dot').forEach(el => {
-        const s = parseInt(el.dataset.wizdot, 10);
-        el.classList.toggle('active', s === step);
-        el.classList.toggle('done', s < step);
-      });
-
-      const backBtn = document.getElementById('wizardBack');
-      const nextBtn = document.getElementById('wizardNext');
-      backBtn.classList.toggle('invisible', step === 1);
-      nextBtn.textContent = step === 3 ? 'Completa' : 'Continua';
-    }
-
-    function closeWizard() {
-      const overlay = document.getElementById('wizardOverlay');
-      if (window.gsap) {
-        gsap.to(overlay, {
-          opacity: 0, duration: 0.25,
-          onComplete: () => { overlay.classList.add('hidden'); gsap.set(overlay, { opacity: 1, clearProps: 'opacity' }); }
-        });
-      } else {
-        overlay.classList.add('hidden');
+      if (index >= coachSteps.length) {
+        doneCoach();
+        return;
       }
+
+      var step = coachSteps[index];
+      var target = document.querySelector(step.selector);
+      if (!target) { showCoachStep(index + 1); return; }
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      setTimeout(function () {
+        var rect = target.getBoundingClientRect();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'coach-overlay';
+        overlay.style.opacity = '0';
+        document.body.appendChild(overlay);
+        if (window.gsap) { gsap.to(overlay, { opacity: 1, duration: 0.3, ease: 'power2.out' }); }
+        else { overlay.style.opacity = '1'; }
+
+        var highlight = document.createElement('div');
+        highlight.className = 'coach-highlight';
+        highlight.style.left = (rect.left - 8) + 'px';
+        highlight.style.top = (rect.top - 8) + 'px';
+        highlight.style.width = (rect.width + 16) + 'px';
+        highlight.style.height = (rect.height + 16) + 'px';
+        document.body.appendChild(highlight);
+
+        var tooltip = document.createElement('div');
+        tooltip.className = 'coach-tooltip';
+        var half = rect.width / 2;
+        tooltip.style.left = Math.max(16, Math.min(rect.left + half - 170, window.innerWidth - 356)) + 'px';
+        tooltip.style.top = (step.placement === 'bottom' ? rect.bottom + 16 : rect.top - 180) + 'px';
+        if (tooltip.style.top < 20) tooltip.style.top = (rect.bottom + 16) + 'px';
+        tooltip.innerHTML =
+          '<div class="coach-tooltip-title">' + step.title + '</div>' +
+          '<div class="coach-tooltip-text">' + step.text + '</div>' +
+          '<button class="coach-tooltip-cta" id="coachNext">' + (index < coachSteps.length - 1 ? 'Avanti \u2192' : 'Inizia! \u2192') + '</button>';
+        document.body.appendChild(tooltip);
+
+        var dots = document.createElement('div');
+        dots.className = 'coach-dots';
+        for (var d = 0; d < coachSteps.length; d++) {
+          var dot = document.createElement('span');
+          dot.className = 'coach-dot' + (d === index ? ' active' : '');
+          dots.appendChild(dot);
+        }
+        document.body.appendChild(dots);
+
+        overlay.addEventListener('click', advanceCoach);
+        document.getElementById('coachNext').addEventListener('click', advanceCoach);
+      }, 420);
     }
 
-    function skipWizard() {
+    function advanceCoach() {
+      showCoachStep(coachStepIndex + 1);
+    }
+
+    function removeCoachUI() {
+      document.querySelectorAll('.coach-overlay, .coach-highlight, .coach-tooltip, .coach-dots').forEach(function (el) { el.remove(); });
+    }
+
+    function doneCoach() {
       localStorage.setItem('concorsoai_wizard_done', 'true');
-      closeWizard();
+      removeCoachUI();
       document.getElementById('onboarding').style.display = 'block';
     }
 
-    function completeWizard() {
-      skipWizard();
-    }
-
-    function showWizard() {
-      const overlay = document.getElementById('wizardOverlay');
-      overlay.classList.remove('hidden');
-      showWizardStep(1);
-      if (window.gsap) {
-        gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' });
-      }
+    function skipWizard() {
+      doneCoach();
     }
 
     function initWizard() {
       document.getElementById('wizardSkip').addEventListener('click', skipWizard);
-      document.getElementById('wizardBack').addEventListener('click', () => showWizardStep(wizardStep - 1));
-      document.getElementById('wizardNext').addEventListener('click', () => {
-        if (wizardStep < 3) {
-          showWizardStep(wizardStep + 1);
-        } else {
-          completeWizard();
-        }
-      });
-      document.getElementById('wizardToUpload').addEventListener('click', () => {
-        skipWizard();
-        document.querySelector('[data-upload-tab]').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
     }
 
     async function init() {
