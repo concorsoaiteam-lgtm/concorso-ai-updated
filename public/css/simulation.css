@@ -968,19 +968,16 @@
     }
 
     .section-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
       letter-spacing: -.01em;
       color: #0B2A4A;
     }
 
     .step-marker {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
       height: 20px;
-      min-width: 20px;
+      line-height: 20px;
       padding: 0 7px;
       border-radius: 999px;
       background: rgba(37,99,235,.10);
