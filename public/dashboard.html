@@ -100,13 +100,15 @@
        Vincolo: non introduciamo dipendenze, solo CSS + behavior CSS-only.
        ==================================================== */
      .wizard-overlay {
-       background: rgba(7,29,51,.55) !important;
+       background: transparent !important;
        align-items: flex-end !important;
        justify-content: flex-end !important;
        padding: 20px !important;
+       pointer-events: none;
      }
-    .wizard-card {
-      position: relative !important;
+     .wizard-card {
+       position: relative !important;
+       pointer-events: auto;
       max-width: 340px !important;
       margin: 0 !important;
       pointer-events: auto; /* ma la card stessa cattura click */

@@ -386,6 +386,73 @@
       transform: translateX(2px);
     }
 
+    .difficulty-card {
+      position: relative;
+      width: 100%;
+      text-align: left;
+      border: 1px solid rgba(37,99,235,.15);
+      border-radius: 18px;
+      padding: 20px;
+      background: rgba(255,255,255,.75);
+      cursor: pointer;
+      transition: all .2s ease;
+    }
+
+    .difficulty-card .difficulty-icon {
+      display: inline-block;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+    .difficulty-card[data-difficulty="Facile"] .difficulty-icon { background: #22C55E; }
+    .difficulty-card[data-difficulty="Realistico"] .difficulty-icon { background: #EAB308; }
+    .difficulty-card[data-difficulty="Difficile"] .difficulty-icon { background: #EF4444; }
+
+    .difficulty-card:hover {
+      transform: translateY(-1px);
+      border-color: rgba(37,99,235,.26);
+      background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(234,244,255,.68));
+    }
+    .difficulty-card.active {
+      border: 2px solid var(--accent-2);
+      background: #FFFFFF;
+      box-shadow: 0 8px 28px rgba(37,99,235,.12);
+    }
+
+    .recommended-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: rgba(37,99,235,.1);
+      color: var(--accent-2);
+      font-size: .68rem;
+      font-weight: 950;
+    }
+
+    .duration-btn {
+      flex: 1;
+      border: 1px solid rgba(37,99,235,.16);
+      border-radius: 10px;
+      padding: 12px 32px;
+      background: rgba(255,255,255,.76);
+      color: var(--text-secondary);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s ease;
+    }
+
+    .duration-btn:hover:not(.active) { background: var(--accent-muted); }
+
+    .duration-btn.active {
+      border-color: var(--accent-2);
+      background: var(--accent-2);
+      color: #FFFFFF;
+      box-shadow: 0 8px 22px rgba(37,99,235,.20);
+    }
+
     .sim-phase {
       min-height: 100vh;
       padding-bottom: 120px;
@@ -1371,148 +1438,24 @@
       background: rgba(255,255,255,.94);
     }
 
-    .config-card > .config-header {
-      padding: 28px 28px 18px;
+    .config-card > .config-anim:first-child {
+      padding: 28px 28px 22px;
       border-bottom: 1px solid rgba(37,99,235,.10);
       background:
         radial-gradient(circle at 18% 0%, rgba(37,99,235,.08), transparent 16rem),
         linear-gradient(180deg, rgba(255,255,255,.96), rgba(247,251,255,.72));
     }
 
-    .config-card > .config-block {
-      padding: 18px 28px;
-      border-bottom: 1px solid rgba(37,99,235,.06);
+    .config-card > .config-anim:not(:first-child) {
+      margin-top: 0;
+      padding: 22px 28px;
+      border-bottom: 1px solid rgba(37,99,235,.08);
     }
 
-    .config-card > .config-start {
+    .config-card > .config-anim:last-child {
       border-bottom: 0;
-      padding: 18px 28px 24px;
+      padding: 22px 28px 26px;
       background: rgba(247,251,255,.52);
-    }
-
-    .step-badge {
-      flex: 0 0 auto;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 26px;
-      height: 26px;
-      border-radius: 8px;
-      background: rgba(37,99,235,.10);
-      color: #0F4C81;
-      font-size: .72rem;
-      font-weight: 800;
-      letter-spacing: -.02em;
-    }
-
-    .difficulty-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-
-    .difficulty-card {
-      position: relative;
-      padding: 16px 12px;
-      text-align: center;
-      border: 1px solid rgba(37,99,235,.15);
-      border-radius: 16px;
-      background: rgba(255,255,255,.75);
-      cursor: pointer;
-      transition: all .2s ease;
-    }
-
-    .difficulty-card:hover {
-      border-color: rgba(37,99,235,.26);
-      background: rgba(255,255,255,.96);
-    }
-
-    .difficulty-card.active {
-      border: 2px solid #2563EB;
-      background: #FFFFFF;
-      box-shadow: 0 8px 24px rgba(37,99,235,.12);
-    }
-
-    .difficulty-card h3 {
-      font-size: .92rem;
-      font-weight: 700;
-      margin-top: 8px;
-      color: #071D33;
-    }
-
-    .difficulty-sub {
-      font-size: .78rem;
-      font-weight: 600;
-      color: #4B6F8E;
-      margin-top: 2px;
-    }
-
-    .difficulty-card .recommended-badge {
-      position: absolute;
-      top: -6px;
-      right: 50%;
-      transform: translateX(50%);
-      font-size: .62rem;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(37,99,235,.1);
-      color: #2563EB;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .duration-grid {
-      display: flex;
-      gap: 8px;
-      padding: 4px;
-      border: 1px solid rgba(37,99,235,.10);
-      border-radius: 16px;
-      background: rgba(247,251,255,.74);
-    }
-
-    .duration-btn {
-      flex: 1;
-      padding: 10px 16px;
-      border: 0;
-      background: transparent;
-      border-radius: 12px;
-      font-size: .88rem;
-      font-weight: 700;
-      color: #4B6F8E;
-      cursor: pointer;
-      transition: all .2s ease;
-    }
-
-    .duration-btn.active {
-      background: #FFFFFF;
-      color: #0F4C81;
-      box-shadow: 0 4px 12px rgba(15,76,129,.08), inset 0 0 0 1px rgba(37,99,235,.12);
-    }
-
-    .difficulty-icon {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-    }
-    .difficulty-icon[data-color="green"] { background: #22C55E; }
-    .difficulty-icon[data-color="yellow"] { background: #EAB308; }
-    .difficulty-icon[data-color="red"] { background: #EF4444; }
-
-    .selected-count {
-      flex: 0 0 auto;
-      min-width: 22px;
-      height: 22px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(37,99,235,.15);
-      border-radius: 999px;
-      padding: 0 7px;
-      background: rgba(37,99,235,.08);
-      color: #0F4C81;
-      font-size: .72rem;
-      font-weight: 800;
     }
 
     .start-btn {
@@ -1632,19 +1575,15 @@
     }
 
     @media (max-width: 640px) {
-      .config-card > .config-header,
-      .config-card > .config-block,
-      .config-card > .config-start {
+      .config-card > .config-anim:first-child,
+      .config-card > .config-anim:not(:first-child) {
         padding-left: 18px;
         padding-right: 18px;
       }
-      .config-card > .config-header { padding-top: 22px; }
-      .config-card > .config-block { padding-top: 14px; padding-bottom: 14px; }
-      .config-card > .config-start { padding-bottom: 20px; }
-      .difficulty-grid { grid-template-columns: 1fr; gap: 6px; }
-      .difficulty-card { padding: 12px; }
-      .duration-grid { gap: 4px; }
-      .duration-btn { padding: 8px 12px; font-size: .82rem; }
+      .difficulty-card { padding: 14px; }
+      .difficulty-card .flex { gap: 10px; }
+      .difficulty-card .pr-20 { padding-right: 0; }
+      .duration-btn { padding: 10px 14px; font-size: .85rem; }
       .bubble-wrap { max-width: 90%; }
     }
 
