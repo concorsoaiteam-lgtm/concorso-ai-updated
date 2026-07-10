@@ -17,25 +17,9 @@
     body {
       min-height: 100vh;
       margin: 0;
-      background:
-        radial-gradient(circle at 12% -8%, rgba(37,99,235,.13), transparent 34rem),
-        radial-gradient(circle at 90% 4%, rgba(94,160,232,.12), transparent 30rem),
-        linear-gradient(180deg, #F7FBFF 0%, #FFFFFF 32%, #F7FBFF 100%);
+      background: #F7FBFF;
       color: var(--text);
       overflow-x: hidden;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-      background-image:
-        linear-gradient(rgba(15,76,129,.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(15,76,129,.045) 1px, transparent 1px);
-      background-size: 44px 44px;
-      mask-image: radial-gradient(circle at 50% 18%, black 0%, transparent 72%);
     }
 
     .text-gradient {
@@ -50,7 +34,7 @@
       animation: cardIn .5s ease-out both;
       background: rgba(255,255,255,.88);
       border: 1px solid rgba(214,232,255,.95);
-      box-shadow: 0 24px 70px rgba(15,76,129,.12);
+      box-shadow: 0 8px 32px rgba(15,76,129,.08);
       backdrop-filter: blur(18px);
     }
 
@@ -60,16 +44,14 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #0F4C81 0%, #2563EB 100%);
+      background: #0F4C81;
       color: #fff;
-      box-shadow: 0 16px 38px rgba(37,99,235,.22);
-      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, opacity .18s ease;
+      transition: background .18s ease, transform .18s ease, opacity .18s ease;
     }
 
     .btn-primary:hover:not(:disabled) {
-      transform: scale(1.02);
-      filter: saturate(1.06);
-      box-shadow: 0 0 0 4px rgba(37,99,235,.08), 0 20px 54px rgba(37,99,235,.30);
+      background: #0B3A63;
+      transform: translateY(-1px);
     }
 
     .btn-google {
@@ -111,7 +93,7 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .toast { position:fixed; bottom:24px; right:24px; z-index:100; padding:12px 18px; border-radius:14px; font-size:.875rem; font-weight:800; backdrop-filter:blur(12px); background:rgba(255,255,255,.92); box-shadow:0 24px 70px rgba(15,76,129,.16); }
+    .toast { position:fixed; bottom:24px; right:24px; z-index:100; padding:12px 18px; border-radius:14px; font-size:.875rem; font-weight:800; backdrop-filter:blur(12px); background:rgba(255,255,255,.92); box-shadow:0 8px 32px rgba(15,76,129,.12); }
     .toast-success { color:#16A34A; border:1px solid rgba(22,163,74,.22); }
     .toast-info { color:#0F4C81; border:1px solid rgba(214,232,255,.95); }
 

@@ -29,69 +29,13 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background:
-        radial-gradient(circle at 12% -8%, rgba(37,99,235,.13), transparent 34rem),
-        radial-gradient(circle at 90% 4%, rgba(94,160,232,.12), transparent 30rem),
-        linear-gradient(180deg, #F7FBFF 0%, #FFFFFF 32%, #F7FBFF 100%);
+      background: #F7FBFF;
       color: var(--text);
       font-family: Inter, ui-sans-serif, system-ui, sans-serif;
       overflow-x: hidden;
       position: relative;
       -webkit-font-smoothing: antialiased;
       text-rendering: geometricPrecision;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-      background-image:
-        linear-gradient(rgba(15,76,129,.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(15,76,129,.045) 1px, transparent 1px);
-      background-size: 44px 44px;
-      mask-image: radial-gradient(circle at 50% 18%, black 0%, transparent 72%);
-    }
-
-    .orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(110px);
-      opacity: .32;
-      pointer-events: none;
-      z-index: -1;
-      will-change: transform;
-    }
-
-    .orb-1 {
-      width: 540px;
-      height: 540px;
-      background: rgba(169,205,248,.72);
-      top: -16%;
-      left: -10%;
-      animation: orbFloat1 26s ease-in-out infinite;
-    }
-
-    .orb-2 {
-      width: 480px;
-      height: 480px;
-      background: rgba(37,99,235,.16);
-      bottom: -18%;
-      right: -10%;
-      animation: orbFloat2 32s ease-in-out infinite;
-    }
-
-    @keyframes orbFloat1 {
-      0%, 100% { transform: translate(0, 0); }
-      33% { transform: translate(70px, 42px); }
-      66% { transform: translate(-34px, 28px); }
-    }
-
-    @keyframes orbFloat2 {
-      0%, 100% { transform: translate(0, 0); }
-      33% { transform: translate(-58px, -34px); }
-      66% { transform: translate(46px, -58px); }
     }
 
     .noise {
@@ -156,7 +100,7 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      background: var(--accent-gradient);
+      background: #0F4C81;
       color: white;
       font-weight: 800;
       font-size: 1rem;
@@ -164,14 +108,12 @@
       border: none;
       border-radius: 16px;
       cursor: pointer;
-      box-shadow: 0 16px 38px rgba(37,99,235,.22);
-      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+      transition: background .18s ease, transform .18s ease;
       will-change: transform;
     }
 
     .btn-primary:hover {
-      filter: saturate(1.08);
-      box-shadow: 0 0 0 4px rgba(37,99,235,.08), 0 22px 60px rgba(37,99,235,.30);
+      background: #0B3A63;
     }
 
     .btn-primary:active { transform: scale(.98); }
@@ -665,7 +607,7 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       background: rgba(255,255,255,.92);
-      box-shadow: 0 24px 70px rgba(15,76,129,.16);
+      box-shadow: 0 8px 32px rgba(15,76,129,.10);
     }
 
     .toast-success { color: var(--success); border: 1px solid rgba(22,163,74,.22); }
@@ -690,7 +632,7 @@
       background: rgba(255,255,255,.88);
       border-radius: 20px;
       padding: 16px 18px;
-      box-shadow: 0 24px 70px rgba(15,76,129,.12);
+      box-shadow: 0 8px 32px rgba(15,76,129,.08);
       color: var(--text-secondary);
       font-size: .9rem;
       font-weight: 800;
@@ -755,7 +697,7 @@
       border-radius: 24px;
       border: 1px solid #A9CDF8;
       background: rgba(255,255,255,.96);
-      box-shadow: 0 24px 70px rgba(15,76,129,.12);
+      box-shadow: 0 8px 32px rgba(15,76,129,.08);
       padding: 32px;
       position: relative;
     }
@@ -830,7 +772,7 @@
       border: 1px solid #D6E8FF;
       border-radius: 18px;
       padding: 20px 22px;
-      box-shadow: 0 24px 70px rgba(15,76,129,.18);
+      box-shadow: 0 8px 32px rgba(15,76,129,.12);
       pointer-events: auto;
       cursor: pointer;
       animation: coachIn .4s cubic-bezier(.22,1,.36,1) both;
