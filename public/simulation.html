@@ -105,7 +105,7 @@
             </div>
           </button>
 
-          <button type="button" class="difficulty-card active" data-difficulty="Realistico">
+          <button type="button" class="difficulty-card" data-difficulty="Realistico">
             <span class="recommended-badge">Consigliato</span>
             <div class="flex items-start gap-3 pr-20">
               <span class="difficulty-icon"></span>
@@ -398,7 +398,7 @@
       : ['https://','xhifnparcouxsypkjcmn','.supabase.co'].join('');
     const SUPABASE_ANON_KEY = (typeof __SUPABASE_ANON_KEY !== 'undefined' && __SUPABASE_ANON_KEY)
       ? __SUPABASE_ANON_KEY
-      : ['sb_publishable_','dVYESGcHAV13d5aI1uC7wQ','_pQ0r1qT2'].join('');
+      : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
     const SUPABASE_KEY = SUPABASE_ANON_KEY;
     if (typeof __SUPABASE_URL === 'undefined' || !__SUPABASE_URL) {
       console.warn('[ConcorsoAI] SUPABASE_URL non configurata. Definisci __SUPABASE_URL e __SUPABASE_ANON_KEY globali per override.');
@@ -809,6 +809,7 @@
       // Quota check: chiama /api/quota prima di avviare
       try {
         var token = typeof window.__getCommAuthToken === 'function' ? window.__getCommAuthToken() : null;
+        if (!token) token = window.__concorsoToken || null;
         if (token) {
           var qres = await fetch('/api/quota', {
             method: 'GET',
@@ -1715,13 +1716,22 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
 
     function updateStartState() {
       const count = selectedBandi.length;
+      const diffChosen = document.querySelector('.difficulty-card.active');
       if (selectedBandiCount) selectedBandiCount.textContent = count === 1 ? '1 selezionato' : count + ' selezionati';
-      startButton.disabled = count === 0;
-      startButton.classList.toggle('ready', count > 0);
-      if (startLabel) startLabel.textContent = count === 0 ? 'Seleziona un bando per iniziare' : 'Inizia Simulazione';
-      if (startHelper) startHelper.textContent = count === 0 ? 'Appena scegli almeno un bando, la simulazione si sblocca.' : 'Pronto: useremo ' + (count === 1 ? 'questo bando' : count + ' bandi') + ' come base della simulazione.';
+      startButton.disabled = count === 0 || !diffChosen;
+      startButton.classList.toggle('ready', count > 0 && diffChosen);
+      if (startLabel) {
+        if (count === 0) startLabel.textContent = 'Seleziona un bando per iniziare';
+        else if (!diffChosen) startLabel.textContent = 'Scegli la difficoltà';
+        else startLabel.textContent = 'Inizia Simulazione';
+      }
+      if (startHelper) {
+        if (count === 0) startHelper.textContent = 'Appena scegli almeno un bando, la simulazione si sblocca.';
+        else if (!diffChosen) startHelper.textContent = 'Ora seleziona anche la difficoltà della simulazione.';
+        else startHelper.textContent = 'Pronto: useremo ' + (count === 1 ? 'questo bando' : count + ' bandi') + ' come base della simulazione.';
+      }
 
-      if (window.gsap && count > 0) {
+      if (window.gsap && count > 0 && diffChosen) {
         gsap.fromTo(startButton, { scale: 0.985 }, { scale: 1, duration: 0.28, ease: 'back.out(2)' });
       }
     }

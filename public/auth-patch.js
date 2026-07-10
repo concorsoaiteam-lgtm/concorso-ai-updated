@@ -50,21 +50,24 @@
   window.fetch = function (input, init) {
     try {
       var url = typeof input === 'string' ? input : (input && input.url);
-      if (url && url.indexOf('/api/chat') !== -1 && init && init.method === 'POST') {
-        // Aggiungi Authorization Bearer se mancante.
-        init.headers = init.headers || {};
-        var hasAuth = false;
-        if (init.headers instanceof Headers) {
-          hasAuth = !!init.headers.get('Authorization');
-          if (!hasAuth) {
-            var t = readStoredAccessToken();
-            if (t) init.headers.set('Authorization', 'Bearer ' + t);
-          }
-        } else {
-          hasAuth = !!init.headers['Authorization'] || !!init.headers['authorization'];
-          if (!hasAuth) {
-            var t = readStoredAccessToken();
-            if (t) init.headers['Authorization'] = 'Bearer ' + t;
+      if (url && init) {
+        var needsAuth = (url.indexOf('/api/chat') !== -1 && init.method === 'POST')
+                     || url.indexOf('/api/quota') !== -1;
+        if (needsAuth) {
+          init.headers = init.headers || {};
+          var hasAuth = false;
+          if (init.headers instanceof Headers) {
+            hasAuth = !!init.headers.get('Authorization');
+            if (!hasAuth) {
+              var t = readStoredAccessToken();
+              if (t) init.headers.set('Authorization', 'Bearer ' + t);
+            }
+          } else {
+            hasAuth = !!init.headers['Authorization'] || !!init.headers['authorization'];
+            if (!hasAuth) {
+              var t = readStoredAccessToken();
+              if (t) init.headers['Authorization'] = 'Bearer ' + t;
+            }
           }
         }
       }

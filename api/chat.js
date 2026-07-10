@@ -2,11 +2,8 @@
 // ConcorsoAI — Proxy serverless verso BluesMinds (v4)
 // ============================================================
 // Cambiamenti rispetto a v3:
-//   1) SUPABASE_ANON_KEY: aggiunto fallback hardcoded offuscato in
-//      stile simulation.html (chiave publishable per design Supabase,
-//      formato sb_publishable_*). Env var resta prioritaria (rotazione
-//      1-click da Vercel). Override della convenzione fail-closed
-//      originaria — decisione utente 07/07/2026.
+//   1) SUPABASE_ANON_KEY: fallback hardcoded con chiave reale.
+//      Env var resta prioritaria (rotazione 1-click da Vercel).
 // ============================================================
 // Cambiamenti rispetto a v2:
 //   1) Rispetta la preferenza di stream del client:
@@ -27,7 +24,7 @@ const crypto = require('crypto'); // TURNO 33: hash per log metric (no PII)
 function getSupabaseConfig() {
   const url = process.env.SUPABASE_URL || 'https://xhifnparcouxsypkjcmn.supabase.co';
   const anonKey = process.env.SUPABASE_ANON_KEY
-    || ['sb_publishable_','dVYESGcHAV13d5aI1uC7wQ','_pQ0r1qT2'].join('');
+    || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
   if (!process.env.SUPABASE_URL) {
     console.warn('[ConcorsoAI] SUPABASE_URL non configurata in process.env. Definisci SUPABASE_URL e SUPABASE_ANON_KEY per override.');
   }

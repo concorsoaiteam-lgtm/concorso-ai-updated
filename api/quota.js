@@ -13,14 +13,14 @@
 // Env vars richieste (fail-closed come api/chat.js):
 //   BLUESMINDS_API_KEY NON richiesta (questo endpoint non chiama AI)
 //   SUPABASE_URL          (se non presente fallback hardcoded)
-//   SUPABASE_ANON_KEY     (se non presente fallback hardcoded sb_publishable_*)
+//   SUPABASE_ANON_KEY     (se non presente fallback hardcoded)
 // ============================================================
 
 const { createClient } = require('@supabase/supabase-js');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xhifnparcouxsypkjcmn.supabase.co';
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY
-  || ['sb_publishable_', 'dVYESGcHAV13d5aI1uC7wQ', '_pQ0r1qT2'].join('');
+  || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
 
 const FREE_PLAN_QUOTA_MONTHLY = 3;
 

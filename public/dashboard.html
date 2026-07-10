@@ -79,18 +79,7 @@
       color: #475569 !important; /* slate-600 (grigio scuro, leggibile) */
     }
 
-    /* Item 17: fiamma piu grande + glow coerente con brand */
-    .streak-flame {
-      filter: drop-shadow(0 2px 6px rgba(249,115,22,.35));
-      transition: transform .25s cubic-bezier(.2,.8,.2,1);
-    }
-    .stat-card:hover .streak-flame {
-      transform: scale(1.08) rotate(-3deg);
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .streak-flame { transition: none; }
-      .stat-card:hover .streak-flame { transform: none; }
-    }
+    /* Streak icon — ereditato lo stile stat-icon blu */
 
     /* ====================================================
        Item 15: il tutorial wizard NON è al centro.
@@ -263,7 +252,7 @@
         </article>
         <article class="card stat-card">
           <div class="stat-icon">
-            <svg class="h-8 w-8 streak-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path fill="#F97316" stroke="#C2410C" stroke-linejoin="round" d="M12 2.5c1.5 2.5 4 5 4 9 0 3.5-2.5 6.5-4 7.5-1.5-1-4-4-4-7.5 0-1.7.7-3 1.4-4.2.4 1 .9 1.7 1.6 2 .4-2 0-4 1-6.8z"/><path fill="#FCD34D" d="M9 16.5c.5 1.5 1.7 2.5 3 3-2 .5-4-.5-4.5-2.5z" stroke="none"/></svg>
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.5c1.5 2.5 4 5 4 9 0 3.5-2.5 6.5-4 7.5-1.5-1-4-4-4-7.5 0-1.7.7-3 1.4-4.2.4 1 .9 1.7 1.6 2 .4-2 0-4 1-6.8z"/><path d="M9 16.5c.5 1.5 1.7 2.5 3 3-2 .5-4-.5-4.5-2.5z"/></svg>
           </div>
           <p class="stat-label">Streak</p>
           <p id="statStreak" class="stat-number skeleton skeleton-number" data-count="0" data-delay="0.2">0</p>
@@ -389,7 +378,7 @@
       : ['https://','xhifnparcouxsypkjcmn','.supabase.co'].join('');
     const SUPABASE_ANON_KEY = (typeof __SUPABASE_ANON_KEY !== 'undefined' && __SUPABASE_ANON_KEY)
       ? __SUPABASE_ANON_KEY
-      : ['sb_publishable_','dVYESGcHAV13d5aI1uC7wQ','_pQ0r1qT2'].join('');
+      : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
     const SUPABASE_KEY = SUPABASE_ANON_KEY;
     if (typeof __SUPABASE_URL === 'undefined' || !__SUPABASE_URL) {
       console.warn('[ConcorsoAI] SUPABASE_URL non configurata. Definisci __SUPABASE_URL e __SUPABASE_ANON_KEY globali per override.');
