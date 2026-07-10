@@ -141,11 +141,11 @@
         </div>
       </div>
 
-      <div class="config-anim mt-7">
-        <button id="startButton" type="button" class="start-btn btn-primary w-full" disabled><span class="start-label">Seleziona un bando per iniziare</span><svg class="inline-block h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></button>
-        <p id="startHelper" class="start-helper">Appena scegli almeno un bando, la simulazione si sblocca.</p>
-      </div>
     </section>
+    <div class="config-sticky-bar">
+      <button id="startButton" type="button" class="start-btn btn-primary w-full" disabled><span class="start-label">Seleziona un bando per iniziare</span><svg class="inline-block h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></button>
+      <p id="startHelper" class="start-helper">Appena scegli almeno un bando, la simulazione si sblocca.</p>
+    </div>
   </main>
 
   <main id="simulationPhase" class="sim-phase hidden">
@@ -610,7 +610,7 @@
         '.bando-section',
         '.difficulty-section',
         '.duration-section',
-        '.start-btn'
+        '.config-sticky-bar'
       ], {
         opacity: 0,
         y: 18,
