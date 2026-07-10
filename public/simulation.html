@@ -105,7 +105,7 @@
             </div>
           </button>
 
-          <button type="button" class="difficulty-card" data-difficulty="Realistico">
+          <button type="button" class="difficulty-card active" data-difficulty="Realistico">
             <span class="recommended-badge">Consigliato</span>
             <div class="flex items-start gap-3 pr-20">
               <span class="difficulty-icon"></span>
@@ -1716,22 +1716,13 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
 
     function updateStartState() {
       const count = selectedBandi.length;
-      const diffChosen = document.querySelector('.difficulty-card.active');
       if (selectedBandiCount) selectedBandiCount.textContent = count === 1 ? '1 selezionato' : count + ' selezionati';
-      startButton.disabled = count === 0 || !diffChosen;
-      startButton.classList.toggle('ready', count > 0 && diffChosen);
-      if (startLabel) {
-        if (count === 0) startLabel.textContent = 'Seleziona un bando per iniziare';
-        else if (!diffChosen) startLabel.textContent = 'Scegli la difficoltà';
-        else startLabel.textContent = 'Inizia Simulazione';
-      }
-      if (startHelper) {
-        if (count === 0) startHelper.textContent = 'Appena scegli almeno un bando, la simulazione si sblocca.';
-        else if (!diffChosen) startHelper.textContent = 'Ora seleziona anche la difficoltà della simulazione.';
-        else startHelper.textContent = 'Pronto: useremo ' + (count === 1 ? 'questo bando' : count + ' bandi') + ' come base della simulazione.';
-      }
+      startButton.disabled = count === 0;
+      startButton.classList.toggle('ready', count > 0);
+      if (startLabel) startLabel.textContent = count === 0 ? 'Seleziona un bando per iniziare' : 'Inizia Simulazione';
+      if (startHelper) startHelper.textContent = count === 0 ? 'Appena scegli almeno un bando, la simulazione si sblocca.' : 'Pronto: useremo ' + (count === 1 ? 'questo bando' : count + ' bandi') + ' come base della simulazione.';
 
-      if (window.gsap && count > 0 && diffChosen) {
+      if (window.gsap && count > 0) {
         gsap.fromTo(startButton, { scale: 0.985 }, { scale: 1, duration: 0.28, ease: 'back.out(2)' });
       }
     }
