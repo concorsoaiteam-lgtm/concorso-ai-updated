@@ -220,10 +220,9 @@ module.exports = async function handler(req, res) {
   let supabaseUser = null;
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: false },
-      global: { headers: { Authorization: 'Bearer ' + userJwt } }
+      auth: { persistSession: false }
     });
-    const { data, error } = await supabase.auth.getUser();
+    const { data, error } = await supabase.auth.getUser(userJwt);
     if (error || !data || !data.user) {
       logMetric('auth_fail', { reason: 'supabase_rejected' });
       return res.status(401).json({ error: 'Token non valido o scaduto' });

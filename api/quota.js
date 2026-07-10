@@ -45,10 +45,9 @@ module.exports = async function handler(req, res) {
   let supabaseUser = null;
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: false },
-      global: { headers: { Authorization: 'Bearer ' + jwt } }
+      auth: { persistSession: false }
     });
-    const { data, error } = await supabase.auth.getUser();
+    const { data, error } = await supabase.auth.getUser(jwt);
     if (error || !data || !data.user) {
       return res.status(401).json({ error: 'Token non valido' });
     }
