@@ -17,84 +17,119 @@
 // ============================================================
 
 const { createClient } = require('@supabase/supabase-js');
-const { WebSocket } = require('ws');
+
+function resolveAnonKey() {
+  return process.env.SUPABASE_ANON_KEY
+    || process.env.SUPABASE_KEY
+    || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
+}
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xhifnparcouxsypkjcmn.supabase.co';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY
-  || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
+const SUPABASE_ANON_KEY = resolveAnonKey();
 
 const FREE_PLAN_QUOTA_MONTHLY = 3;
+
+const CRITICAL_PROJECT_REF = process.env.SUPABASE_URL
+  ? new URL(process.env.SUPABASE_URL).hostname.split('.')[0]
+  : 'xhifnparcouxsypkjcmn';
 
 function getStartOfMonthUTC() {
   const now = new Date();
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0)).toISOString();
 }
 
+function extractProjectRefFromJwt(jwt) {
+  try {
+    const parts = jwt.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
+    return payload.ref || null;
+  } catch (_) { return null; }
+}
+
 module.exports = async function handler(req, res) {
-  if (req.method === 'OPTIONS') return res.status(204).end();
-  if (req.method !== 'POST' && req.method !== 'GET') {
-    return res.status(405).json({ error: 'Use GET or POST' });
-  }
-
-  const authHeader = req.headers.authorization || '';
-  const tokenMatch = authHeader.match(/^Bearer\s+(.+)$/i);
-  if (!tokenMatch) {
-    return res.status(401).json({ error: 'Token mancante' });
-  }
-  const jwt = tokenMatch[1].trim();
-
-  let supabaseUser = null;
   try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: false },
-      realtime: { transport: WebSocket }
-    });
-    const { data, error } = await supabase.auth.getUser(jwt);
-    if (error || !data || !data.user) {
-      return res.status(401).json({ error: 'Token non valido' });
+    // CORS preflight
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      return res.status(204).end();
     }
-    supabaseUser = data.user;
+    if (req.method !== 'POST' && req.method !== 'GET') {
+      return res.status(405).json({ error: 'Use GET or POST' });
+    }
+
+    const authHeader = req.headers.authorization || '';
+    const tokenMatch = authHeader.match(/^Bearer\s+(.+)$/i);
+    if (!tokenMatch) {
+      return res.status(401).json({ error: 'Token mancante' });
+    }
+    const jwt = tokenMatch[1].trim();
+
+    if (!SUPABASE_ANON_KEY) {
+      return res.status(500).json({ error: 'ERRORE_CONFIG', details: 'SUPABASE_ANON_KEY non configurata' });
+    }
+
+    let supabaseUser = null;
+    try {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { persistSession: false }
+      });
+      const { data, error } = await supabase.auth.getUser(jwt);
+      if (error || !data || !data.user) {
+        return res.status(401).json({ error: 'Token non valido' });
+      }
+      supabaseUser = data.user;
+    } catch (e) {
+      const msg = String(e && e.message || e);
+      console.error('[quota] auth error:', msg);
+      return res.status(401).json({ error: 'Auth fallita', details: msg });
+    }
+
+    const plan = (supabaseUser.user_metadata && supabaseUser.user_metadata.plan) || 'free';
+
+    if (plan !== 'free') {
+      return res.status(200).json({
+        plan,
+        quota: null,
+        used: 0,
+        remaining: null,
+        resetAt: null
+      });
+    }
+
+    try {
+      const supabase2 = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { persistSession: false },
+        global: { headers: { Authorization: 'Bearer ' + jwt } }
+      });
+      const since = getStartOfMonthUTC();
+      const { count, error } = await supabase2
+        .from('simulazioni')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', supabaseUser.id)
+        .gte('created_at', since);
+
+      if (error) throw error;
+      const used = count || 0;
+      const remaining = Math.max(0, FREE_PLAN_QUOTA_MONTHLY - used);
+
+      return res.status(200).json({
+        plan,
+        quota: FREE_PLAN_QUOTA_MONTHLY,
+        used,
+        remaining,
+        resetAt: new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, 1)).toISOString()
+      });
+    } catch (e) {
+      const msg = String(e && e.message || e);
+      console.error('[quota] db error:', msg);
+      return res.status(500).json({ error: 'Errore conteggio quota', details: msg });
+    }
   } catch (e) {
-    return res.status(401).json({ error: 'Auth fallita', details: String(e && e.message || e) });
-  }
-
-  const plan = (supabaseUser.user_metadata && supabaseUser.user_metadata.plan) || 'free';
-
-  if (plan !== 'free') {
-    return res.status(200).json({
-      plan,
-      quota: null, // null = illimitato
-      used: 0,
-      remaining: null,
-      resetAt: null
-    });
-  }
-
-  try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: false },
-      global: { headers: { Authorization: 'Bearer ' + jwt } },
-      realtime: { transport: WebSocket }
-    });
-    const since = getStartOfMonthUTC();
-    const { count, error } = await supabase
-      .from('simulazioni')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', supabaseUser.id)
-      .gte('created_at', since);
-
-    if (error) throw error;
-    const used = count || 0;
-    const remaining = Math.max(0, FREE_PLAN_QUOTA_MONTHLY - used);
-
-    return res.status(200).json({
-      plan,
-      quota: FREE_PLAN_QUOTA_MONTHLY,
-      used,
-      remaining,
-      resetAt: new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, 1)).toISOString()
-    });
-  } catch (e) {
-    return res.status(500).json({ error: 'Errore conteggio quota', details: String(e && e.message || e) });
+    const msg = String(e && e.message || e);
+    console.error('[quota] unhandled error:', msg);
+    return res.status(500).json({ error: 'Errore interno server', details: msg });
   }
 };

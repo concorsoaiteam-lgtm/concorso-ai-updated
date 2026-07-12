@@ -12,10 +12,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-  <!-- Tailwind CSS via CDN -->
+  <!-- ===================================================
+       Tailwind + Supabase: ordine deterministico
+       =================================================== -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-
   <script>
     tailwind.config = {
       theme: {
@@ -43,6 +43,15 @@
         }
       }
     }
+  </script>
+
+  <!-- Supabase credentials: definite PRIMA di createClient per
+       evitare il warning "SUPABASE_URL non configurata".
+       Questi valori devono corrispondere a SUPABASE_URL e
+       SUPABASE_ANON_KEY configurati su Vercel (env vars). -->
+  <script>
+    window.__SUPABASE_URL = window.__SUPABASE_URL || 'https://xhifnparcouxsypkjcmn.supabase.co';
+    window.__SUPABASE_ANON_KEY = window.__SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
   </script>
 
   <!-- Supabase + GSAP -->

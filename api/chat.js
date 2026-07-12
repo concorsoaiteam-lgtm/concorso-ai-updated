@@ -18,14 +18,17 @@
 // ============================================================
 
 const { createClient } = require('@supabase/supabase-js');
-const { WebSocket } = require('ws');
 const crypto = require('crypto'); // TURNO 33: hash per log metric (no PII)
 
-// --- Config (fail-closed: nessun fallback hardcoded) ---
+// --- Config: accetta SUPABASE_ANON_KEY o SUPABASE_KEY come env var ---
+function resolveAnonKey() {
+  return process.env.SUPABASE_ANON_KEY
+    || process.env.SUPABASE_KEY
+    || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
+}
 function getSupabaseConfig() {
   const url = process.env.SUPABASE_URL || 'https://xhifnparcouxsypkjcmn.supabase.co';
-  const anonKey = process.env.SUPABASE_ANON_KEY
-    || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
+  const anonKey = resolveAnonKey();
   if (!process.env.SUPABASE_URL) {
     console.warn('[ConcorsoAI] SUPABASE_URL non configurata in process.env. Definisci SUPABASE_URL e SUPABASE_ANON_KEY per override.');
   }
@@ -187,6 +190,18 @@ function getClientIp(req) {
 // Handler principale (v3: dual-mode)
 // ============================================================
 module.exports = async function handler(req, res) {
+  try {
+    return await handleRequest(req, res);
+  } catch (e) {
+    const msg = String(e && e.message || e);
+    console.error('[chat] unhandled error:', msg);
+    if (!res.headersSent) {
+      try { return res.status(500).json({ error: 'Errore interno server', details: msg }); } catch (_) { /* niente */ }
+    }
+  }
+};
+
+async function handleRequest(req, res) {
   setCorsHeaders(req, res);
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -221,8 +236,7 @@ module.exports = async function handler(req, res) {
   let supabaseUser = null;
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: false },
-      realtime: { transport: WebSocket }
+      auth: { persistSession: false }
     });
     const { data, error } = await supabase.auth.getUser(userJwt);
     if (error || !data || !data.user) {
@@ -231,8 +245,6 @@ module.exports = async function handler(req, res) {
     }
     supabaseUser = data.user;
   } catch (authErr) {
-    // TURNO 34: sanitize err message per evitare PII leak (Supabase error
-    // puó contenere email o user_id). Logga solo il tipo di errore.
     const errType = (authErr && (authErr.name || authErr.code)) || 'unknown';
     logMetric('auth_fail', { reason: 'supabase_throw', errType: errType });
     return res.status(401).json({ error: 'Verifica auth fallita' });
@@ -282,11 +294,6 @@ module.exports = async function handler(req, res) {
   }
 
   // 6) Decide modalita: stream vs buffer
-  // Default: stream=true (consigliato, typewriter UX migliore).
-  // Se il client esplicitamente chiede stream=false (vecchio client),
-  // bufferizziamo l'output di BluesMinds in un JSON unico.
-  // Default legacy non-stream per backward compat con chiamaCommissario esistente.
-  // Solo client espliciti (chiamaCommissarioStream) mandano stream:true per SSE.
   const wantsStream = req.body.stream === true;
 
   // 7) Forward verso BluesMinds
@@ -328,7 +335,6 @@ module.exports = async function handler(req, res) {
   if (!wantsStream) {
     try {
       const finalContent = await bufferSseStreamToContent(upstream.body, controller, timeoutId);
-      // Sintetizza risposta OpenAI-compatibile (identica al vero upstream JSON)
       return res.status(200).json({
         id: 'chatcmpl-buffered-' + Date.now(),
         object: 'chat.completion',
