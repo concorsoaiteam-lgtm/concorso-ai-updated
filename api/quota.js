@@ -17,6 +17,7 @@
 // ============================================================
 
 const { createClient } = require('@supabase/supabase-js');
+const { WebSocket } = require('ws');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xhifnparcouxsypkjcmn.supabase.co';
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY
@@ -45,7 +46,8 @@ module.exports = async function handler(req, res) {
   let supabaseUser = null;
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: false }
+      auth: { persistSession: false },
+      realtime: { transport: WebSocket }
     });
     const { data, error } = await supabase.auth.getUser(jwt);
     if (error || !data || !data.user) {
@@ -71,7 +73,8 @@ module.exports = async function handler(req, res) {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: false },
-      global: { headers: { Authorization: 'Bearer ' + jwt } }
+      global: { headers: { Authorization: 'Bearer ' + jwt } },
+      realtime: { transport: WebSocket }
     });
     const since = getStartOfMonthUTC();
     const { count, error } = await supabase

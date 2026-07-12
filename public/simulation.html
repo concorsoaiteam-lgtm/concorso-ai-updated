@@ -898,17 +898,10 @@
       const onError = callbacks && callbacks.onError;
 
       // 1) Token Supabase — richiesto dal backend per Fase 1 sicurezza
-      let token = null;
-      try {
-        if (supabaseClient && supabaseClient.auth && supabaseClient.auth.getSession) {
-          const sessionData = await supabaseClient.auth.getSession();
-          token = sessionData && sessionData.data && sessionData.data.session && sessionData.data.session.access_token;
-        }
-      } catch (_) { /* fallthrough, 401 dal server */ }
-
-      if (!token) {
-        token = window.__concorsoToken || null;
-      }
+      // NOTA: NON chiamiamo supabaseClient.auth.getSession() perché innesca
+      // il refresh automatico di Supabase SDK, che in caso di fallimento
+      // cancella la sessione da localStorage. Leggiamo direttamente da lì.
+      let token = window.__concorsoToken || null;
 
       if (!token) {
         try {
@@ -1188,17 +1181,10 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
     async function chiamaCommissario(messaggi, config) {
       const systemPrompt = buildSystemPrompt(config);
 
-      let token = null;
-      try {
-        if (supabaseClient && supabaseClient.auth && supabaseClient.auth.getSession) {
-          const sessionData = await supabaseClient.auth.getSession();
-          token = sessionData && sessionData.data && sessionData.data.session && sessionData.data.session.access_token;
-        }
-      } catch (_) {}
-
-      if (!token) {
-        token = window.__concorsoToken || null;
-      }
+      // NOTA: NON chiamiamo supabaseClient.auth.getSession() (stessa logica
+      // di chiamaCommissarioStream) per evitare che Supabase SDK cancelli
+      // la sessione da localStorage durante un refresh fallito.
+      let token = window.__concorsoToken || null;
 
       if (!token) {
         try {
@@ -1850,9 +1836,21 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
 
         currentUser = user;
 
+        // Legge il token da localStorage invece di chiamare getSession()
+        // per evitare che Supabase SDK cancelli la sessione durante un
+        // refresh automatico fallito (getSession() innesca il refresh).
         try {
-          const { data: { session } } = await supabaseClient.auth.getSession();
-          if (session?.access_token) window.__concorsoToken = session.access_token;
+          for (var i = 0; i < localStorage.length; i++) {
+            var k = localStorage.key(i);
+            if (k && /^sb-[a-z0-9]+-auth-token$/.test(k)) {
+              var raw = localStorage.getItem(k);
+              if (raw) {
+                var parsed = JSON.parse(raw);
+                var t = parsed && parsed.access_token;
+                if (typeof t === 'string' && t.length > 20) { window.__concorsoToken = t; break; }
+              }
+            }
+          }
         } catch (_) {}
 
         initAmbientMotion();

@@ -18,6 +18,7 @@
 // ============================================================
 
 const { createClient } = require('@supabase/supabase-js');
+const { WebSocket } = require('ws');
 const crypto = require('crypto'); // TURNO 33: hash per log metric (no PII)
 
 // --- Config (fail-closed: nessun fallback hardcoded) ---
@@ -220,7 +221,8 @@ module.exports = async function handler(req, res) {
   let supabaseUser = null;
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: false }
+      auth: { persistSession: false },
+      realtime: { transport: WebSocket }
     });
     const { data, error } = await supabase.auth.getUser(userJwt);
     if (error || !data || !data.user) {
