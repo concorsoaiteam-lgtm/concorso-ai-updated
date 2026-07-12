@@ -304,13 +304,16 @@ async function handleRequest(req, res) {
     });
   }
 
-  // 4) API key BluesMinds
-  const apiKey = process.env.BLUESMINDS_API_KEY;
-  if (!apiKey) {
-    logMetric('config_error', { reason: 'bluesminds_api_key_missing' });
+  // 4) API key BluesMinds — log dettagliato
+  const rawKey = String(process.env.BLUESMINDS_API_KEY || '');
+  const apiKey = rawKey.trim();
+  console.log('[chat] BLUESMINDS_API_KEY raw length:', rawKey.length, '| trimmed length:', apiKey.length, '| trimmed === raw:', (apiKey === rawKey), '| prefix:', apiKey.slice(0, 6) + '...');
+  if (!apiKey || apiKey.length < 10) {
+    console.error('[chat] BLUESMINDS_API_KEY non valida:', { rawLength: rawKey.length, trimmedLength: apiKey.length });
+    logMetric('config_error', { reason: 'bluesminds_api_key_invalid' });
     return res.status(500).json({
       error: 'Configurazione server incompleta',
-      details: 'Variabile BLUESMINDS_API_KEY mancante su Vercel'
+      details: 'BLUESMINDS_API_KEY mancante o troppo corta su Vercel (lunghezza: ' + apiKey.length + ')'
     });
   }
 
@@ -329,34 +332,48 @@ async function handleRequest(req, res) {
   const controller = new AbortController();
   const timeoutId = setTimeout(function () { controller.abort(); }, UPSTREAM_TIMEOUT_MS);
   let upstream;
+  var tStart = Date.now();
+  console.log('[chat] BluesMinds fetch START at', new Date(tStart).toISOString(), '| timeout ms:', UPSTREAM_TIMEOUT_MS, '| url:', BLUESMINDS_URL, '| model:', FIXED_MODEL, '| messages:', (req.body.messages || []).length);
   try {
     upstream = await fetch(BLUESMINDS_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiKey.trim()
+        'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify(forwardBody),
       signal: controller.signal
     });
+    var tElapsed = Date.now() - tStart;
+    console.log('[chat] BluesMinds fetch END at', new Date().toISOString(), '| status:', upstream.status, '| elapsed ms:', tElapsed);
   } catch (fetchErr) {
     clearTimeout(timeoutId);
-    if (fetchErr && fetchErr.name === 'AbortError') {
-      logMetric('upstream_timeout', { userId: hashUserId(supabaseUser.id) });
-      return res.status(504).json({ error: 'Timeout upstream', details: 'BluesMinds non ha risposto entro ' + (UPSTREAM_TIMEOUT_MS / 1000) + 's' });
+    var tElapsedCatch = Date.now() - tStart;
+    var errName = (fetchErr && (fetchErr.name || fetchErr.code)) || 'unknown';
+    var errMsg = fetchErr ? (fetchErr.message || String(fetchErr)) : 'fetchErr era null';
+    console.error('[chat] BluesMinds fetch THREW after', tElapsedCatch + 'ms | name:', errName, '| message:', errMsg);
+    if (fetchErr && fetchErr.cause) {
+      console.error('[chat] BluesMinds fetch CAUSE:', String(fetchErr.cause));
     }
-    logMetric('upstream_fetch_fail', { userId: hashUserId(supabaseUser.id), errType: (fetchErr && (fetchErr.name || fetchErr.code)) || 'unknown' });
-    return res.status(502).json({ error: 'Fetch upstream fallita', details: fetchErr.message || String(fetchErr) });
+    if (fetchErr && errName === 'AbortError') {
+      logMetric('upstream_timeout', { userId: hashUserId(supabaseUser.id), elapsedMs: tElapsedCatch });
+      return res.status(504).json({ error: 'Timeout upstream', details: 'BluesMinds non ha risposto entro ' + (UPSTREAM_TIMEOUT_MS / 1000) + 's', elapsedMs: tElapsedCatch });
+    }
+    logMetric('upstream_fetch_fail', { userId: hashUserId(supabaseUser.id), errType: errName, elapsedMs: tElapsedCatch });
+    return res.status(502).json({ error: 'Fetch upstream fallita', details: errMsg, errType: errName, elapsedMs: tElapsedCatch });
   }
 
   if (!upstream.ok) {
     clearTimeout(timeoutId);
+    var tElapsedStatus = Date.now() - tStart;
     let errBody;
-    try { errBody = await upstream.json(); } catch (_) {
-      try { errBody = { error: await upstream.text() }; } catch (__) { errBody = {}; }
-    }
-    logMetric('upstream_status_error', { userId: hashUserId(supabaseUser.id), status: upstream.status });
-    return res.status(upstream.status).json({ error: 'Upstream error', details: errBody });
+    // Prima prova a leggere il body come testo, poi tenta JSON.parse
+    var rawBody;
+    try { rawBody = await upstream.text(); } catch (_) { rawBody = '(body non leggibile)'; }
+    try { errBody = JSON.parse(rawBody); } catch (_) { errBody = { raw_text: rawBody.slice(0, 2000) }; }
+    console.error('[chat] BluesMinds NON-OK status:', upstream.status, '| elapsed ms:', tElapsedStatus, '| response body:', JSON.stringify(errBody).slice(0, 1000));
+    logMetric('upstream_status_error', { userId: hashUserId(supabaseUser.id), status: upstream.status, elapsedMs: tElapsedStatus });
+    return res.status(upstream.status).json({ error: 'Upstream error', upstream_status: upstream.status, upstream_body: errBody });
   }
 
   // 8) MODALITA NON-STREAM (legacy client): bufferizza SSE upstream in JSON
