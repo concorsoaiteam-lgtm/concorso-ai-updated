@@ -139,6 +139,7 @@ module.exports = async function handler(req, res) {
         global: { headers: { Authorization: 'Bearer ' + jwt } }
       });
       const since = getStartOfMonthUTC();
+      console.log('[quota] query params | user_id:', supabaseUser.id, '| since:', since, '| plan:', plan);
       const { count, error } = await supabase2
         .from('simulazioni')
         .select('id', { count: 'exact', head: true })
@@ -157,9 +158,24 @@ module.exports = async function handler(req, res) {
         resetAt: new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, 1)).toISOString()
       });
     } catch (e) {
-      const msg = String(e && e.message || e);
-      console.error('[quota] db error:', msg);
-      return res.status(500).json({ error: 'Errore conteggio quota', details: msg });
+      // Log the FULL Supabase error object (code, message, details, hint)
+      var errCode = e && (e.code || e.status);
+      var errMsg = e && (e.message || String(e));
+      var errDetails = e && e.details;
+      var errHint = e && e.hint;
+      console.error('[quota] db error:', JSON.stringify({ code: errCode, message: errMsg, details: errDetails, hint: errHint }));
+      // Fallback gracefully: se la query fallisce (tabella mancante, RLS, colonna errata),
+      // non blocchiamo l'utente — restituiamo quota default (free → 3 rimanenti).
+      console.warn('[quota] db query fallita — return quota default di fallback');
+      return res.status(200).json({
+        plan: 'free',
+        quota: FREE_PLAN_QUOTA_MONTHLY,
+        used: 0,
+        remaining: FREE_PLAN_QUOTA_MONTHLY,
+        resetAt: new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, 1)).toISOString(),
+        quota_warning: true,
+        quota_error_details: { code: errCode, message: errMsg, details: errDetails, hint: errHint }
+      });
     }
   } catch (e) {
     const msg = String(e && e.message || e);

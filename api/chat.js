@@ -327,59 +327,116 @@ async function handleRequest(req, res) {
   // 6) Decide modalita: stream vs buffer
   const wantsStream = req.body.stream === true;
 
-  // 7) Forward verso BluesMinds
+  // 7) Forward verso BluesMinds — retry 3x su 503/throw (backoff esponenziale)
   const forwardBody = { ...req.body, model: FIXED_MODEL, stream: true };
-  const controller = new AbortController();
-  const timeoutId = setTimeout(function () { controller.abort(); }, UPSTREAM_TIMEOUT_MS);
-  let upstream;
-  var tStart = Date.now();
-  console.log('[chat] BluesMinds fetch START at', new Date(tStart).toISOString(), '| timeout ms:', UPSTREAM_TIMEOUT_MS, '| url:', BLUESMINDS_URL, '| model:', FIXED_MODEL, '| messages:', (req.body.messages || []).length);
-  try {
-    upstream = await fetch(BLUESMINDS_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiKey
-      },
-      body: JSON.stringify(forwardBody),
-      signal: controller.signal
-    });
-    var tElapsed = Date.now() - tStart;
-    console.log('[chat] BluesMinds fetch END at', new Date().toISOString(), '| status:', upstream.status, '| elapsed ms:', tElapsed);
-  } catch (fetchErr) {
-    clearTimeout(timeoutId);
-    var tElapsedCatch = Date.now() - tStart;
-    var errName = (fetchErr && (fetchErr.name || fetchErr.code)) || 'unknown';
-    var errMsg = fetchErr ? (fetchErr.message || String(fetchErr)) : 'fetchErr era null';
-    console.error('[chat] BluesMinds fetch THREW after', tElapsedCatch + 'ms | name:', errName, '| message:', errMsg);
-    if (fetchErr && fetchErr.cause) {
-      console.error('[chat] BluesMinds fetch CAUSE:', String(fetchErr.cause));
+  var MAX_RETRIES = 3;
+  function backoffMs(attempt) { return 1000 * Math.pow(2, attempt - 1); } // 1s, 2s, 4s
+  var overallStart = Date.now();
+  let upstream = null;
+  var lastRetryableErr = null;
+  var attemptsMade = 0;
+  // Dichiarati fuori dal loop così sono visibili dopo (sezioni 8 e 9)
+  var activeController = null;
+  var activeTimeoutId = null;
+
+  for (var attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    attemptsMade = attempt;
+    var ctrl = new AbortController();
+    var tId = setTimeout(function () { ctrl.abort(); }, UPSTREAM_TIMEOUT_MS);
+    activeController = ctrl;
+    activeTimeoutId = tId;
+    var tStart = Date.now();
+    console.log('[chat] BluesMinds attempt ' + attempt + '/' + MAX_RETRIES + ' at', new Date(tStart).toISOString(), '| messages:', (req.body.messages || []).length);
+
+    try {
+      upstream = await fetch(BLUESMINDS_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + apiKey
+        },
+        body: JSON.stringify(forwardBody),
+        signal: ctrl.signal
+      });
+      var tElapsed = Date.now() - tStart;
+      console.log('[chat] BluesMinds attempt ' + attempt + ' status:', upstream.status, '| elapsed ms:', tElapsed);
+
+      if (upstream.ok) {
+        // SUCCESSO — esce dal loop
+        clearTimeout(tId);
+        break;
+      }
+
+      // Non-ok: distingue 503 (retryable) dagli altri (fail immediato)
+      if (upstream.status === 503) {
+        var rawBody503;
+        try { rawBody503 = await upstream.text(); } catch (_) { rawBody503 = '(unreadable)'; }
+        lastRetryableErr = { status: 503, body: rawBody503, elapsedMs: tElapsed };
+        if (attempt < MAX_RETRIES) {
+          console.warn('[chat] BluesMinds 503 attempt ' + attempt + ' — retrying in ' + backoffMs(attempt) + 'ms | body:', rawBody503.slice(0, 300));
+          clearTimeout(tId);
+          await new Promise(function (r) { setTimeout(r, backoffMs(attempt)); });
+          continue;
+        }
+        // Ultimo tentativo: esce dal loop verso exhausted handler
+        console.warn('[chat] BluesMinds 503 attempt ' + attempt + '/' + MAX_RETRIES + ' — exhausted');
+        clearTimeout(tId);
+        break;
+      }
+
+      // Non-retryable (400, 401, 429, 500, ...) — fail subito
+      clearTimeout(tId);
+      var rawBodyFail;
+      try { rawBodyFail = await upstream.text(); } catch (_) { rawBodyFail = '(unreadable)'; }
+      var parsedFail;
+      try { parsedFail = JSON.parse(rawBodyFail); } catch (_) { parsedFail = { raw_text: rawBodyFail.slice(0, 2000) }; }
+      console.error('[chat] BluesMinds NON-RETRYABLE status:', upstream.status, '| elapsed ms:', tElapsed, '| body:', JSON.stringify(parsedFail).slice(0, 1000));
+      logMetric('upstream_status_error', { userId: hashUserId(supabaseUser.id), status: upstream.status, elapsedMs: tElapsed });
+      return res.status(upstream.status).json({ error: 'Upstream error', upstream_status: upstream.status, upstream_body: parsedFail });
+
+    } catch (fetchErr) {
+      clearTimeout(tId);
+      var tCatch = Date.now() - tStart;
+      var errName = (fetchErr && (fetchErr.name || fetchErr.code)) || 'unknown';
+      var errMsg = fetchErr ? (fetchErr.message || String(fetchErr)) : 'null';
+
+      if (errName === 'AbortError') {
+        console.warn('[chat] BluesMinds timeout attempt ' + attempt + ' after ' + tCatch + 'ms' + (attempt < MAX_RETRIES ? ' — retrying' : ''));
+        lastRetryableErr = { name: 'AbortError', message: errMsg, elapsedMs: tCatch };
+        if (attempt < MAX_RETRIES) {
+          await new Promise(function (r) { setTimeout(r, backoffMs(attempt)); });
+          continue;
+        }
+        logMetric('upstream_timeout', { userId: hashUserId(supabaseUser.id), elapsedMs: tCatch, attempts: attempt });
+        return res.status(504).json({ error: 'Timeout upstream', details: 'BluesMinds non ha risposto entro ' + (UPSTREAM_TIMEOUT_MS / 1000) + 's dopo ' + attempt + ' tentativi', elapsedMs: tCatch, attempts: attempt });
+      }
+
+      // Errore di rete — retry
+      console.error('[chat] BluesMinds fetch error attempt ' + attempt + ':', errMsg, attempt < MAX_RETRIES ? '— retrying' : '');
+      if (fetchErr && fetchErr.cause) {
+        console.error('[chat] BluesMinds fetch CAUSE:', String(fetchErr.cause));
+      }
+      lastRetryableErr = { name: errName, message: errMsg, elapsedMs: tCatch, cause: fetchErr && String(fetchErr.cause) };
+      if (attempt < MAX_RETRIES) {
+        await new Promise(function (r) { setTimeout(r, backoffMs(attempt)); });
+        continue;
+      }
+      logMetric('upstream_fetch_fail', { userId: hashUserId(supabaseUser.id), errType: errName, elapsedMs: tCatch, attempts: attempt });
+      return res.status(502).json({ error: 'Fetch upstream fallita', details: errMsg, errType: errName, elapsedMs: tCatch, attempts: attempt });
     }
-    if (fetchErr && errName === 'AbortError') {
-      logMetric('upstream_timeout', { userId: hashUserId(supabaseUser.id), elapsedMs: tElapsedCatch });
-      return res.status(504).json({ error: 'Timeout upstream', details: 'BluesMinds non ha risposto entro ' + (UPSTREAM_TIMEOUT_MS / 1000) + 's', elapsedMs: tElapsedCatch });
-    }
-    logMetric('upstream_fetch_fail', { userId: hashUserId(supabaseUser.id), errType: errName, elapsedMs: tElapsedCatch });
-    return res.status(502).json({ error: 'Fetch upstream fallita', details: errMsg, errType: errName, elapsedMs: tElapsedCatch });
   }
 
-  if (!upstream.ok) {
-    clearTimeout(timeoutId);
-    var tElapsedStatus = Date.now() - tStart;
-    let errBody;
-    // Prima prova a leggere il body come testo, poi tenta JSON.parse
-    var rawBody;
-    try { rawBody = await upstream.text(); } catch (_) { rawBody = '(body non leggibile)'; }
-    try { errBody = JSON.parse(rawBody); } catch (_) { errBody = { raw_text: rawBody.slice(0, 2000) }; }
-    console.error('[chat] BluesMinds NON-OK status:', upstream.status, '| elapsed ms:', tElapsedStatus, '| response body:', JSON.stringify(errBody).slice(0, 1000));
-    logMetric('upstream_status_error', { userId: hashUserId(supabaseUser.id), status: upstream.status, elapsedMs: tElapsedStatus });
-    return res.status(upstream.status).json({ error: 'Upstream error', upstream_status: upstream.status, upstream_body: errBody });
+  // Se arriviamo qui senza upstream.ok, ultimo errore era 503 esaurito
+  if (!upstream || !upstream.ok) {
+    console.error('[chat] BluesMinds tutti i tentativi falliti — lastRetryableErr:', lastRetryableErr ? JSON.stringify(lastRetryableErr).slice(0, 500) : 'null');
+    logMetric('upstream_retries_exhausted', { userId: hashUserId(supabaseUser.id), attempts: attemptsMade, overallMs: Date.now() - overallStart });
+    return res.status(503).json({ error: 'Servizio di generazione temporaneamente sovraccarico', details: 'I server AI non rispondono dopo ' + attemptsMade + ' tentativi. Riprova tra qualche istante.', attempts: attemptsMade });
   }
 
   // 8) MODALITA NON-STREAM (legacy client): bufferizza SSE upstream in JSON
   if (!wantsStream) {
     try {
-      const finalContent = await bufferSseStreamToContent(upstream.body, controller, timeoutId);
+      const finalContent = await bufferSseStreamToContent(upstream.body, activeController, activeTimeoutId);
       return res.status(200).json({
         id: 'chatcmpl-buffered-' + Date.now(),
         object: 'chat.completion',
@@ -393,7 +450,7 @@ async function handleRequest(req, res) {
         usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }
       });
     } catch (bufErr) {
-      clearTimeout(timeoutId);
+      clearTimeout(activeTimeoutId);
       if (bufErr && bufErr.name === 'AbortError') {
         return res.status(504).json({ error: 'Timeout upstream (buffer mode)' });
       }
@@ -428,12 +485,12 @@ async function handleRequest(req, res) {
       }
     } finally {
       clearInterval(heartbeat);
-      clearTimeout(timeoutId);
+      clearTimeout(activeTimeoutId);
       reader.releaseLock();
     }
     if (!res.writableEnded) res.end();
   } catch (pipeErr) {
-    clearTimeout(timeoutId);
+    clearTimeout(activeTimeoutId);
     try {
       if (!res.writableEnded) {
         const errPayload = JSON.stringify({ error: 'Stream interrotto', details: (pipeErr && pipeErr.message) || String(pipeErr) });

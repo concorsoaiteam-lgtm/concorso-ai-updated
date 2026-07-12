@@ -1305,7 +1305,7 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
           403: 'Accesso negato — contatta il supporto',
           429: 'Troppe richieste — attendi qualche secondo e riprova',
           502: 'BluesMinds non risponde — riprova tra poco',
-          503: 'Servizio temporaneamente non disponibile'
+          503: 'I server di generazione sono sovraccarichi — riprova tra qualche istante'
         };
         showToast(statusErrors[response.status] || ('Errore ' + response.status + ': ' + (data.error || 'risposta non valida')), 'error');
         return '';
