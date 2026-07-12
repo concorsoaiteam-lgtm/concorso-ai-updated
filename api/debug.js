@@ -29,6 +29,10 @@ module.exports = async function handler(req, res) {
     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ? 'SET (' + process.env.SUPABASE_ANON_KEY.length + ' chars)' : 'NOT SET',
     SUPABASE_KEY: process.env.SUPABASE_KEY ? 'SET (' + process.env.SUPABASE_KEY.length + ' chars)' : 'NOT SET',
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET (' + process.env.SUPABASE_SERVICE_ROLE_KEY.length + ' chars)' : 'NOT SET',
+    AI_API_URL: process.env.AI_API_URL || 'NOT SET (default: https://openrouter.ai/api/v1/chat/completions)',
+    AI_MODEL: process.env.AI_MODEL || 'NOT SET (default: deepseek/deepseek-chat)',
+    AI_API_KEY: process.env.AI_API_KEY ? 'SET (' + process.env.AI_API_KEY.length + ' chars)' : 'NOT SET (checking BLUESMINDS_API_KEY...)',
+    BLUESMINDS_API_KEY: process.env.BLUESMINDS_API_KEY ? 'SET (' + process.env.BLUESMINDS_API_KEY.length + ' chars)' : 'NOT SET',
   };
 
   var result = {

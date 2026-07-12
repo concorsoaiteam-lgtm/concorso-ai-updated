@@ -59,9 +59,13 @@ function resolveSupabaseUrl() {
 
 const SUPABASE_URL = resolveSupabaseUrl();
 const SUPABASE_ANON_KEY = resolveAnonKey();
-const BLUESMINDS_URL = 'https://api.bluesminds.com/v1/chat/completions';
+// Provider AI configurabile via env var (default: OpenRouter OpenAI-compatible API)
+const AI_API_URL = process.env.AI_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
+const AI_MODEL = process.env.AI_MODEL || 'deepseek/deepseek-chat';
+const AI_REFERRER = process.env.AI_REFERRER || 'https://concorso-ai.vercel.app';
+const AI_TITLE = process.env.AI_TITLE || 'ConcorsoAI';
 const UPSTREAM_TIMEOUT_MS = 30000;
-const FIXED_MODEL = 'deepseek-v4-flash';
+const FIXED_MODEL = AI_MODEL;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_PER_WINDOW = 30; // per IP (uno IP puó essere molti utenti dietro NAT)
 const RATE_LIMIT_MAX_PER_WINDOW_PER_USER = 60; // TURNO 31: per user (piú generoso del per-IP)
@@ -304,16 +308,17 @@ async function handleRequest(req, res) {
     });
   }
 
-  // 4) API key BluesMinds — log dettagliato
-  const rawKey = String(process.env.BLUESMINDS_API_KEY || '');
+  // 4) API key AI — controlla AI_API_KEY prima, poi BLUESMINDS_API_KEY (fallback)
+  const rawKey = String(process.env.AI_API_KEY || process.env.BLUESMINDS_API_KEY || '');
   const apiKey = rawKey.trim();
-  console.log('[chat] BLUESMINDS_API_KEY raw length:', rawKey.length, '| trimmed length:', apiKey.length, '| trimmed === raw:', (apiKey === rawKey), '| prefix:', apiKey.slice(0, 6) + '...');
+  var keySource = process.env.AI_API_KEY ? 'AI_API_KEY' : (process.env.BLUESMINDS_API_KEY ? 'BLUESMINDS_API_KEY' : 'MISSING');
+  console.log('[chat] AI key source:', keySource, '| raw length:', rawKey.length, '| prefix:', apiKey.slice(0, 6) + '...', '| URL:', AI_API_URL, '| model:', AI_MODEL, '| timeout ms:', UPSTREAM_TIMEOUT_MS);
   if (!apiKey || apiKey.length < 10) {
-    console.error('[chat] BLUESMINDS_API_KEY non valida:', { rawLength: rawKey.length, trimmedLength: apiKey.length });
-    logMetric('config_error', { reason: 'bluesminds_api_key_invalid' });
+    console.error('[chat] AI_API_KEY non valida:', { source: keySource, rawLength: rawKey.length, trimmedLength: apiKey.length });
+    logMetric('config_error', { reason: 'ai_api_key_invalid', source: keySource });
     return res.status(500).json({
       error: 'Configurazione server incompleta',
-      details: 'BLUESMINDS_API_KEY mancante o troppo corta su Vercel (lunghezza: ' + apiKey.length + ')'
+      details: 'Chiave API AI mancante o troppo corta (env: ' + keySource + ', lunghezza: ' + apiKey.length + ')'
     });
   }
 
@@ -327,7 +332,7 @@ async function handleRequest(req, res) {
   // 6) Decide modalita: stream vs buffer
   const wantsStream = req.body.stream === true;
 
-  // 7) Forward verso BluesMinds — retry 3x su 503/throw (backoff esponenziale)
+  // 7) Forward verso AI provider — retry 3x su 503/throw (backoff esponenziale)
   const forwardBody = { ...req.body, model: FIXED_MODEL, stream: true };
   var MAX_RETRIES = 3;
   function backoffMs(attempt) { return 1000 * Math.pow(2, attempt - 1); } // 1s, 2s, 4s
@@ -346,20 +351,22 @@ async function handleRequest(req, res) {
     activeController = ctrl;
     activeTimeoutId = tId;
     var tStart = Date.now();
-    console.log('[chat] BluesMinds attempt ' + attempt + '/' + MAX_RETRIES + ' at', new Date(tStart).toISOString(), '| messages:', (req.body.messages || []).length);
+    console.log('[chat] AI attempt ' + attempt + '/' + MAX_RETRIES + ' at', new Date(tStart).toISOString(), '| model:', AI_MODEL, '| messages:', (req.body.messages || []).length);
 
     try {
-      upstream = await fetch(BLUESMINDS_URL, {
+      upstream = await fetch(AI_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + apiKey
+          'Authorization': 'Bearer ' + apiKey,
+          'HTTP-Referer': AI_REFERRER,
+          'X-Title': AI_TITLE
         },
         body: JSON.stringify(forwardBody),
         signal: ctrl.signal
       });
       var tElapsed = Date.now() - tStart;
-      console.log('[chat] BluesMinds attempt ' + attempt + ' status:', upstream.status, '| elapsed ms:', tElapsed);
+      console.log('[chat] AI attempt ' + attempt + ' status:', upstream.status, '| elapsed ms:', tElapsed);
 
       if (upstream.ok) {
         // SUCCESSO — esce dal loop
@@ -373,13 +380,13 @@ async function handleRequest(req, res) {
         try { rawBody503 = await upstream.text(); } catch (_) { rawBody503 = '(unreadable)'; }
         lastRetryableErr = { status: 503, body: rawBody503, elapsedMs: tElapsed };
         if (attempt < MAX_RETRIES) {
-          console.warn('[chat] BluesMinds 503 attempt ' + attempt + ' — retrying in ' + backoffMs(attempt) + 'ms | body:', rawBody503.slice(0, 300));
+          console.warn('[chat] AI 503 attempt ' + attempt + ' — retrying in ' + backoffMs(attempt) + 'ms | body:', rawBody503.slice(0, 300));
           clearTimeout(tId);
           await new Promise(function (r) { setTimeout(r, backoffMs(attempt)); });
           continue;
         }
         // Ultimo tentativo: esce dal loop verso exhausted handler
-        console.warn('[chat] BluesMinds 503 attempt ' + attempt + '/' + MAX_RETRIES + ' — exhausted');
+        console.warn('[chat] AI 503 attempt ' + attempt + '/' + MAX_RETRIES + ' — exhausted');
         clearTimeout(tId);
         break;
       }
@@ -390,7 +397,7 @@ async function handleRequest(req, res) {
       try { rawBodyFail = await upstream.text(); } catch (_) { rawBodyFail = '(unreadable)'; }
       var parsedFail;
       try { parsedFail = JSON.parse(rawBodyFail); } catch (_) { parsedFail = { raw_text: rawBodyFail.slice(0, 2000) }; }
-      console.error('[chat] BluesMinds NON-RETRYABLE status:', upstream.status, '| elapsed ms:', tElapsed, '| body:', JSON.stringify(parsedFail).slice(0, 1000));
+      console.error('[chat] AI NON-RETRYABLE status:', upstream.status, '| elapsed ms:', tElapsed, '| body:', JSON.stringify(parsedFail).slice(0, 1000));
       logMetric('upstream_status_error', { userId: hashUserId(supabaseUser.id), status: upstream.status, elapsedMs: tElapsed });
       return res.status(upstream.status).json({ error: 'Upstream error', upstream_status: upstream.status, upstream_body: parsedFail });
 
@@ -401,20 +408,20 @@ async function handleRequest(req, res) {
       var errMsg = fetchErr ? (fetchErr.message || String(fetchErr)) : 'null';
 
       if (errName === 'AbortError') {
-        console.warn('[chat] BluesMinds timeout attempt ' + attempt + ' after ' + tCatch + 'ms' + (attempt < MAX_RETRIES ? ' — retrying' : ''));
+        console.warn('[chat] AI timeout attempt ' + attempt + ' after ' + tCatch + 'ms' + (attempt < MAX_RETRIES ? ' — retrying' : ''));
         lastRetryableErr = { name: 'AbortError', message: errMsg, elapsedMs: tCatch };
         if (attempt < MAX_RETRIES) {
           await new Promise(function (r) { setTimeout(r, backoffMs(attempt)); });
           continue;
         }
         logMetric('upstream_timeout', { userId: hashUserId(supabaseUser.id), elapsedMs: tCatch, attempts: attempt });
-        return res.status(504).json({ error: 'Timeout upstream', details: 'BluesMinds non ha risposto entro ' + (UPSTREAM_TIMEOUT_MS / 1000) + 's dopo ' + attempt + ' tentativi', elapsedMs: tCatch, attempts: attempt });
+        return res.status(504).json({ error: 'Timeout upstream', details: 'Il provider AI non ha risposto entro ' + (UPSTREAM_TIMEOUT_MS / 1000) + 's dopo ' + attempt + ' tentativi', elapsedMs: tCatch, attempts: attempt });
       }
 
       // Errore di rete — retry
-      console.error('[chat] BluesMinds fetch error attempt ' + attempt + ':', errMsg, attempt < MAX_RETRIES ? '— retrying' : '');
+      console.error('[chat] AI fetch error attempt ' + attempt + ':', errMsg, attempt < MAX_RETRIES ? '— retrying' : '');
       if (fetchErr && fetchErr.cause) {
-        console.error('[chat] BluesMinds fetch CAUSE:', String(fetchErr.cause));
+        console.error('[chat] AI fetch CAUSE:', String(fetchErr.cause));
       }
       lastRetryableErr = { name: errName, message: errMsg, elapsedMs: tCatch, cause: fetchErr && String(fetchErr.cause) };
       if (attempt < MAX_RETRIES) {
@@ -428,7 +435,7 @@ async function handleRequest(req, res) {
 
   // Se arriviamo qui senza upstream.ok, ultimo errore era 503 esaurito
   if (!upstream || !upstream.ok) {
-    console.error('[chat] BluesMinds tutti i tentativi falliti — lastRetryableErr:', lastRetryableErr ? JSON.stringify(lastRetryableErr).slice(0, 500) : 'null');
+    console.error('[chat] AI tutti i tentativi falliti — lastRetryableErr:', lastRetryableErr ? JSON.stringify(lastRetryableErr).slice(0, 500) : 'null');
     logMetric('upstream_retries_exhausted', { userId: hashUserId(supabaseUser.id), attempts: attemptsMade, overallMs: Date.now() - overallStart });
     return res.status(503).json({ error: 'Servizio di generazione temporaneamente sovraccarico', details: 'I server AI non rispondono dopo ' + attemptsMade + ' tentativi. Riprova tra qualche istante.', attempts: attemptsMade });
   }

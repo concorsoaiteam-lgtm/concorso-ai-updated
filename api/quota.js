@@ -158,11 +158,16 @@ module.exports = async function handler(req, res) {
         resetAt: new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, 1)).toISOString()
       });
     } catch (e) {
-      // Log the FULL Supabase error object (code, message, details, hint)
-      var errCode = e && (e.code || e.status);
-      var errMsg = e && (e.message || String(e));
+      // Estrae i campi dall'errore Supabase; se non sono stringhe
+      // (es. oggetti annidati), li serializza con JSON.stringify.
+      var errCode = e && (e.code || e.status || null);
+      var errMsg = e && e.message;
+      if (errMsg && typeof errMsg !== 'string') { try { errMsg = JSON.stringify(errMsg); } catch (_) { errMsg = String(errMsg); } }
+      if (!errMsg) { errMsg = String(e); }
       var errDetails = e && e.details;
+      if (errDetails && typeof errDetails !== 'string') { try { errDetails = JSON.stringify(errDetails); } catch (_) { errDetails = String(errDetails); } }
       var errHint = e && e.hint;
+      if (errHint && typeof errHint !== 'string') { try { errHint = JSON.stringify(errHint); } catch (_) { errHint = String(errHint); } }
       console.error('[quota] db error:', JSON.stringify({ code: errCode, message: errMsg, details: errDetails, hint: errHint }));
       // Fallback gracefully: se la query fallisce (tabella mancante, RLS, colonna errata),
       // non blocchiamo l'utente — restituiamo quota default (free → 3 rimanenti).
@@ -178,7 +183,9 @@ module.exports = async function handler(req, res) {
       });
     }
   } catch (e) {
-    const msg = String(e && e.message || e);
+    var oMsg = e && e.message;
+    if (oMsg && typeof oMsg !== 'string') { try { oMsg = JSON.stringify(oMsg); } catch (_) { oMsg = String(oMsg); } }
+    const msg = oMsg || String(e);
     console.error('[quota] unhandled error:', msg);
     return res.status(500).json({ error: 'Errore interno server', details: msg });
   }
