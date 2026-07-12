@@ -17,20 +17,50 @@
 // ============================================================
 
 const { createClient } = require('@supabase/supabase-js');
+// Safety: ws non piu' passato al client, ma lo teniamo per eventuali
+// dipendenze transitive di @supabase/realtime-js in Node.js
+try { require('ws'); } catch (_) { /* opzionale */ }
 
+// Chiave hardcoded di fallback (progetto xhifnparcouxsypkjcmn)
+function extractProjectRef(jwt) {
+  try {
+    var p = jwt.split('.');
+    if (p.length !== 3) return 'INVALID_JWT';
+    var payload = JSON.parse(Buffer.from(p[1], 'base64url').toString());
+    return payload.ref || 'NO_REF';
+  } catch (_) { return 'PARSE_ERROR'; }
+}
+var HARDCODED_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
+var HARDCODED_URL = 'https://xhifnparcouxsypkjcmn.supabase.co';
+
+// [TEST TEMPORANEO] Usa HARDCODED anziché ENV_VAR per bypassare env var stale di Vercel.
+// Se il test funziona, il problema è confermato: Vercel ha env var vecchie.
+// FIX DEFINITIVO: entrare in Vercel Dashboard → Project Settings → Environment Variables
+// e aggiornare/rimuovere le variabili SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_KEY.
 function resolveAnonKey() {
-  return process.env.SUPABASE_ANON_KEY
-    || process.env.SUPABASE_KEY
-    || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
+  // COMMENTATO in produzione: var fromEnv = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
+  var source, key;
+  // Usa SEMPRE l'hardcoded per il test
+  source = 'HARDCODED_TEST';
+  key = HARDCODED_ANON;
+  var ref = extractProjectRef(key);
+  console.log('[quota] ANON_KEY source:', source, '| project ref:', ref, '| length:', key.length);
+  return key;
+}
+function resolveSupabaseUrl() {
+  // COMMENTATO in produzione: var fromEnv = process.env.SUPABASE_URL;
+  // Usa SEMPRE l'hardcoded per il test
+  console.log('[quota] SUPABASE_URL source: HARDCODED_TEST | value:', HARDCODED_URL.slice(0, 25) + '...');
+  return HARDCODED_URL;
 }
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xhifnparcouxsypkjcmn.supabase.co';
+const SUPABASE_URL = resolveSupabaseUrl();
 const SUPABASE_ANON_KEY = resolveAnonKey();
 
 const FREE_PLAN_QUOTA_MONTHLY = 3;
 
-const CRITICAL_PROJECT_REF = process.env.SUPABASE_URL
-  ? new URL(process.env.SUPABASE_URL).hostname.split('.')[0]
+const CRITICAL_PROJECT_REF = SUPABASE_URL
+  ? new URL(SUPABASE_URL).hostname.split('.')[0]
   : 'xhifnparcouxsypkjcmn';
 
 function getStartOfMonthUTC() {
@@ -47,7 +77,11 @@ function extractProjectRefFromJwt(jwt) {
   } catch (_) { return null; }
 }
 
+// === DEBUG: log all'avvio del modulo ===
+console.log('[quota] MODULE LOADED', { url: (SUPABASE_URL || '').slice(0, 20) + '...', keyLength: (SUPABASE_ANON_KEY || '').length });
+
 module.exports = async function handler(req, res) {
+  console.log('[quota] HANDLER CALLED', req.method, req.url, 'auth:', (req.headers.authorization || '').slice(0, 20) + '...');
   try {
     // CORS preflight
     if (req.method === 'OPTIONS') {

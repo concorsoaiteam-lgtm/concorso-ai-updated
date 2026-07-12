@@ -402,6 +402,34 @@
   </div>
 
   <script>
+    // ============================================================
+    // DEBUG BOOT — stampa tutto prima di iniziare
+    // ============================================================
+    (function debugBoot() {
+      var log = [];
+      log.push('[DEBUG] __SUPABASE_URL:', typeof __SUPABASE_URL !== 'undefined' ? 'OK' : 'UNDEFINED');
+      log.push('[DEBUG] __SUPABASE_ANON_KEY:', typeof __SUPABASE_ANON_KEY !== 'undefined' ? 'OK' : 'UNDEFINED');
+      log.push('[DEBUG] window.supabase:', typeof window.supabase !== 'undefined' ? 'OK' : 'UNDEFINED');
+      // Cerca token in localStorage
+      var foundKeys = [];
+      try {
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (k && /^sb-[a-z0-9]+-auth-token$/.test(k)) foundKeys.push(k);
+        }
+      } catch (_) {}
+      log.push('[DEBUG] localStorage sb-*-auth-token keys:', foundKeys.length > 0 ? foundKeys.join(', ') : 'NESSUNA');
+      if (foundKeys.length > 0) {
+        try {
+          var raw = JSON.parse(localStorage.getItem(foundKeys[0]));
+          var t = raw && raw.access_token;
+          if (t) log.push('[DEBUG] access_token presente:', t.slice(0, 12) + '...' + t.slice(-6), '(lunghezza:', t.length + ')');
+          else log.push('[DEBUG] access_token MANCANTE nel JSON');
+        } catch (e) { log.push('[DEBUG] errore parse localStorage:', e.message); }
+      }
+      console.log.apply(console, log);
+    })();
+
     const SUPABASE_URL = (typeof __SUPABASE_URL !== 'undefined' && __SUPABASE_URL)
       ? __SUPABASE_URL
       : ['https://','xhifnparcouxsypkjcmn','.supabase.co'].join('');
@@ -409,10 +437,10 @@
       ? __SUPABASE_ANON_KEY
       : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
     const SUPABASE_KEY = SUPABASE_ANON_KEY;
-    if (typeof __SUPABASE_URL === 'undefined' || !__SUPABASE_URL) {
-      console.warn('[ConcorsoAI] SUPABASE_URL non configurata. Definisci __SUPABASE_URL e __SUPABASE_ANON_KEY globali per override.');
-    }
+    console.log('[DEBUG] SUPABASE_URL usata:', SUPABASE_URL.replace(/https?:\/\//, '').split('.')[0] + '...');
+    console.log('[DEBUG] SUPABASE_KEY lunghezza:', SUPABASE_KEY.length, 'chars');
     const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+    console.log('[DEBUG] supabaseClient creato:', supabaseClient ? 'SI' : 'NO');
 
     const loader = document.getElementById('loader');
     const configPhase = document.getElementById('configPhase');
@@ -819,13 +847,17 @@
       try {
         var token = typeof window.__getCommAuthToken === 'function' ? window.__getCommAuthToken() : null;
         if (!token) token = window.__concorsoToken || null;
+        console.log('[DEBUG] quota check token:', token ? token.slice(0, 12) + '...' + token.slice(-6) : 'NULL');
         if (token) {
           var qres = await fetch('/api/quota', {
             method: 'GET',
+            credentials: 'include',
             headers: { 'Authorization': 'Bearer ' + token }
           });
+          console.log('[DEBUG] quota response status:', qres.status, qres.statusText);
           if (qres.ok) {
             var quota = await qres.json();
+            console.log('[DEBUG] quota body:', JSON.stringify(quota));
             if (quota.plan === 'free' && quota.remaining !== null && quota.remaining <= 0) {
               showPaywall(quota);
               return;
@@ -940,8 +972,10 @@
       try {
         const tempMap = { Facile: 0.3, Realistico: 0.5, Difficile: 0.7 };
         const temperature = tempMap[config.difficolta] || 0.5;
+        console.log('[DEBUG] chiamaCommissarioStream -> POST /api/chat stream:true, token:', token ? token.slice(0, 12) + '...' : 'NULL');
         response = await fetch('/api/chat', {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
@@ -957,6 +991,7 @@
             stream: true
           })
         });
+        console.log('[DEBUG] /api/chat stream response status:', response.status, response.statusText);
       } catch (networkErr) {
         if (onError) onError({ status: 0, message: 'Errore di rete: ' + (networkErr.message || 'sconosciuto') });
         return;
@@ -1217,8 +1252,10 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = 'Bearer ' + token;
 
+      console.log('[DEBUG] chiamaCommissario -> POST /api/chat (non-stream), token:', token ? token.slice(0, 12) + '...' : 'NULL');
       const response = await fetch('/api/chat', {
         method: 'POST',
+        credentials: 'include',
         headers: headers,
         body: JSON.stringify({
           model: 'deepseek-v4-flash',
@@ -1230,6 +1267,7 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
           max_tokens: 700
         })
       });
+      console.log('[DEBUG] /api/chat response status:', response.status, response.statusText);
 
       return response;
     }
@@ -1861,6 +1899,8 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
             }
           }
         } catch (_) {}
+        console.log('[DEBUG] init() -> getUser() OK, user.id:', user.id.slice(0, 8) + '...');
+        console.log('[DEBUG] init() -> __concorsoToken:', window.__concorsoToken ? window.__concorsoToken.slice(0, 12) + '...' + window.__concorsoToken.slice(-6) : 'NULL');
 
         initAmbientMotion();
         initEvents();

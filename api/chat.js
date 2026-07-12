@@ -18,23 +18,47 @@
 // ============================================================
 
 const { createClient } = require('@supabase/supabase-js');
+// Safety: ws non piu' passato al client, ma lo teniamo per eventuali
+// dipendenze transitive di @supabase/realtime-js in Node.js
+try { require('ws'); } catch (_) { /* opzionale */ }
 const crypto = require('crypto'); // TURNO 33: hash per log metric (no PII)
 
-// --- Config: accetta SUPABASE_ANON_KEY o SUPABASE_KEY come env var ---
+// --- Chiave hardcoded di fallback (progetto xhifnparcouxsypkjcmn) ---
+var HARDCODED_ANON_CHAT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
+var HARDCODED_URL_CHAT = 'https://xhifnparcouxsypkjcmn.supabase.co';
+
+function extractProjectRef(jwt) {
+  try {
+    var p = jwt.split('.');
+    if (p.length !== 3) return 'INVALID_JWT';
+    var payload = JSON.parse(Buffer.from(p[1], 'base64url').toString());
+    return payload.ref || 'NO_REF';
+  } catch (_) { return 'PARSE_ERROR'; }
+}
+
+// [TEST TEMPORANEO] Usa HARDCODED anziché ENV_VAR per bypassare env var stale di Vercel.
+// Se il test funziona, il problema è confermato: Vercel ha env var vecchie.
+// FIX DEFINITIVO: entrare in Vercel Dashboard → Project Settings → Environment Variables
+// e aggiornare/rimuovere le variabili SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_KEY.
 function resolveAnonKey() {
-  return process.env.SUPABASE_ANON_KEY
-    || process.env.SUPABASE_KEY
-    || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
+  // COMMENTATO in produzione: var fromEnv = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
+  var source, key;
+  // Usa SEMPRE l'hardcoded per il test
+  source = 'HARDCODED_TEST';
+  key = HARDCODED_ANON_CHAT;
+  var ref = extractProjectRef(key);
+  console.log('[chat] ANON_KEY source:', source, '| project ref:', ref, '| length:', key.length);
+  return key;
 }
-function getSupabaseConfig() {
-  const url = process.env.SUPABASE_URL || 'https://xhifnparcouxsypkjcmn.supabase.co';
-  const anonKey = resolveAnonKey();
-  if (!process.env.SUPABASE_URL) {
-    console.warn('[ConcorsoAI] SUPABASE_URL non configurata in process.env. Definisci SUPABASE_URL e SUPABASE_ANON_KEY per override.');
-  }
-  return { url, anonKey };
+function resolveSupabaseUrl() {
+  // COMMENTATO in produzione: var fromEnv = process.env.SUPABASE_URL;
+  // Usa SEMPRE l'hardcoded per il test
+  console.log('[chat] SUPABASE_URL source: HARDCODED_TEST | value:', HARDCODED_URL_CHAT.slice(0, 25) + '...');
+  return HARDCODED_URL_CHAT;
 }
-const { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY } = getSupabaseConfig();
+
+const SUPABASE_URL = resolveSupabaseUrl();
+const SUPABASE_ANON_KEY = resolveAnonKey();
 const BLUESMINDS_URL = 'https://api.bluesminds.com/v1/chat/completions';
 const UPSTREAM_TIMEOUT_MS = 30000;
 const FIXED_MODEL = 'deepseek-v4-flash';
@@ -189,7 +213,11 @@ function getClientIp(req) {
 // ============================================================
 // Handler principale (v3: dual-mode)
 // ============================================================
+// === DEBUG: log all'avvio del modulo ===
+console.log('[chat] MODULE LOADED', { url: (SUPABASE_URL || '').slice(0, 20) + '...', keyLength: (SUPABASE_ANON_KEY || '').length });
+
 module.exports = async function handler(req, res) {
+  console.log('[chat] HANDLER CALLED', req.method, req.url, 'auth:', (req.headers.authorization || 'MISSING').slice(0, 20) + '...');
   try {
     return await handleRequest(req, res);
   } catch (e) {
