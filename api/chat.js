@@ -26,6 +26,8 @@ const crypto = require('crypto'); // TURNO 33: hash per log metric (no PII)
 // --- Chiave hardcoded di fallback (progetto xhifnparcouxsypkjcmn) ---
 var HARDCODED_ANON_CHAT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
 var HARDCODED_URL_CHAT = 'https://xhifnparcouxsypkjcmn.supabase.co';
+// --- Fallback AI key (se env var mancante/stale su Vercel) ---
+var HARDCODED_AI_KEY = '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';
 
 function extractProjectRef(jwt) {
   try {
@@ -308,10 +310,10 @@ async function handleRequest(req, res) {
     });
   }
 
-  // 4) API key AI — controlla AI_API_KEY prima, poi BLUESMINDS_API_KEY (fallback)
-  const rawKey = String(process.env.AI_API_KEY || process.env.BLUESMINDS_API_KEY || '');
+  // 4) API key AI — controlla AI_API_KEY, poi BLUESMINDS_API_KEY, poi fallback hardcoded
+  const rawKey = String(process.env.AI_API_KEY || process.env.BLUESMINDS_API_KEY || HARDCODED_AI_KEY);
   const apiKey = rawKey.trim();
-  var keySource = process.env.AI_API_KEY ? 'AI_API_KEY' : (process.env.BLUESMINDS_API_KEY ? 'BLUESMINDS_API_KEY' : 'MISSING');
+  var keySource = process.env.AI_API_KEY ? 'AI_API_KEY' : (process.env.BLUESMINDS_API_KEY ? 'BLUESMINDS_API_KEY' : 'HARDCODED');
   console.log('[chat] AI key source:', keySource, '| raw length:', rawKey.length, '| prefix:', apiKey.slice(0, 6) + '...', '| URL:', AI_API_URL, '| model:', AI_MODEL, '| timeout ms:', UPSTREAM_TIMEOUT_MS);
   if (!apiKey || apiKey.length < 10) {
     console.error('[chat] AI_API_KEY non valida:', { source: keySource, rawLength: rawKey.length, trimmedLength: apiKey.length });
