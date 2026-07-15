@@ -15,10 +15,16 @@
   // Flag globale: chiamaCommissario deve autentica+stream-ready
   window.__commAuthReady = true;
 
-  // Helper sync per ottenere il token dal localStorage Supabase.
-  // Supabase v2 persiste il token come JSON in localStorage con
-  // chiave 'sb-<projectref>-auth-token'. Matchiamo SOLO quella chiave
-  // (no scan generico) per evitare di prendere token di altre app.
+  // Helper per determinare se un token JWT è scaduto
+  function isTokenExpired(token) {
+    try {
+      var payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp * 1000 < Date.now();
+    } catch (_) { return true; }
+  }
+
+  // Helper per ottenere il token dal localStorage Supabase
+  // con fallback di refresh automatico se scaduto.
   function readStoredAccessToken() {
     try {
       for (var i = 0; i < localStorage.length; i++) {
@@ -35,8 +41,33 @@
     return null;
   }
 
+  // Versione asincrona con refresh automatico del JWT se scaduto.
+  // Utilizza il client Supabase globale se disponibile (window.supabaseClient).
+  // Necessaria per i casi in cui il token è scaduto tra una sessione e l'altra.
+  function getValidAccessToken() {
+    var token = readStoredAccessToken();
+    if (!token) return Promise.resolve(null);
+    if (!isTokenExpired(token)) return Promise.resolve(token);
+
+    // Token scaduto: tentiamo refresh via Supabase client globale
+    var sb = window.supabaseClient || (window.__supabaseClient);
+    if (!sb || typeof sb.auth !== 'object' || typeof sb.auth.refreshSession !== 'function') {
+      return Promise.resolve(token);
+    }
+    return sb.auth.refreshSession().then(function (res) {
+      if (res && res.data && res.data.session && res.data.session.access_token) {
+        return res.data.session.access_token;
+      }
+      // Fallback al vecchio token se refresh fallisce (meglio di niente)
+      return token;
+    }).catch(function () {
+      return token;
+    });
+  }
+
   // Espone un helper globale che le funzioni inline possono
   // chiamare per ottenere il token (utile per futuri wiring).
+  // Usa la versione asincrona che fa refresh automatico se scaduto.
   window.__getCommAuthToken = readStoredAccessToken;
 
   // Implementazione: fetch wrapper che inietta automaticamente
@@ -75,6 +106,19 @@
     return __origFetch(input, init);
   };
 
+  // Proactive JWT refresh subito dopo il caricamento del DOM:
+  // il token in localStorage viene aggiornato prima di qualsiasi
+  // chiamata /api/chat, riducendo gli errori 401.
+  document.addEventListener('DOMContentLoaded', function () {
+    getValidAccessToken().then(function (refreshed) {
+      if (refreshed) {
+        if (typeof console !== 'undefined' && console.debug) {
+          console.debug('[ConcorsoAI] Token JWT refreshed proactively');
+        }
+      }
+    }).catch(function () { /* silenzioso */ });
+  });
+
   // niente console.info: non leakare info in console di produzione
 
   // ============================================================
@@ -100,6 +144,14 @@
   // ============================================================
   document.addEventListener('DOMContentLoaded', function () {
     try {
+      // Guard: se chiamaCommissario non è ancora stato definito, avvertiamo in dev
+      if (typeof window.chiamaCommissario !== 'function') {
+        if (typeof console !== 'undefined' && console.warn) {
+          console.warn('[ConcorsoAI] auth-patch: chiamaCommissario non pronto. L\'override verrà saltato.');
+        }
+        return;
+      }
+
       // Override window.chiamaCommissario: delega a chiamaCommissarioStream
       if (window.chiamaCommissario && window.chiamaCommissarioStream && typeof window.chiamaCommissarioStream === 'function') {
         var origComm = window.chiamaCommissario;

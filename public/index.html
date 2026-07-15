@@ -59,7 +59,7 @@
 
   <link rel="stylesheet" href="/css/landing.css" />
 
-  <!-- Sticky mobile CTA styles -->
+  <!-- Sticky mobile CTA styles + scroll margin + FAQ animations -->
   <style>
     .sticky-mobile-cta {
       position: fixed;
@@ -77,6 +77,25 @@
     @media (max-width: 767px) {
       .sticky-mobile-cta { display: block; }
       body { padding-bottom: 72px; }
+    }
+
+    #come-funziona, #demo, #prezzi, #faq { scroll-margin-top: 5rem; }
+
+    .faq-chevron { transition: transform .3s cubic-bezier(.2,.8,.2,1); }
+    .faq-item[open] .faq-chevron { transform: rotate(180deg); }
+    .faq-answer {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height .35s cubic-bezier(.2,.8,.2,1), opacity .25s ease;
+      opacity: 0;
+    }
+    .faq-item[open] .faq-answer {
+      max-height: 300px;
+      opacity: 1;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .faq-chevron, .faq-answer { transition: none; }
+      .faq-item[open] .faq-answer { max-height: none; opacity: 1; }
     }
   </style>
 
@@ -181,7 +200,7 @@
           </div>
 
           <h1 class="max-w-3xl text-4xl font-black leading-[1.04] tracking-[-0.045em] text-brand-900 sm:text-5xl md:text-6xl lg:text-7xl">
-            L'unica AI che ti prepara <span class="text-gradient">davvero</span> all'orale del concorso.
+            Non lasciare che l'ansia da orale rovini mesi di studio. <span class="text-gradient">Simula la commissione reale</span> prima del grande giorno.
           </h1>
 
           <p class="mt-6 max-w-2xl text-base leading-8 text-brand-700 sm:text-lg lg:text-xl">
@@ -199,7 +218,7 @@
           </div>
 
           <p class="mt-5 text-sm leading-6 text-brand-600">
-            <span class="font-semibold"><svg class="inline-block h-3.5 w-3.5 align-[-1px] text-brand-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Nessuna carta richiesta</span>&nbsp;&nbsp;&nbsp;<span class="font-semibold"><svg class="inline-block h-3.5 w-3.5 align-[-1px] text-brand-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Disdici quando vuoi</span>&nbsp;&nbsp;&nbsp;<span class="font-semibold"><svg class="inline-block h-3.5 w-3.5 align-[-1px] text-brand-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Setup in 2 minuti</span>
+            <span class="font-semibold">⭐️ Nessuna carta di credito</span>&nbsp;&nbsp;·&nbsp;&nbsp;<span class="font-semibold">Prova gratuita inclusa</span>&nbsp;&nbsp;·&nbsp;&nbsp;<span class="font-semibold">Unisciti a +1.000 candidati</span>
           </p>
           
         </div>
@@ -501,7 +520,7 @@
             <h3 class="text-xl font-black text-brand-900">Pro</h3>
             <p class="mt-2 text-sm font-semibold text-brand-700">Per chi vuole fare sul serio.</p>
             <p class="mt-5 text-4xl font-black tracking-tight text-brand-900" style="font-variant-numeric: tabular-nums;">€29<span class="text-lg font-extrabold text-brand-700">/mese</span></p>
-            <p class="mt-1 text-sm font-semibold text-brand-600">oppure €278/anno</p>
+            <p class="mt-1 text-sm font-semibold text-brand-600">oppure €278/anno <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-emerald-700 animate-pulse">Risparmia il 20% 🔥</span></p>
             <ul class="mt-6 space-y-3 text-sm leading-6 text-brand-700">
               <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Tutto del piano Free</li>
               <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Simulazioni senza limiti</li>
@@ -554,62 +573,74 @@
         <div class="mt-12 space-y-4">
           <details class="reveal faq-item group rounded-2xl border border-brand-200 bg-white p-6 shadow-card">
             <summary class="flex cursor-pointer items-start gap-4 list-none">
-              <span class="faq-icon" aria-hidden="true">?</span>
+              <svg class="faq-chevron mt-1 h-5 w-5 shrink-0 text-brand-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
               <div class="flex-1">
                 <h3 class="text-base font-black text-brand-900">Le domande sono davvero pescate dal mio bando?</h3>
-                <p class="mt-2 text-sm leading-7 text-brand-700">Sì. Estraiamo i contenuti del PDF e li passiamo al commissario AI come materiale di riferimento. Più i tuoi materiali sono completi, meglio è.</p>
               </div>
             </summary>
+            <div class="faq-answer">
+              <p class="mt-3 text-sm leading-7 text-brand-700">Sì. Estraiamo i contenuti del PDF e li passiamo al commissario AI come materiale di riferimento. Più i tuoi materiali sono completi, meglio è.</p>
+            </div>
           </details>
 
           <details class="reveal faq-item group rounded-2xl border border-brand-200 bg-white p-6 shadow-card" style="transition-delay:60ms;">
             <summary class="flex cursor-pointer items-start gap-4 list-none">
-              <span class="faq-icon" aria-hidden="true">?</span>
+              <svg class="faq-chevron mt-1 h-5 w-5 shrink-0 text-brand-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
               <div class="flex-1">
                 <h3 class="text-base font-black text-brand-900">Quanto è realistico il commissario AI?</h3>
-                <p class="mt-2 text-sm leading-7 text-brand-700">Tre livelli: Facile, Realistico (consigliato), Difficile. Il livello Realistico calibra la pressione come una commissione vera. Puoi sempre passare di livello.</p>
               </div>
             </summary>
+            <div class="faq-answer">
+              <p class="mt-3 text-sm leading-7 text-brand-700">Tre livelli: Facile, Realistico (consigliato), Difficile. Il livello Realistico calibra la pressione come una commissione vera. Puoi sempre passare di livello.</p>
+            </div>
           </details>
 
           <details class="reveal faq-item group rounded-2xl border border-brand-200 bg-white p-6 shadow-card" style="transition-delay:120ms;">
             <summary class="flex cursor-pointer items-start gap-4 list-none">
-              <span class="faq-icon" aria-hidden="true">?</span>
+              <svg class="faq-chevron mt-1 h-5 w-5 shrink-0 text-brand-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
               <div class="flex-1">
                 <h3 class="text-base font-black text-brand-900">I miei dati sono al sicuro?</h3>
-                <p class="mt-2 text-sm leading-7 text-brand-700">Sì. I bandi sono salvati cifrati su Supabase (UE). Nessun dato è condiviso con terze parti. Puoi cancellare tutto in qualsiasi momento dalla dashboard.</p>
               </div>
             </summary>
+            <div class="faq-answer">
+              <p class="mt-3 text-sm leading-7 text-brand-700">Sì. I bandi sono salvati cifrati su Supabase (UE). Nessun dato è condiviso con terze parti. Puoi cancellare tutto in qualsiasi momento dalla dashboard.</p>
+            </div>
           </details>
 
           <details class="reveal faq-item group rounded-2xl border border-brand-200 bg-white p-6 shadow-card" style="transition-delay:180ms;">
             <summary class="flex cursor-pointer items-start gap-4 list-none">
-              <span class="faq-icon" aria-hidden="true">?</span>
+              <svg class="faq-chevron mt-1 h-5 w-5 shrink-0 text-brand-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
               <div class="flex-1">
                 <h3 class="text-base font-black text-brand-900">Posso allenarmi su materie generiche senza bando?</h3>
-                <p class="mt-2 text-sm leading-7 text-brand-700">Sì. Puoi anche selezionare materie standard (Diritto Amministrativo, Costituzionale, Contabilità Pubblica…) per simulazioni più generali di pratica.</p>
               </div>
             </summary>
+            <div class="faq-answer">
+              <p class="mt-3 text-sm leading-7 text-brand-700">Sì. Puoi anche selezionare materie standard (Diritto Amministrativo, Costituzionale, Contabilità Pubblica…) per simulazioni più generali di pratica.</p>
+            </div>
           </details>
 
           <details class="reveal faq-item group rounded-2xl border border-brand-200 bg-white p-6 shadow-card" style="transition-delay:240ms;">
             <summary class="flex cursor-pointer items-start gap-4 list-none">
-              <span class="faq-icon" aria-hidden="true">?</span>
+              <svg class="faq-chevron mt-1 h-5 w-5 shrink-0 text-brand-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
               <div class="flex-1">
                 <h3 class="text-base font-black text-brand-900">E se il commissario sbaglia?</h3>
-                <p class="mt-2 text-sm leading-7 text-brand-700">Ogni feedback ha un pulsante "Non sono d'accordo". Puoi scrivere cosa non va e il commissario lo considera nella domanda successiva.</p>
               </div>
             </summary>
+            <div class="faq-answer">
+              <p class="mt-3 text-sm leading-7 text-brand-700">Ogni feedback ha un pulsante "Non sono d'accordo". Puoi scrivere cosa non va e il commissario lo considera nella domanda successiva.</p>
+            </div>
           </details>
 
           <details class="reveal faq-item group rounded-2xl border border-brand-200 bg-white p-6 shadow-card" style="transition-delay:300ms;">
             <summary class="flex cursor-pointer items-start gap-4 list-none">
-              <span class="faq-icon" aria-hidden="true">?</span>
+              <svg class="faq-chevron mt-1 h-5 w-5 shrink-0 text-brand-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
               <div class="flex-1">
                 <h3 class="text-base font-black text-brand-900">Funziona anche sul telefono?</h3>
-                <p class="mt-2 text-sm leading-7 text-brand-700">Sì. La simulazione è responsive: chat responsive, feedback panel collassabile, input adattato a mobile. Puoi allenarti dove vuoi.</p>
               </div>
             </summary>
+            <div class="faq-answer">
+              <p class="mt-3 text-sm leading-7 text-brand-700">Sì. La simulazione è responsive: chat responsive, feedback panel collassabile, input adattato a mobile. Puoi allenarti dove vuoi.</p>
+            </div>
           </details>
         </div>
       </div>

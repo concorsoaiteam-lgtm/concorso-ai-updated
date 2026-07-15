@@ -55,7 +55,7 @@
   </script>
 
   <!-- Supabase + GSAP -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.4/dist/umd/supabase.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
   <script src="/auth-patch.js"></script>
@@ -88,6 +88,7 @@
           <span id="selectedBandiCount" class="selected-count">0 selezionati</span>
         </div>
         <p class="mb-3 text-sm font-semibold text-gray-500">Seleziona uno o pi&ugrave; bandi da usare nella simulazione</p>
+      <input type="text" id="searchBandi" placeholder="Cerca il tuo bando..." class="search-bandi-input" autocomplete="off">
       <div id="bandoList" class="bando-list" role="group" aria-label="Lista bandi disponibili" aria-live="polite"></div>
         <div id="emptyBandi" class="empty-bandi mt-3 hidden" role="status">
           <span class="empty-bandi-icon" aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v3.5c0 .414.336.75.75.75h14.5a.75.75 0 0 0 .75-.75v-3.5A1.75 1.75 0 0 0 16.25 3H3.75Z"/><path d="M2 10.25v3.5c0 .966.784 1.75 1.75 1.75h12.5a1.75 1.75 0 0 0 1.75-1.75v-3.5a.75.75 0 0 0-.75-.75H2.75a.75.75 0 0 0-.75.75Z"/></svg></span>
@@ -148,6 +149,7 @@
           <button type="button" class="duration-btn active" data-duration="20">20 min</button>
           <button type="button" class="duration-btn" data-duration="30">30 min</button>
         </div>
+        <div id="durationInfo" class="duration-info mt-3">⏱️ <span id="estimatedQuestions">~8 domande</span> stimate per questa sessione · ~2 min per risposta</div>
       </div>
 
     </section>
@@ -182,6 +184,12 @@
     <div class="sim-content">
     <section class="sim-layout">
       <div id="chatArea" class="chat-area" aria-live="polite">
+        <div id="chatEmptyState" class="chat-empty-state">
+          <div class="empty-state-orb">CA</div>
+          <p class="empty-state-title">La commissione sta esaminando il tuo bando</p>
+          <p class="empty-state-subtitle">Preparati... la prima domanda arriverà a breve</p>
+          <div class="empty-state-wave"><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
         <section class="commissioner-card floating-card" id="commissionerCard">
           <div class="commissioner-avatar-large">CA<span class="online-dot"></span></div>
           <div class="commissioner-info">
@@ -343,7 +351,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm7-3a7 7 0 0 1-14 0m7 7v3m-4 0h8" />
           </svg>
         </button>
-        <button id="sendButton" class="send-btn" type="button" aria-label="Invia risposta">↑</button>
+        <button id="sendButton" class="send-btn" type="button" aria-label="Invia risposta"><span class="send-btn-icon">↑</span></button>
       </div>
       <div class="composer-meta">
         <span><span class="shortcut-key">Enter</span> invia · <span class="shortcut-key">Shift</span> + <span class="shortcut-key">Enter</span> va a capo</span>
@@ -397,7 +405,7 @@
         <div class="briefing-step"><span></span>Costruzione prima domanda</div>
       </div>
       <div class="briefing-progress"><div class="briefing-progress-fill"></div></div>
-      <button id="skipBriefingBtn" type="button" class="btn-secondary" style="margin-top: 16px; width: 100%;">Salta</button>
+      <button id="skipBriefingBtn" type="button" class="briefing-skip-btn">Salta introduzione →</button>
     </section>
   </div>
 
@@ -432,20 +440,36 @@
 
     const SUPABASE_URL = (typeof __SUPABASE_URL !== 'undefined' && __SUPABASE_URL)
       ? __SUPABASE_URL
-      : ['https://','xhifnparcouxsypkjcmn','.supabase.co'].join('');
+      : ['https://', 'xhifnparcouxsypkjcmn', '.supabase.co'].join('');
     const SUPABASE_ANON_KEY = (typeof __SUPABASE_ANON_KEY !== 'undefined' && __SUPABASE_ANON_KEY)
       ? __SUPABASE_ANON_KEY
       : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
     const SUPABASE_KEY = SUPABASE_ANON_KEY;
-    console.log('[DEBUG] SUPABASE_URL usata:', SUPABASE_URL.replace(/https?:\/\//, '').split('.')[0] + '...');
-    console.log('[DEBUG] SUPABASE_KEY lunghezza:', SUPABASE_KEY.length, 'chars');
-    const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
-    console.log('[DEBUG] supabaseClient creato:', supabaseClient ? 'SI' : 'NO');
+    console.log('[DEBUG] SUPABASE_URL:', SUPABASE_URL);
+    console.log('[DEBUG] SUPABASE_KEY presenti:', SUPABASE_KEY ? 'SI, lunghezza: ' + SUPABASE_KEY.length + ' chars' : 'NO');
+    console.log('[DEBUG] window.supabase disponibile:', typeof window.supabase !== 'undefined' ? 'SI' : 'NO');
+    var supabaseClient = null;
+    try {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log('[DEBUG] createClient riuscito, supabaseClient:', supabaseClient ? 'OK' : 'RESTITUITO NULL');
+      } else {
+        console.error('[DEBUG] window.supabase.createClient non è una funzione. window.supabase:', typeof window.supabase);
+      }
+    } catch (initErr) {
+      console.error('[DEBUG] ERRORE createClient:', initErr.message, initErr.stack);
+      supabaseClient = null;
+    }
 
     const loader = document.getElementById('loader');
     const configPhase = document.getElementById('configPhase');
     const simulationPhase = document.getElementById('simulationPhase');
     const summaryPhase = document.getElementById('summaryPhase');
+    if (!loader || !configPhase || !simulationPhase || !summaryPhase) {
+      console.error('[FATAL] Uno o pi&ugrave; elementi &lt;main&gt; mancanti nel DOM (loader, configPhase, simulationPhase, summaryPhase).');
+      document.body.innerHTML = '<div style="padding:32px;max-width:600px;margin:0 auto;font-family:system-ui,sans-serif;text-align:center;margin-top:10vh"><h1 style="font-size:1.5rem;color:#0B2A4A">Errore di caricamento</h1><p style="margin-top:12px;color:#4B6F8E">Impossibile inizializzare la simulazione: elementi struttura mancanti. Contatta il supporto.</p></div>';
+      throw new Error('Elementi main mancanti nel DOM');
+    }
     const bandoList = document.getElementById('bandoList');
     const emptyBandi = document.getElementById('emptyBandi');
     const selectedBandiCount = document.getElementById('selectedBandiCount');
@@ -555,7 +579,8 @@
     }
 
     function updateSessionProgress() {
-      const percent = Math.max(0, Math.min(100, ((questionIndex - 1) / Math.max(1, totalQuestions)) * 100));
+      const raw = ((questionIndex - 1) / Math.max(1, totalQuestions)) * 100;
+      const percent = 10 + Math.max(0, Math.min(90, raw));
       if (sessionProgressFill) sessionProgressFill.style.width = percent + '%';
       if (questionPill) {
         questionPill.classList.remove('progress-pop');
@@ -877,6 +902,7 @@
 
       if (window.gsap) {
         playBriefingAnimation(() => {
+          configPhase.classList.add('phase-exit');
           gsap.to(configPhase, {
             opacity: 0,
             y: -20,
@@ -884,12 +910,18 @@
             ease: "power2.in",
             onComplete: () => {
               configPhase.style.display = 'none';
+              configPhase.classList.remove('phase-exit');
               simulationPhase.style.display = 'block';
               simulationPhase.classList.remove('hidden');
-              gsap.from(simulationPhase, {
-                opacity: 0,
+              simulationPhase.classList.add('phase-enter');
+              gsap.set(simulationPhase, { opacity: 0 });
+              gsap.to(simulationPhase, {
+                opacity: 1,
                 duration: 0.4,
-                ease: "power2.out"
+                ease: "power2.out",
+                onComplete: function () {
+                  gsap.set(simulationPhase, { clearProps: "opacity" });
+                }
               });
               startSimulationUI();
             }
@@ -916,6 +948,8 @@
           delay: 0.6
         });
       }
+      var emptyState = document.getElementById('chatEmptyState');
+      if (emptyState) emptyState.classList.add('is-hidden');
       commissionerContext.textContent = selectedBandi.length > 1
         ? selectedBandi.length + ' bandi attivi · difficoltà ' + selectedDifficulty.toLowerCase() + ' · durata ' + selectedDuration + ' minuti'
         : selectedBandi[0].filename + ' · difficoltà ' + selectedDifficulty.toLowerCase() + ' · durata ' + selectedDuration + ' minuti';
@@ -1277,6 +1311,11 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       isThinking = true;
       answerInput.disabled = true;
       sendButton.disabled = true;
+      sendButton.classList.add('is-loading');
+      answerInput.classList.add('is-thinking');
+      answerInput.placeholder = 'La commissione sta analizzando la tua risposta...';
+      var cc = document.getElementById('commissionerCard');
+      if (cc) cc.classList.remove('question-active');
     }
 
     // Nasconde la thinking animation
@@ -1284,6 +1323,9 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       isThinking = false;
       answerInput.disabled = false;
       sendButton.disabled = false;
+      sendButton.classList.remove('is-loading');
+      answerInput.classList.remove('is-thinking');
+      answerInput.placeholder = 'Scrivi la tua risposta...';
       answerInput.focus();
     }
 
@@ -1365,6 +1407,8 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       }
 
       addMessage('assistant', messaggio, false);
+      var cc = document.getElementById('commissionerCard');
+      if (cc) cc.classList.add('question-active');
 
       if (feedbackData) {
         aggiornafeedbackLive(feedbackData);
@@ -1379,13 +1423,11 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
     // resta a 0/0/0 e `saveSimulationResult` salva zeri su Supabase.
     function aggiornafeedbackLive(newFeedback) {
       const map = { chiarezza: 'clarity', struttura: 'structure', contenuto: 'content' };
+      const dotColors = ['#EF4444','#F59E0B','#22C55E'];
       Object.entries(map).forEach(([key, engKey]) => {
         const raw = newFeedback[key];
         const val = typeof raw === 'number' ? Math.max(0, Math.min(10, Math.round(raw))) : 0;
-        // 1) aggiorna lo stato globale (cosi `voto_finale` e il salvataggio
-        //    su Supabase leggono i valori reali, non i default 0/0/0)
         feedback[engKey] = val;
-        // 2) aggiorna la UI (bar + score)
         const fill = document.getElementById(engKey + 'Fill');
         const score = document.getElementById(engKey + 'Score');
         const color = val < 5 ? '#EF4444' : val <= 7 ? '#2563EB' : '#22C55E';
@@ -1396,10 +1438,28 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
             fill.style.width = (val * 10) + '%';
           }
           fill.style.background = color;
+          fill.classList.remove('score-flash');
+          void fill.offsetWidth;
+          fill.classList.add('score-flash');
         }
         if (score) {
           score.textContent = val + '/10';
           score.style.color = color;
+          // Micro-dots indicator
+          var dotsContainer = score.parentNode.querySelector('.feedback-microdots');
+          if (!dotsContainer) {
+            dotsContainer = document.createElement('span');
+            dotsContainer.className = 'feedback-microdots';
+            score.parentNode.appendChild(dotsContainer);
+          }
+          dotsContainer.innerHTML = '';
+          for (var d = 0; d < 3; d++) {
+            var dot = document.createElement('span');
+            dot.className = 'dot';
+            var dotVal = d < Math.ceil(val / 3.34) ? color : '#E5E7EB';
+            dot.style.background = dotVal;
+            dotsContainer.appendChild(dot);
+          }
         }
       });
     }
@@ -1648,7 +1708,7 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
     async function endSimulation() {
       clearInterval(timerInterval);
       confirmModal.classList.add('hidden');
-      simulationPhase.classList.add('hidden');
+      simulationPhase.classList.add('phase-exit');
       await saveSimulationResult();
 
       const usedSeconds = Math.max(0, Math.round((Date.now() - startedAt) / 1000));
@@ -1686,7 +1746,12 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
         </section>
       `;
       try { localStorage.removeItem('cai_sim_in_progress'); } catch (_) {}
+      setTimeout(function () {
+        simulationPhase.style.display = 'none';
+        simulationPhase.classList.remove('phase-exit');
+      }, 400);
       summaryPhase.classList.remove('hidden');
+      summaryPhase.classList.add('phase-enter');
       if (window.gsap) gsap.from(summaryPhase.querySelector('.card'), { opacity: 0, y: 16, duration: .36, ease: 'power3.out' });
       if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
       spawnConfetti();
@@ -1713,10 +1778,25 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       gsap.from('.sim-navbar, .info-bar', { opacity: 0, y: -8, duration: .35, stagger: .06, ease: 'power2.out', paused: true });
     }
 
-    // Speech-to-text placeholder
+    // Speech-to-text con concentric wave rings UX
     var isRecording = false;
     var recognition = null;
     var voiceBtn = document.getElementById('voiceInputBtn');
+    function addVoiceRings(btn) {
+      if (!btn) return;
+      var existing = btn.querySelectorAll('.voice-ring');
+      existing.forEach(function (r) { r.remove(); });
+      for (var i = 0; i < 3; i++) {
+        var ring = document.createElement('span');
+        ring.className = 'voice-ring';
+        btn.appendChild(ring);
+      }
+    }
+    function removeVoiceRings(btn) {
+      if (!btn) return;
+      var rings = btn.querySelectorAll('.voice-ring');
+      rings.forEach(function (r) { r.remove(); });
+    }
     if (voiceBtn) {
       voiceBtn.addEventListener('click', function () {
         if (!isRecording) {
@@ -1734,6 +1814,7 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
             recognition.start();
             isRecording = true;
             voiceBtn.classList.add('recording');
+            addVoiceRings(voiceBtn);
             voiceBtn.setAttribute('aria-label', 'Ferma registrazione');
           } else {
             console.log('[ConcorsoAI] Speech recognition non supportato');
@@ -1742,6 +1823,7 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
           if (recognition) { recognition.stop(); recognition = null; }
           isRecording = false;
           voiceBtn.classList.remove('recording');
+          removeVoiceRings(voiceBtn);
           voiceBtn.setAttribute('aria-label', 'Input vocale');
         }
       });
@@ -1769,6 +1851,20 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
           if (cb) {
             cb();
           }
+        });
+      }
+
+      // Filtro ricerca bandi
+      var searchBandiInput = document.getElementById('searchBandi');
+      if (searchBandiInput) {
+        searchBandiInput.addEventListener('input', function () {
+          var q = this.value.toLowerCase().trim();
+          var cards = document.querySelectorAll('.bando-card');
+          cards.forEach(function (card) {
+            var name = card.querySelector('.bando-name');
+            var match = !q || (name && name.textContent.toLowerCase().indexOf(q) !== -1);
+            card.style.display = match ? '' : 'none';
+          });
         });
       }
 
@@ -1814,14 +1910,21 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
         });
       });
 
+      function updateDurationInfo() {
+        const q = selectedDuration === 10 ? 5 : selectedDuration === 20 ? 8 : 12;
+        const el = document.getElementById('estimatedQuestions');
+        if (el) el.textContent = '~' + q + ' domande';
+      }
       durationButtons.forEach(button => {
         button.addEventListener('click', () => {
           durationButtons.forEach(item => item.classList.remove('active'));
           button.classList.add('active');
           selectedDuration = Number(button.dataset.duration);
           sessionStorage.setItem('durata', selectedDuration.toString());
+          updateDurationInfo();
         });
       });
+      updateDurationInfo();
 
       startButton.addEventListener('click', startSimulation);
       endButton.addEventListener('click', requestEndSimulation);
@@ -1868,16 +1971,24 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       });
     }
 
+    function mostraFallbackMessaggio(messaggio) {
+      if (loader) loader.style.display = 'none';
+      var fallbackEl = document.createElement('div');
+      fallbackEl.id = 'initFallback';
+      fallbackEl.innerHTML = '<div style="padding:32px;max-width:560px;margin:0 auto;font-family:system-ui,sans-serif;text-align:center;margin-top:12vh"><div style="width:48px;height:48px;margin:0 auto 16px;border-radius:16px;background:linear-gradient(135deg,#0F4C81,#2563EB);display:grid;place-items:center;color:white;font-weight:800;font-size:1.2rem">CA</div><h1 style="font-size:1.25rem;color:#0B2A4A;margin:0">' + messaggio.split('\n')[0] + '</h1><p style="margin-top:10px;color:#4B6F8E;font-size:0.92rem;line-height:1.6">' + messaggio.split('\n').slice(1).join('<br>') || 'Prova a ricaricare la pagina o torna alla dashboard.</p><a href="dashboard.html" style="display:inline-block;margin-top:20px;padding:10px 24px;border-radius:999px;background:linear-gradient(135deg,#0F4C81,#2563EB);color:white;font-weight:700;text-decoration:none">Torna alla Dashboard</a></div>';
+      document.body.appendChild(fallbackEl);
+    }
+
     async function init() {
       if (!supabaseClient) {
-        window.location.href = 'auth.html';
+        mostraFallbackMessaggio('Connessione al database fallita\nIl client Supabase non &egrave; stato inizializzato correttamente. Verifica la connessione o contatta il supporto.');
         return;
       }
 
       try {
         const { data: { user }, error } = await supabaseClient.auth.getUser();
         if (error || !user) {
-          window.location.href = 'auth.html';
+          mostraFallbackMessaggio('Sessione non trovata\nEffettua il login dalla dashboard per accedere alla simulazione.');
           return;
         }
 
@@ -1908,10 +2019,12 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
         initPremiumInteractions();
         loader.style.display = 'none';
         configPhase.classList.remove('hidden');
+        configPhase.classList.add('phase-enter');
         animateInConfig();
       } catch (error) {
         loader.style.display = 'none';
         configPhase.classList.remove('hidden');
+        configPhase.classList.add('phase-enter');
         showToast(error.message || 'Errore caricamento simulazione', 'error');
       }
     }

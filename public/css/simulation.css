@@ -1,3 +1,211 @@
+    /* =========================================================
+       MODIFICHE UX: search bar, empty state, loading spinner,
+       skip button, disagree, duration info, progress head-start
+       ========================================================= */
+
+    .search-bandi-input {
+      width: 100%;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(37,99,235,.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,.6);
+      backdrop-filter: blur(4px);
+      font-size: .875rem;
+      font-weight: 500;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .search-bandi-input:focus {
+      border-color: rgba(37,99,235,.5);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1), 0 4px 16px rgba(37,99,235,.06);
+      background: rgba(255,255,255,.9);
+    }
+    .search-bandi-input::placeholder { color: #6B8BA5; font-weight: 500; }
+    .search-bandi-input:focus::placeholder { opacity: .6; }
+
+    .duration-info {
+      font-size: .82rem;
+      font-weight: 600;
+      color: #0F4C81;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(37,99,235,.06);
+      border: 1px solid rgba(37,99,235,.1);
+      line-height: 1.5;
+    }
+
+    /* Empty state della chat */
+    .chat-empty-state {
+      text-align: center;
+      padding: 32px 16px 24px;
+      opacity: 1;
+      transition: opacity .4s ease, transform .4s ease;
+      transform: translateY(0);
+    }
+    .chat-empty-state.is-hidden {
+      opacity: 0;
+      transform: translateY(-12px);
+      pointer-events: none;
+      position: absolute;
+    }
+    .empty-state-orb {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 14px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #0F4C81, #2563EB);
+      display: grid;
+      place-items: center;
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: .9rem;
+      box-shadow: 0 14px 34px rgba(37,99,235,.20);
+      animation: emptyOrbPulse 2.2s ease-in-out infinite;
+    }
+    @keyframes emptyOrbPulse {
+      0%, 100% { box-shadow: 0 14px 34px rgba(37,99,235,.20); transform: scale(1); }
+      50% { box-shadow: 0 18px 44px rgba(37,99,235,.30), 0 0 0 5px rgba(37,99,235,.06); transform: scale(1.04); }
+    }
+    .empty-state-title {
+      color: #0B2A4A;
+      font-size: .95rem;
+      font-weight: 750;
+      letter-spacing: -.01em;
+    }
+    .empty-state-subtitle {
+      margin-top: 4px;
+      color: #4B6F8E;
+      font-size: .82rem;
+      font-weight: 550;
+    }
+    .empty-state-wave {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 16px;
+      height: 14px;
+    }
+    .empty-state-wave span {
+      display: block;
+      width: 4px;
+      height: 5px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #2563EB, rgba(37,99,235,.28));
+      animation: emptyWave 1s ease-in-out infinite;
+    }
+    .empty-state-wave span:nth-child(2) { animation-delay: .12s; height: 8px; }
+    .empty-state-wave span:nth-child(3) { animation-delay: .24s; height: 12px; }
+    .empty-state-wave span:nth-child(4) { animation-delay: .36s; height: 8px; }
+    .empty-state-wave span:nth-child(5) { animation-delay: .48s; }
+    @keyframes emptyWave {
+      0%, 100% { transform: scaleY(.5); opacity: .4; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+
+    /* Loading spinner per send button */
+    .send-btn.is-loading {
+      pointer-events: none;
+      animation: none;
+    }
+    .send-btn.is-loading::before {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #FFFFFF;
+      border-radius: 50%;
+      animation: sendSpinner .6s linear infinite;
+    }
+    .send-btn.is-loading .send-btn-icon {
+      display: none;
+    }
+    @keyframes sendSpinner {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Textarea in stato thinking */
+    .answer-input.is-thinking {
+      opacity: .55;
+      cursor: wait;
+    }
+    .answer-input.is-thinking::placeholder {
+      color: #4B6F8E;
+      font-style: italic;
+    }
+
+    /* Briefing skip button — ad alto contrasto */
+    .briefing-skip-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 16px;
+      width: 100%;
+      border: 1px solid rgba(37,99,235,.22);
+      border-radius: 999px;
+      padding: 10px 18px;
+      background: rgba(255,255,255,.92);
+      color: #0F4C81;
+      font-size: .82rem;
+      font-weight: 850;
+      cursor: pointer;
+      transition: all .22s cubic-bezier(.2,.9,.2,1);
+      box-shadow: 0 2px 8px rgba(15,76,129,.06);
+    }
+    .briefing-skip-btn:hover {
+      background: #FFFFFF;
+      border-color: #2563EB;
+      color: #2563EB;
+      box-shadow: 0 6px 20px rgba(37,99,235,.14), 0 0 0 2px rgba(37,99,235,.06);
+      transform: translateY(-1px);
+    }
+    .briefing-skip-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.30);
+    }
+
+    /* Disagree button — più visibile come azione rapida */
+    #disagreeBtn {
+      position: relative;
+      border-color: rgba(37,99,235,.22);
+      background: linear-gradient(135deg, #FFFFFF, rgba(247,251,255,.8));
+      padding: 8px 14px;
+      font-size: .78rem;
+      font-weight: 850;
+      color: #0B3A63;
+      transition: all .22s cubic-bezier(.2,.9,.2,1);
+      box-shadow: 0 2px 8px rgba(15,76,129,.06);
+    }
+    #disagreeBtn:hover {
+      border-color: #F59E0B;
+      background: linear-gradient(135deg, #FFFBEB, #FFFEF5);
+      color: #B45309;
+      box-shadow: 0 6px 20px rgba(245,158,11,.16), 0 0 0 2px rgba(245,158,11,.08);
+      transform: translateY(-1px);
+    }
+    #disagreeBtn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(245,158,11,.30);
+    }
+    #disagreeBtn svg {
+      transition: transform .22s ease;
+    }
+    #disagreeBtn:hover svg {
+      transform: rotate(-8deg) scale(1.1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .chat-empty-state { transition: none; }
+      .empty-state-orb, .empty-state-wave span { animation: none !important; }
+      .briefing-skip-btn { transition: none; }
+      #disagreeBtn { transition: none; }
+      #disagreeBtn:hover { transform: none; }
+    }
+
     @keyframes pageFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     #configPhase, #simulationPhase, #summaryPhase, #briefingPhase { animation: pageFade .42s ease-out; }
 
@@ -826,6 +1034,7 @@
       color: #FFFFFF;
       font-size: 1.25rem;
       font-weight: 950;
+      position: relative;
       box-shadow: 0 12px 30px rgba(37,99,235,.22);
       transition: transform .18s ease, opacity .18s ease, background .18s ease;
     }
@@ -2243,5 +2452,111 @@
     @keyframes micPulse {
       0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,.35); }
       50% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+    }
+
+    /* =========================================================
+       VOICE RECORDING — concentric wave rings
+       ========================================================= */
+    #voiceInputBtn {
+      position: relative;
+      z-index: 1;
+    }
+    #voiceInputBtn .voice-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: inherit;
+      border: 2px solid rgba(220,38,38,.35);
+      pointer-events: none;
+      animation: voiceRingExpand 1.4s ease-out infinite;
+    }
+    #voiceInputBtn .voice-ring:nth-child(2) { animation-delay: .45s; }
+    #voiceInputBtn .voice-ring:nth-child(3) { animation-delay: .9s; }
+    @keyframes voiceRingExpand {
+      0% { transform: scale(1); opacity: .7; }
+      100% { transform: scale(1.9); opacity: 0; }
+    }
+    #voiceInputBtn.recording .voice-ring { display: block; }
+    #voiceInputBtn:not(.recording) .voice-ring { display: none; }
+
+    /* =========================================================
+       FEEDBACK MICRO-DOTS — animati all'arrivo
+       ========================================================= */
+    .feedback-microdots {
+      display: inline-flex;
+      gap: 4px;
+      margin-left: 8px;
+    }
+    .feedback-microdots .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      transform: scale(0);
+      animation: dotPop .35s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    .feedback-microdots .dot:nth-child(1) { animation-delay: 0s; }
+    .feedback-microdots .dot:nth-child(2) { animation-delay: .08s; }
+    .feedback-microdots .dot:nth-child(3) { animation-delay: .16s; }
+    @keyframes dotPop {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* =========================================================
+       PHASE TRANSITIONS — crossfade tra i tre <main>
+       ========================================================= */
+    #configPhase, #simulationPhase, #summaryPhase {
+      transition: opacity .35s ease, transform .35s ease;
+    }
+    #configPhase.phase-exit, #simulationPhase.phase-exit, #summaryPhase.phase-exit {
+      opacity: 0;
+      transform: translateY(-12px);
+      pointer-events: none;
+    }
+    #configPhase.phase-enter, #simulationPhase.phase-enter, #summaryPhase.phase-enter {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* =========================================================
+       MESSAGE ENTRANCE — enhanced slide-up + glow
+       ========================================================= */
+    .message-row {
+      animation: msgEntrance .4s cubic-bezier(.2,.9,.2,1) forwards;
+    }
+    @keyframes msgEntrance {
+      0% { opacity: 0; transform: translateY(10px) scale(.985); }
+      60% { opacity: 1; transform: translateY(-2px) scale(1.002); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .message-row.assistant .bubble {
+      transform-origin: top left;
+    }
+    .message-row.user .bubble {
+      transform-origin: top right;
+    }
+
+    /* Commissioner question glow — active state */
+    .commissioner-card.question-active {
+      border-color: rgba(37,99,235,.35);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.08), 0 14px 40px rgba(15,76,129,.12);
+      transition: border-color .3s ease, box-shadow .3s ease;
+    }
+
+    /* Feedback pulse ring on score update */
+    .feedback-fill.score-flash {
+      animation: scoreFlash .5s ease;
+    }
+    @keyframes scoreFlash {
+      0% { filter: brightness(1); }
+      50% { filter: brightness(1.4); }
+      100% { filter: brightness(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #voiceInputBtn .voice-ring,
+      .feedback-microdots .dot,
+      .message-row,
+      .commissioner-card.question-active { animation: none !important; transition: none !important; }
+      #voiceInputBtn .voice-ring { display: none !important; }
     }
 

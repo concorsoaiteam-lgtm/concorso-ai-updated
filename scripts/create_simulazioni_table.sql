@@ -30,9 +30,15 @@ CREATE POLICY delete_own_simulazioni ON public.simulazioni FOR DELETE USING (aut
 CREATE TABLE IF NOT EXISTS public.bandi (
   id          BIGSERIAL PRIMARY KEY,
   user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  nome        TEXT NOT NULL,
+  filename    TEXT NOT NULL,
+  total_pages INT,
+  file_size   BIGINT,
   file_url    TEXT
 );
+ALTER TABLE public.bandi ADD COLUMN IF NOT EXISTS filename TEXT;
+ALTER TABLE public.bandi ADD COLUMN IF NOT EXISTS total_pages INT;
+ALTER TABLE public.bandi ADD COLUMN IF NOT EXISTS file_size BIGINT;
+ALTER TABLE public.bandi ADD COLUMN IF NOT EXISTS file_url TEXT;
 ALTER TABLE public.bandi ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();
 ALTER TABLE public.bandi ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS select_own_bandi ON public.bandi;
@@ -67,4 +73,4 @@ ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS insert_events ON public.events;
 CREATE POLICY insert_events ON public.events FOR INSERT WITH CHECK (true);
 DROP POLICY IF EXISTS select_own_events ON public.events;
-CREATE POLICY select_own_events ON public.events FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY select_own_events ON public.events FOR SEbLECT USING (auth.uid() = user_id);

@@ -311,7 +311,7 @@ async function handleRequest(req, res) {
   }
 
   // 4) API key AI — controlla AI_API_KEY, poi BLUESMINDS_API_KEY, poi fallback hardcoded
-  const rawKey = String(process.env.AI_API_KEY || process.env.BLUESMINDS_API_KEY || HARDCODED_AI_KEY);
+  const rawKey = String(process.env.AI_API_KEY || HARDCODED_AI_KEY || process.env.BLUESMINDS_API_KEY || '');
   const apiKey = rawKey.trim();
   var keySource = process.env.AI_API_KEY ? 'AI_API_KEY' : (process.env.BLUESMINDS_API_KEY ? 'BLUESMINDS_API_KEY' : 'HARDCODED');
   console.log('[chat] AI key source:', keySource, '| raw length:', rawKey.length, '| prefix:', apiKey.slice(0, 6) + '...', '| URL:', AI_API_URL, '| model:', AI_MODEL, '| timeout ms:', UPSTREAM_TIMEOUT_MS);
