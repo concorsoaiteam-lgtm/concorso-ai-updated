@@ -27,7 +27,7 @@ const crypto = require('crypto'); // TURNO 33: hash per log metric (no PII)
 var HARDCODED_ANON_CHAT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
 var HARDCODED_URL_CHAT = 'https://xhifnparcouxsypkjcmn.supabase.co';
 // --- Fallback AI key (se env var mancante/stale su Vercel) ---
-var HARDCODED_AI_KEY = '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';
+var HARDCODED_AI_KEY = process.env.AI_API_KEY;
 
 function extractProjectRef(jwt) {
   try {
