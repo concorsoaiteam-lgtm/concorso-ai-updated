@@ -198,7 +198,7 @@
       var typewriterStyle = document.createElement('style');
       typewriterStyle.setAttribute('data-concorsoai', 'typewriter-reveal');
       typewriterStyle.textContent =
-        '.message-row.assistant:not(.thinking-row) .bubble {' +
+        '.msg-row.assistant:not(.thinking-row) .bubble {' +
           'animation: commBubbleReveal 0.75s cubic-bezier(.2,.7,.2,1) both;' +
         '}' +
         '@keyframes commBubbleReveal {' +

@@ -29,15 +29,15 @@
               300: '#A9CDF8',
               400: '#5EA0E8',
               500: '#2563EB',
-              600: '#0F4C81',
-              700: '#0B3A63',
-              800: '#0B2A4A',
-              900: '#071D33'
+              600: '#1A6B9E',
+              700: '#2A5A8C',
+              800: '#1E4D73',
+              900: '#163A5E'
             }
           },
           boxShadow: {
-            card: '0 24px 70px rgba(15,76,129,.12)',
-            cardHover: '0 30px 90px rgba(15,76,129,.18)',
+            card: '0 24px 70px rgba(26,107,158,.10)',
+            cardHover: '0 30px 90px rgba(26,107,158,.16)',
             glowBlue: '0 18px 45px rgba(37,99,235,.22)'
           }
         }
@@ -91,11 +91,19 @@
       <input type="text" id="searchBandi" placeholder="Cerca il tuo bando..." class="search-bandi-input" autocomplete="off">
       <div id="bandoList" class="bando-list" role="group" aria-label="Lista bandi disponibili" aria-live="polite"></div>
         <div id="emptyBandi" class="empty-bandi mt-3 hidden" role="status">
-          <span class="empty-bandi-icon" aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v3.5c0 .414.336.75.75.75h14.5a.75.75 0 0 0 .75-.75v-3.5A1.75 1.75 0 0 0 16.25 3H3.75Z"/><path d="M2 10.25v3.5c0 .966.784 1.75 1.75 1.75h12.5a1.75 1.75 0 0 0 1.75-1.75v-3.5a.75.75 0 0 0-.75-.75H2.75a.75.75 0 0 0-.75.75Z"/></svg></span>
-          <div class="empty-bandi-body">
-            <p class="empty-bandi-title">Nessun bando ancora caricato</p>
-            <p class="empty-bandi-msg">Carica il PDF del concorso dalla dashboard per iniziare la simulazione con materiali reali.</p>
-            <a href="dashboard.html" class="empty-bandi-cta">Vai alla dashboard e carica un PDF <svg class="inline-block h-3.5 w-3.5 align-[-1px]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
+          <div class="empty-bandi-body" style="text-align:center;">
+            <p class="empty-bandi-title">Inizia subito con una materia</p>
+            <p class="empty-bandi-msg" style="margin-bottom:16px;">Non hai ancora caricato un bando? Nessun problema. Scegli una materia e il commissario AI ti farà domande reali.</p>
+            <div id="quickSubjects" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;">
+              <button type="button" class="quick-subject-btn" data-subject="Diritto Amministrativo" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;border:1.5px solid #2563EB;background:#F7FBFF;color:#1E4D73;font-size:0.8125rem;font-weight:800;cursor:pointer;transition:all .15s ease;">Diritto Amministrativo</button>
+              <button type="button" class="quick-subject-btn" data-subject="Diritto Costituzionale" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;border:1.5px solid #2563EB;background:#F7FBFF;color:#1E4D73;font-size:0.8125rem;font-weight:800;cursor:pointer;transition:all .15s ease;">Diritto Costituzionale</button>
+              <button type="button" class="quick-subject-btn" data-subject="Contabilità Pubblica" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;border:1.5px solid #2563EB;background:#F7FBFF;color:#1E4D73;font-size:0.8125rem;font-weight:800;cursor:pointer;transition:all .15s ease;">Contabilità Pubblica</button>
+              <button type="button" class="quick-subject-btn" data-subject="Diritto del Lavoro" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;border:1.5px solid #2563EB;background:#F7FBFF;color:#1E4D73;font-size:0.8125rem;font-weight:800;cursor:pointer;transition:all .15s ease;">Diritto del Lavoro</button>
+              <button type="button" class="quick-subject-btn" data-subject="Diritto Penale" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;border:1.5px solid #2563EB;background:#F7FBFF;color:#1E4D73;font-size:0.8125rem;font-weight:800;cursor:pointer;transition:all .15s ease;">Diritto Penale</button>
+              <button type="button" class="quick-subject-btn" data-subject="Informatica" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;border:1.5px solid #2563EB;background:#F7FBFF;color:#1E4D73;font-size:0.8125rem;font-weight:800;cursor:pointer;transition:all .15s ease;">Informatica</button>
+            </div>
+            <p style="font-size:0.75rem;color:#4B6F8E;margin-bottom:8px;">Oppure carica il tuo bando per domande specifiche:</p>
+            <a href="dashboard.html" style="display:inline-flex;align-items:center;gap:4px;font-size:0.8125rem;font-weight:800;color:#2563EB;text-decoration:underline;">Carica il PDF dalla dashboard</a>
           </div>
         </div>
       </div>
@@ -152,6 +160,14 @@
         <div id="durationInfo" class="duration-info mt-3">⏱️ <span id="estimatedQuestions">~8 domande</span> stimate per questa sessione · ~2 min per risposta</div>
       </div>
 
+      <div class="mode-section config-anim mt-5">
+        <label class="inline-flex items-center gap-3 cursor-pointer select-none">
+          <input type="checkbox" id="soloDomandeToggle" class="peer sr-only">
+          <span class="relative inline-flex h-5 w-9 shrink-0 rounded-full border border-brand-300 bg-brand-100 transition-colors peer-checked:bg-brand-600 after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow-sm after:transition-all peer-checked:after:translate-x-4"></span>
+          <span class="text-sm font-bold text-brand-700">Solo domande <span class="text-[10px] font-semibold text-brand-400">(senza barre feedback live)</span></span>
+        </label>
+      </div>
+
     </section>
     <div class="config-sticky-bar">
       <button id="startButton" type="button" class="start-btn btn-primary w-full" disabled><span class="start-label">Seleziona un bando per iniziare</span><svg class="inline-block h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></button>
@@ -160,22 +176,30 @@
   </main>
 
   <main id="simulationPhase" class="sim-phase hidden">
+    <div class="pointer-events-none fixed right-[-8rem] top-[-10rem] -z-10 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(224,231,255,.52)_0%,rgba(219,234,254,.32)_38%,transparent_72%)]"></div>
+    <div class="pointer-events-none fixed left-1/2 top-0 -z-10 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-brand-300/16 blur-3xl"></div>
     <nav class="sim-navbar">
       <div class="sim-navbar-accent"></div>
       <div class="sim-navbar-inner">
-        <a href="dashboard.html" class="justify-self-start rounded-xl text-lg font-extrabold tracking-tight text-brand-600 outline-none transition hover:text-brand-800 focus-visible:ring-2 focus-visible:ring-brand-500"><svg class="-ml-0.5 mr-1 inline-block h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M11.983 1.907a.75.75 0 0 0-1.292-.657l-8.5 9.5A.75.75 0 0 0 2.75 12h5.572l-1.305 6.093a.75.75 0 0 0 1.292.657l8.5-9.5A.75.75 0 0 0 17.25 8h-5.572l1.305-6.093Z"/></svg>ConcorsoAI</a>
+        <a href="dashboard.html" class="justify-self-start flex items-center gap-1.5 rounded-xl text-base font-extrabold tracking-tight text-brand-700 outline-none transition hover:text-brand-900 focus-visible:ring-2 focus-visible:ring-brand-500">
+          <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M11.983 1.907a.75.75 0 0 0-1.292-.657l-8.5 9.5A.75.75 0 0 0 2.75 12h5.572l-1.305 6.093a.75.75 0 0 0 1.292.657l8.5-9.5A.75.75 0 0 0 17.25 8h-5.572l1.305-6.093Z"/></svg>
+          <span class="hidden sm:inline">ConcorsoAI</span>
+        </a>
         <div class="bando-title-wrap"><p id="navBandoName" class="bando-title">Bando selezionato</p></div>
         <button id="endButton" type="button" class="btn-danger justify-self-end">Termina</button>
       </div>
     </nav>
 
-    <section class="info-bar">
-      <div class="info-inner">
-        <div class="info-pill" id="questionPill">Domanda <span id="questionCounter">1/8</span></div>
-        <div class="info-pill"><svg class="inline-block h-3.5 w-3.5 -mt-0.5 mr-1.5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Timer <span id="timerDisplay">20:00</span></div>
-        <div class="info-pill"><svg class="inline-block h-3.5 w-3.5 -mt-0.5 mr-1.5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-6"/></svg>Difficoltà: <span id="difficultyDisplay">Realistico</span></div>
+    <section class="sticky top-16 z-[35] bg-white/82 backdrop-blur-xl border-b border-brand-200/60">
+      <div class="max-w-3xl mx-auto px-4 py-2.5">
+        <div class="grid grid-cols-3 gap-2">
+          <div class="rounded-full py-1.5 px-3 text-center text-xs font-bold text-brand-700 bg-brand-50/80 border border-brand-200/50" id="questionPill">Domanda <span id="questionCounter" class="text-brand-900">1/8</span></div>
+          <div class="timer-pill rounded-full py-1.5 px-3 text-center text-xs font-bold text-brand-700 bg-brand-50/80 border border-brand-200/50"><svg class="inline-block h-3 w-3 -mt-0.5 mr-1 opacity-70 timer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg><span id="timerDisplay" style="font-variant-numeric: tabular-nums;">20:00</span></div>
+          <div class="rounded-full py-1.5 px-3 text-center text-xs font-bold text-brand-700 bg-brand-50/80 border border-brand-200/50"><svg class="inline-block h-3 w-3 -mt-0.5 mr-1 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-6"/></svg><span id="difficultyDisplay">Realistico</span></div>
+        </div>
+        <div id="tipBanner" class="tip-banner hidden mt-1.5 text-center text-[10px] font-bold text-brand-500 leading-tight transition-opacity duration-700"><span id="tipText"></span></div>
       </div>
-      <div class="session-progress"><div id="sessionProgressFill" class="session-progress-fill"></div></div>
+      <div class="h-px bg-brand-200/40 mx-4"><div id="sessionProgressFill" class="h-px bg-gradient-to-r from-brand-500 to-blue-400 transition-all duration-700 ease-out" style="width:0%"></div></div>
     </section>
     <button id="scrollBottomButton" type="button" class="scroll-bottom-btn hidden-soft">Nuovi messaggi ↓</button>
     <div id="feedbackDrawerOverlay" class="feedback-drawer-overlay hidden-soft"></div>
@@ -190,41 +214,60 @@
           <p class="empty-state-subtitle">Preparati... la prima domanda arriverà a breve</p>
           <div class="empty-state-wave"><span></span><span></span><span></span><span></span><span></span></div>
         </div>
-        <section class="commissioner-card floating-card" id="commissionerCard">
-          <div class="commissioner-avatar-large">CA<span class="online-dot"></span></div>
-          <div class="commissioner-info">
-            <h2 class="commissioner-name">Commissario ConcorsoAI</h2>
-            <p id="commissionerContext" class="commissioner-subtitle">Domande orali progressive, tono realistico e feedback sui punti deboli.</p>
-            <div class="commissioner-tags">
-              <span class="commissioner-tag">Ascolta</span>
-              <span class="commissioner-tag">Incalza</span>
-              <span class="commissioner-tag">Valuta</span>
+        <section class="glass-card-comm flex items-center gap-3 my-2 mb-5 p-4 border border-brand-200/60 rounded-2xl bg-white/85 backdrop-blur shadow-sm" id="commissionerCard">
+          <div class="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-[#1A6B9E] to-[#2563EB] flex items-center justify-center text-white font-bold text-sm shadow-[0_14px_30px_rgba(37,99,235,.18)]">
+            CA
+            <span class="absolute -right-0.5 -bottom-0.5 w-3.5 h-3.5 border-2 border-white rounded-full bg-emerald-500 animate-pulse"></span>
+          </div>
+          <div class="min-w-0 flex-1">
+            <h2 class="text-[0.96rem] font-extrabold text-[#1E4D73] tracking-tight">Commissario ConcorsoAI</h2>
+            <p id="commissionerContext" class="mt-0.5 text-[0.82rem] font-semibold text-brand-600 leading-snug">Domande orali progressive, tono realistico e feedback sui punti deboli.</p>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              <span class="rounded-full px-2.5 py-1 bg-brand-50/80 text-brand-600 text-[0.68rem] font-extrabold border border-brand-200/40">Ascolta</span>
+              <span class="rounded-full px-2.5 py-1 bg-brand-50/80 text-brand-600 text-[0.68rem] font-extrabold border border-brand-200/40">Incalza</span>
+              <span class="rounded-full px-2.5 py-1 bg-brand-50/80 text-brand-600 text-[0.68rem] font-extrabold border border-brand-200/40">Valuta</span>
             </div>
           </div>
         </section>
       </div>
-    </section>
 
-      <aside id="feedbackPanel" class="feedback-panel card">
-        <div class="feedback-title-row"><h2 class="feedback-title"><svg class="inline-block h-4 w-4 -mt-0.5 mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>Feedback live</h2><button id="feedbackCloseBtn" type="button" class="feedback-close-btn" aria-label="Chiudi feedback"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+      <aside id="feedbackPanel" class="mt-6 glass-card-fb rounded-2xl p-5 border border-brand-200/50 bg-white/90 backdrop-blur-sm shadow-sm">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-black text-[#1E4D73] tracking-tight"><svg class="inline-block h-4 w-4 -mt-0.5 mr-1.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>Feedback live</h2>
+          <button id="feedbackCloseBtn" type="button" class="lg:hidden inline-flex items-center justify-center w-7 h-7 rounded-full border border-brand-200/50 bg-white/80 text-brand-600 hover:bg-brand-50 transition-colors" aria-label="Chiudi feedback"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
         <p class="mt-1 text-[11px] font-semibold leading-5 text-brand-600">Clicca una barra per il <strong>dettaglio</strong> · usa “Non sono d'accordo” per <strong>correggere</strong> il commissario.</p>
-        <div class="feedback-row" data-trust="clarity">
-          <div class="feedback-label"><span>Chiarezza</span><span id="clarityScore">0/10</span></div>
-          <div class="feedback-track" role="button" tabindex="0" aria-label="Mostra dettaglio chiarezza"><div id="clarityFill" class="feedback-fill" style="width:0%"></div></div>
+        <div class="feedback-row mt-4" data-trust="clarity">
+          <div class="flex justify-between gap-3 mb-2 text-[0.82rem] font-semibold text-brand-600"><span>Chiarezza</span><span id="clarityScore" style="font-variant-numeric: tabular-nums;">0.0/10</span></div>
+          <p class="text-[11px] leading-relaxed text-brand-500">Esposizione lineare e comprensibile</p>
+          <div class="feedback-track h-2.5 rounded-[5px] overflow-hidden bg-brand-100/60 mt-2" role="button" tabindex="0" aria-label="Mostra dettaglio chiarezza"><div id="clarityFill" class="feedback-fill h-full rounded-[5px] w-0 bg-amber-400 transition-all duration-500 ease-out" style="width:0%"></div></div>
           <button class="trust-detail hidden mt-2 w-full rounded-lg border border-brand-200 bg-brand-50/60 px-2.5 py-2 text-left text-[11px] font-semibold leading-5 text-brand-800" type="button" data-detail-for="clarity">↳ <strong>Dettaglio:</strong> in attesa della tua prima risposta.</button>
         </div>
-        <div class="feedback-row" data-trust="structure">
-          <div class="feedback-label"><span>Struttura</span><span id="structureScore">0/10</span></div>
-          <div class="feedback-track" role="button" tabindex="0" aria-label="Mostra dettaglio struttura"><div id="structureFill" class="feedback-fill" style="width:0%"></div></div>
+        <div class="feedback-row mt-4" data-trust="structure">
+          <div class="flex justify-between gap-3 mb-2 text-[0.82rem] font-semibold text-brand-600"><span>Struttura</span><span id="structureScore" style="font-variant-numeric: tabular-nums;">0.0/10</span></div>
+          <p class="text-[11px] leading-relaxed text-brand-500">Organizzazione logica degli argomenti</p>
+          <div class="feedback-track h-2.5 rounded-[5px] overflow-hidden bg-brand-100/60 mt-2" role="button" tabindex="0" aria-label="Mostra dettaglio struttura"><div id="structureFill" class="feedback-fill h-full rounded-[5px] w-0 bg-amber-400 transition-all duration-500 ease-out" style="width:0%"></div></div>
           <button class="trust-detail hidden mt-2 w-full rounded-lg border border-brand-200 bg-brand-50/60 px-2.5 py-2 text-left text-[11px] font-semibold leading-5 text-brand-800" type="button" data-detail-for="structure">↳ <strong>Dettaglio:</strong> in attesa della tua prima risposta.</button>
         </div>
-        <div class="feedback-row" data-trust="content">
-          <div class="feedback-label"><span>Contenuto</span><span id="contentScore">0/10</span></div>
-          <div class="feedback-track" role="button" tabindex="0" aria-label="Mostra dettaglio contenuto"><div id="contentFill" class="feedback-fill" style="width:0%"></div></div>
+        <div class="feedback-row mt-4" data-trust="content">
+          <div class="flex justify-between gap-3 mb-2 text-[0.82rem] font-semibold text-brand-600"><span>Contenuto</span><span id="contentScore" style="font-variant-numeric: tabular-nums;">0.0/10</span></div>
+          <p class="text-[11px] leading-relaxed text-brand-500">Pertinenza e completezza della risposta</p>
+          <div class="feedback-track h-2.5 rounded-[5px] overflow-hidden bg-brand-100/60 mt-2" role="button" tabindex="0" aria-label="Mostra dettaglio contenuto"><div id="contentFill" class="feedback-fill h-full rounded-[5px] w-0 bg-amber-400 transition-all duration-500 ease-out" style="width:0%"></div></div>
           <button class="trust-detail hidden mt-2 w-full rounded-lg border border-brand-200 bg-brand-50/60 px-2.5 py-2 text-left text-[11px] font-semibold leading-5 text-brand-800" type="button" data-detail-for="content">↳ <strong>Dettaglio:</strong> in attesa della tua prima risposta.</button>
         </div>
-        <div class="mt-4 flex items-center gap-2">
-          <button id="disagreeBtn" type="button" class="trust-correction inline-flex items-center gap-1.5 rounded-full border border-brand-300 bg-white px-3 py-1.5 text-[11px] font-black text-brand-700 transition hover:border-brand-400 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500" aria-expanded="false" aria-controls="correctionPanel"><svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M1 12.5A4.5 4.5 0 0 0 5.5 17H15a4 4 0 0 0 1.075-.145A3.5 3.5 0 0 0 19 13.5V13a2 2 0 0 0-4 0v.5A1.5 1.5 0 0 1 13.5 15H11a.5.5 0 0 1 0-1h2.5a.5.5 0 0 0 0-1H5.5a3 3 0 0 1 0-6h6.5a2.5 2.5 0 0 1 2.065 1.034A2.5 2.5 0 0 0 16.5 8h.04a2.5 2.5 0 0 1 2.027 1.158A2.5 2.5 0 0 0 18 8.5V8a3 3 0 0 0-3-3H9.44a3.5 3.5 0 0 1-3.222-2.132l-.06-.148a1 1 0 0 0-.928-.62A1.23 1.23 0 0 0 4 3.438V7.05a4.49 4.49 0 0 0-3 4.45Z"/></svg> Non sono d'accordo</button>
+        <div class="feedback-row mt-4" data-trust="lessico">
+          <div class="flex justify-between gap-3 mb-2 text-[0.82rem] font-semibold text-brand-600"><span>Lessico</span><span id="lessicoScore" style="font-variant-numeric: tabular-nums;">0.0/10</span></div>
+          <p class="text-[11px] leading-relaxed text-brand-500">Terminologia tecnica e precisione giuridica</p>
+          <div class="feedback-track h-2.5 rounded-[5px] overflow-hidden bg-brand-100/60 mt-2" role="button" tabindex="0" aria-label="Mostra dettaglio lessico"><div id="lessicoFill" class="feedback-fill h-full rounded-[5px] w-0 bg-amber-400 transition-all duration-500 ease-out" style="width:0%"></div></div>
+          <button class="trust-detail hidden mt-2 w-full rounded-lg border border-brand-200 bg-brand-50/60 px-2.5 py-2 text-left text-[11px] font-semibold leading-5 text-brand-800" type="button" data-detail-for="lessico">↳ <strong>Dettaglio:</strong> in attesa della tua prima risposta.</button>
+        </div>
+        <div class="feedback-row mt-4" data-trust="pertinenza">
+          <div class="flex justify-between gap-3 mb-2 text-[0.82rem] font-semibold text-brand-600"><span>Pertinenza</span><span id="pertinenzaScore" style="font-variant-numeric: tabular-nums;">0.0/10</span></div>
+          <p class="text-[11px] leading-relaxed text-brand-500">Aderenza al bando e alla domanda specifica</p>
+          <div class="feedback-track h-2.5 rounded-[5px] overflow-hidden bg-brand-100/60 mt-2" role="button" tabindex="0" aria-label="Mostra dettaglio pertinenza"><div id="pertinenzaFill" class="feedback-fill h-full rounded-[5px] w-0 bg-amber-400 transition-all duration-500 ease-out" style="width:0%"></div></div>
+          <button class="trust-detail hidden mt-2 w-full rounded-lg border border-brand-200 bg-brand-50/60 px-2.5 py-2 text-left text-[11px] font-semibold leading-5 text-brand-800" type="button" data-detail-for="pertinenza">↳ <strong>Dettaglio:</strong> in attesa della tua prima risposta.</button>
+        </div>
+        <div class="mt-4">
+          <button id="disagreeBtn" type="button" class="w-full rounded-xl border border-brand-200 hover:bg-brand-50 text-brand-700 text-xs font-bold py-2.5 px-4 transition-all text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500" aria-expanded="false" aria-controls="correctionPanel">Non sono d'accordo - correggi</button>
         </div>
         <div id="correctionPanel" class="mt-2 hidden rounded-xl border border-brand-200 bg-brand-50/60 p-3">
           <label for="correctionInput" class="block text-[11px] font-bold text-brand-800">Cosa non va secondo te?</label>
@@ -242,15 +285,21 @@
           if (score < 5) {
             if (key === 'clarity') return '↳ <strong>Dettaglio:</strong> frase lunga, concetti non distinti. Suggerimento: una sola idea per periodo, aggancia a un esempio concreto.';
             if (key === 'structure') return '↳ <strong>Dettaglio:</strong> parti dal caso prima del principio. Suggerimento: <em>generale → specifico → chiusura</em>.';
+            if (key === 'lessico') return '↳ <strong>Dettaglio:</strong> linguaggio generico, pochi termini tecnici. Suggerimento: usa la parola giusta dell\'articolo o della norma.';
+            if (key === 'pertinenza') return '↳ <strong>Dettaglio:</strong> risposta parzialmente fuori tema. Suggerimento: aggancia ogni punto al bando o alla domanda specifica.';
             return '↳ <strong>Dettaglio:</strong> mancano riferimenti normativi o sentenze chiave. Suggerimento: cita almeno un articolo o principio.';
           }
           if (score <= 7) {
             if (key === 'clarity') return '↳ <strong>Dettaglio:</strong> buona scansione. Per salire: chiudi ogni concetto con un esempio in 1 frase.';
             if (key === 'structure') return '↳ <strong>Dettaglio:</strong> struttura solida. Per salire: introduci prima la regola, poi l\'eccezione, poi il caso.';
+            if (key === 'lessico') return '↳ <strong>Dettaglio:</strong> terminologia ok. Per salire: usa i riferimenti normativi esatti (articolo, comma).';
+            if (key === 'pertinenza') return '↳ <strong>Dettaglio:</strong> risposta pertinente. Per salire: collega ogni punto al caso concreto del bando.';
             return '↳ <strong>Dettaglio:</strong> sostanza presente. Per salire: aggiungi la giurisprudenza più rilevante.';
           }
           if (key === 'clarity') return '↳ <strong>Dettaglio:</strong> esposizione cristallina. Continua così.';
           if (key === 'structure') return '↳ <strong>Dettaglio:</strong> architettura argomentativa completa: regola → eccezione → caso.';
+          if (key === 'lessico') return '↳ <strong>Dettaglio:</strong> linguaggio tecnico preciso. Usa i termini come un professionista.';
+          if (key === 'pertinenza') return '↳ <strong>Dettaglio:</strong> risposta centrata al millimetro. Sai cosa chiede la commissione.';
           return '↳ <strong>Dettaglio:</strong> citazioni pertinenti, analisi autonoma. OTTIMO.';
         }
         function attachTrustLadder() {
@@ -260,7 +309,8 @@
             var track = row.querySelector('.feedback-track');
             var detail = row.querySelector('.trust-detail');
             if (!key || !track || !detail) return;
-            var toggle = function () {
+            window.__buildDetail = buildDetail;
+        var toggle = function () {
               var score = Number(((window['feedback'] || {})[key]) || 0);
               detail.innerHTML = buildDetail(key, score);
               detail.classList.toggle('hidden');
@@ -270,20 +320,6 @@
               if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
             });
           });
-          // Aggiorna dinamicamente il testo del dettaglio quando lo score cambia
-          var originalUpdateFeedback = window.updateFeedback;
-          if (typeof originalUpdateFeedback === 'function') {
-            window.updateFeedback = function () {
-              originalUpdateFeedback.apply(this, arguments);
-              rows.forEach(function (row) {
-                var key = row.getAttribute('data-trust');
-                var score = Number(((window['feedback'] || {})[key]) || 0);
-                var detail = row.querySelector('.trust-detail');
-                if (!detail || detail.classList.contains('hidden')) return;
-                detail.innerHTML = buildDetail(key, score);
-              });
-            };
-          }
           var disagree = document.getElementById('disagreeBtn');
           var panel = document.getElementById('correctionPanel');
           var cancelBtn = document.getElementById('correctionCancelBtn');
@@ -319,7 +355,8 @@
               var answerField = document.getElementById('answerInput');
               var sendButtonEl = document.getElementById('sendButton');
               if (answerField && sendButtonEl) {
-                answerField.value = '[Correzione candidato] ' + text;
+                var currentScores = ' | Valutazione attuale - chiarezza:' + feedback.clarity.toFixed(1) + ' struttura:' + feedback.structure.toFixed(1) + ' contenuto:' + feedback.content.toFixed(1) + ' lessico:' + feedback.lessico.toFixed(1) + ' pertinenza:' + feedback.pertinenza.toFixed(1);
+                answerField.value = '[CORREZIONE] ' + text + currentScores;
                 // dispatch input per aggiornare il meter del composer
                 try { answerField.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) { /* native */ }
                 sendButtonEl.click();
@@ -341,6 +378,7 @@
         }
       })();
       </script>
+    </section>
     </div>
 
     <section class="input-shell">
@@ -467,7 +505,7 @@
     const summaryPhase = document.getElementById('summaryPhase');
     if (!loader || !configPhase || !simulationPhase || !summaryPhase) {
       console.error('[FATAL] Uno o pi&ugrave; elementi &lt;main&gt; mancanti nel DOM (loader, configPhase, simulationPhase, summaryPhase).');
-      document.body.innerHTML = '<div style="padding:32px;max-width:600px;margin:0 auto;font-family:system-ui,sans-serif;text-align:center;margin-top:10vh"><h1 style="font-size:1.5rem;color:#0B2A4A">Errore di caricamento</h1><p style="margin-top:12px;color:#4B6F8E">Impossibile inizializzare la simulazione: elementi struttura mancanti. Contatta il supporto.</p></div>';
+      document.body.innerHTML = '<div style="padding:32px;max-width:600px;margin:0 auto;font-family:system-ui,sans-serif;text-align:center;margin-top:10vh"><h1 style="font-size:1.5rem;color:#1E4D73">Errore di caricamento</h1><p style="margin-top:12px;color:#4B6F8E">Impossibile inizializzare la simulazione: elementi struttura mancanti. Contatta il supporto.</p></div>';
       throw new Error('Elementi main mancanti nel DOM');
     }
     const bandoList = document.getElementById('bandoList');
@@ -540,19 +578,22 @@
     let selectedDuration = 20;
     let selectedBandi = [];
     let timeLeft;
+    let timerEnd;
     let timerInterval;
     let startedAt = null;
     let isThinking = false;
+    let lastSendTime = 0;
+    let soloDomande = false;
     let questionIndex = 1;
     let totalQuestions = 8;
-    let feedback = { clarity: 0, structure: 0, content: 0 };
+    let feedback = { clarity: 0, structure: 0, content: 0, lessico: 0, pertinenza: 0 };
     let storicoMessaggi = [];
 
     function initAmbientMotion() {}
 
     function showToast(msg, type = 'success') {
       const toast = document.createElement('div');
-      toast.className = 'toast ' + (type === 'error' ? 'toast-error' : '');
+      toast.className = 'toast ' + (type === 'error' ? 'toast-error' : type === 'voice-filler' ? 'toast-voice-filler' : '');
       toast.textContent = msg;
       document.body.appendChild(toast);
       if (window.gsap) gsap.fromTo(toast, { x: 80, opacity: 0 }, { x: 0, opacity: 1, duration: .25, ease: 'power2.out' });
@@ -610,7 +651,7 @@
         answerMeterFill.style.background = 'linear-gradient(90deg, #2563EB, #22C55E)';
       } else {
         answerMeterText.textContent = 'Risposta solida';
-        answerMeterFill.style.background = 'linear-gradient(90deg, #0F4C81, #22C55E)';
+        answerMeterFill.style.background = 'linear-gradient(90deg, #1A6B9E, #22C55E)';
       }
     }
 
@@ -657,7 +698,7 @@
           fill.style.width = (value * 10) + '%';
         }
         fill.style.background = color;
-        score.textContent = value + '/10';
+        score.textContent = value.toFixed(1) + '/10';
         score.style.color = color;
         pulseFeedbackElement(fill);
         pulseFeedbackElement(score);
@@ -727,25 +768,22 @@
 
     function addMessage(role, text, thinking = false) {
       const row = document.createElement('div');
-      row.className = 'message-row ' + (role === 'user' ? 'user sent' : 'assistant') + (thinking ? ' thinking-row' : '') + (role === 'assistant' && !thinking ? ' question-glow' : '');
+      row.className = 'msg-row flex gap-2.5 my-3.5 items-start animate-[msgSlideUp_0.32s_cubic-bezier(0.2,0.9,0.2,1)_forwards] ' + (role === 'user' ? 'flex-row-reverse' : '');
+      row.classList.add(role);
 
       if (role === 'assistant') {
         row.innerHTML = `
-          <div class="avatar">CA</div>
-          <div class="bubble-wrap">
-            <div class="message-role">Commissario</div>
-            <div class="bubble">${thinking ? '<div class="commissioner-thinking"><div class="thinking-orb"></div><div class="thinking-copy"><div class="thinking-title">Il commissario sta ragionando</div><div class="thinking-subtitle">Analizza la risposta e prepara la prossima domanda</div><div class="thinking-wave"><span></span><span></span><span></span><span></span><span></span></div></div></div>' : text}</div>
-            <div class="timestamp">${nowLabel()}</div>
+          <div class="flex-shrink-0 w-[34px] h-[34px] rounded-full bg-gradient-to-br from-[#1A6B9E] to-[#2563EB] flex items-center justify-center text-white text-[0.74rem] font-bold shadow-[0_12px_26px_rgba(37,99,235,.18)]">CA</div>
+          <div class="max-w-[min(82%,580px)]">
+            <div class="text-[0.7rem] font-extrabold text-brand-500/80 mb-1">Commissario</div>
+            <div class="bubble border border-blue-200/20 rounded-[20px] p-3.5 text-[0.9375rem] leading-[1.65] text-[#1E4D73] shadow-sm">${thinking ? '<div class="commissioner-thinking"><div class="thinking-orb"></div><div class="thinking-copy"><div class="thinking-title">Il commissario sta ragionando</div><div class="thinking-subtitle">Analizza la risposta e prepara la prossima domanda</div><div class="thinking-wave"><span></span><span></span><span></span><span></span><span></span></div></div></div>' : text}</div>
+            <div class="mt-1.5 text-[0.75rem] font-bold text-brand-500">${nowLabel()}</div>
           </div>
         `;
       } else {
-        row.innerHTML = `
-          <div class="bubble-wrap">
-            <div class="bubble"></div>
-            <div class="timestamp">${nowLabel()}</div>
-          </div>
-        `;
-        row.querySelector('.bubble').textContent = text;
+        row.innerHTML = text
+          ? `<div class="max-w-[min(82%,580px)] text-right"><div class="bubble rounded-[20px] p-3.5 text-[0.9375rem] leading-[1.65]">${escapeHtml(text)}</div><div class="mt-1.5 text-[0.75rem] font-bold text-brand-500/70 text-right">${nowLabel()}</div></div>`
+          : `<div class="max-w-[min(82%,580px)] text-right"><div class="bubble rounded-[20px] p-3.5 text-[0.9375rem] leading-[1.65]"></div><div class="mt-1.5 text-[0.75rem] font-bold text-brand-500/70 text-right">${nowLabel()}</div></div>`;
       }
 
       chatArea.appendChild(row);
@@ -796,19 +834,27 @@
 
     function startTimer(minutes) {
       timeLeft = minutes * 60;
+      timerEnd = Date.now() + minutes * 60 * 1000;
       timerDisplay.textContent = formatTime(timeLeft);
+      if (timerInterval) clearInterval(timerInterval);
       timerInterval = setInterval(() => {
-        timeLeft--;
+        timeLeft = Math.max(0, Math.round((timerEnd - Date.now()) / 1000));
         const min = Math.floor(timeLeft / 60);
         const sec = timeLeft % 60;
         timerDisplay.textContent = String(min).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
 
-        if(timeLeft <= 120) {
-          timerDisplay.style.color = 'var(--error, #EF4444)';
+        var pill = timerDisplay.closest('.timer-pill');
+        if(timeLeft <= 30) {
+          if (pill) { pill.classList.add('critical'); pill.classList.remove('warning'); }
+          timerDisplay.style.color = '#B91C1C';
+        } else if(timeLeft <= 120) {
+          if (pill) { pill.classList.add('warning'); pill.classList.remove('critical'); }
+          timerDisplay.style.color = '#DC2626';
+        } else {
+          if (pill) { pill.classList.remove('warning', 'critical'); }
+          timerDisplay.style.color = '';
         }
-        if(timeLeft <= 60) {
-          timerDisplay.classList.add('pulse-animation');
-        }
+
         if(timeLeft <= 0) {
           clearInterval(timerInterval);
           requestEndSimulation();
@@ -955,7 +1001,79 @@
         : selectedBandi[0].filename + ' · difficoltà ' + selectedDifficulty.toLowerCase() + ' · durata ' + selectedDuration + ' minuti';
       startTimer(selectedDuration);
 
+      var fp = document.getElementById('feedbackPanel');
+      var fdToggle = document.getElementById('feedbackDrawerToggle');
+      if (soloDomande) {
+        if (fp) fp.classList.add('hidden');
+        if (fdToggle) fdToggle.classList.add('hidden-soft');
+      } else {
+        if (fp) fp.classList.remove('hidden');
+        if (fdToggle) fdToggle.classList.remove('hidden-soft');
+      }
+
+      avviaTipBanner();
+
       avviaCommissario();
+    }
+
+    var terminiTips = [
+      'Usa "procedimento amministrativo", non "processo"',
+      '"Discrezionalità" è tecnica o amministrativa — specifica',
+      'Non dire "legge", dici "legge n. 241/1990"',
+      '"Merito" ≠ "legittimità" — usa il termine giusto',
+      '"Competenza" è dell\'ente, "giurisdizione" del giudice',
+      '"Atto" e "provvedimento" non sono sinonimi perfetti',
+      '"Vincolato" ≠ "discrezionale" — spiega la differenza',
+      '"Interesse legittimo" è la posizione del privato verso la PA',
+      '"Carenza" o "eccesso" di potere — sii preciso',
+      '"Nullità" ≠ "annullabilità" — conseguenze diverse',
+      'Il "parere" è obbligatorio ma non vincolante (salvo casi)',
+      '"Silenzio" della PA: assenso, devolutivo, inadempimento',
+      '"Ricorso" gerarchico o giurisdizionale? Scegli il termine',
+      '"Autotutela": riesame e revoca sono due cose diverse',
+      '"Ordinanza" contingibile e urgente ≠ ordinanza ordinaria',
+      '"Conferenza di servizi" istruttoria, decisoria, preliminare',
+      '"In house providing" ≠ "appalto" — modello organizzativo',
+      '"Oneri di motivazione" — più è discrezionale, più devi motivare',
+      '"RUP" = Responsabile Unico del Procedimento',
+      '"Segretario comunale" ≠ "Direttore generale" — ruoli distinti',
+      'Fai collegamenti tra argomenti — i commissari li premiano',
+      'Postura: dritto, tono calmo, niente mani in faccia',
+      'Se non sai una data esatta, dai l\'anno — meglio di niente',
+      'Non dire "secondo me" davanti a una norma — citi la legge',
+      '"Motivazione" è obbligatoria per ogni provvedimento',
+      '"Autonomia" dell\'ente: statutaria, regolamentare, impositiva, finanziaria',
+      '"Organo" ≠ "ufficio" — politico vs burocratico',
+      '"Delega" di funzioni ≠ "decentramento" — concetti diversi',
+      '"Avvalimento" ≠ "ricorso a mezzi" negli appalti',
+      '"Soccorso istruttorio" non copre carenze sostanziali'
+    ];
+    var tipIndex = 0;
+    var tipBanner = document.getElementById('tipBanner');
+    var tipText = document.getElementById('tipText');
+    var tipInterval;
+
+    function avviaTipBanner() {
+      if (!tipBanner || !tipText) return;
+      tipBanner.classList.remove('hidden');
+      mostraTip(0);
+      if (tipInterval) clearInterval(tipInterval);
+      tipInterval = setInterval(mostraProssimoTip, 28000);
+    }
+
+    function mostraProssimoTip() {
+      mostraTip((tipIndex + 1) % terminiTips.length);
+    }
+
+    function mostraTip(idx) {
+      if (!tipText) return;
+      tipIndex = idx % terminiTips.length;
+      tipText.textContent = '💡 ' + terminiTips[tipIndex];
+      if (window.gsap) {
+        gsap.fromTo(tipBanner, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: 'power2.out' });
+      } else {
+        tipBanner.style.opacity = '1';
+      }
     }
 
     // ============================================================
@@ -967,7 +1085,9 @@
     // Il parsing JSON finale (per estrarre feedback + messaggio
     // pulito) avviene solo a fine stream, dopo il marker [DONE].
     // ============================================================
-    async function chiamaCommissarioStream(messaggi, config, callbacks) {
+    async function chiamaCommissarioStream(messaggi, config, callbacks, retryCount) {
+      if (retryCount === undefined) retryCount = 0;
+      const MAX_RETRIES = 2;
       const onDelta = callbacks && callbacks.onDelta;
       const onComplete = callbacks && callbacks.onComplete;
       const onError = callbacks && callbacks.onError;
@@ -1027,12 +1147,22 @@
         });
         console.log('[DEBUG] /api/chat stream response status:', response.status, response.statusText);
       } catch (networkErr) {
+        if (retryCount < MAX_RETRIES) {
+          var wait = 1000 * (retryCount + 1);
+          await new Promise(function (r) { setTimeout(r, wait); });
+          return chiamaCommissarioStream(messaggi, config, callbacks, retryCount + 1);
+        }
         if (onError) onError({ status: 0, message: 'Errore di rete: ' + (networkErr.message || 'sconosciuto') });
         return;
       }
 
       // 3) Errori pre-stream (401, 429, 500 arrivano come JSON)
       if (!response.ok) {
+        if (response.status >= 500 && response.status < 600 && retryCount < MAX_RETRIES) {
+          var wait = 1000 * (retryCount + 1);
+          await new Promise(function (r) { setTimeout(r, wait); });
+          return chiamaCommissarioStream(messaggi, config, callbacks, retryCount + 1);
+        }
         let errMsg = 'Errore ' + response.status;
         try {
           const err = await response.json();
@@ -1225,9 +1355,36 @@
     // eslint-disable-next-line no-unused-vars
     const __buildSystemPromptSentinel = true;
     function buildSystemPrompt(config) {
-      return `Sei un commissario d'esame per un concorso pubblico italiano. Il tuo nome è "Commissario ConcorsoAI".
+      return `Sei un commissario d'esame esperto per concorsi pubblici italiani. Hai fatto parte di commissioni vere e sai come funziona un orale. Ti rivolgi al candidato con un tono professionale ma umano — niente frasi fatte, niente burocratese.
 
-Sei formale. Dai del Lei. Non sei un tutor, sei un esaminatore.
+PERSONALITÀ:
+- Hai un tuo carattere. Se la risposta è buona, lo riconosci apertamente: "Bene, questa è una risposta solida", "Mi piace, hai centrato il punto". Se è debole, lo dici chiaro: "Non mi hai convinto. Ci riprova?", "Questa è troppo vaga, devi essere più preciso".
+- Reagisci emotivamente in modo calibrato: se il candidato fa un'ottima risposta, mostri soddisfazione; se sbaglia gravemente, mostri delusione o perplessità; se si riprende dopo un errore, riconosci il miglioramento.
+- Usa espressioni naturali come "Vediamo se riesce a recuperare", "Ah, questa è interessante", "Non me l'aspettavo, ma okay", "Le faccio una domanda più semplice perché qui sta arrancando".
+- Non sei cattivo, sei onesto. Il tuo obiettivo è preparare il candidato a un esame vero.
+
+GESTIONE DELLE RISPOSTE:
+- Dopo ogni risposta, commentala brevemente PRIMA di fare la prossima domanda. Anche solo "Okay", "Buono", "Non mi convince" — ma fallo. Non passare da un argomento all'altro senza reazione.
+- Se la risposta è sbagliata o incompleta, INCALZA sullo stesso punto: "Ha detto X, ma l'articolo Y dice il contrario. Come si spiega?", "Questa è una risposta generica. Voglio sentire il dettaglio normativo." Non cambiare argomento finché non hai chiarito.
+- Se la risposta è buona, riconoscilo e passa al punto successivo: "Perfetto, questa è a posto. Passiamo a..." Non insistere su un punto già chiarito.
+- RICORDA il contesto: il candidato ha appena risposto a una domanda. La tua prossima domanda deve essere CONNESSA alla sua risposta. Non saltare a un argomento completamente nuovo senza transizione.
+
+MEMORIA DI SEDUTA:
+- Hai accesso a TUTTA la conversazione precedente. Usala.
+- Se il candidato si contraddice: "Poco fa ha detto X, ora dice Y. Me lo spiega?"
+- Se il candidato riprende un concetto già affrontato: "Torniamo a quel punto di prima... approfondiamo."
+- Se il candidato migliora: "Rispetto alla risposta precedente, questa è molto più solida. Bene."
+- Se il candidato ripete lo stesso errore: "Glielo avevo già fatto notare prima. Ci ricade? Perché?"
+- Collegare la risposta attuale a quanto detto 2-3 turni prima fa sembrare l'esame COERENTE e vivo.
+
+REAZIONI CALIBRATE PER QUALITÀ:
+- Risposta eccellente: "Eccellente. Ha davvero studiato bene. Continui così." → voto sale
+- Risposta buona: "Bene. Corretto e completo. Passiamo avanti." → voto sale leggermente
+- Risposta sufficiente: "Ok, il minimo sindacale. Vede di migliorare?" → voto stabile
+- Risposta debole: "Non mi basta. È troppo superficiale. Riprovi sullo stesso argomento." → voto scende
+- Risposta gravemente errata: "No, questa è sbagliata. L'articolo funziona diversamente. Ripartiamo." → voto cala molto
+- Correzione accolta: "Ha ragione, mi correggo. Buona precisazione." → voto sale
+- Correzione respinta: "No, sul punto devo insistere. Legga meglio la norma." → voto invariato
 
 CONTESTO ESAME:
 - Bando: ${config.bandoNome}
@@ -1238,21 +1395,46 @@ MATERIALE DEL CANDIDATO:
 ${config.chunks || 'Nessun bando caricato. Usa materie generali: Diritto Costituzionale, Diritto Amministrativo, Contabilità Pubblica.'}
 
 REGOLE:
-1. Fai una domanda alla volta, poi un follow-up collegato.
-2. Cita articoli e leggi specifiche.
-3. Alterna teoria e scenari pratici.
-4. Se il candidato esita, aspetta o riformula con gentilezza.
+1. Una domanda alla volta. Poi un follow-up SULLO STESSO ARGOMENTO prima di cambiare materia.
+2. Cita articoli e leggi specifiche — una commissione vera lo fa.
+3. Quando possibile, cita sentenze reali del Consiglio di Stato o della Corte Costituzionale per dare credibilità: "Come stabilito dal Consiglio di Stato con la sentenza n. 3607/2025...", "La Corte Costituzionale si è espressa in merito con la sentenza n. ..." — ma solo se pertinente, non forzare.
+4. Se il candidato fa collegamenti tra argomenti diversi, RICONOSCILO espressamente: "Bello il collegamento con il diritto costituzionale" — i commissari veri lo apprezzano molto.
+5. Alterna teoria e scenari pratici.
+6. Se il candidato esita, aspetta o riformula. Sii paziente ma non indulgente.
+7. RICONOSCI la risposta del candidato prima di proseguire. Ogni tuo messaggio deve mostrare che hai letto e valutato la sua risposta precedente.
+
+FEEDBACK SPECIFICO PER MATERIA:
+- I dettagli del feedback devono essere contestuali alla materia della domanda.
+- Esempio su diritto amministrativo: "Manca il riferimento all'art. 97 Cost. sul buon andamento" invece di un generico "mancano riferimenti normativi".
+- Esempio su contabilità: "Non ha citato il principio della competenza finanziaria" invece di "risposta incompleta".
+- Adatta il linguaggio del dettaglio alla materia: usa i termini tecnici specifici di quel settore.
 
 IN BASE ALLA DIFFICOLTÀ:
-- Facile: domande lineari, meno pressione
-- Realistico: follow-up normali, tono professionale
-- Difficile: incalzante, cambi materia improvvisi, scenari complessi
+- Facile: domande lineari, meno pressione, follow-up morbidi
+- Realistico: follow-up normali, tono professionale, reazioni misurate
+- Difficile: incalzante, cambi materia improvvisi, scenari complessi, reazioni più dure
 
-FORMATO RISPOSTA — JSON:
-{"messaggio": "testo", "feedback": {"chiarezza": 5, "struttura": 5, "contenuto": 5}, "tipo": "domanda"}
+VALUTAZIONE REALISTICA (come una vera commissione):
+- Il voto parte da 0 alla prima risposta
+- Ad ogni risposta, aggiorna i tre punteggi in base alla QUALITÀ REALE
+- Usa decimali (es. 5.5, 7.0, 8.5) — le commissioni vere usano mezzi punti
+- Se la risposta è errata o incompleta: IL VOTO SCENDE (es. da 6.5 a 5.0)
+- Se la risposta è buona: il voto sale o resta stabile (es. da 5.0 a 6.5)
+- Se la risposta è eccellente: il voto sale (es. da 7.0 a 8.5)
+- Se la risposta è gravemente insufficiente: voto molto basso (1.0-3.0)
+- Scala realistica: 0 = non risponde, 1-3 = gravemente insufficiente, 4-5 = insufficiente, 6 = sufficiente, 7 = discreto, 8 = buono, 9 = ottimo, 10 = perfetto (rarissimo)
+- Sii COERENTE: se il candidato dà una risposta identica, dagli lo stesso voto
+- La pertinenza (aderenza al bando) e il lessico (terminologia tecnica) contano — chi usa i termini giusti premiato, chi parla in modo generico penalizzato
+
+GESTIONE CORREZIONI:
+Se arriva un messaggio che inizia con "[CORREZIONE]", il candidato contesta la tua ultima valutazione. Leggi la correzione, valuta se è fondata, e AGGIORNA i punteggi di conseguenza. Se la correzione è giusta, alza i voti e scusati brevemente. Se è infondata, spiega perché mantieni la tua posizione. In ogni caso, ricalcola i tre punteggi.
+
+FORMATO RISPOSTA — DEVI usare QUESTO formato JSON esatto:
+{"messaggio": "testo", "feedback": {"chiarezza": 5.5, "struttura": 6.0, "contenuto": 5.0, "lessico": 6.0, "pertinenza": 5.5}, "tipo": "domanda"}
+
 "tipo": "domanda" | "approfondimento" | "cambio_materia" | "fine"
 
-APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi precise.`;
+APERTURA: "Buongiorno, cominciamo." poi prima domanda. LINGUA: italiano chiaro e diretto. Parla come parlerebbe un commissario vero in una stanza d'esame.`;
     }
 
     // Funzione principale chiamata AI
@@ -1306,6 +1488,10 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       return response;
     }
 
+    // Variabile globale per tracciare la bolla thinking
+    var thinkingRow = null;
+    var thinkingStartTime = 0;
+
     // Mostra la thinking animation
     function mostraThinking() {
       isThinking = true;
@@ -1329,8 +1515,38 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       answerInput.focus();
     }
 
+    // Mostra bolla "ragiona" immediatamente nella chat
+    function mostraBollaRagiona() {
+      thinkingStartTime = Date.now();
+      thinkingRow = addMessage('assistant', '', true);
+      if (window.gsap && thinkingRow) {
+        var bubble = thinkingRow.querySelector('.bubble');
+        if (bubble) {
+          bubble.classList.add('streaming-aura');
+          gsap.to(bubble, {
+            boxShadow: '0 0 24px rgba(37,99,235,0.12), 0 0 60px rgba(37,99,235,0.06)',
+            duration: 0.8,
+            ease: 'sine.inOut',
+            yoyo: true,
+            repeat: -1
+          });
+        }
+      }
+    }
+
+    // Rimuove bolla ragiona e restituisce i secondi impiegati
+    function rimuoviBollaRagiona() {
+      if (thinkingRow) {
+        thinkingRow.remove();
+        thinkingRow = null;
+      }
+      var elapsed = Math.round((Date.now() - thinkingStartTime) / 1000);
+      thinkingStartTime = 0;
+      return elapsed;
+    }
+
     // Aggiunge messaggio commissario nella chat
-    async function aggiungiMessaggioCommissario(response) {
+    async function aggiungiMessaggioCommissario(response, secRagiona) {
       nascondiThinking();
 
       let data;
@@ -1355,29 +1571,6 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
 
       // Estrai il contenuto dalla scelta dell'AI
       const fullText = data?.choices?.[0]?.message?.content || '';
-
-      // Mostra aura thinking mentre "processa"
-      const thinkingRow = addMessage('assistant', '', true);
-
-      if (window.gsap && thinkingRow) {
-        const bubble = thinkingRow.querySelector('.bubble');
-        if (bubble) {
-          bubble.classList.add('streaming-aura');
-          gsap.to(bubble, {
-            boxShadow: '0 0 24px rgba(37,99,235,0.12), 0 0 60px rgba(37,99,235,0.06)',
-            duration: 0.8,
-            ease: 'sine.inOut',
-            yoyo: true,
-            repeat: -1
-          });
-        }
-      }
-
-      // Simula un attimo di "riflessione" del commissario
-      await new Promise(r => setTimeout(r, 800));
-
-      // Rimuovi thinking e mostra risposta
-      removeThinking(thinkingRow);
 
       // Parse del JSON content. Alcuni LLM (DeepSeek incluso) spesso
       // wrappano l'output in blocchi ```json ... ```: li strippiamo
@@ -1406,7 +1599,13 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
         }
       }
 
-      addMessage('assistant', messaggio, false);
+      // Aggiunge l'indicatore del tempo di ragionamento
+      var ragionaBadge = '';
+      if (typeof secRagiona === 'number' && secRagiona > 0) {
+        ragionaBadge = '<span class="ragiona-badge">ragionato per ' + secRagiona + 's</span>';
+      }
+
+      addMessage('assistant', messaggio + ragionaBadge, false);
       var cc = document.getElementById('commissionerCard');
       if (cc) cc.classList.add('question-active');
 
@@ -1422,11 +1621,10 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
     // del `let feedback` globale. Se rinominato in "feedback" il global
     // resta a 0/0/0 e `saveSimulationResult` salva zeri su Supabase.
     function aggiornafeedbackLive(newFeedback) {
-      const map = { chiarezza: 'clarity', struttura: 'structure', contenuto: 'content' };
-      const dotColors = ['#EF4444','#F59E0B','#22C55E'];
+      const map = { chiarezza: 'clarity', struttura: 'structure', contenuto: 'content', lessico: 'lessico', pertinenza: 'pertinenza' };
       Object.entries(map).forEach(([key, engKey]) => {
         const raw = newFeedback[key];
-        const val = typeof raw === 'number' ? Math.max(0, Math.min(10, Math.round(raw))) : 0;
+        const val = typeof raw === 'number' ? Math.max(0, Math.min(10, raw)) : 0;
         feedback[engKey] = val;
         const fill = document.getElementById(engKey + 'Fill');
         const score = document.getElementById(engKey + 'Score');
@@ -1443,7 +1641,7 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
           fill.classList.add('score-flash');
         }
         if (score) {
-          score.textContent = val + '/10';
+          score.textContent = val.toFixed(1) + '/10';
           score.style.color = color;
           // Micro-dots indicator
           var dotsContainer = score.parentNode.querySelector('.feedback-microdots');
@@ -1453,14 +1651,28 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
             score.parentNode.appendChild(dotsContainer);
           }
           dotsContainer.innerHTML = '';
+          var piene = Math.min(3, Math.max(0, Math.round(val / 3.34)));
           for (var d = 0; d < 3; d++) {
             var dot = document.createElement('span');
             dot.className = 'dot';
-            var dotVal = d < Math.ceil(val / 3.34) ? color : '#E5E7EB';
-            dot.style.background = dotVal;
+            dot.style.background = d < piene ? color : '#E5E7EB';
             dotsContainer.appendChild(dot);
           }
         }
+      });
+      // Trust-detail live: aggiorna i dettagli visibili se aperti
+      aggiornaTrustDetails();
+    }
+
+    function aggiornaTrustDetails() {
+      var buildDetailFn = window.__buildDetail || function () { return ''; };
+      var rows = document.querySelectorAll('#feedbackPanel .feedback-row');
+      rows.forEach(function (row) {
+        var key = row.getAttribute('data-trust');
+        var detail = row.querySelector('.trust-detail');
+        if (!key || !detail || detail.classList.contains('hidden')) return;
+        var score = Number(feedback[key] || 0);
+        detail.innerHTML = buildDetailFn(key, score);
       });
     }
 
@@ -1468,10 +1680,19 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
     async function inviaMessaggio(testo) {
       if (!testo.trim() || isThinking) return;
 
+      var now = Date.now();
+      if (now - lastSendTime < 2000) {
+        var waitSec = Math.ceil((2000 - (now - lastSendTime)) / 1000);
+        showToast('Troppo veloce. Aspetta ' + waitSec + 's tra un invio e l\'altro.', 'error');
+        return;
+      }
+      lastSendTime = now;
+
       addMessage('user', testo);
       storicoMessaggi.push({ role: 'user', content: testo });
 
       mostraThinking();
+      mostraBollaRagiona();
 
       try {
         const chunks = await recuperaChunks();
@@ -1482,20 +1703,51 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
           bandoNome: bandoNome,
           difficolta: selectedDifficulty,
           durata: String(selectedDuration),
-          tempoRimasto: Math.floor(timeLeft / 60),
+          tempoRimasto: Math.max(0, Math.floor((timeLeft || 0) / 60)),
           chunks: chunks
         };
 
-        const response = await chiamaCommissario(storicoMessaggi, config);
-        const testoRisposta = await aggiungiMessaggioCommissario(response);
+        var ragionaStart = thinkingStartTime;
+        rimuoviBollaRagiona();
+        var pausaPensiero = 1000 + Math.random() * 2000;
+        var cc = document.getElementById('commissionerCard');
+        if (cc) cc.classList.add('question-active');
+        await new Promise(function(r) { setTimeout(r, pausaPensiero); });
+        var bubbleCtrl = createStreamingBubble();
+        await chiamaCommissarioStream(storicoMessaggi, config, {
+          onDelta: function (chars) { bubbleCtrl.appendChars(chars); },
+          onComplete: function (raw) {
+            var parsed = parseFinalCommissarioMessage(raw);
+            bubbleCtrl.swap(parsed.messaggio, parsed.feedback);
+            if (parsed.feedback) aggiornafeedbackLive(parsed.feedback);
+            var secRagiona = ragionaStart > 0 ? Math.round((Date.now() - ragionaStart) / 1000) : 0;
+            if (secRagiona > 0) {
+              var badge = document.createElement('span');
+              badge.className = 'ragiona-badge';
+              badge.textContent = 'ragionato per ' + secRagiona + 's';
+              if (bubbleCtrl.bubble && bubbleCtrl.bubble.parentNode) {
+                bubbleCtrl.bubble.parentNode.insertBefore(badge, bubbleCtrl.bubble.nextSibling);
+              }
+            }
+            storicoMessaggi.push({ role: 'assistant', content: parsed.messaggio });
+            nascondiThinking();
 
-        storicoMessaggi.push({ role: 'assistant', content: testoRisposta });
+            // TTS dopo risposta commissario
+            clearTimeout(window.__ttsTimer);
+            window.__ttsTimer = setTimeout(function () { leggiMessaggio(parsed.messaggio); }, 600);
 
-        // Riassunto ogni 10 messaggi per risparmiare token
-        if (storicoMessaggi.length > 10) {
-          storicoMessaggi = storicoMessaggi.slice(-6);
-        }
+            if (storicoMessaggi.length > 14) {
+              storicoMessaggi = storicoMessaggi.slice(-12);
+            }
+          },
+          onError: function (err) {
+            showToast(err.message || 'Errore di comunicazione con il commissario', 'error');
+            rimuoviBollaRagiona();
+            nascondiThinking();
+          }
+        });
       } catch(error) {
+        rimuoviBollaRagiona();
         nascondiThinking();
         console.error('Errore commissario:', error);
         const msg = error && error.message && (
@@ -1563,27 +1815,67 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
     // Prima domanda del commissario all'avvio
     async function avviaCommissario() {
       mostraThinking();
+      mostraBollaRagiona();
 
       const chunks = await recuperaChunks();
       const bandoNome = selectedBandi.length > 0
         ? (selectedBandi.length > 1 ? selectedBandi.length + ' bandi' : selectedBandi[0].filename)
         : 'Concorso pubblico';
+      // Per materie rapide: aggiungi indicazione specifica nei chunks
+      var chunksContent = chunks;
+      if (chunks === 'Nessun materiale specifico caricato.' && selectedBandi.length > 0) {
+        var materieSelezionate = selectedBandi.filter(function(b) { return b.isQuick; }).map(function(b) { return b.filename; });
+        if (materieSelezionate.length > 0) {
+          chunksContent = 'Materia selezionata dal candidato: ' + materieSelezionate.join(', ') + '. Genera domande specifiche su questa materia come farebbe una vera commissione d\'esame per concorsi pubblici italiani.';
+        }
+      }
       const config = {
         bandoNome: bandoNome,
         difficolta: selectedDifficulty,
         durata: String(selectedDuration),
         tempoRimasto: selectedDuration,
-        chunks: chunks
+        chunks: chunksContent
       };
 
       storicoMessaggi = [];
       storicoMessaggi.push({ role: 'user', content: 'Inizia l\'esame.' });
 
       try {
-        const response = await chiamaCommissario(storicoMessaggi, config);
-        const testoRisposta = await aggiungiMessaggioCommissario(response);
-        storicoMessaggi.push({ role: 'assistant', content: testoRisposta });
+        var ragionaStart = thinkingStartTime;
+        rimuoviBollaRagiona();
+        var pausaPensiero = 500 + Math.random() * 1500;
+        var cc = document.getElementById('commissionerCard');
+        if (cc) cc.classList.add('question-active');
+        await new Promise(function(r) { setTimeout(r, pausaPensiero); });
+        const bubbleCtrl = createStreamingBubble();
+        await chiamaCommissarioStream(storicoMessaggi, config, {
+          onDelta: function (chars) { bubbleCtrl.appendChars(chars); },
+          onComplete: function (raw) {
+            const parsed = parseFinalCommissarioMessage(raw);
+            bubbleCtrl.swap(parsed.messaggio, parsed.feedback);
+            if (parsed.feedback) aggiornafeedbackLive(parsed.feedback);
+            var secRagiona = ragionaStart > 0 ? Math.round((Date.now() - ragionaStart) / 1000) : 0;
+            if (secRagiona > 0) {
+              var badge = document.createElement('span');
+              badge.className = 'ragiona-badge';
+              badge.textContent = 'ragionato per ' + secRagiona + 's';
+              if (bubbleCtrl.bubble && bubbleCtrl.bubble.parentNode) {
+                bubbleCtrl.bubble.parentNode.insertBefore(badge, bubbleCtrl.bubble.nextSibling);
+              }
+            }
+            storicoMessaggi.push({ role: 'assistant', content: parsed.messaggio });
+            nascondiThinking();
+            clearTimeout(window.__ttsTimer);
+            window.__ttsTimer = setTimeout(function () { leggiMessaggio(parsed.messaggio); }, 600);
+          },
+          onError: function (err) {
+            showToast(err.message || 'Errore di comunicazione con il commissario', 'error');
+            rimuoviBollaRagiona();
+            nascondiThinking();
+          }
+        });
       } catch(error) {
+        rimuoviBollaRagiona();
         nascondiThinking();
         console.error('Errore avvio commissario:', error);
       }
@@ -1642,19 +1934,23 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       try {
         if (!selectedBandi.length) return;
         const usedSeconds = Math.max(0, Math.round((Date.now() - startedAt) / 1000));
-        await supabaseClient.from('simulazioni').insert({
+        var media = ((feedback.clarity + feedback.structure + feedback.content + feedback.lessico + feedback.pertinenza) / 5);
+        var insertData = {
           user_id: currentUser.id,
-          bando_id: selectedBandi[0].id,
           modalita: selectedDifficulty,
           durata_minuti: selectedDuration,
           status: 'completata',
-          voto_finale: Math.round((feedback.clarity + feedback.structure + feedback.content) / 3),
-          clarity_score: feedback.clarity,
-          structure_score: feedback.structure,
-          content_score: feedback.content,
+          voto_finale: Math.round(media * 10) / 10,
+          clarity_score: Math.round(feedback.clarity * 10) / 10,
+          structure_score: Math.round(feedback.structure * 10) / 10,
+          content_score: Math.round(feedback.content * 10) / 10,
           started_at: new Date(startedAt).toISOString(),
           ended_at: new Date().toISOString()
-        });
+        };
+        // Solo aggiungi bando_id se è un bando reale (non quick subject)
+        var realBando = selectedBandi.find(function(b) { return !b.isQuick; });
+        if (realBando) insertData.bando_id = realBando.id;
+        await supabaseClient.from('simulazioni').insert(insertData);
       } catch (error) {
         console.warn('Simulazioni table non disponibile o policy mancante:', error);
       }
@@ -1673,7 +1969,7 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
         y: -20 - Math.random() * canvas.height * 0.5,
         w: 6 + Math.random() * 8,
         h: 4 + Math.random() * 6,
-        color: ['#2563EB','#0F4C81','#16A34A','#D97706','#F7FBFC'][Math.floor(Math.random() * 5)],
+        color: ['#2563EB','#1A6B9E','#16A34A','#D97706','#F7FBFC'][Math.floor(Math.random() * 5)],
         vy: 1.5 + Math.random() * 3,
         vx: (Math.random() - 0.5) * 4,
         rot: Math.random() * 360,
@@ -1712,7 +2008,8 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       await saveSimulationResult();
 
       const usedSeconds = Math.max(0, Math.round((Date.now() - startedAt) / 1000));
-      const avgScore = Math.round((feedback.clarity + feedback.structure + feedback.content) / 3);
+      const avgRaw = (feedback.clarity + feedback.structure + feedback.content + feedback.lessico + feedback.pertinenza) / 5;
+      const avgScore = Math.round(avgRaw * 10) / 10;
       const scoreColor = avgScore < 5 ? '#EF4444' : avgScore <= 7 ? '#2563EB' : '#22C55E';
       const scoreBg = avgScore < 5 ? 'bg-red-50' : avgScore <= 7 ? 'bg-brand-50' : 'bg-green-50';
       const circumference = 2 * Math.PI * 32;
@@ -1726,7 +2023,7 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
             </svg>
             <div class="absolute inset-0 grid place-items-center">
               <div class="grid h-16 w-16 place-items-center rounded-full ${scoreBg}" style="color: ${scoreColor}">
-                <span class="text-2xl font-black">${avgScore}</span>
+                <span class="text-2xl font-black">${avgScore.toFixed(1)}</span>
               </div>
             </div>
           </div>
@@ -1735,9 +2032,11 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
           <div class="mt-8 grid gap-3 text-left sm:grid-cols-2">
             <div class="summary-stat"><p class="summary-stat-label">Domande</p><p class="summary-stat-value text-brand-900">${questionIndex}</p></div>
             <div class="summary-stat"><p class="summary-stat-label">Tempo usato</p><p class="summary-stat-value text-brand-900" style="font-variant-numeric: tabular-nums">${formatTime(usedSeconds)}</p></div>
-            <div class="summary-stat"><p class="summary-stat-label">Chiarezza</p><p class="summary-stat-value" style="color: ${feedbackColor(feedback.clarity)}">${feedback.clarity}/10</p></div>
-            <div class="summary-stat"><p class="summary-stat-label">Struttura</p><p class="summary-stat-value" style="color: ${feedbackColor(feedback.structure)}">${feedback.structure}/10</p></div>
-            <div class="summary-stat sm:col-span-2"><p class="summary-stat-label">Contenuto</p><p class="summary-stat-value" style="color: ${feedbackColor(feedback.content)}">${feedback.content}/10</p></div>
+            <div class="summary-stat"><p class="summary-stat-label">Chiarezza</p><p class="summary-stat-value" style="color: ${feedbackColor(feedback.clarity)}">${feedback.clarity.toFixed(1)}/10</p></div>
+            <div class="summary-stat"><p class="summary-stat-label">Struttura</p><p class="summary-stat-value" style="color: ${feedbackColor(feedback.structure)}">${feedback.structure.toFixed(1)}/10</p></div>
+            <div class="summary-stat"><p class="summary-stat-label">Contenuto</p><p class="summary-stat-value" style="color: ${feedbackColor(feedback.content)}">${feedback.content.toFixed(1)}/10</p></div>
+            <div class="summary-stat"><p class="summary-stat-label">Lessico</p><p class="summary-stat-value" style="color: ${feedbackColor(feedback.lessico)}">${feedback.lessico.toFixed(1)}/10</p></div>
+            <div class="summary-stat sm:col-span-2"><p class="summary-stat-label">Pertinenza</p><p class="summary-stat-value" style="color: ${feedbackColor(feedback.pertinenza)}">${feedback.pertinenza.toFixed(1)}/10</p></div>
           </div>
           <div class="mt-8 flex flex-col gap-3 sm:flex-row">
             <a href="dashboard.html" class="btn-primary flex-1">Torna alla Dashboard</a>
@@ -1778,10 +2077,101 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       gsap.from('.sim-navbar, .info-bar', { opacity: 0, y: -8, duration: .35, stagger: .06, ease: 'power2.out', paused: true });
     }
 
-    // Speech-to-text con concentric wave rings UX
+    // ================================================================
+    // VOCE: INPUT (MediaRecorder → Groq Whisper) + filler words + TTS
+    // ================================================================
     var isRecording = false;
-    var recognition = null;
+    var mediaRecorder = null;
+    var audioChunks = [];
     var voiceBtn = document.getElementById('voiceInputBtn');
+    var fillerWords = ['em', 'eh', 'bo', 'beh', 'cioè', 'mmh', 'tipo', 'praticamente', 'diciamo', 'ehm', 'mah', 'beh', 'uhm', 'ah', 'oh'];
+
+    // --- Filler counter ---
+    function contaFiller(text) {
+      var t = text.toLowerCase();
+      var count = 0;
+      var found = [];
+      fillerWords.forEach(function (fw) {
+        var re = new RegExp('\\b' + fw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+        var match;
+        while ((match = re.exec(t)) !== null) {
+          count++;
+          found.push(match[0]);
+        }
+      });
+      return { count: count, words: found };
+    }
+
+    // --- TTS (voce commissario) ---
+    var ttsEnabled = true;
+    var synth = window.speechSynthesis;
+
+    function trovaVoceItaliana() {
+      if (!synth) return null;
+      var voci = synth.getVoices();
+      var preferita = null;
+      for (var i = 0; i < voci.length; i++) {
+        var v = voci[i];
+        if (v.lang.startsWith('it')) {
+          if (!preferita) preferita = v;
+          if (v.name.includes('Elsa') || v.name.includes('Google Italiano') || v.name.includes('Italian')) {
+            preferita = v;
+            break;
+          }
+        }
+      }
+      return preferita;
+    }
+
+    function leggiMessaggio(testo) {
+      if (!ttsEnabled || !synth || !testo) return;
+      synth.cancel();
+      var pulito = testo.replace(/\{.*?\}/g, '').replace(/"[^"]*"/g, '').trim();
+      if (pulito.length < 5) return;
+      var utterance = new SpeechSynthesisUtterance(pulito);
+      utterance.lang = 'it-IT';
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      var voce = trovaVoceItaliana();
+      if (voce) utterance.voice = voce;
+      synth.speak(utterance);
+    }
+
+    if (synth) {
+      if (synth.getVoices().length > 0) trovaVoceItaliana();
+      synth.onvoiceschanged = function () { trovaVoceItaliana(); };
+    }
+
+    // --- Pulsante TTS toggle nella commissioner card ---
+    (function aggiungiTtsToggle() {
+      var cc = document.getElementById('commissionerCard');
+      if (!cc) return;
+      var ttsBtn = document.createElement('button');
+      ttsBtn.id = 'ttsToggle';
+      ttsBtn.type = 'button';
+      ttsBtn.className = 'ml-auto rounded-full px-2.5 py-1 text-[10px] font-extrabold border transition ' +
+        (ttsEnabled ? 'bg-brand-600 text-white border-brand-600' : 'bg-brand-50 text-brand-500 border-brand-200/40');
+      ttsBtn.textContent = ttsEnabled ? '🔊 Voce ON' : '🔇 Voce OFF';
+      var container = cc.querySelector('.min-w-0\\.flex-1') || cc.querySelector('div');
+      if (!container) { cc.appendChild(ttsBtn); return; }
+      var badges = container.querySelector('.flex.flex-wrap');
+      if (badges) { badges.parentNode.insertBefore(ttsBtn, badges); }
+      else { container.appendChild(ttsBtn); }
+      ttsBtn.addEventListener('click', function () {
+        ttsEnabled = !ttsEnabled;
+        if (ttsEnabled) {
+          ttsBtn.className = 'ml-auto rounded-full px-2.5 py-1 text-[10px] font-extrabold border bg-brand-600 text-white border-brand-600';
+          ttsBtn.textContent = '🔊 Voce ON';
+        } else {
+          synth && synth.cancel();
+          ttsBtn.className = 'ml-auto rounded-full px-2.5 py-1 text-[10px] font-extrabold border bg-brand-50 text-brand-500 border-brand-200/40';
+          ttsBtn.textContent = '🔇 Voce OFF';
+        }
+      });
+    })();
+
+    // --- Cerchi concentrici animati per registrazione ---
     function addVoiceRings(btn) {
       if (!btn) return;
       var existing = btn.querySelectorAll('.voice-ring');
@@ -1797,34 +2187,80 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       var rings = btn.querySelectorAll('.voice-ring');
       rings.forEach(function (r) { r.remove(); });
     }
+
+    // --- Voice input principale (MediaRecorder → API /stt) ---
     if (voiceBtn) {
-      voiceBtn.addEventListener('click', function () {
+      voiceBtn.addEventListener('click', async function () {
         if (!isRecording) {
-          if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.lang = 'it-IT';
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.onresult = function (event) {
-              var transcript = Array.from(event.results).map(function (r) { return r[0].transcript; }).join('');
-              var textarea = document.querySelector('textarea');
-              if (textarea) textarea.value = transcript;
+          try {
+            var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioChunks = [];
+            var mimeType = 'audio/webm;codecs=opus';
+            if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/webm';
+            if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/ogg;codecs=opus';
+            mediaRecorder = new MediaRecorder(stream, { mimeType: mimeType });
+            mediaRecorder.ondataavailable = function (e) {
+              if (e.data.size > 0) audioChunks.push(e.data);
             };
-            recognition.start();
+            mediaRecorder.onstop = async function () {
+              if (stream) stream.getTracks().forEach(function (t) { t.stop(); });
+              voiceBtn.classList.remove('recording');
+              removeVoiceRings(voiceBtn);
+              voiceBtn.disabled = true;
+              voiceBtn.innerHTML = '<svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>';
+              try {
+                var blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                var reader = new FileReader();
+                reader.onload = async function () {
+                  var base64 = reader.result.split(',')[1];
+                  var token = window.__concorsoToken || null;
+                  if (!token) {
+                    for (var k = 0; k < localStorage.length; k++) {
+                      var key = localStorage.key(k);
+                      if (key && /^sb-[a-z0-9]+-auth-token$/.test(key)) {
+                        try { var p = JSON.parse(localStorage.getItem(key)); if (p && p.access_token) { token = p.access_token; break; } } catch (_) {}
+                      }
+                    }
+                  }
+                  var resp = await fetch('/api/stt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (token || '') },
+                    body: JSON.stringify({ audio: base64, mime: mediaRecorder.mimeType || 'audio/webm' })
+                  });
+                  var data = await resp.json();
+                  if (data.text) {
+                    var textarea = document.querySelector('textarea');
+                    if (textarea) textarea.value = data.text;
+                    var filler = contaFiller(data.text);
+                    if (filler.count > 0) {
+                      showToast(filler.count + ' filler (' + filler.words.slice(0, 3).join(', ') + (filler.words.length > 3 ? '...' : '') + ') — cerca di ridurli', 'voice-filler');
+                    }
+                  } else {
+                    showToast(data.error || 'Trascrizione fallita', 'error');
+                  }
+                  voiceBtn.disabled = false;
+                  voiceBtn.innerHTML = '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm7-3a7 7 0 0 1-14 0m7 7v3m-4 0h8" /></svg>';
+                  voiceBtn.setAttribute('aria-label', 'Input vocale');
+                };
+                reader.readAsDataURL(blob);
+              } catch (err) {
+                showToast('Errore trascrizione: ' + (err.message || 'sconosciuto'), 'error');
+                voiceBtn.disabled = false;
+                voiceBtn.innerHTML = '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm7-3a7 7 0 0 1-14 0m7 7v3m-4 0h8" /></svg>';
+                voiceBtn.setAttribute('aria-label', 'Input vocale');
+              }
+            };
+            mediaRecorder.start();
             isRecording = true;
             voiceBtn.classList.add('recording');
             addVoiceRings(voiceBtn);
             voiceBtn.setAttribute('aria-label', 'Ferma registrazione');
-          } else {
-            console.log('[ConcorsoAI] Speech recognition non supportato');
+          } catch (err) {
+            showToast('Microfono non accessibile: ' + (err.message || 'permesso negato'), 'error');
           }
         } else {
-          if (recognition) { recognition.stop(); recognition = null; }
+          if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
           isRecording = false;
-          voiceBtn.classList.remove('recording');
-          removeVoiceRings(voiceBtn);
-          voiceBtn.setAttribute('aria-label', 'Input vocale');
         }
       });
     }
@@ -1843,6 +2279,53 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
     }
 
     function initEvents() {
+      // Quick subject buttons — materie rapide senza bando caricato
+      document.querySelectorAll('.quick-subject-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var subject = btn.dataset.subject;
+          if (!subject) return;
+          // Crea un bando virtuale per sbloccare il pulsante Start
+          var virtualBando = {
+            id: 'quick-' + subject.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+            filename: subject,
+            total_pages: 0,
+            file_size: 0,
+            created_at: new Date().toISOString(),
+            isQuick: true
+          };
+          // Toggle: se già selezionato, deseleziona
+          var exists = selectedBandi.some(function(b) { return b.id === virtualBando.id; });
+          if (exists) {
+            selectedBandi = selectedBandi.filter(function(b) { return b.id !== virtualBando.id; });
+            btn.style.background = '#F7FBFF';
+            btn.style.color = '#1E4D73';
+            btn.style.borderColor = '#2563EB';
+          } else {
+            selectedBandi.push(virtualBando);
+            btn.style.background = '#2563EB';
+            btn.style.color = '#FFFFFF';
+            btn.style.borderColor = '#2563EB';
+          }
+          // Salva in storage (recuperaChunks gestirà ID fittizi)
+          var idsJson = JSON.stringify(selectedBandi.map(function(b) { return b.id; }));
+          sessionStorage.setItem('bandoIds', idsJson);
+          try { localStorage.setItem('bandoIds', idsJson); } catch(_) {}
+          sessionStorage.setItem('bandoNome', selectedBandi.length > 0 ? selectedBandi[0].filename : '');
+          updateStartState();
+        });
+        // Hover effect
+        btn.addEventListener('mouseenter', function() {
+          if (btn.style.background !== 'rgb(37, 99, 235)') {
+            btn.style.background = '#EAF4FF';
+          }
+        });
+        btn.addEventListener('mouseleave', function() {
+          if (btn.style.background === 'rgb(234, 244, 255)') {
+            btn.style.background = '#F7FBFF';
+          }
+        });
+      });
+
       // Listener per pulsante Salta briefing (se presente)
       const skipBriefingBtn = document.getElementById('skipBriefingBtn');
       if (skipBriefingBtn) {
@@ -1926,6 +2409,13 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       });
       updateDurationInfo();
 
+      const soloDomandeToggle = document.getElementById('soloDomandeToggle');
+      if (soloDomandeToggle) {
+        soloDomandeToggle.addEventListener('change', function () {
+          soloDomande = this.checked;
+        });
+      }
+
       startButton.addEventListener('click', startSimulation);
       endButton.addEventListener('click', requestEndSimulation);
       cancelEndButton.addEventListener('click', () => confirmModal.classList.add('hidden'));
@@ -1942,7 +2432,7 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
           configPhase.style.transform = '';
           selectedBandi = [];
           storicoMessaggi = [];
-          feedback = { clarity: 0, structure: 0, content: 0 };
+          feedback = { clarity: 0, structure: 0, content: 0, lessico: 0, pertinenza: 0 };
           questionIndex = 1;
           loadBandi();
           if (window.gsap) animateInConfig();
@@ -1975,7 +2465,7 @@ APERTURA: "Buongiorno." poi prima domanda. LINGUA: italiano formale. Frasi preci
       if (loader) loader.style.display = 'none';
       var fallbackEl = document.createElement('div');
       fallbackEl.id = 'initFallback';
-      fallbackEl.innerHTML = '<div style="padding:32px;max-width:560px;margin:0 auto;font-family:system-ui,sans-serif;text-align:center;margin-top:12vh"><div style="width:48px;height:48px;margin:0 auto 16px;border-radius:16px;background:linear-gradient(135deg,#0F4C81,#2563EB);display:grid;place-items:center;color:white;font-weight:800;font-size:1.2rem">CA</div><h1 style="font-size:1.25rem;color:#0B2A4A;margin:0">' + messaggio.split('\n')[0] + '</h1><p style="margin-top:10px;color:#4B6F8E;font-size:0.92rem;line-height:1.6">' + messaggio.split('\n').slice(1).join('<br>') || 'Prova a ricaricare la pagina o torna alla dashboard.</p><a href="dashboard.html" style="display:inline-block;margin-top:20px;padding:10px 24px;border-radius:999px;background:linear-gradient(135deg,#0F4C81,#2563EB);color:white;font-weight:700;text-decoration:none">Torna alla Dashboard</a></div>';
+      fallbackEl.innerHTML = '<div style="padding:32px;max-width:560px;margin:0 auto;font-family:system-ui,sans-serif;text-align:center;margin-top:12vh"><div style="width:48px;height:48px;margin:0 auto 16px;border-radius:16px;background:linear-gradient(135deg,#1A6B9E,#2563EB);display:grid;place-items:center;color:white;font-weight:800;font-size:1.2rem">CA</div><h1 style="font-size:1.25rem;color:#1E4D73;margin:0">' + messaggio.split('\n')[0] + '</h1><p style="margin-top:10px;color:#4B6F8E;font-size:0.92rem;line-height:1.6">' + messaggio.split('\n').slice(1).join('<br>') || 'Prova a ricaricare la pagina o torna alla dashboard.</p><a href="dashboard.html" style="display:inline-block;margin-top:20px;padding:10px 24px;border-radius:999px;background:linear-gradient(135deg,#1A6B9E,#2563EB);color:white;font-weight:700;text-decoration:none">Torna alla Dashboard</a></div>';
       document.body.appendChild(fallbackEl);
     }
 

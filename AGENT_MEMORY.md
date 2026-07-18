@@ -1,5 +1,9 @@
 # AGENT MEMORY — ConcorsoAI
 
+## 🧠 Regole personali di Ruman (18/07/2026)
+1. **Regola apprendimento**: ogni volta che imparo qualcosa di utile (un errore ricorrente, qualcosa su Ruman, o qualsiasi altra cosa utile) → aggiungerlo subito in `AGENT_MEMORY.md`
+2. **Regola skill-first**: prima di modificare qualsiasi cosa, cercare la skill migliore per il contesto o chiedere a Ruman qual è la skill migliore
+
 ## Stato progetto (09/07/2026)
 - **Budget**: €0 (free tier Vercel + Supabase + BluesMinds)
 - **AI**: deepseek-v4-flash via BluesMinds API

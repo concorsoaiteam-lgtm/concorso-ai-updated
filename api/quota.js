@@ -4,7 +4,7 @@
 // Ritorna il numero di simulazioni usate nel mese corrente
 // da un utente autenticato via Supabase JWT.
 //
-// Piano Free → 3 simulazioni / mese (sliding window da giorno 1).
+// Piano Free → 5 simulazioni / mese (sliding window da giorno 1).
 // Piano Pro / Coaching → illimitato (quota = null).
 //
 // Il client può chiamare /api/quota per decidere se mostrare
@@ -57,7 +57,7 @@ function resolveSupabaseUrl() {
 const SUPABASE_URL = resolveSupabaseUrl();
 const SUPABASE_ANON_KEY = resolveAnonKey();
 
-const FREE_PLAN_QUOTA_MONTHLY = 3;
+const FREE_PLAN_QUOTA_MONTHLY = 5;
 
 const CRITICAL_PROJECT_REF = SUPABASE_URL
   ? new URL(SUPABASE_URL).hostname.split('.')[0]
