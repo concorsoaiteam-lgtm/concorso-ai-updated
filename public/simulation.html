@@ -255,6 +255,13 @@
           <div class="feedback-track h-2.5 rounded-[5px] overflow-hidden bg-brand-100/60 mt-2" role="button" tabindex="0" aria-label="Mostra dettaglio contenuto"><div id="contentFill" class="feedback-fill h-full rounded-[5px] w-0 bg-amber-400 transition-all duration-500 ease-out" style="width:0%"></div></div>
           <button class="trust-detail hidden mt-2 w-full rounded-lg border border-brand-200 bg-brand-50/60 px-2.5 py-2 text-left text-[11px] font-semibold leading-5 text-brand-800" type="button" data-detail-for="content">↳ <strong>Dettaglio:</strong> in attesa della tua prima risposta.</button>
         </div>
+
+        <!-- Toggle: Mostra tutte e 5 valutazioni (REHAUL 2026-07-18) -->
+        <button type="button" id="moreFeedbackToggle" class="more-feedback-toggle" aria-label="Mostra o nascondi le valutazioni aggiuntive (Lessico e Pertinenza)">
+          <span class="more-toggle-label-show">Mostra tutte le 5 valutazioni ↓</span>
+          <span class="more-toggle-label-hide" style="display:none;">Mostra solo le 3 principali ↑</span>
+        </button>
+
         <div class="feedback-row mt-4" data-trust="lessico">
           <div class="flex justify-between gap-3 mb-2 text-[0.82rem] font-semibold text-brand-600"><span>Lessico</span><span id="lessicoScore" style="font-variant-numeric: tabular-nums;">0.0/10</span></div>
           <p class="text-[11px] leading-relaxed text-brand-500">Terminologia tecnica e precisione giuridica</p>
@@ -2522,6 +2529,22 @@ APERTURA: "Buongiorno, cominciamo." poi prima domanda. LINGUA: italiano chiaro e
 
     window.addEventListener('DOMContentLoaded', init);
   </script>
+<script>
+/* Toggle Mostra tutte e 5 (REHAUL 2026-07-18) — overlay CSS-only su CSS gi\`a caricato */
+(function(){
+  var btn = document.getElementById('moreFeedbackToggle');
+  if (!btn) return;
+  var lShow = btn.querySelector('.more-toggle-label-show');
+  var lHide = btn.querySelector('.more-toggle-label-hide');
+  btn.addEventListener('click', function(){
+    var on = document.body.classList.toggle('show-all-feedback');
+    if (lShow && lHide) {
+      lShow.style.display = on ? 'none' : '';
+      lHide.style.display = on ? '' : 'none';
+    }
+  });
+})();
+</script>
 </body>
 </html>
 
