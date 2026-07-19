@@ -1,0 +1,144 @@
+/* ============================================================================
+   simulation-rehaul.css
+   REHAUL UI/UX 2026-07-18 — match mockup della landing page.
+   Questo file viene caricato DOPO simulation.css e fa override selettivo.
+   ============================================================================ */
+
+/* ---- 1. COLORI DIFFERENZIATI PER LE 3 METRICHE PRINCIPALI -------------
+   Chiarezza + Contenuto → verde (eccellente)
+   Struttura → ambra (attenzione, rivedibile)
+   ---------------------------------------------------------------------- */
+.feedback-row[data-trust="clarity"] .feedback-fill,
+.feedback-row[data-trust="content"] .feedback-fill {
+  background: linear-gradient(90deg, #34D399 0%, #10B981 100%) !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, .25);
+}
+
+.feedback-row[data-trust="structure"] .feedback-fill {
+  background: linear-gradient(90deg, #FBBF24 0%, #F59E0B 100%) !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, .25);
+}
+
+/* ---- 2. DRAWER COLLASSABILE "Mostra tutte e 5" -------------------------
+   Le 2 metriche extra (Lessico, Pertinenza) sono nascoste di default.
+   Vengono mostrate quando body ha classe show-all-feedback.
+   ---------------------------------------------------------------------- */
+.feedback-row[data-trust="lessico"],
+.feedback-row[data-trust="pertinenza"] {
+  display: none;
+}
+
+body.show-all-feedback .feedback-row[data-trust="lessico"],
+body.show-all-feedback .feedback-row[data-trust="pertinenza"] {
+  display: block;
+}
+
+/* ---- 3. BOTTONE DRAWER TRIGGER ("Mostra tutte e 5" / "Mostra meno") -- */
+.more-feedback-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.625rem 0.875rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: #2563EB;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 0.625rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.more-feedback-toggle:hover {
+  background: rgba(37, 99, 235, 0.05);
+  border-color: rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
+}
+
+.more-feedback-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+body.show-all-feedback .more-feedback-toggle {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #059669;
+}
+
+body.show-all-feedback .more-feedback-toggle:hover {
+  background: rgba(16, 185, 129, 0.10);
+}
+
+/* ---- 4. CTA "NON SONO D'ACCORDO" PIÙ PROMINENT -------------------------
+   Match della gerarchia visiva della landing (CTA primaria del feedback).
+   ---------------------------------------------------------------------- */
+#disagreeBtn {
+  font-weight: 900 !important;
+  padding: 0.625rem 0.875rem !important;
+  font-size: 0.85rem !important;
+  border-width: 1.5px !important;
+  letter-spacing: -0.01em !important;
+  transition: all 0.18s ease !important;
+}
+
+#disagreeBtn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 18px rgba(15, 76, 129, 0.16) !important;
+}
+
+#disagreeBtn:active {
+  transform: translateY(0) !important;
+}
+
+/* ---- 5. (PREPARATO PER FUTURO) WAVE BARS -------------------------------
+   Se in futuro aggiungiamo .wave-spans ai messaggi utente,
+   lo stile è già pronto. Per ora la classe esiste ma non è usata.
+   ---------------------------------------------------------------------- */
+.wave-bars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.wave-bars span {
+  display: block;
+  width: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  animation: waveBar 1.15s cubic-bezier(.45, 0, .55, 1) infinite;
+  transform-origin: center;
+}
+
+.wave-bars span:nth-child(2n) { animation-delay: .12s; animation-duration: .95s; }
+.wave-bars span:nth-child(3n) { animation-delay: .22s; animation-duration: 1.25s; }
+.wave-bars span:nth-child(4n) { animation-delay: .34s; animation-duration: 1.05s; }
+
+@keyframes waveBar {
+  0%, 100% { height: 6px; }
+  50% { height: 18px; }
+}
+
+/* ---- 6. ACCESSIBILITÀ --------------------------------------------------
+   Rispetta prefers-reduced-motion.
+   ---------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .wave-bars span {
+    animation: none !important;
+    height: 12px;
+  }
+  #disagreeBtn,
+  .more-feedback-toggle {
+    transition: none !important;
+  }
+  #disagreeBtn:hover,
+  .more-feedback-toggle:hover {
+    transform: none !important;
+  }
+}
