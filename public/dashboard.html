@@ -73,13 +73,7 @@
       .upload-panel.is-fading { transform: none; }
     }
 
-    /* Item 16: "Nessun dato ancora" e "Allenati oggi" NON blu.
-       Override del blu brand di dashboard.css .stat-note. */
-    .stat-note.stat-note-muted {
-      color: #475569 !important; /* slate-600 (grigio scuro, leggibile) */
-    }
 
-    /* Streak icon — ereditato lo stile stat-icon blu */
 
     /* ====================================================
        Item 15: il tutorial wizard NON è al centro.
@@ -146,32 +140,7 @@
 </head>
 
 <body>
-  <!-- Aurora Background -->
-  <div class="bg-aurora" aria-hidden="true">
-    <div class="bg-orb bg-orb--1"></div>
-    <div class="bg-orb bg-orb--2"></div>
-    <div class="bg-orb bg-orb--3"></div>
-    <div class="bg-grid"></div>
-  </div>
 
-  <!-- Noise overlay -->
-  <svg class="noise" width="100%" height="100%" aria-hidden="true">
-    <filter id="noise">
-      <feTurbulence type="fractalNoise" baseFrequency="0.80" numOctaves="4" stitchTiles="stitch" />
-    </filter>
-    <rect width="100%" height="100%" filter="url(#noise)" />
-  </svg>
-
-  <!-- SVG Gradient Defs (hidden, reusable) -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <defs>
-      <linearGradient id="statGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#0F4C81" />
-        <stop offset="50%" stop-color="#1A5A8A" />
-        <stop offset="100%" stop-color="#2563EB" />
-      </linearGradient>
-    </defs>
-  </svg>
 
   <!-- Loading reale sessione -->
   <div id="loader" class="loader" role="status" aria-live="polite">
@@ -188,7 +157,7 @@
     <nav class="navbar">
       <div class="mx-auto flex h-full max-w-[1080px] items-center justify-between px-4 sm:px-6">
         <a href="index.html" class="inline-flex items-center gap-2 rounded-xl text-xl font-extrabold tracking-tight text-brand-900 outline-none focus-visible:ring-2 focus-visible:ring-brand-500" aria-label="Torna alla landing ConcorsoAI">
-          <span>Concorso<span class="text-gradient">AI</span></span>
+          <span>Concorso<span class="text-accent">AI</span></span>
         </a>
 
         <div class="flex items-center gap-2">
@@ -214,9 +183,8 @@
     <main class="container">
       <!-- Hero -->
       <section class="hero">
-        <p class="eyebrow">Dashboard</p>
-        <h1 class="hero-title">Ciao, <span id="userName" class="text-gradient">utente</span></h1>
-        <p class="hero-subtitle">Carica un bando, scegli la difficoltà e inizia. Il commissario AI ti guida passo passo.</p>
+        <h1 class="hero-title">Ciao, <span id="userName">utente</span></h1>
+        <p class="hero-subtitle">Carica un bando, scegli la difficolta e inizia. Il commissario AI ti guida passo passo.</p>
       </section>
 
       <!-- CTA magnetica -->
@@ -230,9 +198,8 @@
 
       <!-- Riprendi simulazione banner — Premium -->
       <div id="resumeBanner" class="hidden resume-banner">
-        <div class="resume-banner-glow" aria-hidden="true"></div>
-        <div class="relative flex items-center gap-4">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,rgba(99,102,241,.12),rgba(139,92,246,.08))] text-indigo-600" style="animation: pulseGlow 2s ease-in-out infinite;">
+        <div class="flex items-center gap-4">
+          <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full" style="background:rgba(99,102,241,.1);color:#4F46E5;">
             <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
           <div class="flex-1 min-w-0">
@@ -243,75 +210,60 @@
         </div>
       </div>
 
-      <!-- Stat cards -->
-      <div class="stats-grid">
-        <article class="card stat-card">
-          <div class="stat-icon-wrap">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm7-3a7 7 0 0 1-14 0m7 7v3m-4 0h8"/></svg>
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <article class="stat-cell">
+          <div class="stat-cell-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm7-3a7 7 0 0 1-14 0m7 7v3m-4 0h8"/></svg>
           </div>
-          <p class="stat-label">Simulazioni</p>
-          <div class="stat-value-row">
-            <p id="statSimulations" class="stat-number stat-number-lg skeleton skeleton-number" data-count="0" data-delay="0.05">0</p>
-          </div>
-          <a id="statSimulationsAction" href="simulation.html" class="stat-action hidden">Inizia la prima <svg class="inline-block h-3.5 w-3.5 align-middle" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
+          <p class="stat-cell-label">Simulazioni</p>
+          <p id="statSimulations" class="stat-cell-value skeleton skeleton-number" data-count="0" data-delay="0.05">0</p>
+          <a id="statSimulationsAction" href="simulation.html" class="stat-cell-action hidden">Inizia la prima <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
         </article>
-        <article class="card stat-card">
-          <div class="stat-icon-wrap">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m12 3 2.35 5.76 6.22.46-4.77 4.02 1.48 6.06L12 16.05 6.72 19.3l1.48-6.06-4.77-4.02 6.22-.46L12 3Z"/></svg>
+        <article class="stat-cell">
+          <div class="stat-cell-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m12 3 2.35 5.76 6.22.46-4.77 4.02 1.48 6.06L12 16.05 6.72 19.3l1.48-6.06-4.77-4.02 6.22-.46L12 3Z"/></svg>
           </div>
-          <p class="stat-label">Voto medio</p>
-          <div class="stat-value-row">
-            <div class="stat-ring">
-              <svg viewBox="0 0 52 52" width="52" height="52">
-                <circle class="stat-ring-track" cx="26" cy="26" r="22"/>
-                <circle id="statAverageRing" class="stat-ring-fill" cx="26" cy="26" r="22" stroke-dasharray="138.23" stroke-dashoffset="138.23"/>
-                <text id="statAverageText" class="stat-ring-text" x="26" y="26">—</text>
-              </svg>
-            </div>
-          </div>
-          <span id="trendArrow" class="trend-indicator hidden" aria-hidden="true"></span>
-          <p id="statAverageNote" class="stat-note hidden stat-note-muted">Nessun dato ancora</p>
+          <p class="stat-cell-label">Voto medio</p>
+          <p id="statAverage" class="stat-cell-value" style="font-size:2rem;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;">—</p>
+          <span id="trendArrow" class="trend-tag hidden" aria-hidden="true"></span>
+          <p id="statAverageNote" class="stat-cell-note hidden">Nessun dato ancora</p>
         </article>
-        <article class="card stat-card">
-          <div class="stat-icon-wrap">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M8.5 13.5h7M8.5 17h4"/></svg>
+        <article class="stat-cell">
+          <div class="stat-cell-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M8.5 13.5h7M8.5 17h4"/></svg>
           </div>
-          <p class="stat-label">Bandi</p>
-          <div class="stat-value-row">
-            <p id="statBandi" class="stat-number stat-number-lg skeleton skeleton-number" data-count="0" data-delay="0.15">0</p>
-          </div>
-          <a id="statBandiAction" href="#" class="stat-action hidden">Carica un PDF <svg class="inline-block h-3.5 w-3.5 align-[-1px]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
+          <p class="stat-cell-label">Bandi</p>
+          <p id="statBandi" class="stat-cell-value skeleton skeleton-number" data-count="0" data-delay="0.15">0</p>
+          <a id="statBandiAction" href="#" class="stat-cell-action hidden">Carica un PDF <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
         </article>
-        <article class="card stat-card">
-          <div class="stat-icon-wrap">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.5c1.5 2.5 4 5 4 9 0 3.5-2.5 6.5-4 7.5-1.5-1-4-4-4-7.5 0-1.7.7-3 1.4-4.2.4 1 .9 1.7 1.6 2 .4-2 0-4 1-6.8z"/><path d="M9 16.5c.5 1.5 1.7 2.5 3 3-2 .5-4-.5-4.5-2.5z"/></svg>
+        <article class="stat-cell">
+          <div class="stat-cell-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.5c1.5 2.5 4 5 4 9 0 3.5-2.5 6.5-4 7.5-1.5-1-4-4-4-7.5 0-1.7.7-3 1.4-4.2.4 1 .9 1.7 1.6 2 .4-2 0-4 1-6.8z"/><path d="M9 16.5c.5 1.5 1.7 2.5 3 3-2 .5-4-.5-4.5-2.5z"/></svg>
           </div>
-          <p class="stat-label">Streak</p>
-          <div class="stat-value-row">
-            <p id="statStreak" class="stat-number stat-number-lg skeleton skeleton-number" data-count="0" data-delay="0.2">0</p>
-            <span class="stat-suffix">gg</span>
-          </div>
-          <p id="statStreakNote" class="stat-note hidden stat-note-muted">Allenati oggi</p>
+          <p class="stat-cell-label">Streak</p>
+          <p id="statStreak" class="stat-cell-value skeleton skeleton-number"><span id="statStreakValue" data-count="0" data-delay="0.2">0</span> <span class="stat-cell-suffix">gg</span></p>
+          <p id="statStreakNote" class="stat-cell-note hidden">Allenati oggi</p>
         </article>
       </div>
 
-      <!-- Due card affiancate -->
-      <div class="cards-grid">
-        <section class="card content-card">
-          <div class="card-header">
-            <h2 class="card-title">Ultime simulazioni</h2>
-            <a href="history.html" class="card-link">Vedi tutto <svg class="inline-block h-3.5 w-3.5 align-[-1px]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
+      <!-- Ultime simulazioni + Aree da migliorare -->
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px;">
+        <section class="panel">
+          <div class="section-header">
+            <h2 class="section-title">Ultime simulazioni</h2>
+            <a href="history.html" class="section-link">Vedi tutto <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
           </div>
           <div id="recentList">
-            <div class="flex items-center gap-3 mb-3"><div class="skeleton skeleton-avatar"></div><div class="flex-1"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-meta"></div></div></div>
-            <div class="flex items-center gap-3 mb-3"><div class="skeleton skeleton-avatar"></div><div class="flex-1"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-meta"></div></div></div>
-            <div class="flex items-center gap-3"><div class="skeleton skeleton-avatar"></div><div class="flex-1"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-meta"></div></div></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div class="skeleton skeleton-avatar"></div><div style="flex:1"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-meta"></div></div></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div class="skeleton skeleton-avatar"></div><div style="flex:1"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-meta"></div></div></div>
+            <div style="display:flex;align-items:center;gap:12px"><div class="skeleton skeleton-avatar"></div><div style="flex:1"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-meta"></div></div></div>
           </div>
         </section>
 
-        <section class="card content-card">
-          <div class="card-header">
-            <h2 class="card-title">Aree da migliorare</h2>
+        <section class="panel">
+          <div class="section-header">
+            <h2 class="section-title">Aree da migliorare</h2>
           </div>
           <div id="improveList">
             <div class="skeleton skeleton-bar"></div>
@@ -322,49 +274,48 @@
       </div>
 
       <!-- Trend punteggi -->
-      <section id="trendChart" class="card" style="margin-top:18px;">
-        <div class="card-header">
-          <h2 class="card-title">Trend punteggi</h2>
+      <section id="trendChart" class="panel section">
+        <div class="section-header">
+          <h2 class="section-title">Trend punteggi</h2>
         </div>
-        <div class="mt-4 flex items-end gap-2 hidden" id="trendBars" style="height:120px; padding-top:18px;">
-        </div>
+        <div class="trend-chart hidden" id="trendBars"></div>
         <p id="trendEmpty" class="empty-state">Completa almeno 2 simulazioni per vedere il tuo trend.</p>
       </section>
 
-      <!-- I tuoi bandi — search + lista -->
-      <section class="card" id="bandiSection" style="margin-top:18px;">
-        <div class="card-header">
-          <h2 class="card-title">I tuoi bandi</h2>
-          <span id="bandiCountChip" class="bandi-count-chip">0</span>
+      <!-- I tuoi bandi -->
+      <section class="panel section" id="bandiSection">
+        <div class="section-header">
+          <h2 class="section-title">I tuoi bandi</h2>
+          <span id="bandiCountChip" class="count-chip">0</span>
         </div>
-        <div class="bandi-search-wrap">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input id="dashboardSearchBandi" type="text" placeholder="Cerca tra i tuoi bandi..." class="bandi-search-input">
+        <div class="search-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="dashboardSearchBandi" type="text" placeholder="Cerca tra i tuoi bandi..." class="search-input">
         </div>
-        <div id="bandiList" class="space-y-2">
-          <p class="text-sm font-semibold text-brand-600">Nessun bando ancora. <a href="#" onclick="document.querySelector('.upload-section').scrollIntoView({behavior:'smooth'});return false" class="font-black text-brand-600 hover:underline">Carica il PDF del tuo concorso</a> per iniziare.</p>
+        <div id="bandiList">
+          <p style="font-size:.84rem;color:var(--text-muted);font-weight:450;">Nessun bando ancora. <a href="#" onclick="document.querySelector('.upload-section').scrollIntoView({behavior:'smooth'});return false" style="font-weight:700;color:var(--accent-ring);text-decoration:none;">Carica il PDF del tuo concorso</a> per iniziare.</p>
         </div>
       </section>
 
       <!-- Upload bando -->
-      <section class="upload-section card">
-        <h2 class="card-title">Aggiungi materiale di studio</h2>
-        <p class="mt-2 text-sm font-semibold text-brand-700">PDF, testo libero o materie generali</p>
+      <section class="upload-section panel">
+        <h2 class="section-title">Aggiungi materiale di studio</h2>
+        <p style="margin-top:6px;font-size:.84rem;color:var(--text-muted);font-weight:450;">PDF, testo libero o materie generali</p>
 
-        <div class="upload-tabs" role="tablist" aria-label="Modalità di input">
+        <div class="upload-tabs" role="tablist" aria-label="Modalita di input">
           <button class="upload-tab active" type="button" data-upload-tab="pdf">Carica PDF</button>
           <button class="upload-tab" type="button" data-upload-tab="text">Incolla testo</button>
           <button class="upload-tab" type="button" data-upload-tab="subjects">Scegli materie</button>
         </div>
 
         <div id="uploadPanelPdf" class="upload-panel">
-          <p class="mt-2 text-sm font-semibold text-brand-700">PDF fino a 400MB per file</p>
-          <label id="uploadDrop" for="fileInput" class="upload-drop block">
+          <p style="margin-bottom:8px;font-size:.82rem;color:var(--text-muted);font-weight:450;">PDF fino a 400MB per file</p>
+          <label id="uploadDrop" for="fileInput" class="upload-drop-area" style="display:block;">
             <input id="fileInput" type="file" accept=".pdf,application/pdf" multiple class="sr-only" />
-            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <svg class="upload-drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0-4 4m4-4 4 4M4 16.5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5" />
             </svg>
-            <p id="uploadDropText" class="text-sm font-bold text-brand-700">Trascina uno o più PDF o clicca per selezionare</p>
+            <p id="uploadDropText" style="font-size:.84rem;font-weight:600;color:var(--text-secondary);">Trascina uno o piu PDF o clicca per selezionare</p>
           </label>
           <div id="uploadProgressList" class="upload-progress-list"></div>
         </div>
@@ -372,36 +323,42 @@
         <div id="uploadPanelText" class="upload-panel hidden">
           <textarea id="freeTextInput" class="upload-textarea" placeholder="Incolla qui appunti, articoli di legge, programma del concorso..."></textarea>
           <div class="upload-actions-row">
-            <p id="wordCounter" class="word-count">0 parole</p>
-            <button id="saveTextButton" class="upload-secondary-btn" type="button">Salva testo</button>
+            <p id="wordCounter" style="font-size:.8rem;color:var(--text-muted);font-weight:450;">0 parole</p>
+            <button id="saveTextButton" class="upload-btn-secondary" type="button">Salva testo</button>
           </div>
         </div>
 
         <div id="uploadPanelSubjects" class="upload-panel hidden">
           <div id="materieGrid" class="materie-grid"></div>
           <div class="upload-actions-row">
-            <p class="materie-note">Domande generali sulla materia, non specifiche al tuo bando</p>
-            <button id="saveMaterieButton" class="upload-secondary-btn" type="button">Conferma materie</button>
+            <p style="font-size:.8rem;color:var(--text-muted);font-weight:450;">Domande generali sulla materia, non specifiche al tuo bando</p>
+            <button id="saveMaterieButton" class="upload-btn-secondary" type="button">Conferma materie</button>
           </div>
         </div>
       </section>
 
       <!-- Onboarding -->
-      <section id="onboarding" class="card">
-        <h2 class="card-title">Come funziona</h2>
+      <section id="onboarding" class="panel">
+        <h2 class="section-title">Come funziona</h2>
         <div class="onboarding-grid">
-          <article class="step">
-            <p class="step-number">01</p>
+          <article>
+            <div class="step-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0-4 4m4-4 4 4M4 16.5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5"/></svg>
+            </div>
             <h3 class="step-title">Carica il tuo bando</h3>
             <p class="step-description">Importa il PDF del concorso.</p>
           </article>
-          <article class="step">
-            <p class="step-number">02</p>
+          <article>
+            <div class="step-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
             <h3 class="step-title">Avvia una simulazione</h3>
-            <p class="step-description">Scegli modalità, difficoltà e durata.</p>
+            <p class="step-description">Scegli modalita, difficolta e durata.</p>
           </article>
-          <article class="step">
-            <p class="step-number">03</p>
+          <article>
+            <div class="step-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
             <h3 class="step-title">Ricevi feedback</h3>
             <p class="step-description">Migliora chiarezza, struttura e contenuto.</p>
           </article>
@@ -515,54 +472,44 @@
       }, 3000);
     }
 
-    function setStat(type, value, decimals = 0) {
-      const elMap = {
-        simulations: document.getElementById('statSimulations'),
-        bandi: document.getElementById('statBandi'),
-        streak: document.getElementById('statStreak')
-      };
-      const numeric = Number(value || 0);
+    function setStat(type, value, decimals) {
+      var numeric = Number(value || 0);
 
       if (type === 'average') {
-        // Gestisce il ring SVG per il voto medio
-        const ring = document.getElementById('statAverageRing');
-        const text = document.getElementById('statAverageText');
-        const note = document.getElementById('statAverageNote');
-        const arrow = document.getElementById('trendArrow');
-        const circumference = 2 * Math.PI * 22; // r=22
-
+        var avgEl = document.getElementById('statAverage');
+        var note = document.getElementById('statAverageNote');
+        var arrow = document.getElementById('trendArrow');
         if (!numeric) {
-          ring.style.strokeDashoffset = circumference;
-          text.textContent = '—';
+          avgEl.textContent = '—';
           note.classList.remove('hidden');
           arrow.classList.add('hidden');
         } else {
           note.classList.add('hidden');
-          const pct = numeric / 10; // voto su scala 0-10
-          const offset = circumference * (1 - Math.min(1, Math.max(0, pct)));
-          ring.style.strokeDashoffset = offset;
-          ring.style.stroke = numeric >= 7 ? 'url(#statGradient)' : numeric >= 5 ? '#D97706' : '#DC2626';
-          text.textContent = numeric.toFixed(1);
+          avgEl.textContent = numeric.toFixed(1);
+          avgEl.style.color = numeric >= 7 ? 'var(--success)' : numeric >= 5 ? 'var(--warning)' : 'var(--error)';
         }
         return;
       }
 
-      const el = elMap[type];
+      var elMap = {
+        simulations: document.getElementById('statSimulations'),
+        bandi: document.getElementById('statBandi'),
+        streak: document.getElementById('statStreak'),
+        streakValue: document.getElementById('statStreakValue')
+      };
+      var el = elMap[type];
       if (!el) return;
-      el.classList.remove('skeleton', 'skeleton-number', 'stat-empty');
+      el.classList.remove('skeleton', 'skeleton-number', 'stat-cell-empty');
+      var valueEl = type === 'streak' ? elMap.streakValue : el;
 
       if (!numeric) {
-        el.classList.add('stat-empty');
+        el.classList.add('stat-cell-empty');
         el.removeAttribute('data-count');
-        el.textContent = '0';
-
-        if (type === 'simulations') {
-          document.getElementById('statSimulationsAction').classList.remove('hidden');
-        } else if (type === 'bandi') {
-          document.getElementById('statBandiAction').classList.remove('hidden');
-        } else if (type === 'streak') {
-          document.getElementById('statStreakNote').classList.remove('hidden');
-        }
+        valueEl.removeAttribute('data-count');
+        valueEl.textContent = '0';
+        if (type === 'simulations') document.getElementById('statSimulationsAction').classList.remove('hidden');
+        else if (type === 'bandi') document.getElementById('statBandiAction').classList.remove('hidden');
+        else if (type === 'streak') document.getElementById('statStreakNote').classList.remove('hidden');
         return;
       }
 
@@ -571,153 +518,125 @@
       if (type === 'streak') document.getElementById('statStreakNote').classList.add('hidden');
 
       el.dataset.count = String(numeric);
-      el.textContent = Math.round(numeric).toString();
+      valueEl.dataset.count = String(numeric);
+      valueEl.textContent = Math.round(numeric).toString();
     }
 
     function animateCounts() {
-      // Anima i numeri nelle stat card (escluso average che ha il ring SVG)
-      document.querySelectorAll('#statSimulations[data-count], #statBandi[data-count], #statStreak[data-count]').forEach(el => {
-        const target = parseFloat(el.dataset.count || '0');
+      // Anima i numeri nelle stat cell
+      document.querySelectorAll('#statSimulations[data-count], #statBandi[data-count], #statStreakValue[data-count]').forEach(function(el) {
+        var target = parseFloat(el.dataset.count || '0');
         if (!target) return;
-        const delay = parseFloat(el.dataset.delay || '0');
-        const obj = { value: 0 };
+        var delay = parseFloat(el.dataset.delay || '0');
+        var obj = { value: 0 };
         gsap.to(obj, {
           value: target,
-          duration: 1.2,
+          duration: 1,
           ease: 'power2.out',
-          delay,
-          onUpdate: () => {
-            el.textContent = Math.round(obj.value).toString();
-          },
-          onComplete: () => {
-            el.textContent = Math.round(target).toString();
-          }
+          delay: delay,
+          onUpdate: function() { el.textContent = Math.round(obj.value).toString(); },
+          onComplete: function() { el.textContent = Math.round(target).toString(); }
         });
       });
 
-      // Anima il ring SVG del voto medio usando state.average (non dal DOM)
-      const avgRing = document.getElementById('statAverageRing');
-      const avgText = document.getElementById('statAverageText');
-      const avgNote = document.getElementById('statAverageNote');
-      if (!avgRing || !avgText) return;
-      if (!avgNote.classList.contains('hidden')) return; // empty state
-
-      const targetAvg = state.average;
+      // Anima il voto medio (testo semplice, no SVG ring)
+      var avgEl = document.getElementById('statAverage');
+      var avgNote = document.getElementById('statAverageNote');
+      if (!avgEl || !avgNote || !avgNote.classList.contains('hidden')) return;
+      var targetAvg = state.average;
       if (!targetAvg || targetAvg <= 0) return;
-
-      const circumference = 2 * Math.PI * 22;
-      const targetPct = targetAvg / 10;
-      const targetOffset = circumference * (1 - Math.min(1, Math.max(0, targetPct)));
-      const obj = { offset: circumference, display: 0 };
-
+      var obj = { value: 0 };
       gsap.to(obj, {
-        offset: targetOffset,
-        display: targetAvg,
-        duration: 1.4,
+        value: targetAvg,
+        duration: 1,
         ease: 'power2.out',
         delay: 0.1,
-        onUpdate: () => {
-          avgRing.style.strokeDashoffset = obj.offset;
-          avgText.textContent = obj.display.toFixed(1);
-        },
-        onComplete: () => {
-          avgRing.style.strokeDashoffset = targetOffset;
-          avgText.textContent = targetAvg.toFixed(1);
-        }
+        onUpdate: function() { avgEl.textContent = obj.value.toFixed(1); },
+        onComplete: function() { avgEl.textContent = targetAvg.toFixed(1); }
       });
     }
 
     function renderRecent() {
-      const container = document.getElementById('recentList');
+      var container = document.getElementById('recentList');
       if (!state.recent.length) {
-        // FASE 3.3 — empty state con CTA motivante invece di testo piatto
         container.innerHTML =
-          '<div class="empty-cta-card" role="status">' +
-            '<span class="empty-cta-icon" aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></span>' +
-            '<div class="empty-cta-body">' +
-              '<p class="empty-cta-title">La tua prima simulazione ti aspetta</p>' +
-              '<p class="empty-cta-msg">Hai gi\u00e0 caricato dei bandi? Scegline uno e inizia. Il commissario AI ti guider\u00e0 passo passo.</p>' +
-              '<a href="simulation.html" class="empty-cta-link">Vai alla simulazione <svg class="inline-block h-3.5 w-3.5 align-[-1px]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>' +
-            '</div>' +
+          '<div class="empty-state">' +
+            '<div class="empty-state-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></div>' +
+            '<p class="empty-state-title">La tua prima simulazione ti aspetta</p>' +
+            '<p>Hai gia caricato dei bandi? Scegline uno e inizia.</p>' +
+            '<a href="simulation.html" class="empty-state-link">Vai alla simulazione <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>' +
           '</div>';
         return;
       }
 
-      container.innerHTML = state.recent.slice(0, 3).map(item => {
-        const score = typeof item.score === 'number' ? item.score : null;
-        return `
-          <div class="list-item">
-            <div>
-              <p class="list-title">${item.subject || 'Simulazione orale'}</p>
-              <p class="list-meta">${relativeDate(item.created_at)}</p>
-            </div>
-            <p class="score" style="color:${score === null ? 'var(--text-muted)' : scoreColor(score)}">${score === null ? '—' : score.toFixed(1)}</p>
-          </div>
-        `;
+      container.innerHTML = state.recent.slice(0, 3).map(function(item) {
+        var score = typeof item.score === 'number' ? item.score : null;
+        return '<div class="activity-item">' +
+          '<div>' +
+            '<p class="activity-title">' + (item.subject || 'Simulazione orale') + '</p>' +
+            '<p class="activity-meta">' + relativeDate(item.created_at) + '</p>' +
+          '</div>' +
+          '<p class="activity-score" style="color:' + (score === null ? 'var(--text-muted)' : scoreColor(score)) + '">' + (score === null ? '-' : score.toFixed(1)) + '</p>' +
+        '</div>';
       }).join('');
     }
 
     function renderSubjects() {
-      const container = document.getElementById('improveList');
+      var container = document.getElementById('improveList');
       if (!state.subjects.length) {
-        container.innerHTML = '<div class="empty-cta-card" role="status"><span class="empty-cta-icon" aria-hidden="true"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span><div class="empty-cta-body"><p class="empty-cta-title">Inizia a fare pratica</p><p class="empty-cta-msg">Completa qualche simulazione e qui vedrai su cosa concentrarti per migliorare.</p></div></div>';
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><p class="empty-state-title">Inizia a fare pratica</p><p>Completa qualche simulazione per vedere i tuoi progressi.</p></div>';
         return;
       }
 
-      container.innerHTML = state.subjects.map(item => {
-        const width = Math.max(0, Math.min(100, (item.score / 10) * 100));
-        const color = scoreColor(item.score);
-        return `
-          <div class="progress-row">
-            <div class="progress-label">
-              <span>${item.subject}</span>
-              <span style="color:${color}; font-weight:800">${item.score.toFixed(1)}</span>
-            </div>
-            <div class="progress-track"><div class="progress-fill" style="width:${width}%; background:${color}"></div></div>
-          </div>
-        `;
+      container.innerHTML = state.subjects.map(function(item) {
+        var width = Math.max(0, Math.min(100, (item.score / 10) * 100));
+        var color = scoreColor(item.score);
+        return '<div class="progress-item">' +
+          '<div class="progress-head">' +
+            '<span>' + item.subject + '</span>' +
+            '<span style="color:' + color + ';font-weight:700">' + item.score.toFixed(1) + '</span>' +
+          '</div>' +
+          '<div class="progress-track"><div class="progress-fill" style="width:' + width + '%;background:' + color + '"></div></div>' +
+        '</div>';
       }).join('');
     }
 
     function renderTrend() {
-      const arrow = document.getElementById('trendArrow');
-      const scores = state.recent.filter(r => typeof r.score === 'number').map(r => r.score);
+      var arrow = document.getElementById('trendArrow');
+      var scores = state.recent.filter(function(r) { return typeof r.score === 'number'; }).map(function(r) { return r.score; });
       if (scores.length < 2) { arrow.classList.add('hidden'); return; }
-      const diff = scores[0] - scores[1];
+      var diff = scores[0] - scores[1];
       arrow.classList.remove('hidden');
       if (diff > 0.1) {
-        arrow.className = 'trend-indicator trend-up';
-        arrow.innerHTML = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l5-6 5 6"/></svg> <span>+'+diff.toFixed(1)+'</span>';
+        arrow.className = 'trend-tag trend-tag-up';
+        arrow.innerHTML = '<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l5-6 5 6"/></svg> +'+diff.toFixed(1);
       } else if (diff < -0.1) {
-        arrow.className = 'trend-indicator trend-down';
-        arrow.innerHTML = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l5 6 5-6"/></svg> <span>'+diff.toFixed(1)+'</span>';
+        arrow.className = 'trend-tag trend-tag-down';
+        arrow.innerHTML = '<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l5 6 5-6"/></svg> '+diff.toFixed(1);
       } else {
-        arrow.className = 'trend-indicator';
-        arrow.innerHTML = '<span style="color:var(--text-muted);font-size:.72rem">stabile</span>';
+        arrow.className = 'trend-tag';
+        arrow.innerHTML = 'stabile';
       }
     }
 
     function renderTrendChart() {
-      const container = document.getElementById('trendChart');
-      const barsEl = document.getElementById('trendBars');
-      const emptyEl = document.getElementById('trendEmpty');
-      const scores = state.recent.filter(r => typeof r.score === 'number').slice(0, 10);
+      var barsEl = document.getElementById('trendBars');
+      var emptyEl = document.getElementById('trendEmpty');
+      var scores = state.recent.filter(function(r) { return typeof r.score === 'number'; }).slice(0, 10);
       if (scores.length < 2) {
-        container.classList.remove('hidden');
         barsEl.classList.add('hidden');
         emptyEl.classList.remove('hidden');
         return;
       }
-      container.classList.remove('hidden');
       barsEl.classList.remove('hidden');
       emptyEl.classList.add('hidden');
-      const max = Math.max(...scores.map(s => s.score));
-      barsEl.innerHTML = scores.map((s, i) => {
-        const height = max > 0 ? (s.score / max) * 100 : 8;
-        return `<div class="trend-bar"><div class="trend-bar-fill" style="height:${Math.max(4, height)}%;"></div><span class="trend-bar-label">${i + 1}</span></div>`;
+      var max = Math.max.apply(null, scores.map(function(s) { return s.score; }));
+      barsEl.innerHTML = scores.map(function(s, i) {
+        var height = max > 0 ? (s.score / max) * 100 : 8;
+        return '<div class="trend-bar-wrap"><div class="trend-bar" style="height:' + Math.max(4, height) + '%;"></div><span class="trend-bar-label">' + (i + 1) + '</span></div>';
       }).join('');
       if (window.gsap) {
-        gsap.from('.trend-bar-fill', { height: 4, duration: .5, stagger: .04, ease: 'power2.out' });
+        gsap.from('.trend-bar', { height: 4, duration: .5, stagger: .04, ease: 'power2.out' });
       }
     }
 
@@ -737,15 +656,9 @@
       animateCounts();
 
       if (window.gsap) {
-        gsap.from(['#recentList', '#improveList'], {
-          y: 8,
-          duration: .32,
-          stagger: .05,
-          ease: 'power2.out',
-          clearProps: 'transform'
-        });
+        gsap.from(['#recentList', '#improveList'], { y: 6, duration: .28, stagger: .04, ease: 'power2.out', clearProps: 'transform' });
         if (!document.getElementById('trendArrow').classList.contains('hidden')) {
-          gsap.from('#trendArrow', { y: 6, opacity: 0, duration: .4, delay: .5, ease: 'power2.out', clearProps: 'transform' });
+          gsap.from('#trendArrow', { y: 4, opacity: 0, duration: .35, delay: .4, ease: 'power2.out', clearProps: 'transform' });
         }
       }
     }
@@ -822,22 +735,22 @@
     function initPageAnimations() {
       if (!window.gsap) return;
 
-      const animatedSections = ['.navbar', '.hero', '.cta-wrapper', '.stat-card', '.content-card', '.upload-section', '#onboarding'];
+      var animatedSections = ['.navbar', '.hero', '.cta-wrapper', '.stat-cell', '.panel', '.upload-section', '#onboarding'];
       gsap.killTweensOf(animatedSections);
       gsap.set(animatedSections, { opacity: 1, visibility: 'visible' });
 
-      const tl = gsap.timeline({
-        defaults: { ease: 'power3.out', duration: .58 },
-        onComplete: () => gsap.set(animatedSections, { opacity: 1, visibility: 'visible', clearProps: 'transform' })
+      var tl = gsap.timeline({
+        defaults: { ease: 'power3.out', duration: .52 },
+        onComplete: function() { gsap.set(animatedSections, { opacity: 1, visibility: 'visible', clearProps: 'transform' }); }
       });
 
-      tl.from('.navbar', { y: -16, duration: .38 })
-        .from('.hero', { y: 18 }, '-=.28')
-        .from('.cta-wrapper', { y: 12 }, '-=.22')
-        .from('.stat-card', { y: 14, stagger: .055 }, '-=.18')
-        .from('.content-card', { y: 14, stagger: .07 }, '-=.12')
-        .from('.upload-section', { y: 18 }, '-=.08')
-        .from('#onboarding', { y: 18 }, '-=.08');
+      tl.from('.navbar', { y: -12, duration: .34 })
+        .from('.hero', { y: 14 }, '-=.24')
+        .from('.cta-wrapper', { y: 10 }, '-=.20')
+        .from('.stat-cell', { y: 12, stagger: .05 }, '-=.16')
+        .from('.panel', { y: 12, stagger: .06 }, '-=.10')
+        .from('.upload-section', { y: 14 }, '-=.06')
+        .from('#onboarding', { y: 14 }, '-=.06');
     }
 
     function initMagneticButton() {
