@@ -45,9 +45,10 @@
     }
   </script>
 
-  <!-- Supabase + GSAP -->
+  <!-- Supabase + GSAP + ScrollTrigger -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 
   <link rel="stylesheet" href="/css/dashboard.css" />
@@ -451,24 +452,28 @@
       return `${days} giorni fa`;
     }
 
-    function showToast(msg, type = 'success') {
-      const toast = document.createElement('div');
+    function showToast(msg, type) {
+      if (!type) type = 'success';
+      var toast = document.createElement('div');
       toast.className = 'toast toast-' + type;
-      toast.textContent = msg;
+      toast.style.position = 'fixed';
+      toast.style.overflow = 'hidden';
+
+      var text = document.createElement('span');
+      text.textContent = String(msg).replace(/<[^>]*>/g, '');
+      toast.appendChild(text);
+
+      var progress = document.createElement('div');
+      progress.style.cssText = 'position:absolute;bottom:0;left:0;height:3px;background:currentColor;opacity:0.3;border-radius:0 0 14px 14px;width:100%;transform-origin:left;';
+      toast.appendChild(progress);
+
       document.body.appendChild(toast);
 
-      gsap.fromTo(toast,
-        { x: 80, opacity: 0 },
-        { x: 0, opacity: 1, duration: 0.3, ease: 'power2.out' }
-      );
+      gsap.fromTo(toast, { x: 80, opacity: 0, scale: 0.95 }, { x: 0, opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(1.4)' });
+      gsap.to(progress, { scaleX: 0, duration: 3, ease: 'none' });
 
-      setTimeout(() => {
-        gsap.to(toast, {
-          x: 80,
-          opacity: 0,
-          duration: 0.25,
-          onComplete: () => toast.remove()
-        });
+      setTimeout(function() {
+        gsap.to(toast, { x: 80, opacity: 0, scale: 0.95, duration: 0.25, ease: 'power2.in', onComplete: function() { toast.remove(); } });
       }, 3000);
     }
 
@@ -515,7 +520,14 @@
 
       if (type === 'simulations') document.getElementById('statSimulationsAction').classList.add('hidden');
       if (type === 'bandi') document.getElementById('statBandiAction').classList.add('hidden');
-      if (type === 'streak') document.getElementById('statStreakNote').classList.add('hidden');
+      if (type === 'streak') {
+        document.getElementById('statStreakNote').classList.add('hidden');
+        var streakCell = document.getElementById('statStreak').closest('.stat-cell');
+        if (streakCell) {
+          if (numeric > 0) streakCell.classList.add('stat-streak-active');
+          else streakCell.classList.remove('stat-streak-active');
+        }
+      }
 
       el.dataset.count = String(numeric);
       valueEl.dataset.count = String(numeric);
@@ -523,7 +535,6 @@
     }
 
     function animateCounts() {
-      // Anima i numeri nelle stat cell
       document.querySelectorAll('#statSimulations[data-count], #statBandi[data-count], #statStreakValue[data-count]').forEach(function(el) {
         var target = parseFloat(el.dataset.count || '0');
         if (!target) return;
@@ -535,24 +546,29 @@
           ease: 'power2.out',
           delay: delay,
           onUpdate: function() { el.textContent = Math.round(obj.value).toString(); },
-          onComplete: function() { el.textContent = Math.round(target).toString(); }
+          onComplete: function() {
+            el.textContent = Math.round(target).toString();
+            gsap.fromTo(el, { scale: 1.15 }, { scale: 1, duration: 0.3, ease: 'back.out(2)' });
+          }
         });
       });
 
-      // Anima il voto medio (testo semplice, no SVG ring)
       var avgEl = document.getElementById('statAverage');
       var avgNote = document.getElementById('statAverageNote');
       if (!avgEl || !avgNote || !avgNote.classList.contains('hidden')) return;
       var targetAvg = state.average;
       if (!targetAvg || targetAvg <= 0) return;
-      var obj = { value: 0 };
-      gsap.to(obj, {
+      var obj2 = { value: 0 };
+      gsap.to(obj2, {
         value: targetAvg,
         duration: 1,
         ease: 'power2.out',
         delay: 0.1,
-        onUpdate: function() { avgEl.textContent = obj.value.toFixed(1); },
-        onComplete: function() { avgEl.textContent = targetAvg.toFixed(1); }
+        onUpdate: function() { avgEl.textContent = obj2.value.toFixed(1); },
+        onComplete: function() {
+          avgEl.textContent = targetAvg.toFixed(1);
+          gsap.fromTo(avgEl, { scale: 1.15 }, { scale: 1, duration: 0.3, ease: 'back.out(2)' });
+        }
       });
     }
 
@@ -572,11 +588,14 @@
       container.innerHTML = state.recent.slice(0, 3).map(function(item) {
         var score = typeof item.score === 'number' ? item.score : null;
         return '<div class="activity-item">' +
-          '<div>' +
+          '<div class="activity-icon">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm7-3a7 7 0 0 1-14 0"/></svg>' +
+          '</div>' +
+          '<div style="flex:1;min-width:0;">' +
             '<p class="activity-title">' + (item.subject || 'Simulazione orale') + '</p>' +
             '<p class="activity-meta">' + relativeDate(item.created_at) + '</p>' +
           '</div>' +
-          '<p class="activity-score" style="color:' + (score === null ? 'var(--text-muted)' : scoreColor(score)) + '">' + (score === null ? '-' : score.toFixed(1)) + '</p>' +
+          '<div class="activity-score" style="color:' + (score === null ? '#9CA3AF' : scoreColor(score)) + '">' + (score === null ? '-' : score.toFixed(1)) + '</div>' +
         '</div>';
       }).join('');
     }
@@ -599,6 +618,9 @@
           '<div class="progress-track"><div class="progress-fill" style="width:' + width + '%;background:' + color + '"></div></div>' +
         '</div>';
       }).join('');
+      if (window.gsap) {
+        gsap.from('.progress-fill', { width: 0, duration: 0.8, ease: 'power2.out', stagger: 0.1, delay: 0.2 });
+      }
     }
 
     function renderTrend() {
@@ -636,7 +658,7 @@
         return '<div class="trend-bar-wrap"><div class="trend-bar" style="height:' + Math.max(4, height) + '%;"></div><span class="trend-bar-label">' + (i + 1) + '</span></div>';
       }).join('');
       if (window.gsap) {
-        gsap.from('.trend-bar', { height: 4, duration: .5, stagger: .04, ease: 'power2.out' });
+        gsap.from('.trend-bar', { scaleY: 0, transformOrigin: 'bottom', duration: 0.5, stagger: 0.04, ease: 'back.out(1.2)', delay: 0.1 });
       }
     }
 
@@ -735,36 +757,58 @@
     function initPageAnimations() {
       if (!window.gsap) return;
 
-      var animatedSections = ['.navbar', '.hero', '.cta-wrapper', '.stat-cell', '.panel', '.upload-section', '#onboarding'];
-      gsap.killTweensOf(animatedSections);
-      gsap.set(animatedSections, { opacity: 1, visibility: 'visible' });
+      gsap.set(['.navbar', '.hero', '.cta-wrapper', '.stat-cell', '.panel', '.upload-section', '#onboarding'], { opacity: 1, visibility: 'visible' });
 
-      var tl = gsap.timeline({
-        defaults: { ease: 'power3.out', duration: .52 },
-        onComplete: function() { gsap.set(animatedSections, { opacity: 1, visibility: 'visible', clearProps: 'transform' }); }
+      var tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+      tl.from('.navbar', { y: -16, opacity: 0, duration: 0.4 })
+        .from('.hero-title', { y: 20, opacity: 0, duration: 0.5 }, '-=0.2')
+        .from('.hero-subtitle', { y: 16, opacity: 0, duration: 0.4 }, '-=0.35')
+        .from('.cta-wrapper', { y: 12, opacity: 0, scale: 0.96, duration: 0.5, ease: 'back.out(1.4)' }, '-=0.25')
+        .from('.stat-cell', { y: 20, opacity: 0, scale: 0.96, duration: 0.45, stagger: { each: 0.07, ease: 'power2.out' } }, '-=0.2')
+        .from('.panel', { y: 16, opacity: 0, duration: 0.4, stagger: 0.06 }, '-=0.2');
+    }
+
+    function initScrollReveal() {
+      if (!window.gsap || !window.ScrollTrigger) return;
+      var panels = document.querySelectorAll('.panel, .upload-section');
+      panels.forEach(function(panel) {
+        gsap.from(panel, {
+          scrollTrigger: { trigger: panel, start: 'top 88%', toggleActions: 'play none none none' },
+          y: 20, opacity: 0, duration: 0.45, ease: 'power2.out'
+        });
       });
-
-      tl.from('.navbar', { y: -12, duration: .34 })
-        .from('.hero', { y: 14 }, '-=.24')
-        .from('.cta-wrapper', { y: 10 }, '-=.20')
-        .from('.stat-cell', { y: 12, stagger: .05 }, '-=.16')
-        .from('.panel', { y: 12, stagger: .06 }, '-=.10')
-        .from('.upload-section', { y: 14 }, '-=.06')
-        .from('#onboarding', { y: 14 }, '-=.06');
     }
 
     function initMagneticButton() {
-      const btn = document.querySelector('.btn-primary');
-      btn.addEventListener('mousemove', (e) => {
-        const rect = btn.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width/2;
-        const y = e.clientY - rect.top - rect.height/2;
-        gsap.to(btn, { x: x*0.3, y: y*0.3,
-          duration: 0.3, ease: "power2.out" });
+      var btn = document.querySelector('.btn-primary');
+      btn.addEventListener('mousemove', function(e) {
+        var rect = btn.getBoundingClientRect();
+        var x = e.clientX - rect.left - rect.width/2;
+        var y = e.clientY - rect.top - rect.height/2;
+        gsap.to(btn, { x: x*0.3, y: y*0.3, duration: 0.3, ease: 'power2.out' });
       });
-      btn.addEventListener('mouseleave', () => {
-        gsap.to(btn, { x: 0, y: 0,
-          duration: 0.6, ease: "elastic.out(1,0.5)" });
+      btn.addEventListener('mouseleave', function() {
+        gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1,0.5)' });
+      });
+
+      // Particelle al click
+      btn.addEventListener('click', function(e) {
+        for (var i = 0; i < 6; i++) {
+          var particle = document.createElement('div');
+          particle.style.cssText = 'position:fixed;width:6px;height:6px;background:#2563EB;border-radius:50%;pointer-events:none;left:' + e.clientX + 'px;top:' + e.clientY + 'px;z-index:9999;';
+          document.body.appendChild(particle);
+          var angle = (i / 6) * Math.PI * 2;
+          var distance = 40 + Math.random() * 30;
+          gsap.to(particle, {
+            x: Math.cos(angle) * distance,
+            y: Math.sin(angle) * distance,
+            opacity: 0, scale: 0,
+            duration: 0.5 + Math.random() * 0.3,
+            ease: 'power2.out',
+            onComplete: function() { particle.remove(); }
+          });
+        }
       });
     }
 
@@ -774,7 +818,7 @@
         const isHidden = userMenu.classList.contains('hidden');
         userMenu.classList.toggle('hidden');
         userMenuButton.setAttribute('aria-expanded', String(isHidden));
-        if (isHidden) gsap.fromTo(userMenu, { opacity: 0, y: -8, scale: .98 }, { opacity: 1, y: 0, scale: 1, duration: .18, ease: 'power2.out' });
+        if (isHidden) gsap.fromTo(userMenu, { opacity: 0, y: -12, scale: 0.95, transformOrigin: 'top right' }, { opacity: 1, y: 0, scale: 1, duration: 0.22, ease: 'back.out(1.4)' });
       });
 
       document.addEventListener('click', (event) => {
@@ -1111,8 +1155,30 @@
       renderMaterieButtons();
 
       uploadTabs.forEach(button => {
-        button.addEventListener('click', () => switchUploadTab(button.dataset.uploadTab));
+        button.addEventListener('click', () => {
+          switchUploadTab(button.dataset.uploadTab);
+          requestAnimationFrame(function() { updateTabIndicator(button); });
+        });
       });
+
+      // Tab indicator scorrevole
+      var tabsContainer = document.querySelector('.upload-tabs');
+      var indicator = document.createElement('div');
+      indicator.className = 'tab-indicator';
+      tabsContainer.appendChild(indicator);
+
+      function updateTabIndicator(activeTab) {
+        var rect = activeTab.getBoundingClientRect();
+        var parentRect = tabsContainer.getBoundingClientRect();
+        indicator.style.left = (rect.left - parentRect.left) + 'px';
+        indicator.style.width = rect.width + 'px';
+      }
+
+      // Init sull'active di default
+      var defaultTab = document.querySelector('.upload-tab.active');
+      if (defaultTab) {
+        setTimeout(function() { updateTabIndicator(defaultTab); }, 100);
+      }
 
       ['dragenter', 'dragover'].forEach(eventName => {
         uploadDrop.addEventListener(eventName, (event) => {
@@ -1305,6 +1371,10 @@
       }
 
       initMenu();
+      if (window.gsap && window.ScrollTrigger) {
+        gsap.registerPlugin(ScrollTrigger);
+        initScrollReveal();
+      }
       initUpload();
       initMagneticButton();
       initWizard();
