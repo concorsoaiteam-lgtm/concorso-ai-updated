@@ -7,7 +7,7 @@
 ## 1. Architettura delle pagine
 
 ### 1.1 `public/index.html` — Landing (~55 KB, 717 righe)
-Landing page SEO + conversione. Struttura:
+Landing page SEO + conversione. Struttura:m
 ```
 Navbar (desktop: link sezioni; mobile: hamburger toggle)
 ├── Hero (headline, subheadline, CTA "Inizia gratuitamente" → auth.html)

@@ -159,6 +159,7 @@
     <div class="loader-card">
       <span class="loader-dot"></span>
       <span>Verifica sessione</span>
+      <span style="display:block;margin-top:6px;font-size:.8rem;font-weight:500;color:var(--text-muted, #6B7280);">Stiamo controllando il tuo account... ci vuole un attimo.</span>
     </div>
   </div>
 
@@ -178,12 +179,12 @@
           <button id="userMenuButton" type="button" class="flex items-center gap-3 rounded-2xl border border-brand-200 bg-white px-2 py-1.5 shadow-sm transition hover:border-brand-300 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500" aria-label="Apri menu utente" aria-haspopup="menu" aria-expanded="false">
             <span id="userInitial" class="flex h-9 w-9 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0F4C81,#2563EB)] text-sm font-black text-white shadow-glowBlue">U</span>
             <span id="navName" class="hidden max-w-[10rem] truncate pr-2 text-sm font-black text-brand-900 sm:block">Utente</span>
-            <span id="planBadge" class="hidden rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-black uppercase tracking-wider text-amber-700 sm:inline-block">Free</span>
+            <span id="planBadge" class="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-black uppercase tracking-wider text-amber-700 sm:inline-block">Free</span>
           </button>
           <div id="userMenu" class="absolute right-0 mt-2 hidden w-52 overflow-hidden rounded-2xl border border-brand-200 bg-white p-2 shadow-card" role="menu">
-            <a href="#" class="block rounded-xl px-3 py-2.5 text-sm font-bold text-brand-700 transition hover:bg-brand-50 hover:text-brand-900" role="menuitem">Il mio profilo</a>
-            <a href="#" class="block rounded-xl px-3 py-2.5 text-sm font-bold text-brand-700 transition hover:bg-brand-50 hover:text-brand-900" role="menuitem">Impostazioni</a>
-            <a href="#" class="block rounded-xl px-3 py-2.5 text-sm font-bold text-brand-700 transition hover:bg-brand-50 hover:text-brand-900" role="menuitem">Abbonamento</a>
+            <a href="#" class="block rounded-xl px-3 py-2.5 text-sm font-bold text-brand-700 transition hover:bg-brand-50 hover:text-brand-900" role="menuitem" onclick="showToast('In arrivo', 'success'); return false">Il mio profilo</a>
+            <a href="#" class="block rounded-xl px-3 py-2.5 text-sm font-bold text-brand-700 transition hover:bg-brand-50 hover:text-brand-900" role="menuitem" onclick="showToast('In arrivo', 'success'); return false">Impostazioni</a>
+            <a href="#" class="block rounded-xl px-3 py-2.5 text-sm font-bold text-brand-700 transition hover:bg-brand-50 hover:text-brand-900" role="menuitem" onclick="showToast('In arrivo', 'success'); return false">Abbonamento</a>
             <div class="my-2 h-px bg-brand-200"></div>
             <button id="logoutButton" type="button" class="block w-full rounded-xl px-3 py-2.5 text-left text-sm font-black text-red-700 transition hover:bg-red-50" role="menuitem">Esci</button>
           </div>
@@ -196,7 +197,7 @@
       <section class="hero">
         <p class="eyebrow">Dashboard</p>
         <h1 class="hero-title">Ciao, <span id="userName" class="text-gradient">utente</span></h1>
-        <p class="hero-subtitle">La tua prossima simulazione ti aspetta. Continua ad allenarti con il tuo commissario AI.</p>
+        <p class="hero-subtitle">Carica un bando, scegli la difficoltà e inizia. Il commissario AI ti guida passo passo.</p>
       </section>
 
       <!-- CTA magnetica -->
@@ -217,8 +218,8 @@
             <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-base font-black text-brand-900">⚡️ Hai una simulazione in sospeso!</p>
-            <p class="text-sm font-bold text-brand-600 mt-0.5">Riprendi ora per non perdere la tua sessione d'esame.</p>
+            <p class="text-base font-black text-brand-900">Hai una simulazione da riprendere</p>
+            <p class="text-sm font-bold text-brand-600 mt-0.5">Non perdere la tua sessione: tutto è rimasto come l'hai lasciata.</p>
           </div>
           <a href="simulation.html" class="btn-primary shrink-0 rounded-xl px-6 py-3 text-sm font-black shadow-lg shadow-indigo-200/50">Riprendi <svg class="ml-1 h-3.5 w-3.5 inline-block" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
         </div>
@@ -292,16 +293,13 @@
       </div>
 
       <!-- Trend punteggi -->
-      <section id="trendChart" class="card hidden" style="margin-top:18px;">
+      <section id="trendChart" class="card" style="margin-top:18px;">
         <div class="card-header">
           <h2 class="card-title">Trend punteggi</h2>
         </div>
-        <div class="mt-4 flex items-end gap-2" id="trendBars" style="height:120px; padding-top:18px;">
-          <div class="skeleton skeleton-bar" style="height:80px;"></div>
-          <div class="skeleton skeleton-bar" style="height:60px;"></div>
-          <div class="skeleton skeleton-bar" style="height:100px;"></div>
+        <div class="mt-4 flex items-end gap-2 hidden" id="trendBars" style="height:120px; padding-top:18px;">
         </div>
-        <p id="trendEmpty" class="empty-state hidden">Nessun dato sufficiente per mostrare il trend.</p>
+        <p id="trendEmpty" class="empty-state">Completa almeno 2 simulazioni per vedere il tuo trend.</p>
       </section>
 
       <!-- I tuoi bandi — search + lista -->
@@ -315,7 +313,7 @@
           <input id="dashboardSearchBandi" type="text" placeholder="Cerca tra i tuoi bandi..." class="w-full rounded-xl border border-brand-200 bg-white/80 py-2.5 pl-10 pr-3 text-sm font-semibold text-brand-900 outline-none placeholder:text-brand-600/45 transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
         </div>
         <div id="bandiList" class="space-y-2">
-          <p class="text-sm font-semibold text-brand-600">Carica un bando per vederlo qui.</p>
+          <p class="text-sm font-semibold text-brand-600">Nessun bando ancora. <a href="#" onclick="document.querySelector('.upload-section').scrollIntoView({behavior:'smooth'});return false" class="font-black text-brand-600 hover:underline">Carica il PDF del tuo concorso</a> per iniziare.</p>
         </div>
       </section>
 
@@ -331,7 +329,7 @@
         </div>
 
         <div id="uploadPanelPdf" class="upload-panel">
-          <p class="mb-3 text-sm font-semibold text-brand-700">PDF fino a 500MB per file</p>
+          <p class="mt-2 text-sm font-semibold text-brand-700">PDF fino a 400MB per file</p>
           <label id="uploadDrop" for="fileInput" class="upload-drop block">
             <input id="fileInput" type="file" accept=".pdf,application/pdf" multiple class="sr-only" />
             <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -514,16 +512,16 @@
         el.removeAttribute('data-count');
 
         if (type === 'simulations') {
-          el.innerHTML = progressRingSvg(10);
+          el.innerHTML = progressRingSvg(0);
           document.getElementById('statSimulationsAction').classList.remove('hidden');
         } else if (type === 'average') {
-          el.innerHTML = progressRingSvg(10);
+          el.innerHTML = progressRingSvg(0);
           document.getElementById('statAverageNote').classList.remove('hidden');
         } else if (type === 'bandi') {
-          el.innerHTML = progressRingSvg(10);
+          el.innerHTML = progressRingSvg(0);
           document.getElementById('statBandiAction').classList.remove('hidden');
         } else if (type === 'streak') {
-          el.innerHTML = progressRingSvg(10);
+          el.innerHTML = progressRingSvg(0);
           document.getElementById('statStreakNote').classList.remove('hidden');
         }
         return;
@@ -596,7 +594,7 @@
     function renderSubjects() {
       const container = document.getElementById('improveList');
       if (!state.subjects.length) {
-        container.innerHTML = '<p class="empty-state">Completa delle simulazioni per vedere i tuoi punti deboli.</p>';
+        container.innerHTML = '<p class="empty-state">Fai qualche simulazione e qui vedrai su cosa concentrarti per migliorare.</p>';
         return;
       }
 
@@ -640,8 +638,14 @@
       const barsEl = document.getElementById('trendBars');
       const emptyEl = document.getElementById('trendEmpty');
       const scores = state.recent.filter(r => typeof r.score === 'number').slice(0, 10);
-      if (scores.length < 2) { container.classList.add('hidden'); return; }
+      if (scores.length < 2) {
+        container.classList.remove('hidden');
+        barsEl.classList.add('hidden');
+        emptyEl.classList.remove('hidden');
+        return;
+      }
       container.classList.remove('hidden');
+      barsEl.classList.remove('hidden');
       emptyEl.classList.add('hidden');
       const max = Math.max(...scores.map(s => s.score));
       barsEl.innerHTML = scores.map((s, i) => {
@@ -816,7 +820,7 @@
 
     const uploadCards = new Map();
     const selectedMaterie = new Set();
-    const MAX_PDF_SIZE = 500 * 1024 * 1024;
+    const MAX_PDF_SIZE = 400 * 1024 * 1024;
     const MATERIE = [
       'Diritto Amministrativo',
       'Diritto Costituzionale',
