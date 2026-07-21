@@ -146,12 +146,31 @@
 </head>
 
 <body>
-  <!-- Background layers coerenti con landing -->
+  <!-- Aurora Background -->
+  <div class="bg-aurora" aria-hidden="true">
+    <div class="bg-orb bg-orb--1"></div>
+    <div class="bg-orb bg-orb--2"></div>
+    <div class="bg-orb bg-orb--3"></div>
+    <div class="bg-grid"></div>
+  </div>
+
+  <!-- Noise overlay -->
   <svg class="noise" width="100%" height="100%" aria-hidden="true">
     <filter id="noise">
       <feTurbulence type="fractalNoise" baseFrequency="0.80" numOctaves="4" stitchTiles="stitch" />
     </filter>
     <rect width="100%" height="100%" filter="url(#noise)" />
+  </svg>
+
+  <!-- SVG Gradient Defs (hidden, reusable) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="statGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0F4C81" />
+        <stop offset="50%" stop-color="#1A5A8A" />
+        <stop offset="100%" stop-color="#2563EB" />
+      </linearGradient>
+    </defs>
   </svg>
 
   <!-- Loading reale sessione -->
@@ -209,59 +228,69 @@
         <p class="cta-note">Scegli materia, difficoltà e durata</p>
       </div>
 
-      <!-- Riprendi simulazione banner — Hero priority -->
-      <div id="resumeBanner" class="hidden relative mt-4 overflow-hidden rounded-3xl border-2 border-indigo-300 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 shadow-lg shadow-indigo-200/40">
-        <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,.06)_50%,transparent_70%)]"></div>
-        <div class="absolute inset-0 rounded-3xl" style="background: linear-gradient(135deg, rgba(99,102,241,.08), rgba(139,92,246,.04)); mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude; padding: 2px;"></div>
+      <!-- Riprendi simulazione banner — Premium -->
+      <div id="resumeBanner" class="hidden resume-banner">
+        <div class="resume-banner-glow" aria-hidden="true"></div>
         <div class="relative flex items-center gap-4">
-          <div class="flex h-12 w-12 shrink-0 animate-pulse items-center justify-center rounded-full bg-indigo-100 text-indigo-700">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,rgba(99,102,241,.12),rgba(139,92,246,.08))] text-indigo-600" style="animation: pulseGlow 2s ease-in-out infinite;">
             <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-base font-black text-brand-900">Hai una simulazione da riprendere</p>
-            <p class="text-sm font-bold text-brand-600 mt-0.5">Non perdere la tua sessione: tutto è rimasto come l'hai lasciata.</p>
+            <p class="text-sm font-semibold text-brand-600/80 mt-0.5">Non perdere la tua sessione: tutto è rimasto come l'hai lasciata.</p>
           </div>
-          <a href="simulation.html" class="btn-primary shrink-0 rounded-xl px-6 py-3 text-sm font-black shadow-lg shadow-indigo-200/50">Riprendi <svg class="ml-1 h-3.5 w-3.5 inline-block" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
+          <a href="simulation.html" class="btn-primary shrink-0 rounded-xl px-6 py-3 text-sm font-black">Riprendi <svg class="ml-1 h-3.5 w-3.5 inline-block" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
         </div>
       </div>
 
       <!-- Stat cards -->
       <div class="stats-grid">
         <article class="card stat-card">
-          <div class="stat-icon">
+          <div class="stat-icon-wrap">
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm7-3a7 7 0 0 1-14 0m7 7v3m-4 0h8"/></svg>
           </div>
           <p class="stat-label">Simulazioni</p>
-          <p id="statSimulations" class="stat-number skeleton skeleton-number" data-count="0" data-delay="0.05">0</p>
+          <div class="stat-value-row">
+            <p id="statSimulations" class="stat-number stat-number-lg skeleton skeleton-number" data-count="0" data-delay="0.05">0</p>
+          </div>
           <a id="statSimulationsAction" href="simulation.html" class="stat-action hidden">Inizia la prima <svg class="inline-block h-3.5 w-3.5 align-middle" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
         </article>
         <article class="card stat-card">
-          <div class="stat-icon">
+          <div class="stat-icon-wrap">
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m12 3 2.35 5.76 6.22.46-4.77 4.02 1.48 6.06L12 16.05 6.72 19.3l1.48-6.06-4.77-4.02 6.22-.46L12 3Z"/></svg>
           </div>
           <p class="stat-label">Voto medio</p>
-          <div class="flex items-end gap-2">
-            <p id="statAverage" class="stat-number skeleton skeleton-number" data-count="0" data-decimals="1" data-delay="0.1">0</p>
-            <span id="trendArrow" class="hidden mb-1 transition-opacity duration-500" aria-hidden="true">
-              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l5-6 5 6"/></svg>
-            </span>
+          <div class="stat-value-row">
+            <div class="stat-ring">
+              <svg viewBox="0 0 52 52" width="52" height="52">
+                <circle class="stat-ring-track" cx="26" cy="26" r="22"/>
+                <circle id="statAverageRing" class="stat-ring-fill" cx="26" cy="26" r="22" stroke-dasharray="138.23" stroke-dashoffset="138.23"/>
+                <text id="statAverageText" class="stat-ring-text" x="26" y="26">—</text>
+              </svg>
+            </div>
           </div>
+          <span id="trendArrow" class="trend-indicator hidden" aria-hidden="true"></span>
           <p id="statAverageNote" class="stat-note hidden stat-note-muted">Nessun dato ancora</p>
         </article>
         <article class="card stat-card">
-          <div class="stat-icon">
+          <div class="stat-icon-wrap">
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M8.5 13.5h7M8.5 17h4"/></svg>
           </div>
           <p class="stat-label">Bandi</p>
-          <p id="statBandi" class="stat-number skeleton skeleton-number" data-count="0" data-delay="0.15">0</p>
+          <div class="stat-value-row">
+            <p id="statBandi" class="stat-number stat-number-lg skeleton skeleton-number" data-count="0" data-delay="0.15">0</p>
+          </div>
           <a id="statBandiAction" href="#" class="stat-action hidden">Carica un PDF <svg class="inline-block h-3.5 w-3.5 align-[-1px]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
         </article>
         <article class="card stat-card">
-          <div class="stat-icon">
+          <div class="stat-icon-wrap">
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.5c1.5 2.5 4 5 4 9 0 3.5-2.5 6.5-4 7.5-1.5-1-4-4-4-7.5 0-1.7.7-3 1.4-4.2.4 1 .9 1.7 1.6 2 .4-2 0-4 1-6.8z"/><path d="M9 16.5c.5 1.5 1.7 2.5 3 3-2 .5-4-.5-4.5-2.5z"/></svg>
           </div>
           <p class="stat-label">Streak</p>
-          <p id="statStreak" class="stat-number skeleton skeleton-number" data-count="0" data-delay="0.2">0</p>
+          <div class="stat-value-row">
+            <p id="statStreak" class="stat-number stat-number-lg skeleton skeleton-number" data-count="0" data-delay="0.2">0</p>
+            <span class="stat-suffix">gg</span>
+          </div>
           <p id="statStreakNote" class="stat-note hidden stat-note-muted">Allenati oggi</p>
         </article>
       </div>
@@ -306,11 +335,11 @@
       <section class="card" id="bandiSection" style="margin-top:18px;">
         <div class="card-header">
           <h2 class="card-title">I tuoi bandi</h2>
-          <span id="bandiCountChip" class="rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-black text-brand-700">0</span>
+          <span id="bandiCountChip" class="bandi-count-chip">0</span>
         </div>
-        <div class="relative mb-4">
-          <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input id="dashboardSearchBandi" type="text" placeholder="Cerca tra i tuoi bandi..." class="w-full rounded-xl border border-brand-200 bg-white/80 py-2.5 pl-10 pr-3 text-sm font-semibold text-brand-900 outline-none placeholder:text-brand-600/45 transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
+        <div class="bandi-search-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="dashboardSearchBandi" type="text" placeholder="Cerca tra i tuoi bandi..." class="bandi-search-input">
         </div>
         <div id="bandiList" class="space-y-2">
           <p class="text-sm font-semibold text-brand-600">Nessun bando ancora. <a href="#" onclick="document.querySelector('.upload-section').scrollIntoView({behavior:'smooth'});return false" class="font-black text-brand-600 hover:underline">Carica il PDF del tuo concorso</a> per iniziare.</p>
@@ -486,62 +515,70 @@
       }, 3000);
     }
 
-    function progressRingSvg(pct, size = 48) {
-      const r = 20, circ = 2 * Math.PI * r;
-      const dash = (pct / 100) * circ;
-      return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 48 48" class="inline-block" aria-hidden="true">' +
-        '<circle cx="24" cy="24" r="' + r + '" fill="none" stroke="#D6E8FF" stroke-width="3"/>' +
-        '<circle cx="24" cy="24" r="' + r + '" fill="none" stroke="' + (pct >= 50 ? '#16A34A' : '#2563EB') + '" stroke-width="3" stroke-linecap="round" stroke-dasharray="' + circ + '" stroke-dashoffset="' + (circ - dash) + '" transform="rotate(-90 24 24)" style="transition: stroke-dashoffset .8s ease"/>' +
-        '<text x="24" y="24" text-anchor="middle" dominant-baseline="central" fill="#0B2A4A" font-size="13" font-weight="900" font-family="Inter,system-ui">' + Math.round(pct) + '%</text>' +
-        '</svg>';
-    }
-
     function setStat(type, value, decimals = 0) {
       const elMap = {
         simulations: document.getElementById('statSimulations'),
-        average: document.getElementById('statAverage'),
         bandi: document.getElementById('statBandi'),
         streak: document.getElementById('statStreak')
       };
-      const el = elMap[type];
-      el.classList.remove('skeleton', 'skeleton-number', 'stat-empty');
       const numeric = Number(value || 0);
+
+      if (type === 'average') {
+        // Gestisce il ring SVG per il voto medio
+        const ring = document.getElementById('statAverageRing');
+        const text = document.getElementById('statAverageText');
+        const note = document.getElementById('statAverageNote');
+        const arrow = document.getElementById('trendArrow');
+        const circumference = 2 * Math.PI * 22; // r=22
+
+        if (!numeric) {
+          ring.style.strokeDashoffset = circumference;
+          text.textContent = '—';
+          note.classList.remove('hidden');
+          arrow.classList.add('hidden');
+        } else {
+          note.classList.add('hidden');
+          const pct = numeric / 10; // voto su scala 0-10
+          const offset = circumference * (1 - Math.min(1, Math.max(0, pct)));
+          ring.style.strokeDashoffset = offset;
+          ring.style.stroke = numeric >= 7 ? 'url(#statGradient)' : numeric >= 5 ? '#D97706' : '#DC2626';
+          text.textContent = numeric.toFixed(1);
+        }
+        return;
+      }
+
+      const el = elMap[type];
+      if (!el) return;
+      el.classList.remove('skeleton', 'skeleton-number', 'stat-empty');
 
       if (!numeric) {
         el.classList.add('stat-empty');
         el.removeAttribute('data-count');
+        el.textContent = '0';
 
         if (type === 'simulations') {
-          el.innerHTML = progressRingSvg(0);
           document.getElementById('statSimulationsAction').classList.remove('hidden');
-        } else if (type === 'average') {
-          el.innerHTML = progressRingSvg(0);
-          document.getElementById('statAverageNote').classList.remove('hidden');
         } else if (type === 'bandi') {
-          el.innerHTML = progressRingSvg(0);
           document.getElementById('statBandiAction').classList.remove('hidden');
         } else if (type === 'streak') {
-          el.innerHTML = progressRingSvg(0);
           document.getElementById('statStreakNote').classList.remove('hidden');
         }
         return;
       }
 
       if (type === 'simulations') document.getElementById('statSimulationsAction').classList.add('hidden');
-      if (type === 'average') document.getElementById('statAverageNote').classList.add('hidden');
       if (type === 'bandi') document.getElementById('statBandiAction').classList.add('hidden');
       if (type === 'streak') document.getElementById('statStreakNote').classList.add('hidden');
 
       el.dataset.count = String(numeric);
-      el.textContent = decimals ? numeric.toFixed(decimals) : Math.round(numeric).toString();
-      if (type === 'streak') el.textContent = Math.round(numeric).toString() + ' gg';
+      el.textContent = Math.round(numeric).toString();
     }
 
     function animateCounts() {
-      document.querySelectorAll('[data-count]').forEach(el => {
+      // Anima i numeri nelle stat card (escluso average che ha il ring SVG)
+      document.querySelectorAll('#statSimulations[data-count], #statBandi[data-count], #statStreak[data-count]').forEach(el => {
         const target = parseFloat(el.dataset.count || '0');
         if (!target) return;
-        const decimals = parseInt(el.dataset.decimals || '0', 10);
         const delay = parseFloat(el.dataset.delay || '0');
         const obj = { value: 0 };
         gsap.to(obj, {
@@ -550,14 +587,43 @@
           ease: 'power2.out',
           delay,
           onUpdate: () => {
-            const value = decimals ? obj.value.toFixed(decimals) : Math.round(obj.value).toString();
-            el.textContent = el.id === 'statStreak' ? value + ' gg' : value;
+            el.textContent = Math.round(obj.value).toString();
           },
           onComplete: () => {
-            const value = decimals ? target.toFixed(decimals) : Math.round(target).toString();
-            el.textContent = el.id === 'statStreak' ? value + ' gg' : value;
+            el.textContent = Math.round(target).toString();
           }
         });
+      });
+
+      // Anima il ring SVG del voto medio usando state.average (non dal DOM)
+      const avgRing = document.getElementById('statAverageRing');
+      const avgText = document.getElementById('statAverageText');
+      const avgNote = document.getElementById('statAverageNote');
+      if (!avgRing || !avgText) return;
+      if (!avgNote.classList.contains('hidden')) return; // empty state
+
+      const targetAvg = state.average;
+      if (!targetAvg || targetAvg <= 0) return;
+
+      const circumference = 2 * Math.PI * 22;
+      const targetPct = targetAvg / 10;
+      const targetOffset = circumference * (1 - Math.min(1, Math.max(0, targetPct)));
+      const obj = { offset: circumference, display: 0 };
+
+      gsap.to(obj, {
+        offset: targetOffset,
+        display: targetAvg,
+        duration: 1.4,
+        ease: 'power2.out',
+        delay: 0.1,
+        onUpdate: () => {
+          avgRing.style.strokeDashoffset = obj.offset;
+          avgText.textContent = obj.display.toFixed(1);
+        },
+        onComplete: () => {
+          avgRing.style.strokeDashoffset = targetOffset;
+          avgText.textContent = targetAvg.toFixed(1);
+        }
       });
     }
 
@@ -566,12 +632,12 @@
       if (!state.recent.length) {
         // FASE 3.3 — empty state con CTA motivante invece di testo piatto
         container.innerHTML =
-          '<div class="empty-bandi empty-cta-card" role="status">' +
-            '<span class="empty-bandi-icon" aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></span>' +
-            '<div class="empty-bandi-body">' +
-              '<p class="empty-bandi-title">La tua prima simulazione ti aspetta</p>' +
-              '<p class="empty-bandi-msg">Hai gi\u00e0 caricato dei bandi? Scegline uno e inizia. Il commissario AI ti guider\u00e0 passo passo.</p>' +
-              '<a href="simulation.html" class="empty-bandi-cta">Vai alla simulazione <svg class="inline-block h-3.5 w-3.5 align-[-1px]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>' +
+          '<div class="empty-cta-card" role="status">' +
+            '<span class="empty-cta-icon" aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></span>' +
+            '<div class="empty-cta-body">' +
+              '<p class="empty-cta-title">La tua prima simulazione ti aspetta</p>' +
+              '<p class="empty-cta-msg">Hai gi\u00e0 caricato dei bandi? Scegline uno e inizia. Il commissario AI ti guider\u00e0 passo passo.</p>' +
+              '<a href="simulation.html" class="empty-cta-link">Vai alla simulazione <svg class="inline-block h-3.5 w-3.5 align-[-1px]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>' +
             '</div>' +
           '</div>';
         return;
@@ -594,7 +660,7 @@
     function renderSubjects() {
       const container = document.getElementById('improveList');
       if (!state.subjects.length) {
-        container.innerHTML = '<p class="empty-state">Fai qualche simulazione e qui vedrai su cosa concentrarti per migliorare.</p>';
+        container.innerHTML = '<div class="empty-cta-card" role="status"><span class="empty-cta-icon" aria-hidden="true"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span><div class="empty-cta-body"><p class="empty-cta-title">Inizia a fare pratica</p><p class="empty-cta-msg">Completa qualche simulazione e qui vedrai su cosa concentrarti per migliorare.</p></div></div>';
         return;
       }
 
@@ -619,17 +685,15 @@
       if (scores.length < 2) { arrow.classList.add('hidden'); return; }
       const diff = scores[0] - scores[1];
       arrow.classList.remove('hidden');
-      const svg = arrow.querySelector('svg');
-      if (diff > 0) {
-        svg.style.stroke = '#16A34A';
-        svg.setAttribute('viewBox', '0 0 20 20');
-        svg.innerHTML = '<path d="M5 13l5-6 5 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
-      } else if (diff < 0) {
-        svg.style.stroke = '#DC2626';
-        svg.setAttribute('viewBox', '0 0 20 20');
-        svg.innerHTML = '<path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+      if (diff > 0.1) {
+        arrow.className = 'trend-indicator trend-up';
+        arrow.innerHTML = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l5-6 5 6"/></svg> <span>+'+diff.toFixed(1)+'</span>';
+      } else if (diff < -0.1) {
+        arrow.className = 'trend-indicator trend-down';
+        arrow.innerHTML = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l5 6 5-6"/></svg> <span>'+diff.toFixed(1)+'</span>';
       } else {
-        arrow.classList.add('hidden');
+        arrow.className = 'trend-indicator';
+        arrow.innerHTML = '<span style="color:var(--text-muted);font-size:.72rem">stabile</span>';
       }
     }
 
@@ -680,7 +744,9 @@
           ease: 'power2.out',
           clearProps: 'transform'
         });
-        gsap.from('#trendArrow', { y: 6, opacity: 0, duration: .4, delay: .5, ease: 'power2.out', clearProps: 'transform' });
+        if (!document.getElementById('trendArrow').classList.contains('hidden')) {
+          gsap.from('#trendArrow', { y: 6, opacity: 0, duration: .4, delay: .5, ease: 'power2.out', clearProps: 'transform' });
+        }
       }
     }
 
