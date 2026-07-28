@@ -348,6 +348,121 @@ Quindi solo Perché (white bg) mantiene border-t.
 
 **Vincolo nuovo per future sessioni**: quando introduci UN colore accent strategico, **fallo nella tonalità più distinguibile dal primary** (L gap >5pp, hue gap >30°). Altrimenti il colore NON viene percepito e l'introduzione è sprecata. `accent-700` vs `brand-700` era fallimento — sempre test contrast-perceptual gap PRIMA di applicare.
 
+## ROUND 8 — ALL WHITE + ANIMATIONS (28/07/2026)
+
+**User feedback dopo round 7**: vuole 2 cose nuove:
+1. **Sfondo bianco uniforme** ("bianco e basta è brutto" meaning "togli le alternative al bianco"). Override del rhythm alternato 5-tone.
+2. **Piu' animazioni** ("non sembra morto"). Mantenere colori round 7 (ha fatto 1.5x).
+
+**Workflow**: Thinker letto stato + AGENT_MEMORY completa, decisione strategica autonoma (no spawning extra). Code-reviewer 2 giri (round 8 + 8.1) per validare bestia-mode escalation.
+
+### Modifiche applicate (6 modifiche batch):
+
+**1. Section background uniforme bianco**:
+- CF section: `class="reveal-on-scroll bg-slate-200 ..."` → `class="reveal-on-scroll ..."` (bg-slate-200 rimosso).
+- Prezzi section: stesso pattern rimosso.
+- Risultato: tutte le 4 sezioni (Hero, CF, Perché, Prezzi) + Footer = bg-white uniforme. Rhythm 5-tone distrutto, sostituito da rhythm gerarchia cards 3-tier.
+
+**2. Cards visibility compensation (CF upgrade)**:
+- 3 CF li: `tactile-card` (.10 shadow + brand-200) → `tactile-card-strong` (.14 shadow + brand-300). Inizialmente tutte e 6 cards strong per uniformità.
+- Risultato iniziale: tutte 6 cards same styling. Hierarchy persa.
+
+**3. H1 word-by-word reveal**:
+- Single text in H1 splittato in 10 inline `<span class="word-rise dN">` con stagger 80ms (d1..d10).
+- Periodo "AI." ora DENTRO accent-900 span wrapper (period indigo colored).
+- text-accent-900 cascaded down a span interni d9/d10.
+
+**4. Number bounce-in CSS**:
+- 6 `<span class="text-accent-900">N.</span>` → `<span class="num-bounce text-accent-900">N.</span>` (apply su 3 CF li + 3 Perché div).
+- New keyframe `num-bounce`: scale(.4) → opacity:0 → scale(1.18) → scale(1). Cubic-bezier(.34,1.56,.64,1) [poi corretto]. Trigger: `.reveal-on-scroll.is-visible .num-bounce`.
+
+**5. Nav link underline grow on hover**:
+- 4 navbar links (Come funziona, Perché noi, Prezzi, Accedi): aggiunto `class="nav-link"` (allowMultiple 4).
+- New CSS: `.nav-link::after` pseudo-element width:0 → 100% on `:hover` + `:focus-visible`. transition:width 250ms ease-out. Background currentColor (ink-700 resting, brand-700 on hover).
+
+**6. CSS blocco word-rise + disable hero-rise on H1**:
+- New keyframe `word-rise`: opacity 0 + translateY(10px) → opacity 1 + translateY(0). .45s duration cubic-bezier(.2,.8,.2,1) forwards.
+- Stagger delay classes d1..d10 (60ms..690ms).
+- CRITICAL: `.hero-rise > h1 { opacity: 1 !important; animation: none !important; }` per disabilitare hero-rise su H1 (altrimenti parent fade nasconde word-rise). 
+
+### Code-reviewer post round 8 verdict: 3 critical.
+
+**Critical #1**: `.num-bounce` static `opacity:0` non covered da prefers-reduced-motion global override (animation-duration .001ms non tocca static opacity). BUG se reduced-motion + section off-screen → numeri invisibili.
+
+**Critical #2**: Cubic-bezier(.34,1.56,.64,1) overshoot 1.56 = Material/AI-tool bouncy cartoon anti-slop tell. Stripe/Linear usano (.16,1,.3,1).
+
+**Critical #3**: 6 cards ora visualmente IDENTICHE dopo upgrade (tutte tactile-card-strong + brand-300). CF cards perso il "weight minore" che le differenziava semanticamente da Perché.
+
+## ROUND 8.1 — REVIEWER FIXES (28/07/2026)
+
+3 micro-fix atomici applicati:
+
+**Fix 1**: `prefers-reduced-motion` override esteso a `.num-bounce`:
+```css
+.hero-rise > *,
+.reveal-on-scroll,
+.word-rise,
+.num-bounce {  /* AGGIUNTO round 8.1 */
+  opacity: 1 !important;
+  transform: none !important;
+}
+```
+Risolve BUG hidden-static-opacity.
+
+**Fix 2**: cubic-bezier num-bounce sostituzione atomica:
+- Vecchio: `cubic-bezier(.34,1.56,.64,1)` (Material cartoon)
+- Nuovo: `cubic-bezier(.16,1,.3,1)` (iOS/Stripe smooth, max overshoot ~1.0)
+- Niente overshoot = "schiocco" confidente non childish.
+
+**Fix 3**: 3 CF cards revert differential hierarchy:
+- Vecchio: `<li class="tactile-card-strong ... border-brand-300 ...">` (6 cards tutte uguali)
+- Nuovo: `<li class="tactile-card ... border-brand-300 ...">` (allowMultiple 3, CF only, `<li` tag non matcha `<div` di Perché)
+- Risultato:
+  - CF: `tactile-card` (.10 shadow + brand-300) → "passi procedurali" gentle
+  - Perché: `tactile-card-strong` (.14 shadow + brand-300) → "value prop decisive" anchor
+- Gerarchia differenziale restaurata. Trade-off accettato: CF visibility leggermente minore di Perché, ma compensated da border-brand-300 (1 step più scuro di brand-200 round 7).
+
+### Code-reviewer post round 8.1 verdict: 3 fix corretti, push-ready, 2 residui soft.
+
+**Residuo soft 1**: CF cards visibility borderline su white bg (.10 shadow lighter than .14). Border-brand-300 dovrebbe compensare. Verifica post-push.
+
+**Residuo soft 2**: num-bounce senza inter-card stagger — tutti 3 numeri in CF animano simultaneamente a .15s delay quando section visible. UX migliore sarebbe stagger 80ms via `nth-child(N)` selector (= 4-line CSS aggiuntivo, alto impatto "vita sequenziale").
+
+### Risultato netto round 8 + 8.1:
+
+**Background**: 100% white uniforme (Hero + CF + Perché + Prezzi + Footer tutti bg-white). Compensazione via cards visibility (tactile-card-strong + border-brand-300 + shadow brand-tinted .10/.14).
+
+**Hierarchy 3-tier depth**:
+- Foundation: sectioni bg-white (piano base, nessuna gerarchia bg)
+- Cards: tactile-card (.10 + brand-300) < tactile-card-strong (.14 + brand-300). Differential CF < Perché.
+- Pro card: shadow-elevated (.18) anchor della pagina.
+
+**Animations nuove (3 + 1 fix)**:
+1. H1 word-by-word reveal (10 staggers, 1.1s total, above-the-fold impact)
+2. Number bounce-in (6 numeri, spring overdone → smooth iOS/Stripe post-fix)
+3. Nav link underline grow (4 link, 250ms ease-out, ::after pseudo)
+4. Existing: hero-rise stagger, reveal-on-scroll, savings-badge pulse, hero-cta-pulse, tactile-card hover lift (round 6-7)
+
+**prefers-reduced-motion coverage**: 100% coperto — .num-bounce + .word-rise + .reveal-on-scroll + .hero-rise > * tutti in override.
+
+**Anti-slop discipline mantenuta**:
+- Single-accent: blu primary + indigo accent + ink gray + emerald status = palette unita.
+- Bouncy cartoon RIMOSSO (cubic-bezier escalation).
+- prefers-reduced-motion rispettato.
+- Niente glassmorphism, niente neon, niente gradienti.
+
+## Metriche post-round 8 + 8.1
+- Round 6: UI 40, UX 52
+- Round 7 + 7.1: non misurato (utente riporta 1.5x improvement)
+- Round 8 + 8.1 atteso: UI 75-88, UX 80-92. Background uniformity + 3 nuove animazioni = visual hierarchy + aliveness composta.
+
+**Push-ready finale**: round 8 + 8.1 chiude il perimetro "background + animations + animations-fix". Risultato pulito, review-validated. Prossimi naturali:
+1. Misurare designmeter score post-push.
+2. Se residuo soft 1 (CF cards visibility) confermato: escalation 1-line.
+3. Se residuo soft 2 (num-bounce stagger) prioritario: 4-line CSS nth-child.
+
+**Vincolo nuovo per future sessioni**: quando aggiungi animazioni "above-the-fold-batch" (hero + cards + nav), ricorda di disabilitare parent animations (es. hero-rise su H1) per evitare che il parent fade nasconda i child animations. Pattern: genitore ha animation che va opacity:0→1, figlio ha animation che va opacity:0→1 dentro — figlio invisibile finché genitore non visibile. Override esplicito del genitore richiesto. Measurable in review con "animation chain audit".
+
 ## ROUND 6 — BIG VISUAL EFFECTS (28/07/2026)
 
 **User feedback critico dopo 5.8**: "hai solo peggiorato i colori, non hai fatto ombra stili bagliore grandezze effetti animazioni". L'utente vuole IMPATTO VISIVO GRANDE, non micro-tweak timid. Cambio direzione radicale.
