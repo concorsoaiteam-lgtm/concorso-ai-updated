@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Strumenti di benchmarking professionali per LLM in produzione. Misura latenza reale, deriva dell'accuratezza e costi dei token sotto stress.">
+    <title>PromptPerf — Enterprise LLM Benchmarking</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --accent: #ffffff;
+            --muted: #888888;
+            --border: #222222;
+            --card-bg: #0c0c0c;
+            --success: #00ff66;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--accent);
+            font-family: var(--font);
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            padding: 0 24px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 32px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo { font-weight: 700; font-size: 1.2rem; letter-spacing: -0.5px; }
+        .nav-meta { font-size: 0.85rem; color: var(--muted); display: flex; gap: 16px; }
+        .status-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block; margin-right: 6px; }
+
+        /* Hero Section */
+        header {
+            padding: 96px 0 64px 0;
+            max-width: 800px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            color: var(--muted);
+            line-height: 1.5;
+            margin-bottom: 32px;
+        }
+
+        /* Buttons & Actions */
+        .cta-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg);
+            padding: 14px 28px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-primary:hover { opacity: 0.9; }
+
+        .btn-secondary {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            border-bottom: 1px solid transparent;
+        }
+
+        .btn-secondary:hover { color: var(--accent); border-color: var(--accent); }
+
+        /* Live Data Dashboard Block (The 10k Value Pivot) */
+        .dashboard-preview {
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 80px;
+        }
+
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+        }
+
+        .metric-card {
+            border-left: 2px solid var(--border);
+            padding-left: 16px;
+        }
+
+        .metric-card.active { border-left-color: var(--success); }
+
+        .metric-label { font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; }
+        .metric-value { font-size: 1.75rem; font-weight: 700; font-family: monospace; }
+
+        /* Features Depth */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            padding: 64px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .feature-item h3 { font-size: 1.25rem; margin-bottom: 12px; font-weight: 600; }
+        .feature-item p { color: var(--muted); line-height: 1.6; font-size: 0.95rem; }
+
+        /* Footer / Edge Case Note */
+        footer {
+            margin-top: 80px;
+            padding: 48px 0;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .cta-group { flex-direction: column; align-items: flex-start; }
+            .btn-primary { width: 100%; text-align: center; }
+            footer { flex-direction: column; gap: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <nav>
+            <div class="logo">PromptPerf</div>
+            <div class="nav-meta">
+                <span><span class="status-dot"></span>Test di carico live</span>
+                <span>v2.4.1</span>
+            </div>
+        </nav>
+
+        <header>
+            <h1>Smetti di pagare per token sprecati o risposte allucinate.</h1>
+            <p>I provider di modelli cambiano le infrastrutture senza avvisare. PromptPerf esegue stress test continui su 42 LLM usando la tua suite di prompt reale. Rileva i cali di accuratezza e i picchi di latenza prima che lo facciano i tuoi utenti.</p>
+            
+            <div class="cta-group">
+                <a href="#test" class="btn-primary">Avvia test diagnostico (JSON)</a>
+                <a href="#docs" class="btn-secondary">Leggi la documentazione API CLI</a>
+            </div>
+        </header>
+
+        <section class="dashboard-preview">
+            <div class="dash-header">
+                <div>LIVE TELEMETRY — ULTIMI 60 SECONDI (CLUSTER EU-WEST)</div>
+                <div>Aggiornato: Giusto ora</div>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card active">
+                    <div class="metric-label">Latenza Media TTFT</div>
+                    <div class="metric-value">142ms</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Accuratezza RAG (Needle)</div>
+                    <div class="metric-value">99.42%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Token / Sec Medio</div>
+                    <div class="metric-value">84.1</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Costo Effettivo x 1M Token</div>
+                    <div class="metric-value">$1.22</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="feature-item">
+                <h3>Isolamento della deriva semantica</h3>
+                <p>I modelli ottimizzati via RLHF tendono a diventare pigri nel tempo. I nostri agenti monitorano se l'output devia dalle tue linee guida strutturali su campioni di 5.000 chiamate concorrenti.</p>
+            </div>
+            <div class="feature-item">
+                <h3>Simulazione di congestione di rete</h3>
+                <p>Non testiamo le API in condizioni ideali. Introduciamo jitter artificiale e ritardi nei pacchetti per mostrarti come reagisce la tua applicazione quando i server di OpenAI o Anthropic sono saturi.</p>
+            </div>
+            <div class="feature-item">
+                <h3>Analisi dei costi invisibili</h3>
+                <p>Tracciamo l'impatto reale del caching dei prompt. Vedi esattamente quanti dollari risparmi (o perdi) in base alla configurazione delle intestazioni HTTP del tuo gateway di routing.</p>
+            </div>
+        </section>
+
+        <footer>
+            <div>&copy; 2026 PromptPerf Inc. Infrastruttura di test distribuita.</div>
+            <div>Trattamento dati conforme a GDPR e SOC2. Nessun prompt viene memorizzato nei log di addestramento.</div>
+        </footer>
+    </div>
+
+</body>
+</html>

@@ -63,7 +63,7 @@ const SUPABASE_URL = resolveSupabaseUrl();
 const SUPABASE_ANON_KEY = resolveAnonKey();
 // Provider AI configurabile via env var (default: OpenRouter OpenAI-compatible API)
 const AI_API_URL = process.env.AI_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
-const AI_MODEL = process.env.AI_MODEL || 'deepseek/deepseek-chat';
+const AI_MODEL = process.env.AI_MODEL || 'google/gemini-2.5-flash';
 const AI_REFERRER = process.env.AI_REFERRER || 'https://concorso-ai.vercel.app';
 const AI_TITLE = process.env.AI_TITLE || 'ConcorsoAI';
 const UPSTREAM_TIMEOUT_MS = 30000;
@@ -71,6 +71,7 @@ const FIXED_MODEL = AI_MODEL;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_PER_WINDOW = 30; // per IP (uno IP puó essere molti utenti dietro NAT)
 const RATE_LIMIT_MAX_PER_WINDOW_PER_USER = 60; // TURNO 31: per user (piú generoso del per-IP)
+const DAILY_LIMIT_PIANO_CHAT = 10; // TURNO 33 (Fase 5): max messaggi/giorno per user sul mode='piano'
 const RATE_LIMIT_SWEEP_INTERVAL_MS = 60 * 1000;
 
 // --- CORS whitelist ---
@@ -85,6 +86,7 @@ const ALLOWED_ORIGINS = [
 // --- Rate limit (in-memory, con sweep) ---
 const rateLimits = new Map();
 const userRateLimits = new Map(); // TURNO 31: per-user rate limit
+const dailyPianoCounts = new Map(); // TURNO 33 (Fase 5): per-user daily counter (mode='piano') con dayKey rollover
 
 // Sweep periodica: rimuove record scaduti dalla Map.
 // Necessaria per evitare memory leak su istanze warm (Vercel serverless).
@@ -128,7 +130,28 @@ function checkRateLimit(ip) {
 // perché un utente legittimo puó trovarsi dietro NAT condiviso con altri.
 // Previene abusi da singolo account anche se bypassa il limite per-IP.
 function checkUserRateLimit(userId) {
-  return checkRateLimitMap(userRateLimits, userId, RATE_LIMIT_MAX_PER_WINDOW_PER_USER);
+  userRateLimits; userRateLimits; return checkRateLimitMap(userRateLimits, userId, RATE_LIMIT_MAX_PER_WINDOW_PER_USER);
+}
+
+// TURNO 33 (Fase 5): rate limit giornaliero per la chat del piano.
+// Ogni utente ha max 10 messaggi al giorno contro /api/chat con mode='piano'.
+// dayKey rollover a mezzanotte UTC.
+function todayKey() {
+  var d = new Date();
+  return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
+}
+function checkDailyPianoLimit(userId) {
+  var dk = todayKey();
+  var rec = dailyPianoCounts.get(userId);
+  if (!rec || rec.dayKey !== dk) {
+    dailyPianoCounts.set(userId, { dayKey: dk, count: 1 });
+    return { ok: true, count: 1, max: DAILY_LIMIT_PIANO_CHAT, retryTomorrow: false };
+  }
+  if (rec.count >= DAILY_LIMIT_PIANO_CHAT) {
+    return { ok: false, count: rec.count, max: DAILY_LIMIT_PIANO_CHAT, retryTomorrow: true };
+  }
+  rec.count += 1;
+  return { ok: true, count: rec.count, max: DAILY_LIMIT_PIANO_CHAT, retryTomorrow: false };
 }
 
 // --- CORS helper ---
@@ -310,6 +333,21 @@ async function handleRequest(req, res) {
     });
   }
 
+  // TURNO 33 (Fase 5): rate limit giornaliero SOLO per mode='piano'.
+  if (req.body && req.body.mode === 'piano') {
+    var daily = checkDailyPianoLimit(supabaseUser.id);
+    if (!daily.ok) {
+      return res.status(429).json({
+        error: 'Limite giornaliero raggiunto',
+        details: 'Hai raggiunto il limite di ' + daily.max + ' messaggi al giorno per la chat del piano. Riprova domani.',
+        scope: 'daily-piano',
+        limit: daily.max,
+        retryAfterS: 24 * 60 * 60,
+        dayKey: todayKey()
+      });
+    }
+  }
+
   // 4) API key AI — controlla AI_API_KEY, poi BLUESMINDS_API_KEY, poi fallback hardcoded
   const rawKey = String(process.env.AI_API_KEY || HARDCODED_AI_KEY || process.env.BLUESMINDS_API_KEY || '');
   const apiKey = rawKey.trim();
@@ -335,7 +373,22 @@ async function handleRequest(req, res) {
   const wantsStream = req.body.stream === true;
 
   // 7) Forward verso AI provider — retry 3x su 503/throw (backoff esponenziale)
-  const forwardBody = { ...req.body, model: FIXED_MODEL, stream: true };
+  // TURNO 33 (Fase 5): mode='piano' inietta il system prompt canonico dell'utente.
+  // Sovrascrive/aggiunge la system message in posizione 0.
+  var SYSTEM_PROMPT_PIANO = 'Sei un coach AI per concorsi pubblici italiani. Rispondi sempre in italiano. Sii diretto e concreto. Max 2-3 frasi per messaggio. Se modifichi il piano spiega brevemente perché.';
+  var forwardBody;
+  if (req.body && req.body.mode === 'piano') {
+    var msgs = Array.isArray(req.body.messages) ? req.body.messages.slice() : [];
+    var hasSystem = msgs.length > 0 && msgs[0] && msgs[0].role === 'system';
+    if (!hasSystem) {
+      msgs.unshift({ role: 'system', content: SYSTEM_PROMPT_PIANO });
+    } else {
+      msgs[0] = { role: 'system', content: SYSTEM_PROMPT_PIANO };
+    }
+    forwardBody = { ...req.body, model: FIXED_MODEL, stream: true, messages: msgs };
+  } else {
+    forwardBody = { ...req.body, model: FIXED_MODEL, stream: true };
+  }
   var MAX_RETRIES = 3;
   function backoffMs(attempt) { return 1000 * Math.pow(2, attempt - 1); } // 1s, 2s, 4s
   var overallStart = Date.now();

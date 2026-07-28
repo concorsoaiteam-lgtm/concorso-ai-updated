@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Scrivania — ConcorsoAI</title>
+<meta name="description" content="Scrivania di lavoro per la preparazione al concorso pubblico." />
+<meta name="theme-color" content="#FFFFFF" />
+
+<!-- Fonts: Geist (UI) + Geist Mono (codici/numeri) -->
+<!-- Georgia fornita dal system, niente Google Font -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+/* ============================================================
+   ARCHIVIO RAZIONALE — Dashboard 3
+   Mood: scrivania di una sala studio istituzionale.
+   White chrome, inchiostro istituzionale, niente decorazioni.
+
+   Anti-AI-default (impeccable bans):
+   - niente cream/sand bg
+   - niente glassmorphism
+   - niente gradient text
+   - niente mix-blend-mode
+   - niente repeating-linear-gradient bg
+   - niente decorative grid background
+   - niente "01-02-03" decorative markers su ogni sezione
+   - niente box-shadow diffuso (ghost card)
+   - niente border-radius > 6 su container
+   - niente hero > 4rem
+   - niente letter-spacing < -0.02em
+   - niente emoji decorativi
+   - niente chat bubble con avatar AI
+   ============================================================ */
+
+:root {
+  /* Palette — tutta in OKLCH-friendly hex, chroma 0.005-0.015 verso il brand */
+  --bg:        #FFFFFF;       /* canvas principale */
+  --bg-shell:  #F4F6F8;       /* shell fuori dal main content */
+  --bg-row:    #F9FAFB;       /* hover riga */
+  --bg-cell:   #FAFBFC;       /* stripe tabella */
+  --border:    #E5E7EB;       /* bordi 1px tabella, card */
+  --border-strong: #D1D5DB;   /* bordi input/active */
+  --ink:       #111827;       /* testo primario */
+  --ink-2:     #1F2937;       /* testo secondario */
+  --muted:     #6B7280;       /* metadata, label */
+  --muted-2:   #9CA3AF;       /* placeholder, tertiary */
+
+  /* Accent: blu istituzionale carta da zucchero scuro */
+  --accent:    #0F4C81;       /* brand, link, active indicator */
+  --accent-2:  #1E5A96;       /* hover */
+  --accent-tint: #EFF4F8;     /* bg leggermente tinta verso accent */
+
+  /* Status */
+  --success:   #0E7040;       /* verde pino */
+  --warning:   #B45309;       /* terra bruciata */
+  --error:     #B91C1C;       /* rosso mattone */
+
+  /* Tipografia */
+  --sans:  'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --serif: Georgia, 'Cambria', 'Times New Roman', serif;
+  --mono:  'Geist Mono', ui-monospace, 'JetBrains Mono', monospace;
+
+  /* Misure sobrie */
+  --reading-w: 720px;          /* colonna reading */
+  --max-w:     960px;          /* colonna main */
+  --topbar-h:  52px;
+
+  /* Easing funzionale */
+  --t-fast: 150ms;
+  --t-med:  200ms;
+  --ease:   cubic-bezier(0.2, 0, 0.2, 1);  /* ease-out */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: auto; }  /* niente smooth-scroll decorative */
+body {
+  font-family: var(--sans);
+  background: var(--bg-shell);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'ss01' on, 'cv11' on;
+  font-size: 15px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+img, svg { display: block; }
+button {
+  font-family: inherit; cursor: pointer;
+  border: none; background: none; color: inherit;
+}
+a { color: inherit; text-decoration: none; }
+input, textarea, select {
+  font-family: inherit; font-size: inherit; color: inherit;
+}
+
+/* ============================================================
+   TOPBAR — una singola barra 52px
+   ============================================================ */
+.topbar {
+  position: sticky; top: 0; z-index: 30;
+  height: var(--topbar-h);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) auto;
+  align-items: center;
+  padding: 0 24px;
+}
+.brand {
+  display: flex; align-items: baseline; gap: 6px;
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.brand-slash {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 1px;
+}
+
+.brand-context {
+  display: flex; flex-direction: column; gap: 0;
+  margin-left: 18px;
+  padding-left: 18px;
+  border-left: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+.brand-context .bc-line {
+  display: flex; gap: 10px;
+}
+.brand-context strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.tabs {
+  display: flex; align-items: center; gap: 0;
+}
+.tab {
+  position: relative;
+  padding: 0 16px;
+  height: var(--topbar-h);
+  display: flex; align-items: center;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color var(--t-fast) var(--ease);
+}
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--ink); font-weight: 600; }
+.tab[aria-selected="true"]::after {
+  content: '';
+  position: absolute;
+  left: 16px; right: 16px;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent);
+}
+.tab .tab-tag {
+  margin-left: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--muted-2);
+  padding: 1px 5px;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+/* topbar right: user */
+.topbar-right {
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  margin-left: 24px;
+}
+.user-line {
+  display: flex; align-items: center; gap: 8px;
+}
+.user-circle {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 760px) {
+  .tabs { gap: 0; }
+  .tab { padding: 0 10px; font-size: 13px; }
+  .brand-context { display: none; }
+  .topbar { padding: 0 14px; }
+}
+
+/* ============================================================
+   MAIN — single column 960px max
+   ============================================================ */
+.main {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 36px 24px 96px;
+  background: var(--bg);
+  min-height: calc(100vh - var(--topbar-h));
+}
+@media (max-width: 760px) {
+  .main { padding: 24px 16px 64px; }
+}
+
+.tab-panel {
+  display: none;
+  animation: panelIn var(--t-med) var(--ease);
+}
+.tab-panel.active { display: block; }
+@keyframes panelIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+/* niente translateY/scale slop — solo opacity */
+
+/* ============================================================
+   TYPOGRAPHY — funzionale
+   ============================================================ */
+
+/* Page metadata strip (in alto, sopra il titolo) */
+.page-meta {
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.page-meta .pm-code {
+  color: var(--ink);
+  font-weight: 600;
+}
+.page-meta .pm-pipe {
+  color: var(--border-strong);
+  user-select: none;
+}
+
+h1.page-title {
+  font-family: var(--sans);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+h1.page-title .pt-soft {
+  font-weight: 500;
+  color: var(--muted);
+}
+.page-lead {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 60ch;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+/* ============================================================
+   TAB 1 — FASCICOLO
+   "Fascicolo documentale" — form sobrio + tabella concorsi
+   ============================================================ */
+
+/* Banner di stato: niente border-left stripe (anti-slop), uso full border + bg tint verso status */
+.status-bar {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  background: rgba(14, 112, 64, 0.04);
+  margin-bottom: 24px;
+  border-radius: 0;
+}
+.status-bar.warn { background: rgba(180, 83, 9, 0.05); }
+.status-bar .sb-text {
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.status-bar .sb-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--success);
+  text-transform: uppercase;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+.status-bar.warn .sb-tag { color: var(--warning); }
+
+/* Form: inserimento nuovo fascicolo */
+fieldset.form-section {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px 24px 24px;
+  background: var(--bg);
+  margin-bottom: 28px;
+}
+fieldset.form-section > legend {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 0 8px;
+  background: var(--bg);
+}
+.fs-help {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 4px 0 20px;
+  max-width: 60ch;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+@media (max-width: 700px) { .form-row { grid-template-columns: 1fr; } }
+
+.form-row.three { grid-template-columns: 2fr 1fr 1fr; }
+@media (max-width: 700px) { .form-row.three { grid-template-columns: 1fr; } }
+
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.form-field input[type="text"],
+.form-field input[type="email"],
+.form-field input[type="date"],
+.form-field select,
+.form-field textarea {
+  padding: 9px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  transition: border-color var(--t-fast) var(--ease);
+  outline: none;
+}
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  border-color: var(--accent);
+}
+.form-field textarea { min-height: 88px; resize: vertical; font-family: var(--serif); font-size: 14px; line-height: 1.55; }
+.form-field .ff-hint {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted-2);
+}
+.form-field .ff-hint strong { color: var(--muted); font-weight: 600; }
+
+/* file input minimal */
+.filebox {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 4px;
+  background: var(--bg);
+  cursor: pointer;
+}
+.filebox:hover { border-color: var(--accent); }
+.filebox input[type="file"] {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.filebox .fb-icon {
+  width: 22px; height: 22px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+/* Bottoni (sobri, niente glow) */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #FFFFFF;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+  letter-spacing: -0.005em;
+}
+.btn:hover { background: var(--accent-2); border-color: var(--accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn-secondary {
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
+}
+.btn-secondary:hover { background: var(--bg-shell); border-color: var(--ink); }
+.btn .btn-arrow {
+  transition: transform var(--t-fast) var(--ease);
+}
+.btn:hover .btn-arrow { transform: translateX(2px); }
+.btn-link {
+  background: none; border: none; padding: 0;
+  color: var(--accent); font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.btn-link:hover { color: var(--accent-2); }
+
+/* Tabella fascicoli (stile istituzionale) */
+.table-wrap {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+.table-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.table-head h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.table-head .th-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.table th,
+.table td {
+  text-align: left;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.table th {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--bg-shell);
+  border-bottom: 1px solid var(--border-strong);
+}
+.table tbody tr {
+  transition: background var(--t-fast) var(--ease);
+  cursor: pointer;
+}
+.table tbody tr:hover { background: var(--bg-row); }
+.table tbody tr.selected { background: var(--accent-tint); }
+.table tbody tr.selected td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
+.table tbody tr:last-child td { border-bottom: none; }
+.table .td-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  width: 50px;
+}
+.table .td-title {
+  font-weight: 500;
+  color: var(--ink);
+}
+.table .td-ente {
+  color: var(--muted);
+  font-size: 12px;
+}
+.table .td-code {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-2);
+}
+.table .td-stato {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.td-stato.pronto    { color: var(--success); background: rgba(14, 112, 64, 0.08); }
+.td-stato.attesa    { color: var(--warning); background: rgba(180, 83, 9, 0.08); }
+.td-stato.archiviato{ color: var(--muted);  background: var(--bg-shell); }
+.td-stato.ko        { color: var(--error);   background: rgba(185, 28, 28, 0.08); }
+.table .td-link {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.table .td-link:hover { color: var(--accent-2); }
+
+/* Banner "Azione" sotto la tabella (CTA sobrio) */
+.dispatch {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  flex-wrap: wrap;
+}
+.dispatch .dp-info {
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.dispatch .dp-info strong {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin-right: 8px;
+}
+
+/* ============================================================
+   TAB 2 — PIANO
+   Verbale + calendario a settimane
+   ============================================================ */
+.week-toolbar {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.week-toolbar .wt-nav {
+  display: flex; gap: 8px; align-items: center;
+}
+.week-toolbar .wt-nav button {
+  padding: 6px 12px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease);
+}
+.week-toolbar .wt-nav button:hover { background: var(--bg-shell); }
+.week-toolbar .wt-nav button.today {
+  background: var(--accent); color: #FFFFFF; border-color: var(--accent);
+}
+.week-toolbar .wt-range {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.week-toolbar .wt-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+.week-toolbar .wt-meta strong { color: var(--ink); font-weight: 600; }
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  overflow: hidden;
+  margin-bottom: 32px;
+}
+.day {
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  min-height: 132px;
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 8px;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease);
+  position: relative;
+}
+.day:last-child { border-right: none; }
+.day:hover { background: var(--bg-row); }
+.day.today {
+  background: var(--bg-cell);
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+.day .d-meta {
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.day .d-name {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.day .d-num {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1;
+}
+.day .d-type {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.day .d-type.preselettiva { color: var(--muted); }
+.day .d-type.scritta      { color: var(--accent); }
+.day .d-type.orale        { color: var(--success); }
+.day .d-type.libero       { color: var(--muted-2); }
+.day .d-status {
+  margin-top: auto;
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.day .d-status::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--muted-2);
+}
+.day .d-status.done::before     { background: var(--success); }
+.day .d-status.upcoming::before { background: var(--accent); }
+.day .d-status.skipped::before  { background: var(--warning); }
+
+/* Verbale di seduta (al posto della chat bubble AI slop) */
+.verbale {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  margin-bottom: 28px;
+}
+.verbale-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-shell);
+}
+.verbale-head h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.verbale-id {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+.verbale-body {
+  font-family: var(--serif);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  padding: 24px 20px;
+  max-width: 65ch;
+}
+.verbale-body .v-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 8px;
+  display: block;
+}
+.verbale-body p + p { margin-top: 12px; }
+.verbale-body em { font-style: italic; }
+.verbale-body strong { color: var(--ink); font-weight: 600; }
+.verbale-foot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  gap: 12px;
+}
+.verbale-foot input {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 13px;
+}
+.verbale-foot input:focus { outline: none; border-color: var(--accent); }
+
+/* ============================================================
+   TAB 3 — STORICO PROVE
+   Tabella cronologica + aree di miglioramento strutturate
+   ============================================================ */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+.kpi-cell {
+  padding: 18px 20px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 6px;
+  background: var(--bg);
+}
+.kpi-cell:last-child { border-right: none; }
+.kpi-cell .kc-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.kpi-cell .kc-val {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.kpi-cell .kc-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+.kpi-cell .kc-sub.is-up { color: var(--success); }
+.kpi-cell .kc-sub.is-dn { color: var(--error); }
+@media (max-width: 700px) {
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+  .kpi-cell { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .kpi-cell:nth-child(2n) { border-right: none; }
+  /* La precedente sezione .kpi-strip + .kpi-cell (righe 745-789 dell'originale) è stata rimossa.
+   Per evitare regressione visiva, il markup HTML è già sostituito da .summary-line (a monte).
+   Nessun residuo di codice morto deve essere cercato nelle prossime release. */
+}
+
+/* Aree: visualizzate come "verbale" */
+.rubrica {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  margin-bottom: 28px;
+}
+.rubrica-head {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.rubrica-head h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.rubrica-head .rh-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.rubrica-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 60px;
+  gap: 24px;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--t-fast) var(--ease);
+}
+.rubrica-row:last-child { border-bottom: none; }
+.rubrica-row:hover { background: var(--bg-row); }
+.rubrica-row .rr-name {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.rubrica-row .rr-name .rr-meta {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+}
+.rubrica-bar {
+  height: 4px;
+  background: var(--bg-shell);
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.rubrica-fill {
+  height: 100%;
+  background: var(--ink);
+  width: 0;
+  transition: width var(--t-med) var(--ease);
+}
+.rubrica-fill.is-mid { background: var(--accent); }
+.rubrica-fill.is-low { background: var(--error); }
+.rubrica-row .rr-val {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.rubrica-row .rr-val.is-mid { color: var(--accent); }
+.rubrica-row .rr-val.is-low { color: var(--error); }
+@media (max-width: 700px) {
+  .rubrica-row { grid-template-columns: 1fr; gap: 8px; }
+  .rubrica-row .rr-val { text-align: left; }
+}
+
+/* Riepilogo inline (NO hero-metric template) */
+.summary-line {
+  display: flex; flex-wrap: wrap; gap: 8px 0;
+  align-items: baseline;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  margin-bottom: 28px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.summary-line .sl-k {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+  color: var(--muted); text-transform: uppercase; margin-right: 6px;
+}
+.summary-line .sl-v {
+  font-family: var(--mono); font-size: 18px; font-weight: 700;
+  color: var(--ink); font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em; margin-right: 4px;
+}
+.summary-line .sl-sub {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--muted); margin-right: 4px;
+}
+.summary-line .sl-delta.is-up { color: var(--success); font-weight: 600; }
+.summary-line .sl-delim {
+  font-family: var(--mono); color: var(--border-strong);
+  padding: 0 14px; user-select: none;
+}
+
+/* ============================================================
+   TAB 4 — CLASSIFICA
+   Testo lungo sobrio, NO card layout
+   ============================================================ */
+.classifica-read {
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--ink-2);
+  max-width: 65ch;
+  margin-bottom: 32px;
+}
+.classifica-read .cr-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 12px;
+  letter-spacing: 0.02em;
+}
+.classifica-read p + p { margin-top: 14px; }
+.classifica-read em { font-style: italic; }
+.classifica-read strong { font-weight: 600; color: var(--ink); }
+.classifica-read .cr-quote {
+  display: block;
+  margin: 24px 0;
+  padding: 0 0 0 18px;
+  border-left: 1px solid var(--border-strong);
+  font-style: italic;
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.checklist {
+  list-style: none;
+  margin: 0 0 32px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+}
+.checklist li {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 24px;
+  align-items: baseline;
+}
+.checklist li:last-child { border-bottom: none; }
+.checklist .chk-name {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.checklist .chk-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.checklist .chk-state {
+  margin-left: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--success);
+  text-transform: uppercase;
+}
+.checklist .chk-state.pending { color: var(--warning); }
+@media (max-width: 700px) {
+  .checklist li { grid-template-columns: 1fr; gap: 4px; }
+}
+
+.waitlist {
+  display: flex; gap: 0;
+  max-width: 480px;
+  margin-top: 8px;
+}
+.waitlist input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px 0 0 4px;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  font-family: var(--sans);
+}
+.waitlist input:focus { outline: none; border-color: var(--accent); }
+.waitlist button {
+  padding: 0 18px;
+  background: var(--accent);
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 0 4px 4px 0;
+  border: 1px solid var(--accent);
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease);
+}
+.waitlist button:hover { background: var(--accent-2); border-color: var(--accent-2); }
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast {
+  position: fixed;
+  bottom: 24px; left: 50%; transform: translate(-50%, 16px);
+  background: var(--ink);
+  color: var(--bg);
+  padding: 10px 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  border-radius: 4px;
+  z-index: 90;
+  opacity: 0;
+  transition: opacity var(--t-med) var(--ease), transform var(--t-med) var(--ease);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ============================================================
+   FOCUS RING (sobrio, istituzionale)
+   ============================================================ */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ============================================================
+   REDUCED MOTION (impeccable compliance)
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ============================================================
+   PRINT — bonus sobrio, in caso l'utente voglia stampare
+   ============================================================ */
+@media print {
+  .topbar, .verbale-foot, .dispatch, .waitlist, .week-toolbar { display: none !important; }
+  body { background: #FFFFFF; }
+  .main { padding: 0; max-width: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     TOPBAR — navigazione orizzontale, niente sidebar
+     ============================================================ -->
+<header class="topbar" role="banner">
+  <div style="display: flex; align-items: center; min-width: 0;">
+    <div class="brand" role="img" aria-label="ConcorsoAI">
+      Concorso<span class="brand-slash">/</span>Scrivania
+    </div>
+    <div class="brand-context" aria-label="Contesto corrente">
+      <div class="bc-line"><span>Ufficio:</span><strong>Fascicoli candidati</strong></div>
+      <div class="bc-line"><span>sessione:</span><strong>sess-2026-0721-a4</strong></div>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Sezioni scrivania">
+    <button class="tab" role="tab" data-tab="t1" aria-selected="true">Fascicolo</button>
+    <button class="tab" role="tab" data-tab="t2" aria-selected="false">Piano<span class="tab-tag">Pro</span></button>
+    <button class="tab" role="tab" data-tab="t3" aria-selected="false">Storico prove</button>
+    <button class="tab" role="tab" data-tab="t4" aria-selected="false">Classifica</button>
+  </div>
+
+  <div class="topbar-right">
+    <span class="user-line">
+      <span class="user-circle">MR</span>
+      <span>Marco Rinaldi</span>
+    </span>
+  </div>
+</header>
+
+<!-- ============================================================
+     MAIN
+     ============================================================ -->
+<main class="main">
+
+  <!-- ============================================================
+       TAB 1 — FASCICOLO
+       ============================================================ -->
+  <section id="t1" class="tab-panel active" role="tabpanel">
+    <div class="page-meta">
+      <span>Sezione · Fascicolo documentale</span>
+      <span class="pm-pipe">|</span>
+      <span class="pm-code">UFF/CONC/01</span>
+      <span class="pm-pipe">|</span>
+      <span>Aggiornato · 21-07-2026 09:12</span>
+    </div>
+
+    <h1 class="page-title">I tuoi <span class="pt-soft">fascicoli aperti</span></h1>
+    <p class="page-lead">Qui trovi i concorsi pubblici italiani caricati come fascicolo. Puoi aggiungere un nuovo concorso, rivedere i materiali già acquisiti e procedere alla simulazione d'esame quando il fascicolo è completo.</p>
+
+    <!-- Banner di stato sobrio -->
+    <div class="status-bar" role="status">
+      <span class="sb-tag">Stato</span>
+      <span class="sb-text">Tutti i fascicoli sono aggiornati. L'ultima sincronizzazione con la Gazzetta Ufficiale è avvenuta alle 09:00 di stamane.</span>
+    </div>
+
+    <!-- Form: nuovo fascicolo -->
+    <fieldset class="form-section">
+      <legend>Aggiungi un concorso al fascicolo</legend>
+      <p class="fs-help">Incolla il testo del bando, oppure seleziona un concorso già monitorato per aggiungerlo in automatico. Il sistema normalizzerà denominazione, ente, tipologia di prove e Gazzetta Ufficiale di riferimento.</p>
+
+      <form onsubmit="event.preventDefault(); showToast('Fascicolo acquisito. In elaborazione.');">
+        <div class="form-row three">
+          <div class="form-field">
+            <label for="repo-name">Denominazione del concorso</label>
+            <input type="text" id="repo-name" placeholder="Es. Funzionario amministrativo tributario" />
+            <span class="ff-hint">Nome ufficiale da <strong>Gazzetta Ufficiale</strong> o portale InPA.</span>
+          </div>
+          <div class="form-field">
+            <label for="repo-ente">Ente</label>
+            <input type="text" id="repo-ente" placeholder="Es. Agenzia delle Entrate" />
+          </div>
+          <div class="form-field">
+            <label for="repo-tipo">Tipologia prove</label>
+            <select id="repo-tipo">
+              <option>Preselettiva + Scritta + Orale</option>
+              <option>Solo Orale</option>
+              <option>Preselettiva + Orale</option>
+              <option>Titoli + Orale</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="repo-materie">Materie d'esame principali</label>
+            <textarea id="repo-materie" placeholder="Una materia per riga: Diritto tributario, Diritto amministrativo, Contabilità pubblica, ..."></textarea>
+          </div>
+          <div class="form-field">
+            <label for="repo-gi">Gazzetta Ufficiale di riferimento</label>
+            <input type="text" id="repo-gi" placeholder="Es. GU n.34 del 12-04-2026" />
+            <span class="ff-hint">Numero e data della Gazzetta. Formato italiano.</span>
+            <label for="repo-data" style="margin-top: 14px;">Data di scadenza domande</label>
+            <input type="date" id="repo-data" />
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-bottom: 16px;">
+          <label>Documenti del bando (PDF · fino a 3 file · max 10MB)</label>
+          <div class="filebox">
+            <svg class="fb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <label for="repo-files" style="flex:1; cursor:pointer;">Trascina qui il bando o <u>seleziona da filesystem</u>.</label>
+            <input type="file" id="repo-files" accept=".pdf" multiple style="display:none" />
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-secondary">Annulla</button>
+          <button type="submit" class="btn">
+            Acquisisci fascicolo
+            <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><polyline points="13 5 20 12 13 19"/></svg>
+          </button>
+        </div>
+      </form>
+    </fieldset>
+
+    <!-- Tabella fascicoli -->
+    <div class="table-wrap">
+      <div class="table-head">
+        <h3>Fascicoli aperti</h3>
+        <span class="th-meta">4 fascicoli · ultima revisione 21-07-2026</span>
+      </div>
+      <table class="table" aria-label="Fascicoli aperti">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Concorso</th>
+            <th>Ente</th>
+            <th>Gazzetta Uff.</th>
+            <th>Tipo prove</th>
+            <th>Stato</th>
+            <th>Azione</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-num">01</td>
+            <td>
+              <div class="td-title">Funzionario amministrativo tributario</div>
+              <div class="td-ente">165 posti · Dir. III · tempo indeterminato</div>
+            </td>
+            <td>Agenzia delle Entrate</td>
+            <td class="td-code">GU 4ª SS n.34 · 12-04-2026</td>
+            <td>Presel. + Scritta + Orale</td>
+            <td><span class="td-stato pronto">Pronto</span></td>
+            <td><a class="td-link" href="#" data-tab="t1">Apri</a></td>
+          </tr>
+          <tr>
+            <td class="td-num">02</td>
+            <td>
+              <div class="td-title">Istruttore direttivo — area contabile</div>
+              <div class="td-ente">28 posti · Cat. D · tempo indeterminato</div>
+            </td>
+            <td>Ministero dell'Economia e delle Finanze</td>
+            <td class="td-code">GU 4ª SS n.27 · 28-03-2026</td>
+            <td>Titoli + Orale</td>
+            <td><span class="td-stato pronto">Pronto</span></td>
+            <td><a class="td-link" href="#" data-tab="t1">Apri</a></td>
+          </tr>
+          <tr>
+            <td class="td-num">03</td>
+            <td>
+              <div class="td-title">Collaboratore amministrativo — settore legale</div>
+              <div class="td-ente">312 posti · Cat. C · tempo indeterminato</div>
+            </td>
+            <td>INPS — Direzione Generale</td>
+            <td class="td-code">GU 4ª SS n.18 · 22-02-2025</td>
+            <td>Presel. + Scritta + Orale</td>
+            <td><span class="td-stato attesa">In attesa OCR</span></td>
+            <td><a class="td-link" href="#" data-tab="t1">Rivedi</a></td>
+          </tr>
+          <tr>
+            <td class="td-num">04</td>
+            <td>
+              <div class="td-title">Assistente giuridico</div>
+              <div class="td-ente">47 posti · Cat. C · tempo indeterminato</div>
+            </td>
+            <td>Comune di Roma</td>
+            <td class="td-code">GU 4ª SS n.84 · 11-09-2024</td>
+            <td>Titoli + Orale</td>
+            <td><span class="td-stato archiviato">Archiviato</span></td>
+            <td><a class="td-link" href="#" data-tab="t1">Apri</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Banner azione (1 sola CTA, niente glow) -->
+    <div class="dispatch" role="region" aria-label="Avvio simulazione">
+      <div class="dp-info">
+        <strong>Procedi</strong>
+        Seleziona una riga della tabella per aprire la configurazione della simulazione. Fascicoli in stato "Pronto" sono abilitati al preflight.
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button type="button" class="btn btn-secondary">Indietro</button>
+        <button type="button" class="btn" onclick="document.querySelector('tr:nth-child(1)').click()">
+          Apri preflight
+          <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><polyline points="13 5 20 12 13 19"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TAB 2 — PIANO
+       ============================================================ -->
+  <section id="t2" class="tab-panel" role="tabpanel">
+    <div class="page-meta">
+      <span>Sezione · Piano di studi</span>
+      <span class="pm-pipe">|</span>
+      <span class="pm-code">PIANO/SETT-03</span>
+      <span class="pm-pipe">|</span>
+      <span>Emissione · Lun 21-07-2026 06:00</span>
+    </div>
+
+    <h1 class="page-title">Piano settimanale <span class="pt-soft">— settimana 3</span></h1>
+    <p class="page-lead">Il coach AI emette un piano di studi ogni lunedì alle 06:00, sulla base dell'andamento della settimana precedente. Puoi richiedere una modifica in linguaggio naturale; il sistema redigerà la nuova versione come verbale di seduta.</p>
+
+    <!-- Stato Pro / Free banner (sobrio, niente paywall glamour) -->
+    <div class="status-bar warn" role="status">
+      <span class="sb-tag">Piano Pro</span>
+      <span class="sb-text">Stai consultando un piano base. Con Pro, il coach riscrive automaticamente il piano ogni lunedì sulla base dei voti delle prove precedenti.</span>
+      <button class="btn-link" style="margin-left: auto;">Vedi funzionalità Pro →</button>
+    </div>
+
+    <div class="week-toolbar">
+      <div class="wt-nav">
+        <button aria-label="Settimana precedente">← Settimana prec.</button>
+        <button class="today">Oggi</button>
+        <button aria-label="Settimana successiva">Settimana succ. →</button>
+      </div>
+      <div class="wt-range">21 — 27 luglio 2026</div>
+      <div class="wt-meta"><strong>5</strong> sessioni pianificate · <strong>2h 15m</strong> totali</div>
+    </div>
+
+    <div class="week-grid" role="grid" aria-label="Calendario settimanale">
+      <div class="day today">
+        <div class="d-meta">
+          <span class="d-name">LUN</span>
+          <span class="d-num">21</span>
+        </div>
+        <span class="d-type scritta">Scritta</span>
+        <div class="d-status done">Svolta · 7,4 / 10</div>
+      </div>
+      <div class="day">
+        <div class="d-meta">
+          <span class="d-name">MAR</span>
+          <span class="d-num">22</span>
+        </div>
+        <span class="d-type orale">Orale</span>
+        <div class="d-status upcoming">In programma · 20m</div>
+      </div>
+      <div class="day">
+        <div class="d-meta">
+          <span class="d-name">MER</span>
+          <span class="d-num">23</span>
+        </div>
+        <span class="d-type preselettiva">Preselettiva</span>
+        <div class="d-status upcoming">In programma · 25m</div>
+      </div>
+      <div class="day">
+        <div class="d-meta">
+          <span class="d-name">GIO</span>
+          <span class="d-num">24</span>
+        </div>
+        <span class="d-type libero">Libero</span>
+        <div class="d-status">Recupero</div>
+      </div>
+      <div class="day">
+        <div class="d-meta">
+          <span class="d-name">VEN</span>
+          <span class="d-num">25</span>
+        </div>
+        <span class="d-type orale">Orale</span>
+        <div class="d-status upcoming">In programma · 20m</div>
+      </div>
+      <div class="day">
+        <div class="d-meta">
+          <span class="d-name">SAB</span>
+          <span class="d-num">26</span>
+        </div>
+        <span class="d-type scritta">Scritta</span>
+        <div class="d-status upcoming">In programma · 30m</div>
+      </div>
+      <div class="day">
+        <div class="d-meta">
+          <span class="d-name">DOM</span>
+          <span class="d-num">27</span>
+        </div>
+        <span class="d-type libero">Libero</span>
+        <div class="d-status">Recupero</div>
+      </div>
+    </div>
+
+    <!-- Verbale di seduta — al posto della chat bubble AI -->
+    <div class="verbale">
+      <div class="verbale-head">
+        <h3>Verbale di seduta · revisione settimana</h3>
+        <span class="verbale-id">verb/pianto/rev-2026-0721</span>
+      </div>
+      <div class="verbale-body">
+        <span class="v-meta">Redatto dal coach AI · 21-07-2026 06:00</span>
+        <p>La seduta di ieri (LUN 21) si è conclusa con un punteggio di <strong>7,4/10</strong> in materia di <em>Diritto amministrativo — Legge 241/1990</em>. Le risposte sono risultate chiare nell'esposizione mentre è risultato carente il riferimento all'<strong>art. 3</strong> sull'obbligo di motivazione.</p>
+        <p>Per la settimana corrente si dispone: <strong>martedì 22, prova orale (20m)</strong> su <em>Contabilità pubblica — D.Lgs. 118/2011</em>; mercoledì 23, simulazione preselettiva (25m); venerdì 25, modulo breve di ripasso (20m).</p>
+        <p>Raccomandazione: <strong>prima della seduta di martedì, rileggere gli articoli 3, 5 e 6 della L. 241/90</strong> e il primo capitolo del manuale Ragioneria Generale dello Stato.</p>
+      </div>
+      <form class="verbale-foot" onsubmit="event.preventDefault(); showToast('Richiesta acquisita. Nuovo verbale in emissione.');">
+        <input type="text" placeholder="Es. Sposta venerdì a domenica" />
+        <button class="btn" type="submit">Apponi modifica</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TAB 3 — STORICO PROVE
+       ============================================================ -->
+  <section id="t3" class="tab-panel" role="tabpanel">
+    <div class="page-meta">
+      <span>Sezione · Storico prove</span>
+      <span class="pm-pipe">|</span>
+      <span class="pm-code">STOR/AGGREG</span>
+      <span class="pm-pipe">|</span>
+      <span>Ultimo aggiornamento · 21-07-2026 09:00</span>
+    </div>
+
+    <h1 class="page-title">Risultati delle prove <span class="pt-soft">— ultime 14 sedute</span></h1>
+    <p class="page-lead">Il punteggio medio è dato dalla media ponderata delle prove sostenute, corretto per il coefficiente di severità della commissione (calibrato automaticamente).</p>
+
+    <!-- Riepilogo inline (NO hero-metric template) -->
+    <div class="summary-line" aria-label="Riepilogo prove">
+      <span><span class="sl-k">Prove</span><span class="sl-v">14</span><span class="sl-sub">da gen-2026</span></span>
+      <span class="sl-delim">·</span>
+      <span><span class="sl-k">Media</span><span class="sl-v">7,2</span><span class="sl-delta is-up">+0,4</span><span class="sl-sub">vs ultima sett.</span></span>
+      <span class="sl-delim">·</span>
+      <span><span class="sl-k">Best</span><span class="sl-v">8,4</span><span class="sl-sub">11 mag · Orale</span></span>
+      <span class="sl-delim">·</span>
+      <span><span class="sl-k">Tempo</span><span class="sl-v">5h 47m</span><span class="sl-sub">media 24,8 m/prova</span></span>
+    </div>
+
+    <!-- Tabella cronologica -->
+    <div class="table-wrap">
+      <div class="table-head">
+        <h3>Cronologia prove</h3>
+        <span class="th-meta">14 voci · ordine cronologico inverso</span>
+      </div>
+      <table class="table" aria-label="Storico prove">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Tipologia</th>
+            <th>Materia</th>
+            <th>Durata</th>
+            <th>Voto</th>
+            <th>Esito</th>
+            <th>Verbale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-code">21-07-2026</td>
+            <td>Scritta</td>
+            <td>Diritto amministrativo · L. 241/90</td>
+            <td class="td-code">20 min</td>
+            <td class="td-code"><strong>7,4</strong> / 10</td>
+            <td><span class="td-stato pronto">Superato</span></td>
+            <td><a class="td-link" href="#">verb-20260721-a4</a></td>
+          </tr>
+          <tr>
+            <td class="td-code">18-07-2026</td>
+            <td>Orale</td>
+            <td>Diritto costituzionale · Art. 117</td>
+            <td class="td-code">22 min</td>
+            <td class="td-code"><strong>6,8</strong> / 10</td>
+            <td><span class="td-stato attesa">In revisione</span></td>
+            <td><a class="td-link" href="#">verb-20260718-a3</a></td>
+          </tr>
+          <tr>
+            <td class="td-code">14-07-2026</td>
+            <td>Preselettiva</td>
+            <td>Contabilità pubblica · D.Lgs. 118/11</td>
+            <td class="td-code">25 min</td>
+            <td class="td-code"><strong>6,4</strong> / 10</td>
+            <td><span class="td-stato pronto">Superato</span></td>
+            <td><a class="td-link" href="#">verb-20260714-a2</a></td>
+          </tr>
+          <tr>
+            <td class="td-code">11-07-2026</td>
+            <td>Scritta</td>
+            <td>Diritto civile · Obbligazioni</td>
+            <td class="td-code">28 min</td>
+            <td class="td-code"><strong>7,1</strong> / 10</td>
+            <td><span class="td-stato pronto">Superato</span></td>
+            <td><a class="td-link" href="#">verb-20260711-a1</a></td>
+          </tr>
+          <tr>
+            <td class="td-code">07-07-2026</td>
+            <td>Orale</td>
+            <td>Diritto amministrativo · Procedimento</td>
+            <td class="td-code">18 min</td>
+            <td class="td-code"><strong>5,2</strong> / 10</td>
+            <td><span class="td-stato ko">Respinto</span></td>
+            <td><a class="td-link" href="#">verb-20260707-a4</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Rubrica di valutazione (no gauge/decoration) -->
+    <div class="rubrica">
+      <div class="rubrica-head">
+        <h3>Rubrica di valutazione</h3>
+        <div class="rh-meta">Punteggi medi · periodo 01-05 — 21-07 2026 · calcolati su 14 prove</div>
+      </div>
+      <div class="rubrica-row">
+        <div class="rr-name">Chiarezza espositiva<span class="rr-meta">Forza del candidato</span></div>
+        <div class="rubrica-bar"><div class="rubrica-fill" data-w="82"></div></div>
+        <span class="rr-val">8,2</span>
+      </div>
+      <div class="rubrica-row">
+        <div class="rr-name">Struttura della risposta<span class="rr-meta">Andamento stabile</span></div>
+        <div class="rubrica-bar"><div class="rubrica-fill is-mid" data-w="70"></div></div>
+        <span class="rr-val is-mid">7,0</span>
+      </div>
+      <div class="rubrica-row">
+        <div class="rr-name">Contenuto tecnico<span class="rr-meta">Margine principale di crescita</span></div>
+        <div class="rubrica-bar"><div class="rubrica-fill is-low" data-w="54"></div></div>
+        <span class="rr-val is-low">5,4</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TAB 4 — CLASSIFICA
+       Testo sobrio, niente card layout
+       ============================================================ -->
+  <section id="t4" class="tab-panel" role="tabpanel">
+    <div class="page-meta">
+      <span>Sezione · Classifica nazionale candidati</span>
+      <span class="pm-pipe">|</span>
+      <span class="pm-code">CLAS/ATTESA</span>
+      <span class="pm-pipe">|</span>
+      <span>Stato · <strong style="color: var(--warning);">Implementazione Q4 2026</strong></span>
+    </div>
+
+    <h1 class="page-title">Classifica <span class="pt-soft">tra candidati iscritti a concorsi analoghi</span></h1>
+
+    <div class="classifica-read">
+      <span class="cr-meta">Comunicazione ufficiale · agg. 12-07-2026</span>
+      <p>La piattaforma nazionale di confronto tra candidati è in fase di implementazione. Sarà attiva dal <strong>Q4 2026</strong>, in conformità con le linee guida sulla <em>protezione dei dati personali dei candidati</em> (Regolamento UE 2016/679) e con le indicazioni del Garante per la protezione dei dati personali in materia di <em>reclutamento pubblico</em>.</p>
+      <p>Saranno inclusi nel calcolo soltanto i candidati che hanno sostenuto prove reali sullo stesso bando e stessa materia, nella <strong>stessa regione</strong>, con votazione superiore alla soglia minima (5,0/10) prevista per la validità statistica.</p>
+      <span class="cr-quote">La classifica non è una graduatoria. È uno specchio del tuo margine di crescita rispetto a chi sta facendo le stesse prove.</span>
+      <p>L'iscrizione alla <em>waitlist</em> è facoltativa. La tua posizione sarà determinata interamente dalle prove che hai sostenuto e sarà aggiornata automaticamente al termine di ciascuna simulazione.</p>
+    </div>
+
+    <!-- Checklist requisiti (sobria) -->
+    <div class="table-head" style="background: var(--bg); padding-left: 0;">
+      <h3 style="font-size: 14px;">Requisiti tecnici del sistema</h3>
+    </div>
+    <ul class="checklist" aria-label="Stato componenti della classifica">
+      <li>
+        <span class="chk-name">Anonimizzazione per bando<span class="chk-state">Operativo</span></span>
+        <span class="chk-desc">Ogni candidato compare con codice alfanumerico univoco (es. «CA-2026-04-A4»); il nome reale non viene mai mostrato.</span>
+      </li>
+      <li>
+        <span class="chk-name">Validazione del voto minimo<span class="chk-state">Operativo</span></span>
+        <span class="chk-desc">Voti al di sotto di 5,0 non entrano nel calcolo della classifica. La validità è giornaliera.</span>
+      </li>
+      <li>
+        <span class="chk-name">Confronto per materia e regione<span class="chk-state pending">In test</span></span>
+        <span class="chk-desc">Aggregazione in corso: i primi confronti pilota sono attivi su 12 bandi selezionati (settembre 2026).</span>
+      </li>
+      <li>
+        <span class="chk-name">Notifica via email<span class="chk-state pending">In integrazione</span></span>
+        <span class="chk-desc">Invio di una notifica al raggiungimento di una nuova soglia di classifica (entro le prime 100 posizioni per materia).</span>
+      </li>
+    </ul>
+
+    <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;">Per essere avvisato del lancio del servizio:</p>
+    <form class="waitlist" onsubmit="event.preventDefault(); showToast('Iscrizione alla waitlist acquisita.');">
+      <input type="email" placeholder="indirizzo email" required />
+      <button type="submit">Iscrivi</button>
+    </form>
+  </section>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite">Confermato.</div>
+
+<script>
+/* ============================================================
+   Interazioni minime, nessun effetto decorativo
+   ============================================================ */
+(function () {
+  // Tab switching — solo toggling, niente stagger animation
+  var tabs    = document.querySelectorAll('.tab[data-tab]');
+  var panels  = document.querySelectorAll('.tab-panel');
+
+  function switchTab(key) {
+    tabs.forEach(function (t) {
+      var active = t.getAttribute('data-tab') === key;
+      t.setAttribute('aria-selected', String(active));
+    });
+    panels.forEach(function (p) {
+      p.classList.toggle('active', p.id === key);
+    });
+    if (key === 't3') animateRubrica();
+  }
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () { switchTab(t.getAttribute('data-tab')); });
+  });
+
+  // Tabella: click su riga → highlight (no azione, è solo look istituzionale)
+  document.querySelectorAll('.table tbody').forEach(function (tbody) {
+    tbody.addEventListener('click', function (e) {
+      var tr = e.target.closest('tr');
+      if (!tr) return;
+      var link = tr.querySelector('.td-link');
+      if (link && e.target !== link) {
+        // Feedback sobrio: cambia la classe sulla riga cliccata
+        tbody.querySelectorAll('tr').forEach(function (r) { r.classList.remove('selected'); });
+        tr.classList.add('selected');
+      }
+    });
+  });
+
+  // Day click → segna come "prossimo"
+  document.querySelectorAll('.day').forEach(function (day) {
+    day.addEventListener('click', function () {
+      document.querySelectorAll('.day').forEach(function (d) { d.classList.remove('today'); });
+      day.classList.add('today');
+    });
+  });
+
+  // Rubrica: animate fill on tab enter (sobrio, solo width transition)
+  function animateRubrica() {
+    document.querySelectorAll('.rubrica-fill').forEach(function (el) {
+      var w = el.getAttribute('data-w');
+      if (!w) return;
+      el.style.width = '0%';
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          el.style.transition = 'width 600ms cubic-bezier(0.2, 0, 0.2, 1)';
+          el.style.width = w + '%';
+        });
+      });
+    });
+  }
+  animateRubrica();
+
+  // Toast — visible briefly
+  var toastTimer;
+  window.showToast = function (msg) {
+    var t = document.getElementById('toast');
+    if (msg) t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2400);
+  };
+})();
+</script>
+
+</body>
+</html>

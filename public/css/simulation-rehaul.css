@@ -43,7 +43,7 @@ body.show-all-feedback .feedback-row[data-trust="pertinenza"] {
   padding: 0.625rem 0.875rem;
   text-align: center;
   font-size: 0.8125rem;
-  font-weight: 800;
+  font-weight: 700;
   color: #2563EB;
   background: rgba(255, 255, 255, 0.6);
   border: 1px solid rgba(37, 99, 235, 0.18);
@@ -78,7 +78,7 @@ body.show-all-feedback .more-feedback-toggle:hover {
    Match della gerarchia visiva della landing (CTA primaria del feedback).
    ---------------------------------------------------------------------- */
 #disagreeBtn {
-  font-weight: 900 !important;
+  font-weight: 700 !important;
   padding: 0.625rem 0.875rem !important;
   font-size: 0.85rem !important;
   border-width: 1.5px !important;

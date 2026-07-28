@@ -7,44 +7,20 @@
   <meta name="description" content="Dashboard ConcorsoAI: prepara, monitora i progressi e partecipa alla classifica." />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="theme-color" content="#0F4C81" />
+  <meta name="color-scheme" content="light" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.3/files/geist-latin-400-normal.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.3/files/geist-latin-700-normal.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.0.3/files/geist-mono-latin-400-normal.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.0.3/files/geist-mono-latin-700-normal.woff2" crossorigin />
   <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.3/index.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.0.3/index.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/dashboard.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <style>
-    :root {
-      --bg: #F7FBFF;
-      --surface: #FFFFFF;
-      --surface-raised: #F0F6FF;
-      --border: #E2EEFF;
-      --border-strong: #C5D8F5;
-      --brand: #0F4C81;
-      --accent: #2563EB;
-      --success: #16A34A;
-      --success-light: #DCFCE7;
-      --success-muted: #F0FDF4;
-      --warning: #D97706;
-      --warning-light: #FEF3C7;
-      --error: #DC2626;
-      --error-light: #FEE2E2;
-      --reward: #F59E0B;
-      --reward-light: rgba(245,158,11,0.10);
-      --reward-border: rgba(245,158,11,0.25);
-      --text-primary: #0A1628;
-      --text-secondary: #3D5A8A;
-      --text-muted: #7B93B8;
-      --text-disabled: #B8CDE8;
-      --r-btn: 10px;
-      --r-card: 16px;
-      --r-chip: 6px;
-      --r-toast: 14px;
-      --r-icon-box: 12px;
-      --sh-1: 0 1px 3px rgba(15,76,129,0.06), 0 1px 2px rgba(15,76,129,0.04);
-      --sh-2: 0 4px 16px rgba(15,76,129,0.10), 0 2px 6px rgba(15,76,129,0.06);
-      --sh-3: 0 8px 32px rgba(15,76,129,0.12), 0 2px 8px rgba(15,76,129,0.06);
-      --sh-4: 0 20px 60px rgba(15,76,129,0.16), 0 4px 16px rgba(15,76,129,0.08);
-    }
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>    <style>
+    /* NOTE: design tokens moved to public/css/dashboard.css :root.
+       Inline <style>保留: typography-only overrides + page-local rules. */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
@@ -63,7 +39,7 @@
     .navbar {
       position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 56px;
       background: rgba(247,251,255,0.85);
-      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
     }
     .nav-inner {
@@ -129,6 +105,21 @@
     }
     .user-menu a:hover, .user-menu button:hover { background: var(--surface-raised); }
     .user-menu .logout { color: var(--error); font-weight: 600; }
+    /* FIX 1 — Bottone Esci (logout button) */
+    #logoutButton {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; padding: 10px 14px;
+      border-radius: 10px; border: none;
+      background: transparent;
+      color: #DC2626;
+      font-size: 14px; font-weight: 600;
+      font-family: 'Geist', sans-serif;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      text-align: left;
+    }
+    #logoutButton:hover { background: rgba(220,38,38,0.08); }
+    #logoutButton:active { transform: scale(0.98); }
     .user-menu .divider { height: 1px; background: var(--border); margin: 4px 8px; }
 
     .shell {
@@ -196,8 +187,11 @@
     .upload-tab { flex: 1; padding: 9px 14px; border-radius: 7px; border: none; background: transparent; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--text-muted); cursor: pointer; position: relative; z-index: 1; }
     .upload-tab.active { color: var(--text-primary); background: var(--surface); box-shadow: 0 1px 4px rgba(15,76,129,0.08); }
     .upload-indicator { position: absolute; top: 4px; bottom: 4px; border-radius: 7px; background: var(--surface); box-shadow: 0 1px 4px rgba(15,76,129,0.08); transition: left 0.28s cubic-bezier(0.4,0,0.2,1), width 0.28s cubic-bezier(0.4,0,0.2,1); z-index: 0; }
-    .upload-panel { transition: opacity 0.18s ease-out, transform 0.18s ease-out; }
+    .upload-panel { width: 100%; transition: opacity 0.2s ease; }
     .upload-panel.is-fading { opacity: 0; transform: translateY(4px); pointer-events: none; }
+    .upload-panel.is-hidden { opacity: 0; visibility: hidden; position: absolute; top: 0; left: 0; pointer-events: none; }
+    .upload-panel.is-visible { opacity: 1; visibility: visible; position: relative; pointer-events: auto; }
+    .upload-panels-container { min-height: 280px; position: relative; }
     .drop-zone { display: block; border: 2px dashed var(--border); border-radius: var(--r-card); padding: 36px 20px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
     .drop-zone:hover { border-color: var(--accent); background: rgba(37,99,235,0.02); }
     .drop-zone.drag-over { border-color: var(--accent); background: rgba(37,99,235,0.05); border-style: solid; }
@@ -215,10 +209,20 @@
     .materia-pill:active { transform: scale(0.97); }
     .materia-pill.active { background: #EAF4FF; border: 1.5px solid #2563EB; color: #0F4C81; font-weight: 600; }
     .materie-actions { display: flex; justify-content: flex-end; margin-top: 18px; }
+    /* Chips materie salvate (BUG 2) */
+    .materie-selezionate { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; min-height: 0; }
+    .materia-chip-saved { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #EAF4FF; border: 1px solid #C5D8F5; border-radius: 6px; font-size: 12px; font-weight: 600; color: #0F4C81; font-family: 'Geist', sans-serif; }
+    .materia-chip-saved svg { color: #16A34A; }
+    /* Materie hint sotto la griglia: cambia colore quando almeno 1 selezionata */
+    .materie-hint { font-size: 13px; font-weight: 500; color: var(--text-muted); margin-top: 12px; transition: color 0.2s ease; }
+    .materie-hint.active { color: #16A34A; }
     .bandi-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
-    .bando-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: var(--r-card); background: var(--surface); border: 1.5px solid var(--border); cursor: pointer; transition: border-color 0.18s, box-shadow 0.18s, background 0.18s; }
-    .bando-card:hover { background: var(--surface-raised); border-color: var(--border-strong); box-shadow: var(--sh-2); }
-    .bando-card.selected { border: 4px solid var(--accent); padding: 11px 13px; box-shadow: 0 0 0 3px rgba(37,99,235,0.10), var(--sh-2); }
+    .bando-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: var(--r-card); background: var(--surface); border: 1.5px solid var(--border); cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease; }
+    /* Hover NON selezionata */
+    .bando-card:hover { border-color: var(--border-strong); background: var(--surface-raised); }
+    /* Selezionata (toggle). Hover su selected non sovrascrive bg/blu grazie a specificity (2 classi). */
+    .bando-card.selected { border: 2px solid #2563EB; background: #EAF4FF; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .bando-icon { color: var(--accent); flex-shrink: 0; display: block; }
     .bando-card-icon { width: 38px; height: 38px; border-radius: var(--r-icon-box); background: rgba(37,99,235,0.08); color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .bando-card-body { flex: 1; min-width: 0; }
     .bando-card-name { font-size: 14px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -232,77 +236,6 @@
     .start-progress-label { font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--text-muted); min-height: 16px; }
     .tab-prepara-grid { display: flex; flex-direction: column; gap: 24px; }
 
-    .progressi-subtitle { font-size: 14px; font-weight: 500; color: var(--text-muted); margin: 4px 0 24px; }
-    .progressi-top { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
-    .gauge-cell { display: flex; justify-content: center; align-items: center; padding: 16px 0; cursor: pointer; }
-    .gauge-wrap { position: relative; width: 160px; height: 160px; }
-    .gauge-svg { width: 120px; height: 120px; transform: rotate(-90deg); }
-    .gauge-bg { fill: none; stroke: var(--border); stroke-width: 10; }
-    .gauge-fill { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1), stroke 0.3s; }
-    .gauge-outer-arc { fill: none; stroke: rgba(37,99,235,0.12); stroke-width: 2; stroke-dasharray: 314.159; animation: gaugeOuterSpin 12s linear infinite; }
-    @keyframes gaugeOuterSpin { from { stroke-dashoffset: 314.159; } to { stroke-dashoffset: 0; } }
-    .gauge-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .gauge-val { font-family: 'Geist Mono', monospace; font-size: 36px; font-weight: 700; letter-spacing: -0.03em; color: var(--text-primary); line-height: 1; font-variant-numeric: tabular-nums; }
-    .gauge-band { font-size: 12px; font-weight: 600; margin-top: 6px; letter-spacing: 0.02em; transition: color 0.3s; }
-    .gauge-label { margin-top: 14px; font-size: 15px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; }
-    .gauge-trend { margin-top: 4px; font-size: 13px; color: var(--text-muted); }
-    .gauge-color-error { stroke: var(--error); }
-    .gauge-color-warning { stroke: var(--warning); }
-    .gauge-color-success { stroke: var(--success); }
-    .gauge-color-empty { stroke: #9CA3AF; }
-    @keyframes gaugeBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.015); } }
-    .gauge-wrap.gauge-alive { animation: gaugeBreathe 2.8s ease-in-out infinite; transform-origin: center; }
-
-    .streak-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); padding: 26px 22px; box-shadow: var(--sh-1); display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .streak-card.legend { background: linear-gradient(160deg, #F5F3FF 0%, #FFFFFF 50%); border-color: rgba(124,58,237,0.20); }
-    .streak-fire-wrap { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
-    .streak-fire { width: 48px; height: 48px; transform-origin: bottom center; animation: flameWave 1.8s ease-in-out infinite; transition: color 0.3s; }
-    .streak-fire.fire-static { animation: none; }
-    @keyframes flameWave { 0%, 100% { transform: scaleY(1) rotate(-2deg); } 50% { transform: scaleY(1.1) rotate(2deg); } }
-    .streak-unit { font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-top: 10px; }
-    .streak-value { font-family: 'Geist Mono', monospace; font-size: 64px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; transition: color 0.3s; }
-    .streak-record { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-top: 4px; }
-    .streak-color-gray { color: #9CA3AF; }
-    .streak-color-orange { color: #F97316; }
-    .streak-color-red { color: #DC2626; }
-    .streak-color-violet { color: #7C3AED; filter: drop-shadow(0 0 8px rgba(124,58,237,0.5)); }
-    .streak-week { display: none; }
-    .streak-day-dot { width: 12px; height: 12px; border-radius: 50%; background: transparent; border: 1.5px solid var(--border-strong); transition: background 0.2s, border-color 0.2s; }
-    .streak-day-dot.on { background: currentColor; border-color: transparent; box-shadow: 0 0 6px rgba(37,99,235,0.45); }
-
-    .aree-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); padding: 22px; box-shadow: var(--sh-1); margin-bottom: 18px; }
-    .aree-toggle { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0; border: none; background: transparent; cursor: pointer; gap: 12px; }
-    .aree-toggle-l { text-align: left; flex: 1; }
-    .aree-chevron { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: transform 0.25s, color 0.2s; }
-    .aree-card.is-open .aree-chevron { transform: rotate(180deg); color: var(--accent); }
-    .aree-body { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.3s ease, opacity 0.25s ease, margin-top 0.25s ease; margin-top: 0; }
-    .aree-card.is-open .aree-body { max-height: 500px; opacity: 1; margin-top: 16px; }
-    .aree-row { margin-bottom: 16px; }
-    .aree-row:last-child { margin-bottom: 0; }
-    .aree-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-    .aree-name { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
-    .aree-val { font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
-    .aree-val.color-error { color: var(--error); }
-    .aree-val.color-warning { color: var(--warning); }
-    .aree-val.color-success { color: var(--success); }
-    .aree-track { height: 6px; border-radius: 3px; background: var(--border); overflow: hidden; }
-    .aree-fill { height: 100%; border-radius: 3px; width: 0; background: linear-gradient(90deg, var(--error), var(--warning), var(--success)); background-size: 1080px 6px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
-    .aree-fill.is-weak { animation: weakPulse 2s ease-in-out infinite; }
-    @keyframes weakPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-
-    .trend-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); padding: 24px; box-shadow: var(--sh-1); margin-bottom: 18px; }
-    .trend-canvas { position: relative; height: 160px; margin-top: 8px; }
-    .trend-canvas svg { width: 100%; height: 100%; display: block; overflow: visible; }
-    .trend-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    .trend-dot { fill: var(--surface); stroke: var(--accent); stroke-width: 2; cursor: pointer; }
-    .trend-area-fill { fill: url(#trendGrad); stroke: none; }
-    .trend-axis { display: flex; justify-content: space-between; padding: 0 4px; font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--text-muted); font-weight: 500; }
-    .trend-note { font-size: 13px; color: var(--text-muted); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-    .trend-note b { font-family: 'Geist Mono', monospace; color: var(--text-primary); font-weight: 700; }
-    .trend-empty { display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: var(--r-card); background: linear-gradient(120deg, var(--surface-raised), var(--surface)); border: 1px dashed var(--border); }
-    .trend-empty-icon { width: 40px; height: 40px; border-radius: var(--r-icon-box); background: var(--surface); display: flex; align-items: center; justify-content: center; color: var(--accent); flex-shrink: 0; box-shadow: var(--sh-1); }
-    .trend-empty-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
-    .trend-empty-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
 
     .placeholder-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); padding: 48px 28px; box-shadow: var(--sh-1); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; max-width: 560px; margin: 24px auto; }
     .placeholder-icon { width: 64px; height: 64px; border-radius: var(--r-icon-box); background: var(--surface-raised); color: var(--text-secondary); display: flex; align-items: center; justify-content: center; }
@@ -313,17 +246,17 @@
     .empty-state { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 32px 16px; gap: 10px; }
     .empty-icon { width: 48px; height: 48px; border-radius: var(--r-icon-box); background: var(--surface-raised); display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
 
-    .toast { position: fixed; bottom: 24px; right: 24px; z-index: 9999; padding: 14px 16px; border-radius: var(--r-toast); max-width: 360px; font-size: 14px; font-weight: 600; font-family: inherit; box-shadow: var(--sh-3); display: flex; align-items: center; gap: 10px; opacity: 0; transform: translateX(60px) scale(0.95); transition: opacity 0.28s, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .toast { position: fixed; bottom: 24px; right: 24px; z-index: 9999; padding: 14px 16px; border-radius: var(--r-toast); max-width: 360px; font-size: 14px; font-weight: 600; font-family: inherit; box-shadow: var(--sh-3); display: flex; align-items: center; gap: 10px; opacity: 0; transform: translateX(60px) scale(0.95); transition: opacity 0.28s, transform 0.28s cubic-bezier(0.25, 0, 0.15, 1); }
     .toast.show { opacity: 1; transform: translateX(0) scale(1); }
     .toast.is-leaving { transform: translateX(60px) scale(0.95); opacity: 0; }
     .toast-success { background: rgba(240,253,244,0.95); border: 1px solid rgba(22,163,74,0.2); color: #15803D; }
     .toast-info { background: rgba(240,247,255,0.95); border: 1px solid rgba(37,99,235,0.2); color: var(--accent); }
     .toast-progress { position: absolute; bottom: 0; left: 0; height: 3px; background: currentColor; opacity: 0.25; width: 100%; transform-origin: left; transform: scaleX(1); transition: transform 3s linear; }
 
-    @media (max-width: 900px) { .progressi-top { grid-template-columns: 1fr; } .gauge-val { font-size: 32px; } .streak-value { font-size: 56px; } }
-    @media (max-width: 640px) { .shell { padding: 72px 16px 48px; } .nav-inner { padding: 0 16px; gap: 12px; } .nav-tab { padding: 7px 12px; font-size: 13px; } .nav-user-name { display: none; } .gauge-wrap { width: 130px; height: 130px; } .gauge-val { font-size: 28px; } .streak-value { font-size: 56px; } }
+    @media (max-width: 640px) { .shell { padding: 72px 16px 48px; } .nav-inner { padding: 0 16px; gap: 12px; } .nav-tab { padding: 7px 12px; font-size: 13px; } .nav-user-name { display: none; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }
   </style>
+<script src="/js/telemetry.js"></script>
 </head>
 <body>
   <svg style="position:absolute;width:0;height:0" aria-hidden="true">
@@ -343,6 +276,7 @@
         <a href="index.html" class="nav-logo" aria-label="ConcorsoAI home">Concorso<span class="ai">AI</span></a>
         <div class="nav-tabs" id="navTabs" role="tablist" aria-label="Sezioni dashboard">
           <button type="button" role="tab" class="nav-tab active" data-tab="tab-prepara" aria-selected="true" aria-controls="tab-prepara">Prepara</button>
+          <button type="button" role="tab" class="nav-tab" data-tab="tab-piano" aria-selected="false" aria-controls="tab-piano">Il tuo piano<span class="pro-badge">Pro</span></button>
           <button type="button" role="tab" class="nav-tab" data-tab="tab-progressi" aria-selected="false" aria-controls="tab-progressi">Progressi</button>
           <button type="button" role="tab" class="nav-tab" data-tab="tab-classifica" aria-selected="false" aria-controls="tab-classifica">Classifica</button>
         </div>
@@ -356,7 +290,14 @@
               <a href="#" role="menuitem" data-action="noop">Impostazioni</a>
               <a href="#" role="menuitem" data-action="noop">Abbonamento</a>
               <div class="divider"></div>
-              <button id="logoutButton" type="button" class="logout" role="menuitem">Esci</button>
+              <button id="logoutButton" type="button" role="menuitem">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Esci
+              </button>
             </div>
           </button>
         </div>
@@ -373,7 +314,8 @@
               <button type="button" role="tab" class="upload-tab" data-pane="pane-materie" aria-selected="false" aria-controls="pane-materie">Materie</button>
               <div class="upload-indicator" id="uploadIndicator" aria-hidden="true"></div>
             </div>
-            <div id="pane-pdf" class="upload-panel" role="tabpanel" aria-labelledby="pane-pdf-tab">
+            <div class="upload-panels-container">
+            <div id="pane-pdf" class="upload-panel is-visible" role="tabpanel" aria-labelledby="pane-pdf-tab">
               <label class="drop-zone" id="dropZone">
                 <input type="file" id="fileInput" accept="application/pdf" multiple class="hidden" />
                 <div class="drop-zone-icon" aria-hidden="true">
@@ -383,18 +325,18 @@
               </label>
               <div id="progressList"></div>
             </div>
-            <div id="pane-text" class="upload-panel hidden" role="tabpanel" aria-labelledby="pane-text-tab">
+            <div id="pane-text" class="upload-panel is-hidden" role="tabpanel" aria-labelledby="pane-text-tab">
               <textarea id="textInput" class="ta" placeholder="Incolla qui il testo del bando..."></textarea>
               <div class="ta-row">
                 <span style="font-size: 12px; color: var(--text-muted);">L'AI estrarr&agrave; automaticamente materia, date e requisiti.</span>
-                <button type="button" class="btn-secondary" id="saveTextBtn">Salva testo</button>
+                <button type="button" class="btn-secondary" id="saveTextBtn"><span class="btn-text">Salva testo</span></button>
               </div>
             </div>
-            <div id="pane-materie" class="upload-panel hidden" role="tabpanel" aria-labelledby="pane-materie-tab">
+            <div id="pane-materie" class="upload-panel is-hidden" role="tabpanel" aria-labelledby="pane-materie-tab">
               <div class="materie-grid" id="materieGrid"></div>
-              <div class="materie-actions">
-                <button type="button" class="btn-secondary" id="saveMaterieBtn">Conferma materie</button>
-              </div>
+              <div id="materieSelezionate" class="materie-selezionate" aria-live="polite"></div>
+              <p class="materie-hint" id="materieHint">Seleziona le materie per la simulazione</p>
+            </div>
             </div>
           </div>
 
@@ -407,15 +349,156 @@
               </div>
             </div>
             <div class="bandi-list" id="bandiList"></div>
+
+            <!-- ===== Pre-launch config (difficoltà + durata) ===== -->
+            <div class="opt-section">
+              <label class="opt-label" for="diffToggle">Difficolt&agrave;</label>
+              <div class="opt-toggle-group" id="diffToggle" data-kind="difficolta" role="radiogroup" aria-label="Difficolt&agrave; della simulazione">
+                <button type="button" class="opt-toggle" data-difficolta="facile" role="radio" aria-checked="false">Facile</button>
+                <button type="button" class="opt-toggle active" data-difficolta="media" role="radio" aria-checked="true">Media</button>
+                <button type="button" class="opt-toggle" data-difficolta="difficile" role="radio" aria-checked="false">Difficile</button>
+              </div>
+            </div>
+            <div class="opt-section">
+              <label class="opt-label" for="durToggle">Durata</label>
+              <div class="opt-toggle-group" id="durToggle" data-kind="durata" role="radiogroup" aria-label="Durata della simulazione">
+                <button type="button" class="opt-toggle" data-durata="10" role="radio" aria-checked="false">10 min</button>
+                <button type="button" class="opt-toggle active" data-durata="20" role="radio" aria-checked="true">20 min</button>
+                <button type="button" class="opt-toggle" data-durata="30" role="radio" aria-checked="false">30 min</button>
+              </div>
+            </div>
+
             <div class="start-row">
               <button type="button" class="btn-cta" id="startBtn" disabled>
-                <span id="startBtnText">Seleziona un bando per iniziare</span>
+                <span id="startBtnText" class="btn-text">Seleziona un bando per iniziare</span>
                 <svg class="cta-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7"/></svg>
               </button>
               <div class="start-progress-bar"><div class="start-progress-fill" id="startProgressFill"></div></div>
               <div class="start-progress-label" id="startProgressLabel"></div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section id="tab-piano" class="tab-panel" role="tabpanel" aria-labelledby="tab-piano-tab">
+        <!-- Layer 1: paywall (default visible per Fase 1 Pro-gating).
+             Pro content (.pro-locked) — nascosto di default, mostrato quando data-user-tier="pro".
+             JS legge __USER_TIER__ da window (impostato dal login) e applyTierAttribute(). -->
+        <div class="paywall-card" aria-labelledby="paywall-title">
+          <div class="paywall-head">
+            <div class="paywall-icon" aria-hidden="true">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                <circle cx="12" cy="16.5" r="1.5" fill="currentColor"/>
+              </svg>
+            </div>
+            <h2 class="paywall-title" id="paywall-title">Funzionalità Pro</h2>
+          </div>
+          <p class="paywall-text">Il piano settimanale personalizzato è riservato agli utenti Pro. Passa a Pro per ricevere coaching quotidiano basato sui tuoi progressi.</p>
+          <button type="button" class="paywall-cta" id="upgradeBtn">
+            Passa a Pro
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+        <!-- Layer 2: contenuto Pro (placeholder per Fase 4).
+             Visibile solo se body[data-user-tier="pro"] (regolato da CSS Fase 0).
+             NON mettere attributo HTML "hidden": quello vince su qualsiasi CSS !important. -->
+        <div class="pro-locked">
+          <div class="panel-eyebrow">Il tuo piano</div>
+          <div class="panel-title">Piano settimanale personalizzato</div>
+          <div class="progressi-subtitle">La tua settimana su misura, generata dall'AI e adattata ai tuoi progressi.</div>
+
+          <!-- Banner adattivo (mostra solo dopo la 1a settimana completata; dismissibile) -->
+          <div class="piano-banner hidden" id="pianoBanner" role="status">
+            <span class="piano-banner-dot" aria-hidden="true"></span>
+            <span class="piano-banner-text">Piano aggiornato in base ai tuoi risultati della settimana.</span>
+            <button type="button" class="piano-banner-dismiss" id="pianoBannerDismiss" aria-label="Chiudi banner">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          <!-- No bando (cross-tab CTA) -->
+          <div class="piano-no-bando hidden" id="pianoNoBando">
+            <div class="piano-no-bando-head">
+              <div class="piano-no-bando-icon" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+              </div>
+              <h3 class="piano-no-bando-title">Prima di creare il piano, carica un bando</h3>
+            </div>
+            <p class="piano-no-bando-text">L'AI ha bisogno del bando del concorso per costruire un piano realistico.</p>
+            <button type="button" class="btn-primary" id="pianoNoBandoGoBtn"><span class="btn-text">Vai a Prepara</span> <svg class="cta-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+          </div>
+
+          <!-- Onboarding 3-step (no piano esistente) -->
+          <div class="piano-onboarding hidden" id="pianoOnboarding">
+            <div class="piano-onboarding-head">
+              <span class="piano-onboarding-tag">Coach AI</span>
+              <p class="piano-onboarding-greeting">Ciao! Sono il tuo coach AI.</p>
+              <p class="piano-onboarding-prompt">Per creare il tuo piano settimanale, rispondi a 3 domande rapide:</p>
+            </div>
+            <div class="piano-steps">
+              <div class="piano-step">
+                <label class="piano-step-label" for="pianoExamDate">1. Quando è il tuo esame?</label>
+                <input type="date" id="pianoExamDate" class="piano-input" />
+              </div>
+              <div class="piano-step">
+                <span class="piano-step-label">2. Quanto tempo hai al giorno?</span>
+                <div class="piano-toggle-group" role="radiogroup" aria-label="Tempo disponibile">
+                  <button type="button" class="piano-toggle" data-value="15" role="radio" aria-checked="false">15min</button>
+                  <button type="button" class="piano-toggle active" data-value="30" role="radio" aria-checked="true">30min</button>
+                  <button type="button" class="piano-toggle" data-value="60" role="radio" aria-checked="false">1ora</button>
+                </div>
+              </div>
+              <div class="piano-step">
+                <label class="piano-step-label" for="pianoCommitments">3. Hai impegni fissi da escludere?</label>
+                <textarea id="pianoCommitments" class="piano-textarea" placeholder="Es. 'Mercoledì sera dalle 19 alle 22'" rows="3"></textarea>
+              </div>
+            </div>
+            <div class="piano-onboarding-actions">
+              <button type="button" class="btn-primary" id="pianoOnboardingSubmit" disabled><span class="btn-text">Genera piano</span> <svg class="cta-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+            </div>
+          </div>
+
+          <!-- Calendario attivo -->
+          <div class="piano-active hidden" id="pianoActive">
+            <nav class="piano-week-nav" aria-label="Navigazione settimana">
+              <button type="button" class="piano-week-btn" id="pianoPrevWeek" aria-label="Settimana precedente">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <button type="button" class="piano-week-today" id="pianoToday">Oggi</button>
+              <button type="button" class="piano-week-btn" id="pianoNextWeek" aria-label="Settimana successiva">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+              <span class="piano-week-range" id="pianoWeekRange" aria-live="polite"></span>
+            </nav>
+            <div class="piano-week-grid" id="pianoWeekGrid" role="grid" aria-label="Calendario settimanale" aria-rowcount="1" aria-colcount="7"></div>
+            <div class="piano-day-detail" id="pianoDayDetail" aria-live="polite"></div>
+          </div>
+
+          <!-- Chat AI (Sezione B) -->
+          <section class="piano-chat" id="pianoChat" aria-label="Chat con il coach AI">
+            <header class="piano-chat-head">
+              <span class="piano-chat-eyebrow">Coach AI</span>
+              <span class="piano-chat-status" id="pianoChatStatus">
+                <span class="piano-chat-status-dot" aria-hidden="true"></span>Online
+              </span>
+            </header>
+            <div class="piano-chat-history" id="pianoChatHistory" role="log" aria-live="polite">
+              <div class="piano-msg piano-msg-bot" id="pianoWelcomeBubble">
+                <div class="piano-msg-avatar" aria-hidden="true">AI</div>
+                <div class="piano-msg-bubble" id="pianoWelcomeText">Ciao! Sono il tuo coach AI.</div>
+              </div>
+            </div>
+            <form class="piano-chat-form" id="pianoChatForm">
+              <input type="text" id="pianoChatInput" class="piano-chat-input" placeholder="Es. 'Sposta venerdì a domenica'" autocomplete="off" disabled />
+              <button type="submit" class="piano-chat-send" id="pianoChatSend" aria-label="Invia messaggio" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+              </button>
+            </form>
+          </section>
         </div>
       </section>
 
@@ -438,8 +521,8 @@
 
           <div class="streak-card" id="streakCard">
             <div class="streak-fire-wrap" id="streakFireWrap">
-              <svg class="streak-fire fire-static streak-color-gray" id="streakFire" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M12 2C9 7 6 8 6 13a6 6 0 0 0 12 0c0-3-1.5-5-3-6 0 2-1 3-2 3-1 0-2-1-1-3z"></path>
+              <svg class="streak-flame streak-color-gray" id="streakFire" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13 3.23 12.17 3.75 11.46 4.32C8.87 6.4 7.85 10.07 9.07 13.22C9.11 13.32 9.15 13.42 9.15 13.55C9.15 13.77 9 13.97 8.8 14.05C8.57 14.15 8.33 14.09 8.14 13.93C8.08 13.88 8.04 13.83 8 13.76C6.87 12.33 6.69 10.28 7.45 8.64C6.1 9.68 5.29 11.34 5.29 13C5.29 16.52 8.32 19.35 11.9 19.35C13.37 19.35 14.84 18.81 15.99 17.82C17.24 16.74 17.96 15.16 18 13.5C18.02 12.6 17.8 11.88 17.66 11.2Z"/>
               </svg>
             </div>
             <div class="streak-value streak-color-gray" id="streakValue">&mdash;</div>
@@ -475,23 +558,53 @@
           </div>
           <div id="trendContent"></div>
         </div>
+
+        <div class="recent-card">
+          <div class="panel-head">
+            <div>
+              <div class="panel-eyebrow">Storico</div>
+              <div class="panel-title">
+                Ultime simulazioni
+                <span class="live-indicator hidden" id="recentLiveIndicator">
+                  <span class="live-dot" id="liveDot" aria-hidden="true"></span>
+                  <span class="timestamp-relative" id="recentLiveLabel" data-timestamp=""></span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div id="recentList"></div>
+        </div>
       </section>
 
       <section id="tab-classifica" class="tab-panel" role="tabpanel" aria-labelledby="tab-classifica-tab">
         <div class="placeholder-card">
-          <div class="placeholder-icon" aria-hidden="true">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#C5D8F5" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 9H4a2 2 0 0 1-2-2V5h4m14 4h2a2 2 0 0 0 2-2V5h-4m-8 13v-2m0 0a5 5 0 0 1-5-5V5h10v7a5 5 0 0 1-5 5zm0 0h-3m3 0h3"></path>
+          <div class="classifica-trophy" aria-hidden="true">
+            <svg width="120" height="120" viewBox="0 0 120 120" fill="none" role="img" aria-label="Trofeo stilizzato">
+              <!-- Trofeo sobrio, brand navy + accent blu. NO gradient viola-blu, NO glassmorphism. -->
+              <path d="M40 32 h40 v8 a20 20 0 0 1 -40 0 v-8 z" stroke="#0F4C81" stroke-width="2" fill="none" stroke-linejoin="round"/>
+              <path d="M40 36 h-12 v4 a8 8 0 0 0 8 8 h4" stroke="#2563EB" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M80 36 h12 v4 a8 8 0 0 1 -8 8 h-4" stroke="#2563EB" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="50" y1="60" x2="70" y2="60" stroke="#0F4C81" stroke-width="2.5" stroke-linecap="round"/>
+              <rect x="48" y="60" width="24" height="12" rx="2" stroke="#0F4C81" stroke-width="2" fill="none"/>
+              <line x1="60" y1="72" x2="60" y2="84" stroke="#0F4C81" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="46" y1="84" x2="74" y2="84" stroke="#0F4C81" stroke-width="2.5" stroke-linecap="round"/>
+              <!-- Stella centrale sobria -->
+              <path d="M60 42 l2.2 5.4 l5.8 .5 l-4.4 3.8 l1.3 5.6 l-4.9 -2.9 l-4.9 2.9 l1.3 -5.6 l-4.4 -3.8 l5.8 -.5 z"
+                    stroke="#2563EB" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
             </svg>
           </div>
-          <span class="placeholder-badge">In arrivo &mdash; sfida altri candidati</span>
-          <div class="placeholder-title">Classifica in arrivo</div>
-          <div class="placeholder-text">Stiamo preparando la sfida tra candidati. Presto potrai confrontare il tuo punteggio con altri utenti della tua regione e materia.</div>
+          <span class="placeholder-badge">In arrivo &mdash; classifica</span>
+          <h2 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin: 16px 0 8px; font-family: 'Geist', sans-serif; letter-spacing: -0.02em;">In arrivo &mdash; sfida altri candidati</h2>
+          <p style="font-size: 14px; color: var(--text-muted); max-width: 360px; margin: 0 auto 8px; line-height: 1.6;">Stiamo preparando la classifica. I tuoi progressi stanno gi&agrave; contribuendo.</p>
+          <p style="font-size: 14px; color: var(--text-muted); max-width: 360px; margin: 0 auto 24px; line-height: 1.6;">Presto potrai confrontare il tuo punteggio con altri utenti della tua regione e materia.</p>
           <button type="button" class="btn-secondary" id="notifyBtn">Avvisami quando &egrave; pronto</button>
+          <p class="classifica-footnote" style="margin-top: 18px; font-size: 12px; color: var(--text-muted); max-width: 360px; line-height: 1.5;">Quando sar&agrave; pronta, potrai confrontarti con chi ha sostenuto il tuo stesso bando.</p>
         </div>
       </section>
     </main>
   </div>
+
+  <div id="tutorial-overlay" class="hidden" aria-live="polite" role="region"></div>
 
   <div id="toast" class="toast" role="status" aria-live="polite">
     <span id="toastText"></span>
@@ -499,6 +612,91 @@
   </div>
 
   <script>
+  (function () {
+    "use strict";
+
+    /* === FASE 1 WIRING ===
+       Navbar già gestita dallo script esistente (data-tab su nav.tab).
+       Aggiungo: tier-gating + Classifica waitlist + Paywall stub. */
+
+    function fase1ApplyTier() {
+      var tier = (typeof window !== "undefined" && window.__USER_TIER__) || null;
+      if (tier) document.body.setAttribute("data-user-tier", tier);
+      else document.body.removeAttribute("data-user-tier");
+    }
+
+    function fase1GetSupabaseClient() {
+      if (typeof window === "undefined") return null;
+      var sdk = window.supabase;
+      if (!sdk || typeof sdk.createClient !== "function") return null;
+      var url  = window.__SUPABASE_URL__ || "";
+      var key  = window.__SUPABASE_ANON_KEY__ || "";
+      if (!url || !key) return null;
+      try { return sdk.createClient(url, key); } catch (e) { return null; }
+    }
+
+    function fase1Toast(msg, type) {
+      var t = document.getElementById("toast");
+      var txt = document.getElementById("toastText");
+      if (!t || !txt) return;
+      txt.textContent = msg;
+      t.className = "toast toast-" + (type || "info") + " show";
+      var pg = t.querySelector(".toast-progress");
+      if (pg) {
+        pg.style.transition = "none";
+        pg.style.transform = "scaleX(1)";
+        requestAnimationFrame(function () {
+          pg.style.transition = "transform 3s linear";
+          pg.style.transform = "scaleX(0)";
+        });
+      }
+      setTimeout(function () {
+        t.classList.remove("show");
+        t.classList.add("is-leaving");
+        setTimeout(function () { t.classList.remove("is-leaving"); }, 320);
+      }, 3000);
+    }
+
+    function fase1HandleUpgrade() {
+      // M19: telemetry helper (canonical schema), fire-and-forget verso Supabase events.
+      try { window.telemetry("paywall_cta_clicked", { source: "tab_piano_paywall" }); } catch (_) {}
+      // Redirect alla pagina pricing (conversione Free → Pro).
+      window.location.href = "/pricing.html";
+    }
+
+    function fase1HandleNotify() {
+      var btn = document.getElementById("notifyBtn");
+      if (!btn || btn.disabled) return;
+      btn.disabled = true;
+      btn.textContent = "Registrazione…";
+      // NB: rimosso `var originalText = btn.innerHTML;` (dead code post-refactor M19) e
+      // rimosso `var client = fase1GetSupabaseClient(); if (!client){error}` perché
+      // window.telemetry gestisce Supabase autonomamente (fire-and-forget, silent-fail).
+
+      // M19: telemetry helper, fire-and-forget verso Supabase events.
+      // silent-fail by design — telemetry non ritorna errori al chiamante.
+      try { window.telemetry("classifica_waitlist_join", { source: "tab_classifica_cta" }); } catch (_) {}
+      // Toast feedback ottimistico. Idempotency via btn.disabled.
+      btn.textContent = "Iscritto";
+      btn.classList.add("btn-success");
+      btn.disabled = true;
+      fase1Toast("Ti avviseremo via email quando la classifica sarà pronta!", "success");
+    }
+
+    function fase1Bind() {
+      fase1ApplyTier();
+      var up = document.getElementById("upgradeBtn");
+      if (up) up.addEventListener("click", fase1HandleUpgrade);
+      var nb = document.getElementById("notifyBtn");
+      if (nb) nb.addEventListener("click", fase1HandleNotify);
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fase1Bind);
+    } else {
+      fase1Bind();
+    }
+  })();
   (function () {
     "use strict";
     var MATERIE = [
@@ -529,9 +727,123 @@
       areeScores: null
     };
 
+    /* ===== Pre-launch config (difficoltà + durata) ===== */
+    var selectedDifficolta = "media";
+    var selectedDurata = 20;
+
+    function getCurrentInputMethod() {
+      try {
+        var activeTab = $$(".upload-tab.active")[0];
+        if (!activeTab) return "pdf";
+        return activeTab.getAttribute("data-pane") === "pane-materie" ? "subjects"
+             : activeTab.getAttribute("data-pane") === "pane-text"    ? "text"
+             : "pdf";
+      } catch (e) { return "pdf"; }
+    }
+
+    function bindOptionToggles() {
+      var groups = $$(".opt-toggle-group");
+      groups.forEach(function (group) {
+        var kind = group.getAttribute("data-kind"); // "difficolta" | "durata"
+        if (!kind) return;
+        var buttons = $$(".opt-toggle", group);
+        buttons.forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            buttons.forEach(function (b) {
+              b.classList.remove("active");
+              b.setAttribute("aria-checked", "false");
+            });
+            btn.classList.add("active");
+            btn.setAttribute("aria-checked", "true");
+            if (kind === "difficolta") {
+              selectedDifficolta = btn.getAttribute("data-difficolta") || "media";
+            } else if (kind === "durata") {
+              var n = parseInt(btn.getAttribute("data-durata"), 10);
+              if (!isNaN(n) && [10, 20, 30].indexOf(n) !== -1) selectedDurata = n;
+            }
+          });
+        });
+      });
+    }
+
     function $(id) { return document.getElementById(id); }
     function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
     function toggleHidden(el, hide) { if (!el) return; if (hide) el.classList.add("hidden"); else el.classList.remove("hidden"); }
+
+    /* ============================================
+       BUTTON STATE MACHINE — 4 stati (idle / loading / success / error)
+       Helper riusato da tutti i bottoni asincroni della dashboard.
+       Si aspetta <span class="btn-text">…</span> interno al bottone
+       (se assente, l'aggiornamento testo viene saltato silenziosamente).
+       ============================================ */
+    var BUTTON_STATES = {
+      idle:    { text: "",                 disabled: false, className: "btn-idle" },
+      loading: { text: "Avvio in corso...", disabled: true,  className: "btn-loading" },
+      success: { text: "Pronto!",          disabled: true,  className: "btn-success" },
+      error:   { text: "Riprova",          disabled: false, className: "btn-error"   }
+    };
+
+    function setButtonState(btn, state) {
+      if (!btn) return;
+      var s = BUTTON_STATES[state];
+      if (!s) return;
+
+      var textSpan = btn.querySelector(".btn-text");
+      // Cattura il baseline SOLO in transizione idle → non-idle, controllando se la
+      // classeName attuale ha già una state-class. Se catturassimo anche su loading→success
+      // o success→loading, data-idleText verrebbe sovrascritto con "Avvio in corso..." o
+      // "Pronto!", e dopo il revert a idle il testoShown sarebbe sbagliato.
+      // updateStartBtn() riscrive #startBtnText dinamicamente ("Prepara bando →" vs
+      // "Inizia Simulazione →"): serve catturare il valore live AL PRIMO click, cioè
+      // quando la classe btn-idle è ancora presente (wasInIdle=true).
+      var wasInIdle = !/\bbtn-(loading|success|error)\b/.test(btn.className);
+      if (textSpan && state !== "idle" && wasInIdle) {
+        btn.dataset.idleText = textSpan.textContent.trim();
+      }
+
+      btn.disabled = s.disabled;
+      btn.className = btn.className.replace(/\bbtn-(idle|loading|success|error)\b/g, "").trim() + " " + s.className;
+      if (textSpan) textSpan.textContent = s.text || btn.dataset.idleText || "";
+
+      // Rimuovi icona stato precedente, inietta la nuova (se non idle)
+      var existingIcon = btn.querySelector(".btn-icon");
+      if (existingIcon) existingIcon.remove();
+      if (state !== "idle") {
+        var svg = "";
+        if (state === "loading") {
+          svg = '<svg class="btn-icon btn-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">'
+              + '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" opacity="0.3"/>'
+              + '<path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>';
+        } else if (state === "success") {
+          svg = '<svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+              + '<polyline points="20 6 9 17 4 12"/></svg>';
+        } else if (state === "error") {
+          svg = '<svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">'
+              + '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+        }
+        if (svg) btn.insertAdjacentHTML("afterbegin", svg);
+      }
+
+      // FIX: clear pending revert timer prima di schedule-rare uno nuovo (evita code su rapid click)
+      if (btn.dataset.revertTimer) {
+        clearTimeout(parseInt(btn.dataset.revertTimer, 10));
+        btn.dataset.revertTimer = "";
+      }
+
+      // Auto-revert dopo timeout (spec: 1800ms success, 2500ms error)
+      if (state === "success") {
+        btn.dataset.revertTimer = String(setTimeout(function () {
+          btn.dataset.revertTimer = "";
+          setButtonState(btn, "idle");
+        }, 1800));
+      }
+      if (state === "error") {
+        btn.dataset.revertTimer = String(setTimeout(function () {
+          btn.dataset.revertTimer = "";
+          setButtonState(btn, "idle");
+        }, 2500));
+      }
+    }
 
     var toastTimer = null;
     function showToast(message, type) {
@@ -583,18 +895,63 @@
     }
 
     function switchUploadTab(paneId) {
+      // Aggiorna classi tab + posiziona indicator
       $$(".upload-tab").forEach(function (b) {
         var active = b.getAttribute("data-pane") === paneId;
         b.classList.toggle("active", active);
         b.setAttribute("aria-selected", active ? "true" : "false");
       });
       positionUploadIndicator(paneId);
-      ["pane-pdf", "pane-text", "pane-materie"].forEach(function (id) {
-        var el = $(id);
-        if (!el) return;
-        if (id === paneId) { el.classList.remove("hidden"); el.classList.remove("is-fading"); }
-        else { el.classList.add("is-fading"); setTimeout(function () { el.classList.add("hidden"); el.classList.remove("is-fading"); }, 180); }
+
+      // Pillola animazione GSAP (smooth). Vanilla fallback se GSAP non è ancora caricato.
+      var hasGsap = typeof window !== "undefined" && typeof window.gsap !== "undefined";
+      var allIds = ["pane-pdf", "pane-text", "pane-materie"];
+
+      // Uscita pannelli non-target: fade-out + slide-up (0.15s ease-in)
+      // FIX height-jump: usa .is-hidden (position: absolute) invece di .hidden (display: none).
+      // Container .upload-panels-container mantiene altezza del pannello visibile → niente salto layout.
+      allIds.forEach(function (id) {
+        if (id === paneId) return;
+        var p = $(id);
+        // Skip se già non-visibile (già nascosto)
+        if (!p || !p.classList.contains("is-visible")) return;
+        if (hasGsap) {
+          gsap.to(p, {
+            opacity: 0,
+            y: -6,
+            duration: 0.15,
+            ease: "power1.in",
+            onComplete: function () {
+              p.classList.remove("is-visible");
+              p.classList.add("is-hidden");
+              // Reset inline opacity a 0 così GSAP inline-style non vince sulla CSS .is-hidden
+              gsap.set(p, { opacity: 0, y: 0 });
+            }
+          });
+        } else {
+          p.classList.remove("is-visible");
+          p.classList.add("is-hidden");
+        }
       });
+
+      // Entrata pannello target: fade-in + slide-down (0.2s ease-out, delay 0.12s)
+      var incoming = $(paneId);
+      if (incoming) {
+        if (incoming.classList.contains("is-hidden")) {
+          incoming.classList.remove("is-hidden");
+          incoming.classList.add("is-visible");
+        }
+        if (hasGsap) {
+          gsap.fromTo(incoming,
+            { opacity: 0, y: 6 },
+            { opacity: 1, y: 0, duration: 0.2, ease: "power2.out", delay: 0.12 }
+          );
+        }
+      }
+      // Materie: riallinea CTA startBtn al count delle materie selezionate
+      if (paneId === "pane-materie" && typeof updateCTAFromMaterie === "function") {
+        updateCTAFromMaterie();
+      }
     }
 
     function bindUploadTabs() {
@@ -623,6 +980,8 @@
           btn.classList.toggle("active");
           var idx = state.selectedMaterie.indexOf(name);
           if (idx === -1) state.selectedMaterie.push(name); else state.selectedMaterie.splice(idx, 1);
+          renderMaterieSelezionate(); // BUG 2: chip live update ad ogni toggle
+          updateCTAFromMaterie();      // Materie: aggiorna CTA subject count
         });
         grid.appendChild(btn);
       });
@@ -635,7 +994,7 @@
       if (!state.bandi || state.bandi.length === 0) {
         var empty = document.createElement("div");
         empty.className = "empty-state";
-        empty.innerHTML = '<div class="empty-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 13h6m-3-3v6m5 5h4a2 2 0 002-2V6a2 2 0 00-2-2h-4M5 7v12a2 2 0 002 2h4M5 7V5a2 2 0 012-2h6a2 2 0 012 2v2M5 7h14"/></svg></div><div style="font-size: 16px; font-weight: 600; color: var(--text-primary);">Nessun bando ancora</div><div style="font-size: 13px; color: var(--text-muted);">Carica un PDF o incolla un testo per crearne uno.</div>';
+        empty.innerHTML = '<div class="empty-icon" style="margin-bottom: 12px;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--border-strong)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/><circle cx="18" cy="19" r="3" fill="var(--surface)" stroke="var(--border-strong)"/><line x1="18" y1="17.5" x2="18" y2="20.5" stroke="var(--border-strong)"/><line x1="16.5" y1="19" x2="19.5" y2="19" stroke="var(--border-strong)"/></svg></div><p style="font-size: 14px; font-weight: 600; color: var(--text-secondary); margin: 8px 0 4px;">Nessun bando ancora</p><p style="font-size: 13px; font-weight: 400; color: var(--text-muted); margin: 0;">Carica un PDF per iniziare</p>';
         list.appendChild(empty);
         updateStartBtn();
         return;
@@ -649,13 +1008,18 @@
         var statoLabel = b.status === "in_attesa" ? "In attesa" : "Pronto";
         var dateStr = b.created_at ? formatDate(b.created_at) : "";
         card.innerHTML =
-          '<div class="bando-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25M9 16.5l1.5 1.5 3.75-3.75"/></svg></div>' +
+          '<div class="bando-card-icon bando-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>' +
           '<div class="bando-card-body">' +
           '<div class="bando-card-name">' + escapeHtml(b.nome || "Bando senza nome") + '</div>' +
           '<div class="bando-card-meta"><span>' + dateStr + '</span><span class="bando-chip ' + statoClass + '">' + statoLabel + '</span></div>' +
           "</div>";
         card.addEventListener("click", function () {
-          state.selectedBandoId = b.id;
+          // BUG 3 fix: toggle selection. Click su card già selezionata → deseleziona.
+          if (state.selectedBandoId === b.id) {
+            state.selectedBandoId = null;
+          } else {
+            state.selectedBandoId = b.id;
+          }
           renderBandi();
         });
         list.appendChild(card);
@@ -683,7 +1047,199 @@
     function escapeHtml(s) {
       return String(s == null ? "" : s)
         .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        .replace(/"/g, "&quot;")        .replace(/'/g, "&#039;");
+    }
+
+    /* ============================================
+       FIX 2 — displayName(user) + renderUserIdentity(user)
+       Estrae il nome reale dell'utente da Supabase user_metadata.
+       Chain di fallback: full_name \u2192 name \u2192 display_name \u2192 email prefix \u2192 "utente".
+       Chiamato DOPO auth.getUser() in loadDashboardData (e in mock per demo).
+       ============================================ */
+    function displayName(user) {
+      if (!user) return "utente";
+      var md = user.user_metadata || {};
+      var fullName = md.full_name || md.name || md.display_name;
+      if (fullName && String(fullName).trim()) {
+        return String(fullName).trim().split(" ")[0];
+      }
+      if (user.email) return String(user.email).split("@")[0];
+      return "utente";
+    }
+
+    function renderUserIdentity(user) {
+      try {
+        var name = displayName(user);
+        var initialEl = $("userInitial");
+        var nameEl    = $("navName");
+        if (initialEl) initialEl.textContent = name.charAt(0).toUpperCase();
+        if (nameEl)    nameEl.textContent    = name;
+        if (window.console && console.log) {
+          console.log("User metadata:", user && user.user_metadata);
+        }
+      } catch (e) {
+        /* identity render failure non blocca la dashboard */
+      }
+    }
+
+    /* ============================================
+       MATERIE → CTA — Aggiorna bottone "Inizia Simulazione" su tab materie
+       Se 0 materie selezionate → disabled + "Seleziona almeno una materia".
+       Altrimenti → enabled + "Inizia con N materie →".
+       Aggiorna anche il materie-hint sotto la griglia.
+       ============================================ */
+    function updateCTAFromMaterie() {
+      var btn = $("startBtn");
+      var txt = $("startBtnText");
+      var hint = $("materieHint");
+      if (!btn || !txt) return;
+
+      var activeTab = $$(".upload-tab.active")[0];
+      var onMaterieTab = activeTab && activeTab.getAttribute("data-pane") === "pane-materie";
+      if (!onMaterieTab) return; // altra logica (bando) gestisce il CTA
+
+      var count = (state.selectedMaterie || []).length;
+      if (count === 0) {
+        btn.disabled = true;
+        txt.textContent = "Seleziona almeno una materia";
+        if (hint) { hint.textContent = "Seleziona le materie per la simulazione"; hint.classList.remove("active"); }
+        return;
+      }
+      btn.disabled = false;
+      txt.textContent = "Inizia con " + count + " " + (count === 1 ? "materia" : "materie");
+      if (hint) { hint.textContent = "\u2713 " + count + " " + (count === 1 ? "materia selezionata" : "materie selezionate"); hint.classList.add("active"); }
+    }
+
+    /* ============================================
+       BUG 2 — Render materie selezionate come chips live
+       Chiamato dopo ogni toggle di materia-pill click
+       E dopo saveMaterie() successful.
+       ============================================ */
+    function renderMaterieSelezionate() {
+      var container = $("materieSelezionate");
+      if (!container) return;
+      var list = state.selectedMaterie || [];
+      if (list.length === 0) {
+        container.innerHTML = "";
+        return;
+      }
+      container.innerHTML = list.map(function (m) {
+        return '<span class="materia-chip-saved">'
+             +   '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+             +     '<polyline points="20 6 9 17 4 12"/>'
+             +   '</svg>'
+             +   escapeHtml(m)
+             + '</span>';
+      }).join("");
+    }
+
+    /* ============================================
+       TIMESTAMP HELPERS — formato "aggiornato X fa"
+       + pannello "Ultime simulazioni" in TAB 2.
+       ============================================ */
+    function relativeTimeIT(dateString) {
+      if (!dateString) return "";
+      try {
+        var ts = new Date(dateString).getTime();
+        if (isNaN(ts)) return "";
+        var diff = Math.floor((Date.now() - ts) / 1000);
+        if (diff < 60)    return "aggiornato ora";
+        if (diff < 3600)  {
+          var m = Math.floor(diff / 60);
+          return m === 1 ? "aggiornato 1 minuto fa" : "aggiornato " + m + " minuti fa";
+        }
+        if (diff < 86400) {
+          var h = Math.floor(diff / 3600);
+          return h === 1 ? "aggiornato 1 ora fa" : "aggiornato " + h + " ore fa";
+        }
+        if (diff < 172800) return "aggiornato ieri";
+        var days = Math.floor(diff / 86400);
+        return "aggiornato " + days + " giorni fa";
+      } catch (e) { return ""; }
+    }
+
+    function absoluteDateIT(dateString) {
+      if (!dateString) return "";
+      try {
+        var d = new Date(dateString);
+        if (isNaN(d.getTime())) return "";
+        return d.toLocaleString("it-IT", {
+          day: "numeric", month: "long", year: "numeric",
+          hour: "2-digit", minute: "2-digit"
+        });
+      } catch (e) { return ""; }
+    }
+
+    function refreshTimestamps() {
+      $$("[data-timestamp]").forEach(function (el) {
+        var ts = el.getAttribute("data-timestamp");
+        if (!ts) return;
+        var rel = relativeTimeIT(ts);
+        el.textContent = rel;
+        el.setAttribute("title", absoluteDateIT(ts));
+        if (el.id === "recentLiveLabel") {
+          var dot = $("liveDot");
+          if (dot) {
+            if (rel === "aggiornato ora") dot.classList.remove("faded");
+            else dot.classList.add("faded");
+          }
+        }
+      });
+    }
+
+    function renderRecent() {
+      var list = $("recentList");
+      if (!list) return;
+      var sims = state.recentSimulations || [];
+
+      var indicator = $("recentLiveIndicator");
+      var label = $("recentLiveLabel");
+      if (sims.length === 0) {
+        list.innerHTML =
+          '<div class="recent-empty">' +
+            '<div class="recent-empty-title">Nessuna simulazione ancora completata.</div>' +
+            '<div>Inizia la tua prima simulazione per vederla qui.</div>' +
+          '</div>';
+        if (label) label.setAttribute("data-timestamp", "");
+        if (indicator) indicator.classList.add("hidden");
+        return;
+      }
+      var newest = sims[0];
+      var newestTs = newest.created_at || newest.at || "";
+      if (label) {
+        label.setAttribute("data-timestamp", newestTs);
+        label.setAttribute("title", absoluteDateIT(newestTs));
+        label.textContent = relativeTimeIT(newestTs);
+      }
+      if (indicator) indicator.classList.remove("hidden");
+
+      var html = "";
+      sims.slice(0, 10).forEach(function (s) {
+        var date = s.created_at || s.at || "";
+        var rel  = relativeTimeIT(date);
+        var abs  = absoluteDateIT(date);
+        var scoreVal = (s.score == null || s.score === "") ? null : Number(s.score);
+        var scoreTxt = scoreVal == null || isNaN(scoreVal) ? "&mdash;" : scoreVal.toFixed(1);
+        var scoreCls = scoreVal == null || isNaN(scoreVal) ? ""
+                     : scoreVal >= 8 ? "color-success"
+                     : scoreVal >= 6 ? "color-warning"
+                     : "color-error";
+        var name = s.bando_nome || s.bando_name || s.nome
+                 || (s.id ? "Simulazione #" + String(s.id).substring(0, 8) : "Simulazione");
+        html += '<div class="recent-item">'
+              +   '<div class="recent-item-info">'
+              +     '<div class="recent-item-name">' + escapeHtml(name) + '</div>'
+              +     '<span class="timestamp-relative" data-timestamp="' + escapeHtml(date) + '" title="' + escapeHtml(abs) + '">'
+              +       escapeHtml(rel)
+              +     '</span>'
+              +   '</div>'
+              +   '<div class="recent-item-score ' + scoreCls + '">'
+              +     scoreTxt + '<span class="score-suffix">/10</span>'
+              +   '</div>'
+              + '</div>';
+      });
+      list.innerHTML = html;
+      refreshTimestamps();
     }
 
     function updateStartBtn() {
@@ -706,8 +1262,25 @@
       var label = $("startProgressLabel");
       if (!btn) return;
       btn.addEventListener("click", function () {
+        // MATERIE FLOW: tab materie attivo → salva subjects+difficoltà+durata in localStorage e redirect.
+        // Niente bando, niente estrazione PDF: la simulazione userà le materie come contesto AI.
+        var activeTab0 = $$(".upload-tab.active")[0];
+        var curMethod0 = activeTab0 ? activeTab0.getAttribute("data-pane") : null;
+        if (curMethod0 === "pane-materie") {
+          if ((state.selectedMaterie || []).length === 0) return;
+          try {
+            localStorage.setItem("cai_input_method", "subjects");
+            localStorage.setItem("cai_subjects", JSON.stringify(state.selectedMaterie));
+            localStorage.setItem("cai_difficolta", selectedDifficolta);
+            localStorage.setItem("cai_durata", String(selectedDurata));
+          } catch (e) { /* localStorage pieno / disabilitato: procedi al redirect lo stesso */ }
+          window.location.href = "simulation.html";
+          return;
+        }
+
         var bando = state.bandi.find(function (b) { return b.id === state.selectedBandoId; });
         if (!bando) return;
+        setButtonState(btn, "loading");
         if (bando.status !== "in_attesa") { launchSimulation(bando); return; }
         if (btn.dataset.dbl === "1") {
           launchSimulation(bando);
@@ -726,6 +1299,7 @@
           if (p >= 100) {
             p = 100;
             label.textContent = "Pronto! Clicca di nuovo per avviare.";
+            setButtonState(btn, "success"); // FIX: mostra "Pronto!" brevemente prima del revert idle, poi click 2x → launchSimulation
             fill.style.width = "100%";
             bando.status = "pronto";
             state.bandi = state.bandi.slice();
@@ -741,209 +1315,21 @@
     }
 
     function launchSimulation(bando) {
-      try { localStorage.setItem("dashboard.activeBando", JSON.stringify({ id: bando.id, nome: bando.nome, at: Date.now() })); } catch (e) {}
-      window.location.href = "simulation.html?bando=" + encodeURIComponent(bando.id);
+      try {
+        // Salva prefs per simulation.html (bypassa configPhase)
+        localStorage.setItem("cai_input_method", getCurrentInputMethod());
+        localStorage.setItem("cai_bando_id", bando.id);
+        localStorage.setItem("cai_difficolta", selectedDifficolta);
+        localStorage.setItem("cai_durata", String(selectedDurata));
+        localStorage.setItem("cai_subjects", JSON.stringify(state.selectedMaterie || []));
+        // Mantieni dashboard.activeBando per backward-compat (es. eventuali handler legacy)
+        localStorage.setItem("dashboard.activeBando", JSON.stringify({ id: bando.id, nome: bando.nome, at: Date.now() }));
+      } catch (e) { /* localStorage pieno / disabilitato: procedi comunque al redirect */ }
+      // Flusso diretto dashboard → simulation.html (zero pagine intermedie)
+      window.location.href = "simulation.html";
     }
 
-    function renderGauge() {
-      var fill = $("gaugeFill");
-      var val = $("gaugeVal");
-      var band = $("gaugeBand");
-      var wrap = $("gaugeWrap");
-      var trend = $("gaugeTrend");
-      if (!fill || !val || !band) return;
-      var avg = state.averageScore;
-      var count = state.simulationsCount;
-      var circ = 440;
-      fill.classList.remove("gauge-color-error", "gauge-color-warning", "gauge-color-success", "gauge-color-empty");
-      wrap.classList.remove("gauge-alive");
-      if (count === 0 || avg == null) {
-        fill.setAttribute("stroke-dashoffset", String(circ));
-        fill.classList.add("gauge-color-empty");
-        val.textContent = "\u2014";
-        band.textContent = "Nessuna simulazione";
-        band.style.color = "var(--text-muted)";
-        if (trend) trend.textContent = "Completa la prima simulazione";
-        return;
-      }
-      var pct = Math.max(0, Math.min(1, avg / 10));
-      var offset = circ * (1 - pct);
-      fill.setAttribute("stroke-dashoffset", String(circ));
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () { fill.setAttribute("stroke-dashoffset", String(offset)); });
-      });
-      val.textContent = avg.toFixed(1);
-      var color, label;
-      if (avg < 6) { color = "var(--error)"; label = "Da migliorare"; fill.classList.add("gauge-color-error"); wrap.classList.add("gauge-alive"); }
-      else if (avg < 8) { color = "var(--warning)"; label = "Sufficiente"; fill.classList.add("gauge-color-warning"); wrap.classList.add("gauge-alive"); }
-      else { color = "var(--success)"; label = "Eccellente"; fill.classList.add("gauge-color-success"); wrap.classList.add("gauge-alive"); }
-      band.textContent = label;
-      band.style.color = color;
-      if (trend) trend.textContent = count + (count === 1 ? " simulazione" : " simulazioni") + " completate";
-    }
 
-    function tierClass(days) {
-      if (days <= 2) return { tier: "gray", static: true };
-      if (days < 7) return { tier: "orange", static: false };
-      if (days < 15) return { tier: "red", static: false };
-      return { tier: "violet", static: false };
-    }
-
-    function renderStreak() {
-      var fire = $("streakFire");
-      var val = $("streakValue");
-      var record = $("streakRecord");
-      var card = $("streakCard");
-      var week = $("streakWeek");
-      if (!fire || !val || !record || !card || !week) return;
-      card.classList.remove("legend");
-      var days = state.streakDays || 0;
-      fire.removeAttribute("class");
-      val.removeAttribute("class");
-      if (days === 0 && state.simulationsCount === 0) {
-        fire.setAttribute("class", "streak-fire streak-color-gray fire-static");
-        val.setAttribute("class", "streak-value streak-color-gray");
-        val.textContent = "\u2014";
-        record.textContent = "Ancora nessun giorno di fila";
-        week.innerHTML = "";
-        return;
-      }
-      var tier = tierClass(days);
-      fire.setAttribute("class", "streak-fire streak-color-" + tier.tier + (tier.static ? " fire-static" : ""));
-      val.setAttribute("class", "streak-value streak-color-" + tier.tier);
-      if (tier.tier === "violet") card.classList.add("legend");
-      val.textContent = String(days);
-      record.textContent = "Record: " + (state.bestStreak || 0) + " giorni";
-      week.innerHTML = "";
-      for (var i = 0; i < 7; i++) {
-        var dot = document.createElement("span");
-        dot.className = "streak-day-dot";
-        if (i < Math.min(days, 7)) dot.classList.add("on");
-        week.appendChild(dot);
-      }
-    }
-
-    function renderAree() {
-      var card = $("areeCard");
-      if (!card) return;
-      if (state.simulationsCount === 0) { card.classList.add("hidden"); return; }
-      card.classList.remove("hidden");
-      var scores = state.areeScores || computeAreeFromSims();
-      var rows = [
-        { id: "Chiarezza", valId: "areeValChiarezza", fillId: "areeFillChiarezza" },
-        { id: "Struttura", valId: "areeValStruttura", fillId: "areeFillStruttura" },
-        { id: "Contenuto", valId: "areeValContenuto", fillId: "areeFillContenuto" }
-      ];
-      var minVal = Infinity, minIdx = -1;
-      rows.forEach(function (r, idx) {
-        var v = scores[r.id];
-        var num = (v == null ? 0 : v);
-        if (num < minVal && num > 0) { minVal = num; minIdx = idx; }
-      });
-      rows.forEach(function (r, idx) {
-        var v = scores[r.id];
-        var vEl = $(r.valId), fEl = $(r.fillId);
-        if (!vEl || !fEl) return;
-        var num = (v == null ? 0 : v);
-        vEl.textContent = (v == null ? "\u2014" : num.toFixed(1));
-        vEl.classList.remove("color-error", "color-warning", "color-success");
-        if (v != null) {
-          if (num < 6) vEl.classList.add("color-error");
-          else if (num < 8) vEl.classList.add("color-warning");
-          else vEl.classList.add("color-success");
-        }
-        var pct = Math.max(0, Math.min(100, num * 10));
-        fEl.style.width = pct + "%";
-        fEl.classList.remove("is-weak");
-        if (idx === minIdx && num > 0 && num < 8) fEl.classList.add("is-weak");
-      });
-      if (state.averageScore != null && state.averageScore < 6) {
-        card.classList.add("is-open");
-        $("areeToggle").setAttribute("aria-expanded", "true");
-      }
-    }
-
-    function computeAreeFromSims() {
-      if (!state.recentSimulations || state.recentSimulations.length === 0) return { Chiarezza: null, Struttura: null, Contenuto: null };
-      var sum = { Chiarezza: 0, Struttura: 0, Contenuto: 0 };
-      var count = { Chiarezza: 0, Struttura: 0, Contenuto: 0 };
-      state.recentSimulations.forEach(function (s) {
-        if (s.chiarezza != null) { sum.Chiarezza += s.chiarezza; count.Chiarezza++; }
-        if (s.struttura != null) { sum.Struttura += s.struttura; count.Struttura++; }
-        if (s.contenuto != null) { sum.Contenuto += s.contenuto; count.Contenuto++; }
-      });
-      return {
-        Chiarezza: count.Chiarezza ? sum.Chiarezza / count.Chiarezza : null,
-        Struttura: count.Struttura ? sum.Struttura / count.Struttura : null,
-        Contenuto: count.Contenuto ? sum.Contenuto / count.Contenuto : null
-      };
-    }
-
-    function renderTrend() {
-      var content = $("trendContent");
-      if (!content) return;
-      var sims = state.recentSimulations || [];
-      if (sims.length === 0) {
-        content.innerHTML =
-          '<div class="trend-empty">' +
-          '<div class="trend-empty-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5M12 16.5L7.5 12M12 16.5V3"/></svg></div>' +
-          '<div style="flex: 1; min-width: 0;">' +
-          '<div class="trend-empty-title">Non hai ancora completato simulazioni.</div>' +
-          '<div class="trend-empty-sub">Inizia la tua prima simulazione per vedere l\'andamento nel tempo.</div>' +
-          "</div>" +
-          '<button type="button" class="btn-primary" data-go-tab="tab-prepara">Vai a Prepara</button>' +
-          "</div>";
-        return;
-      }
-      var sorted = sims.slice().sort(function (a, b) { return new Date(a.at || a.created_at) - new Date(b.at || b.created_at); });
-      var W = 100, H = 40, padding = 4;
-      var xs = [], ys = [];
-      sorted.forEach(function (s, i) {
-        xs.push(padding + (W - padding * 2) * (sorted.length === 1 ? 0.5 : i / (sorted.length - 1)));
-        ys.push(padding + (H - padding * 2) * (1 - (s.score || 0) / 10));
-      });
-      var path = sorted.length === 1
-        ? "M " + xs[0] + " " + (ys[0] - 0.5) + " L " + xs[0] + " " + (ys[0] + 0.5)
-        : buildBezierPath(xs, ys);
-      var areaPath = sorted.length === 1
-        ? path
-        : path + " L " + xs[xs.length - 1] + " " + (H - padding) + " L " + xs[0] + " " + (H - padding) + " Z";
-      var firstDate = formatDate(sorted[0].at || sorted[0].created_at);
-      var lastDate = formatDate(sorted[sorted.length - 1].at || sorted[sorted.length - 1].created_at);
-      var lastDateFull = formatFullDate(sorted[sorted.length - 1].at || sorted[sorted.length - 1].created_at);
-      var lastScore = sorted[sorted.length - 1].score;
-      var prevScore = sorted.length > 1 ? sorted[sorted.length - 2].score : null;
-      var delta = prevScore != null ? (lastScore - prevScore) : 0;
-      var deltaStr = prevScore == null ? "\u2014" : (delta >= 0 ? "+" : "") + delta.toFixed(1);
-      var dotsHtml = "";
-      sorted.forEach(function (s, i) {
-        var dotClass = "trend-dot" + (i === sorted.length - 1 ? " now-pulse" : "");
-        dotsHtml += '<circle class="' + dotClass + '" cx="' + xs[i] + '" cy="' + ys[i] + '" r="3.5"></circle>';
-      });
-      content.innerHTML =
-        '<div class="trend-canvas"><svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none">' +
-        '<path class="trend-area-fill" d="' + areaPath + '"/>' +
-        '<path class="trend-line" d="' + path + '"/>' +
-        dotsHtml +
-        "</svg></div>" +
-        '<div class="trend-axis"><span>' + firstDate + "</span><span>" + lastDate + "</span></div>" +
-        '<div class="trend-note">Ultima simulazione: <b>' + lastDateFull + "</b> &ndash; <b>" + lastScore.toFixed(1) + "/10</b>" +
-        (prevScore != null ? ' (<b>' + deltaStr + "</b> rispetto alla precedente)" : "") +
-        "</div>";
-    }
-
-    function buildBezierPath(xs, ys) {
-      if (xs.length < 2) return "";
-      var d = "M " + xs[0] + " " + ys[0];
-      for (var i = 0; i < xs.length - 1; i++) {
-        var cx1 = xs[i] + (xs[i + 1] - xs[i]) * 0.4;
-        var cy1 = ys[i];
-        var cx2 = xs[i] + (xs[i + 1] - xs[i]) * 0.6;
-        var cy2 = ys[i + 1];
-        d += " C " + cx1 + " " + cy1 + ", " + cx2 + " " + cy2 + ", " + xs[i + 1] + " " + ys[i + 1];
-      }
-      return d;
-    }
 
     function bindAreeToggle() {
       var t = $("areeToggle");
@@ -952,19 +1338,6 @@
         var card = $("areeCard");
         var open = card.classList.toggle("is-open");
         t.setAttribute("aria-expanded", open ? "true" : "false");
-      });
-    }
-
-    function bindGaugeClick() {
-      var g = $("gaugeCard");
-      if (!g) return;
-      g.addEventListener("click", function () {
-        if (state.simulationsCount === 0) { switchTab("tab-prepara"); return; }
-        var card = $("areeCard");
-        if (!card || card.classList.contains("hidden")) return;
-        var open = card.classList.toggle("is-open");
-        $("areeToggle").setAttribute("aria-expanded", open ? "true" : "false");
-        if (open) card.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     }
 
@@ -987,6 +1360,8 @@
         var user = r && r.data && r.data.user;
         if (!user) { window.location.href = "auth.html"; return null; }
         state.user = user;
+        // FIX 2 — render user identity (nome reale) DOPO che l'utente Supabase \u00e8 stato caricato
+        renderUserIdentity(user);
         return sb.from("bandi").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).then(function (bRes) {
           state.bandi = (bRes && bRes.data) || [];
           return sb.from("simulazioni").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
@@ -1006,6 +1381,8 @@
 
     function loadMockData() {
       state.user = { email: "demo@concorso.ai", id: "demo" };
+      // FIX 2 — mock case: renderizza identit\u00e0 demo (prefix email \u2192 "demo")
+      renderUserIdentity(state.user);
       state.bandi = [];
       state.simulationsCount = 0;
       state.averageScore = null;
@@ -1102,7 +1479,8 @@
       var ta = $("textInput");
       if (!ta) return;
       var text = (ta.value || "").trim();
-      if (text.length < 30) { showToast("Testo troppo breve", "error"); return; }
+      if (text.length < 30) { showToast("Testo troppo breve", "error"); setButtonState($("saveTextBtn"), "error"); return; }
+      setButtonState($("saveTextBtn"), "loading");
       var bando = {
         id: "b-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
         nome: text.slice(0, 64) + (text.length > 64 ? "..." : ""),
@@ -1115,18 +1493,23 @@
       switchUploadTab("pane-pdf");
       ta.value = "";
       showToast("Bando creato", "success");
+      setButtonState($("saveTextBtn"), "success");
     }
 
     function saveMaterie() {
+      var saveBtn = $("saveMaterieBtn");
       var selected = $$(".materia-pill.active").map(function (b) { return b.getAttribute("data-materia"); });
       state.selectedMaterie = selected;
       try { localStorage.setItem("dashboard.materie", JSON.stringify(selected)); } catch (e) {}
+      setButtonState(saveBtn, "loading");
+      renderMaterieSelezionate(); // BUG 2: chips live dopo save
       showToast(selected.length + " materie salvate", "success");
+      setButtonState(saveBtn, "success");
     }
 
     function bindMaterieAndTextActions() {
       var st = $("saveTextBtn"); if (st) st.addEventListener("click", saveText);
-      var sm = $("saveMaterieBtn"); if (sm) sm.addEventListener("click", saveMaterie);
+      // saveMaterieBtn rimosso: le materie si confermano cliccando "Inizia Simulazione →"
     }
 
     function init() {
@@ -1142,24 +1525,22 @@
       bindUploadTabs();
       bindUpload();
       bindMaterieAndTextActions();
+      renderMaterieSelezionate(); // BUG 2: mostra chips delle materie gi\u00e0 salvate al load
+      updateCTAFromMaterie();      // Materie: stato iniziale CTA (se tab materie attivo)
+      bindOptionToggles();
       bindStartBtn();
       bindUserMenu();
       bindAreeToggle();
-      bindGaugeClick();
       bindClassificaNotify();
       renderMaterie();
       renderBandi();
-      renderGauge();
-      renderStreak();
-      renderAree();
-      renderTrend();
+      renderRecent();
+      setInterval(refreshTimestamps, 30000);
       toggleHidden($("loader"), true);
       toggleHidden($("app"), false);
       loadDashboardData().then(function () {
-        renderGauge();
-        renderStreak();
-        renderAree();
-        renderTrend();
+        renderRecent();
+        if (typeof window.fase3Init === "function") window.fase3Init();
       });
     }
 
@@ -1169,6 +1550,1143 @@
       init();
     }
   })();
+  </script>  <script>
+  (function () {
+    "use strict";
+
+    /* === FASE 2: TUTORIAL 3-STEP FIRST ACCESS ===
+       Hide se localStorage['tutorialDismissed_v1'] === 'true'
+           OR count(simulazioni WHERE user_id = current) > 0.
+       Entrambe le check all'avvio dell'app. */
+    function fase2TutorialGetSimulationsCount() {
+      if (typeof window === "undefined") return Promise.resolve(-1);
+      // Fail-CLOSED: sentinel = -1 → caller hides tutorial (user spec: "se ha gi\u00e0 simulazioni \u2192 nascosto").
+      // Reuse main IIFE's supabase client if exposed via window.__SUPABASE_CLIENT__.
+      var client = window.__SUPABASE_CLIENT__ || null;
+      var uid    = window.__USER_ID__ || null;
+      if (!client) {
+        var sdk = window.supabase;
+        var url = window.__SUPABASE_URL__ || "";
+        var key = window.__SUPABASE_ANON_KEY__ || "";
+        if (!sdk || typeof sdk.createClient !== "function" || !url || !key || !uid) {
+          return Promise.resolve(-1);
+        }
+        try { client = sdk.createClient(url, key); } catch (e) { return Promise.resolve(-1); }
+      }
+      if (!uid) return Promise.resolve(-1);
+      return client
+        .from("simulazioni")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", uid)
+        .then(function (res) {
+          // null response o missing count = fail-CLOSED.
+          if (!res || typeof res.count !== "number") return -1;
+          return res.count;
+        })
+        .catch(function () { return -1; });
+    }
+
+    function fase2ShouldShowTutorial() {
+      try {
+        if (localStorage.getItem("tutorialDismissed_v1") === "true") return Promise.resolve(false);
+      } catch (e) {}
+      return fase2TutorialGetSimulationsCount().then(function (count) {
+        // count === 0 \u2192 show (no simulations yet).
+        // count  > 0 \u2192 hide (has data).
+        // count  < 0 \u2192 hide (DB error / fail-CLOSED per user spec).
+        return count === 0;
+      });
+    }
+
+    var FASE2_TUTORIAL_STEPS = [
+      { anchorSel: "#dropZone",   title: "Carica il tuo bando",  text: "Trascina qui il PDF del bando. L'AI estrarrà materia, date e requisiti." },
+      { anchorSel: "#bandiList",  title: "Seleziona un bando",   text: "Clicca sulla card per selezionarla. Appariranno difficoltà e durata." },
+      { anchorSel: "#startBtn",   title: "Configura e inizia",   text: "Scegli difficoltà e durata, poi premi Inizia Simulazione." }
+    ];
+
+    var fase2Tutorial = { step: 0, overlay: null, highlight: null, tooltip: null, dots: null, titleEl: null, textEl: null, progressEl: null, nextBtn: null };
+
+    function fase2TutorialBuildOverlay() {
+      if (fase2Tutorial.overlay) return;
+      var ov = document.createElement("div");
+      ov.className = "tutorial-overlay";
+      ov.setAttribute("role", "dialog");
+      ov.setAttribute("aria-modal", "true");
+      ov.setAttribute("aria-labelledby", "tutorial-title");
+
+      var hl = document.createElement("div");
+      hl.className = "tutorial-highlight";
+      hl.setAttribute("aria-hidden", "true");
+      ov.appendChild(hl);
+
+      var tip = document.createElement("div");
+      tip.className = "tutorial-tooltip";
+      tip.innerHTML =
+        '<div class="tutorial-tooltip-title" id="tutorial-title"></div>' +
+        '<div class="tutorial-tooltip-text"></div>' +
+        '<div class="tutorial-tooltip-footer">' +
+          '<span class="tutorial-progress-text">1 / 3</span>' +
+          '<div class="tutorial-dots"></div>' +
+          '<button type="button" class="tutorial-next">Avanti →</button>' +
+        '</div>';
+      ov.appendChild(tip);
+
+      var skip = document.createElement("button");
+      skip.type = "button";
+      skip.className = "tutorial-skip";
+      skip.setAttribute("aria-label", "Salta il tutorial");
+      skip.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<line x1="18" y1="6" x2="6" y2="18"/>' +
+          '<line x1="6" y1="6" x2="18" y2="18"/>' +
+        '</svg>' +
+        '<span>Salta</span>';
+      skip.addEventListener("click", fase2TutorialDismiss);
+      document.body.appendChild(skip);
+
+      document.body.appendChild(ov);
+
+      fase2Tutorial.overlay   = ov;
+      fase2Tutorial.highlight = hl;
+      fase2Tutorial.tooltip   = tip;
+      fase2Tutorial.dots      = tip.querySelector(".tutorial-dots");
+      fase2Tutorial.titleEl   = tip.querySelector(".tutorial-tooltip-title");
+      fase2Tutorial.textEl    = tip.querySelector(".tutorial-tooltip-text");
+      fase2Tutorial.progressEl= tip.querySelector(".tutorial-progress-text");
+      fase2Tutorial.nextBtn   = tip.querySelector(".tutorial-next");
+
+      fase2Tutorial.nextBtn.addEventListener("click", fase2TutorialNext);
+    }
+
+    function fase2TutorialPosition() {
+      var step = FASE2_TUTORIAL_STEPS[fase2Tutorial.step];
+      var anchor = document.querySelector(step.anchorSel);
+      if (!anchor) return false;
+      var r = anchor.getBoundingClientRect();
+      var pad = 8;
+      var hl = fase2Tutorial.highlight;
+      hl.style.left   = (r.left   - pad) + "px";
+      hl.style.top    = (r.top    - pad) + "px";
+      hl.style.width  = (r.width  + pad * 2) + "px";
+      hl.style.height = (r.height + pad * 2) + "px";
+      var tipW = 320, tipH = 168;
+      var tl, tt;
+      if (r.bottom + tipH + 24 < window.innerHeight) {
+        tl = Math.max(16, Math.min(window.innerWidth - tipW - 16, r.left));
+        tt = r.bottom + 24;
+      } else if (r.top - tipH - 24 > 0) {
+        tl = Math.max(16, Math.min(window.innerWidth - tipW - 16, r.left));
+        tt = Math.max(16, r.top - tipH - 24);
+      } else {
+        tl = Math.min(window.innerWidth - tipW - 16, r.right + 24);
+        tt = Math.max(16, Math.min(window.innerHeight - tipH - 16, r.top));
+      }
+      fase2Tutorial.tooltip.style.left = tl + "px";
+      fase2Tutorial.tooltip.style.top  = tt + "px";
+      return true;
+    }
+
+    function fase2TutorialRender() {
+      var step = FASE2_TUTORIAL_STEPS[fase2Tutorial.step];
+      fase2Tutorial.titleEl.textContent = step.title;
+      fase2Tutorial.textEl.textContent  = step.text;
+      fase2Tutorial.progressEl.textContent = (fase2Tutorial.step + 1) + " / " + FASE2_TUTORIAL_STEPS.length;
+      fase2Tutorial.nextBtn.textContent = (fase2Tutorial.step === FASE2_TUTORIAL_STEPS.length - 1) ? "Fine" : "Avanti →";
+      var html = "";
+      for (var i = 0; i < FASE2_TUTORIAL_STEPS.length; i++) {
+        html += '<span class="tutorial-dot' + (i === fase2Tutorial.step ? ' active' : '') + '" aria-hidden="true"></span>';
+      }
+      fase2Tutorial.dots.innerHTML = html;
+      if (!fase2TutorialPosition()) fase2TutorialNext();
+    }
+
+    function fase2TutorialNext() {
+      if (fase2Tutorial.step < FASE2_TUTORIAL_STEPS.length - 1) {
+        fase2Tutorial.step += 1;
+        fase2TutorialRender();
+      } else {
+        fase2TutorialDismiss();
+      }
+    }
+
+    function fase2TutorialDismiss() {
+      try { localStorage.setItem("tutorialDismissed_v1", "true"); } catch (e) {}
+      if (fase2Tutorial.overlay && fase2Tutorial.overlay.parentNode) {
+        fase2Tutorial.overlay.parentNode.removeChild(fase2Tutorial.overlay);
+      }
+      var skips = document.querySelectorAll(".tutorial-skip");
+      for (var i = 0; i < skips.length; i++) { if (skips[i].parentNode) skips[i].parentNode.removeChild(skips[i]); }
+      fase2Tutorial = { step: 0, overlay: null, highlight: null, tooltip: null, dots: null, titleEl: null, textEl: null, progressEl: null, nextBtn: null };
+    }
+
+    var FASE2_TUTORIAL_TRIES = 0;
+    function fase2TutorialStart() {
+      FASE2_TUTORIAL_TRIES += 1;
+      if (FASE2_TUTORIAL_TRIES > 40) return; // safety bail-out ~10s
+      if (!document.querySelector("#dropZone") || !document.querySelector("#bandiList") || !document.querySelector("#startBtn")) {
+        setTimeout(fase2TutorialStart, 250);
+        return;
+      }
+      fase2TutorialBuildOverlay();
+      fase2TutorialRender();
+    }
+
+    function fase2TutorialInit() {
+      fase2ShouldShowTutorial().then(function (show) {
+        if (!show) return;
+        setTimeout(fase2TutorialStart, 800);
+      });
+    }
+
+    /* === FASE 2: BOTTONE "AVVIA SIMULAZIONE" STATE MACHINE ===
+       Capture-phase click che triggera loading → success. Coerente con BUTTON STATES Fase 0. */
+    function fase2BtnStateLocal(btn, state) {
+      if (!btn) return;
+      var span = btn.querySelector(".btn-text");
+      if (span && state !== "idle" && !btn.dataset.fase2Idle) {
+        btn.dataset.fase2Idle = span.textContent.trim();
+      }
+      btn.className = btn.className.replace(/\s*\bbtn-(idle|loading|success|error)\b/g, "");
+      if (state === "idle") {
+        btn.disabled = false;
+        if (span) span.textContent = btn.dataset.fase2Idle || "";
+        return;
+      }
+      btn.classList.add("btn-" + state);
+      var labels = { loading: "Avvio in corso\u2026", success: "Pronto!", error: "Riprova" };
+      if (span && labels[state]) span.textContent = labels[state];
+      btn.disabled = (state === "loading" || state === "success");
+      var existing = btn.querySelector(".btn-icon, .btn-spinner");
+      if (existing) existing.remove();
+      var svg = "";
+      if (state === "loading") {
+        svg = '<svg class="btn-icon btn-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+              '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" opacity="0.3"/>' +
+              '<path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>';
+      } else if (state === "success") {
+        svg = '<svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+              '<polyline points="20 6 9 17 4 12"/></svg>';
+      } else if (state === "error") {
+        svg = '<svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">' +
+              '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+      }
+      if (svg) btn.insertAdjacentHTML("afterbegin", svg);
+      if (state === "success") setTimeout(function () { fase2BtnStateLocal(btn, "idle"); }, 1800);
+      if (state === "error")   setTimeout(function () { fase2BtnStateLocal(btn, "idle"); }, 2500);
+    }
+
+    function fase2WireStartBtn() {
+      var btn = document.getElementById("startBtn");
+      if (!btn) return;
+      btn.addEventListener("click", function () {
+        if (btn.disabled) return;
+        if (fase2Tutorial.overlay) fase2TutorialDismiss();
+        fase2BtnStateLocal(btn, "loading");
+        setTimeout(function () { fase2BtnStateLocal(btn, "success"); }, 2000);
+      }, true); // capture phase: runs BEFORE the existing handler.
+    }
+
+    function fase2Init() {
+      fase2TutorialInit();
+      fase2WireStartBtn();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fase2Init);
+    } else {
+      fase2Init();
+    }
+  })();
   </script>
-</body>
+  <script>
+  (function () {
+    "use strict";
+
+    /* === FASE 3 — TAB 3 PROGRESSI: gauge + streak + trend + aree === */
+
+    /* Gauge render — 140px desktop, 100px mobile, 3 stati colore sogliati. */
+    function fase3RenderGauge(score) {
+      var wrap   = document.getElementById("gaugeWrap");
+      var circle = document.getElementById("gaugeFill");
+      var val    = document.getElementById("gaugeVal");
+      var band   = document.getElementById("gaugeBand");
+      if (!wrap || !circle || !val || !band) return;
+      var dasharray = parseFloat(circle.getAttribute("stroke-dasharray")) || 440;
+      if (score == null || typeof score !== "number") {
+        wrap.classList.remove("gauge-alive");
+        circle.classList.remove("gauge-color-error", "gauge-color-warning", "gauge-color-success");
+        circle.classList.add("gauge-color-empty");
+        circle.setAttribute("stroke-dashoffset", String(dasharray));
+        val.innerHTML = "&mdash;";
+        band.textContent = "Nessuna simulazione";
+        return;
+      }
+      var colorClass, label;
+      if (score < 6.0)       { colorClass = "gauge-color-error";   label = "Da migliorare"; }
+      else if (score < 8.0)  { colorClass = "gauge-color-warning"; label = "Sufficiente"; }
+      else                   { colorClass = "gauge-color-success"; label = "Eccellente"; }
+      circle.classList.remove("gauge-color-empty", "gauge-color-error", "gauge-color-warning", "gauge-color-success");
+      circle.classList.add(colorClass);
+      var clamped = Math.max(0, Math.min(10, score));
+      var offset = dasharray * (1 - clamped / 10);
+      circle.setAttribute("stroke-dashoffset", String(offset));
+      // Breathing animation SOLO per score \u2265 8.5 (reword milestone).
+      if (score >= 8.5) wrap.classList.add("gauge-alive");
+      else wrap.classList.remove("gauge-alive");
+      val.textContent = clamped.toFixed(1);
+      band.textContent = label;
+    }
+
+    /* Streak 7 day dots — leftmost = 6 giorni fa, RIGHTMOST = OGGI.
+       L'utente legge il tempo left-to-right, oggi sempre ultimo. */
+    function fase3RenderStreakDays(streakDays) {
+      var week = document.getElementById("streakWeek");
+      if (!week) return;
+      var days = Math.max(0, streakDays || 0);
+      week.innerHTML = "";
+      for (var i = 0; i < 7; i++) {
+        var daysFromToday = 6 - i;
+        var dot = document.createElement("span");
+        dot.className = "streak-day-dot" + (days > daysFromToday ? " on" : "");
+        var label = (i === 6) ? "Oggi" : (i === 5) ? "Ieri" : (7 - i) + " giorni fa";
+        dot.setAttribute("aria-label", label);
+        dot.setAttribute("title", label);
+        dot.setAttribute("role", "presentation");
+        week.appendChild(dot);
+      }
+    }
+
+    /* Streak flame color detective based on consecutive days. */
+    function fase3RenderStreakFlame(streakDays, bestStreak) {
+      var flame  = document.getElementById("streakFire");
+      var value  = document.getElementById("streakValue");
+      var card   = document.getElementById("streakCard");
+      var record = document.getElementById("streakRecord");
+      if (!flame || !value || !card) return;
+      var n = Math.max(0, streakDays || 0);
+      var colorClass, activate, legend;
+      if      (n <= 2)  { colorClass = "streak-color-gray";   activate = false; legend = false; }
+      else if (n <= 6)  { colorClass = "streak-color-orange"; activate = true;  legend = false; }
+      else if (n <= 14) { colorClass = "streak-color-red";    activate = true;  legend = false; }
+      else               { colorClass = "streak-color-violet"; activate = true;  legend = true;  }
+      flame.className = "streak-flame " + colorClass + (activate ? " active" : "");
+      value.className = "streak-value " + colorClass;
+      card.classList.toggle("legend", legend);
+      value.textContent = n > 0 ? String(n) : "\u2014";
+      if (record) {
+        record.textContent = (bestStreak && bestStreak > 0)
+          ? "Record: " + bestStreak + " giorni"
+          : "Record: \u2014 giorni";
+      }
+    }
+
+    /* Trend chart — curca Bezier SVG, gradient area, dots interactivos + tooltip. */
+    var TREND_GRAD_ID = "fase3TrendGrad";
+    var trendTooltipEl = null;
+    function fase3FormatDate(iso) {
+      try {
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return "";
+        var months = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
+        return d.getDate() + " " + months[d.getMonth()];
+      } catch (e) { return ""; }
+    }
+    function fase3ShowTrendTooltip(point, anchor) {
+      if (!trendTooltipEl) {
+        trendTooltipEl = document.createElement("div");
+        trendTooltipEl.className = "trend-tooltip";
+        trendTooltipEl.setAttribute("role", "tooltip");
+        document.body.appendChild(trendTooltipEl);
+      }
+      trendTooltipEl.textContent = fase3FormatDate(point.date) + " \u00b7 " + point.score.toFixed(1);
+      var r = anchor.getBoundingClientRect();
+      trendTooltipEl.style.left = (r.left + r.width / 2) + "px";
+      trendTooltipEl.style.top  = (r.top - 8) + "px";
+      trendTooltipEl.classList.add("visible");
+    }
+    function fase3HideTrendTooltip() {
+      if (trendTooltipEl) trendTooltipEl.classList.remove("visible");
+    }
+
+    function fase3BuildBezierPath(pts) {
+      var d = "";
+      for (var i = 0; i < pts.length; i++) {
+        var p = pts[i];
+        if (i === 0) { d += "M " + p.x.toFixed(2) + " " + p.y.toFixed(2); continue; }
+        var prev = pts[i - 1];
+        var mx = (prev.x + p.x) / 2;
+        d += " C " + mx.toFixed(2) + " " + prev.y.toFixed(2) +
+             ", " + mx.toFixed(2) + " " + p.y.toFixed(2) +
+             ", " + p.x.toFixed(2) + " " + p.y.toFixed(2);
+      }
+      return d;
+    }
+
+    function fase3RenderTrend(simulations) {
+      var trendContent = document.getElementById("trendContent");
+      if (!trendContent) return;
+      if (!simulations || simulations.length === 0) {
+        trendContent.innerHTML =
+          '<div class="trend-empty">' +
+            '<div class="trend-empty-icon" aria-hidden="true">' +
+              '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+                '<circle cx="12" cy="12" r="10"/>' +
+                '<polyline points="12 6 12 12 16 14"/>' +
+              '</svg>' +
+            '</div>' +
+            '<div>' +
+              '<div class="trend-empty-title">Non hai ancora completato simulazioni</div>' +
+              '<div class="trend-empty-sub">Completa la prima per vedere il tuo andamento.</div>' +
+            '</div>' +
+            '<button type="button" class="btn-secondary" data-action="goto-prepara">Vai a Prepara</button>' +
+          '</div>';
+        var btn = trendContent.querySelector('[data-action="goto-prepara"]');
+        if (btn) {
+          btn.addEventListener("click", function () {
+            var tab = document.querySelector('.nav-tab[data-tab="tab-prepara"]');
+            if (tab) tab.click();
+          });
+        }
+        return;
+      }
+
+      var sorted = simulations.slice().sort(function (a, b) {
+        var da = new Date(a.ended_at || a.started_at || a.created_at || 0).getTime();
+        var db = new Date(b.ended_at || b.started_at || b.created_at || 0).getTime();
+        return da - db;
+      }).slice(-8);
+
+      var W = 600, H = 160, pX = 24, pY = 24;
+      var innerW = W - pX * 2;
+      var innerH = H - pY * 2;
+      var pts = sorted.map(function (s, i) {
+        var x = (sorted.length === 1) ? (pX + innerW / 2) : (pX + (i / (sorted.length - 1)) * innerW);
+        var score = Math.max(0, Math.min(10, parseFloat(s.voto_finale) || 0));
+        var y = pY + innerH - (score / 10) * innerH;
+        return { x: x, y: y, score: score, date: s.ended_at || s.started_at || s.created_at };
+      });
+
+      var d = fase3BuildBezierPath(pts);
+      var lastX = pts[pts.length - 1].x;
+      var firstX = pts[0].x;
+      var dArea = d + " L " + lastX.toFixed(2) + " " + (H - pY).toFixed(2) +
+                  " L " + firstX.toFixed(2) + " " + (H - pY).toFixed(2) + " Z";
+
+      var dotsHtml = pts.map(function (p, i) {
+        return '<circle class="trend-dot" cx="' + p.x.toFixed(2) + '" cy="' + p.y.toFixed(2) +
+               '" r="2.5" data-idx="' + i + '" tabindex="0" role="button"' +
+               ' aria-label="' + fase3FormatDate(p.date) + ' \u00b7 ' + p.score.toFixed(1) + '"/>';
+      }).join("");
+
+      var noteHtml = '<div class="trend-note">Ultima simulazione: <b>' + pts[pts.length - 1].score.toFixed(1) + '</b></div>';
+
+      var svgHtml =
+        '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Trend ultime ' + pts.length + ' simulazioni">' +
+          '<defs>' +
+            '<linearGradient id="' + TREND_GRAD_ID + '" x1="0" x2="0" y1="0" y2="1">' +
+              '<stop offset="0%" stop-color="#2563EB" stop-opacity="0.20"/>' +
+              '<stop offset="100%" stop-color="#2563EB" stop-opacity="0"/>' +
+            '</linearGradient>' +
+          '</defs>' +
+          '<path d="' + dArea + '" fill="url(#' + TREND_GRAD_ID + ')" class="trend-area-fill"/>' +
+          '<path d="' + d + '" class="trend-line" stroke-dasharray="1000" stroke-dashoffset="1000"/>' +
+          dotsHtml +
+        '</svg>' +
+        noteHtml;
+
+      trendContent.innerHTML = svgHtml;
+
+      // Left-to-right Bezier draw via stroke-dashoffset (1.2s ease-out, spec).
+      var pathEl = trendContent.querySelector(".trend-line");
+      if (pathEl) {
+        var len = 0;
+        if (pathEl.getTotalLength) {
+          try { len = pathEl.getTotalLength(); } catch (e) {}
+        }
+        if (!len) {
+          pathEl.setAttribute("stroke-dasharray", "1000");
+          pathEl.setAttribute("stroke-dashoffset", "0");
+        } else {
+          pathEl.setAttribute("stroke-dasharray", String(len));
+          pathEl.setAttribute("stroke-dashoffset", String(len));
+          requestAnimationFrame(function () {
+            pathEl.style.transition = "stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)";
+            pathEl.setAttribute("stroke-dashoffset", "0");
+          });
+        }
+      }
+
+      trendContent.querySelectorAll(".trend-dot").forEach(function (dot) {
+        dot.addEventListener("mouseenter", function () {
+          var idx = parseInt(dot.getAttribute("data-idx"), 10);
+          if (pts[idx]) fase3ShowTrendTooltip(pts[idx], dot);
+        });
+        dot.addEventListener("mouseleave", fase3HideTrendTooltip);
+        dot.addEventListener("focus", function () {
+          var idx = parseInt(dot.getAttribute("data-idx"), 10);
+          if (pts[idx]) fase3ShowTrendTooltip(pts[idx], dot);
+        });
+        dot.addEventListener("blur", fase3HideTrendTooltip);
+        dot.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            dot.dispatchEvent(new Event("mouseenter"));
+          }
+        });
+      });
+    }
+
+    /* Aree auto-open: se avg < 6 (asimmetria intenzionale: vulnerable side visible). */
+    function fase3RenderAreeAutoOpen(score) {
+      var aree = document.getElementById("areeCard");
+      if (!aree) return;
+      var low = (typeof score === "number") && (score < 6.0);
+      aree.classList.toggle("is-open", low);
+    }
+
+    /* Gauge click → espande aree. */
+    function fase3WireGaugeClick() {
+      var gauge = document.getElementById("gaugeCard");
+      var aree  = document.getElementById("areeCard");
+      if (!gauge || !aree) return;
+      gauge.addEventListener("click", function () {
+        aree.classList.toggle("is-open");
+        aree.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+      gauge.setAttribute("role", "button");
+      gauge.setAttribute("tabindex", "0");
+      gauge.setAttribute("aria-label", "Apri aree da migliorare");
+    }
+
+    /* Fetch state from Supabase (streak + simulazioni). Reuse main client if exposed. */
+    function fase3GetClient() {
+      if (typeof window === "undefined") return null;
+      var existing = window.__SUPABASE_CLIENT__ || null;
+      if (existing) return existing;
+      var sdk = window.supabase;
+      var url = window.__SUPABASE_URL__ || "";
+      var key = window.__SUPABASE_ANON_KEY__ || "";
+      if (!sdk || typeof sdk.createClient !== "function" || !url || !key) return null;
+      try { return sdk.createClient(url, key); } catch (e) { return null; }
+    }
+
+    function fase3FetchAll() {
+      var client = fase3GetClient();
+      var uid    = window.__USER_ID__ || null;
+      if (!client || !uid) return Promise.resolve(null);
+      var p1 = client.from("simulazioni")
+        .select("voto_finale, ended_at, started_at, created_at")
+        .eq("user_id", uid)
+        .order("created_at", { ascending: true })
+        .limit(50);
+      var p2 = client.from("streak")
+        .select("current_days, record_days, last_touch")
+        .eq("user_id", uid)
+        .maybeSingle();
+      return Promise.all([p1, p2]).then(function (results) {
+        var sims = (results[0] && results[0].data) || [];
+        var streakRow = (results[1] && results[1].data) || null;
+        var sum = 0, count = 0;
+        for (var i = 0; i < sims.length; i++) {
+          var v = parseFloat(sims[i].voto_finale);
+          if (!isNaN(v)) { sum += v; count++; }
+        }
+        var avg = count > 0 ? sum / count : null;
+        return {
+          averageScore: avg,
+          streakDays: streakRow ? (streakRow.current_days || 0) : 0,
+          bestStreak: streakRow ? (streakRow.record_days || 0) : 0,
+          simulations: sims
+        };
+      }).catch(function () { return null; });
+    }
+
+    function fase3Render(data) {
+      var d = data || { averageScore: null, streakDays: 0, bestStreak: 0, simulations: [] };
+      fase3RenderGauge(d.averageScore);
+      fase3RenderStreakDays(d.streakDays);
+      fase3RenderStreakFlame(d.streakDays, d.bestStreak);
+      fase3RenderTrend(d.simulations);
+      fase3RenderAreeAutoOpen(d.averageScore);
+    }
+
+    function fase3Init() {
+      fase3WireGaugeClick();
+      fase3FetchAll().then(function (data) {
+        if (data) fase3Render(data);
+        try {
+          window.__CONCORSOAI_REFRESH_FASE3__ = function () {
+            return fase3FetchAll().then(function (d2) { if (d2) fase3Render(d2); });
+          };
+        } catch (e) {}
+      });
+    }
+
+    // Expose fase3Init per callers esterni (es. main IIFE dopo loadDashboardData).
+    // Default idempotente: re-assegna solo se non già esposto, in caso di doppio boot.
+    if (typeof window.fase3Init !== "function") window.fase3Init = fase3Init;
+
+  })();
+  </script>
+
+  <!-- ============================================================
+       FASE 4 — TAB 2 "IL TUO PIANO"
+       Calendario 7-day + Chat AI con messaggio contestuale (prima vs ritorno + area più debole).
+       Vanilla JS. Reads piano_settimanale.schedule from Supabase (RLS), writes via Upsert.
+       Non dipende da state globale — query dirette con window.supabase.createClient.
+       Honora prefers-reduced-motion (animation: pianoMsgFadeIn disabilitata in CSS).
+       ============================================================ -->
+  <script>
+  (function () {
+    "use strict";
+    var $ = function (id) { return document.getElementById(id); };
+    var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+    var MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+    var GIORNI = ["DOM","LUN","MAR","MER","GIO","VEN","SAB"];
+    var TYPE_COLOR = { sessione_guidata: "#16A34A", pratica_libera: "#D97706", prova_esame: "#DC2626", rest: "#7B93B8" };
+    var TYPE_LABEL = { sessione_guidata: "Sessione guidata", pratica_libera: "Pratica libera", prova_esame: "Prova d'esame", rest: "Riposo" };
+
+    function fmtIT(iso) { var d = new Date(iso + "T00:00:00"); return d.getDate() + " " + MESI[d.getMonth()]; }
+    function fmtDayShort(iso) { return GIORNI[new Date(iso + "T00:00:00").getDay()]; }
+
+    // Speculare a date_trunc('week', d)::date di Postgres (lunedì della settimana).
+    function getWeekStart(d) {
+      var dt = new Date(d || Date.now());
+      var diff = (dt.getDay() === 0 ? 6 : dt.getDay() - 1);
+      dt.setDate(dt.getDate() - diff);
+      dt.setHours(0, 0, 0, 0);
+      return dt.toISOString().split("T")[0];
+    }
+
+    var sbCached = null;
+    var pianoCurrentBandoId = null;
+    var currentSchedule = [];
+    var pianoRealtimeChannel = null;
+    function getSb() {
+      if (typeof window === "undefined" || !window.supabase || typeof window.supabase.createClient !== "function") return null;
+      if (sbCached) return sbCached;
+      var url = window.__SUPABASE_URL__ || "";
+      var key = window.__SUPABASE_ANON_KEY__ || "";
+      if (!url || !key) return null;
+      try { sbCached = window.supabase.createClient(url, key); return sbCached; } catch (e) { sbCached = null; return null; }
+    }
+
+    function getUserId(cb) {
+      var sb = getSb();
+      if (!sb) return cb(null, false);
+      sb.auth.getUser().then(function (r) {
+        var u = r && r.data && r.data.user;
+        cb(u && u.id ? u.id : null, !!u);
+      }).catch(function () { cb(null, false); });
+    }
+
+    function showLayer(id) {
+      ["pianoNoBando","pianoOnboarding","pianoActive"].forEach(function (nid) {
+        var el = $(nid); if (!el) return;
+        el.classList.toggle("hidden", nid !== id);
+      });
+    }
+    function setChatEnabled(enabled) {
+      var inp = $("pianoChatInput"); var btn = $("pianoChatSend");
+      if (inp) inp.disabled = !enabled;
+      if (btn) btn.disabled = !enabled;
+    }
+
+    function buildFallbackSchedule(weekStart, dailyMin) {
+      if (!weekStart || typeof weekStart !== "string") weekStart = getWeekStart();
+      var today = new Date();
+      var sched = [];
+      for (var i = 0; i < 7; i++) {
+        var d = new Date(weekStart + "T00:00:00");
+        d.setDate(d.getDate() + i);
+        var iso = d.toISOString().split("T")[0];
+        var isSun = d.getDay() === 0;
+        var isToday = d.toDateString() === today.toDateString();
+        sched.push({
+          day: iso,
+          type: isSun ? "rest" : (isToday ? "sessione_guidata" : (i % 2 === 0 ? "pratica_libera" : "sessione_guidata")),
+          duration_min: isSun ? 0 : dailyMin,
+          materia: isSun ? null : "Diritto Amministrativo",
+          focus: isSun ? null : (isToday ? "Principio di trasparenza" : "Atti amministrativi"),
+          status: isToday ? "today" : "future",
+          simulazione_id: null
+        });
+      }
+      return sched;
+    }
+
+    function renderWeek(schedule, weekStart) {
+      var grid = $("pianoWeekGrid"); var range = $("pianoWeekRange");
+      var lastISO = schedule[6] && schedule[6].day;
+      if (range && lastISO) range.textContent = fmtIT(weekStart) + " \u2192 " + fmtIT(lastISO);
+      if (!grid) return;
+      grid.innerHTML = "";
+      var firstDetail = null;
+      schedule.forEach(function (entry) {
+        var cell = document.createElement("button");
+        cell.type = "button";
+        cell.className = "piano-day";
+        if (entry.status === "done") cell.classList.add("is-done");
+        else if (entry.status === "today") cell.classList.add("is-today");
+        else if (entry.status === "skipped") cell.classList.add("is-skipped");
+        else cell.classList.add("is-future");
+        if (entry.type === "rest") cell.classList.add("is-rest");
+        var color = TYPE_COLOR[entry.type] || "#7B93B8";
+        cell.style.setProperty("--day-color", color);
+        var dayNum = new Date(entry.day + "T00:00:00").getDate();
+        cell.innerHTML =
+          '<span class="piano-day-name">' + fmtDayShort(entry.day) + '</span>' +
+          '<span class="piano-day-num">' + dayNum + '</span>' +
+          '<span class="piano-day-icon" aria-hidden="true"></span>' +
+          '<span class="piano-day-meta">' + (entry.duration_min ? entry.duration_min + "min" : "\u2014") + '</span>';
+        var ariaLabel = fmtDayShort(entry.day) + " " + dayNum + ", " + (entry.materia || (entry.type === "rest" ? "riposo" : "\u2014"));
+        if (entry.duration_min) ariaLabel += ", " + entry.duration_min + " minuti";
+        cell.setAttribute("aria-label", ariaLabel);
+        if (idx === 0) cell.setAttribute("tabindex", "0"); else cell.setAttribute("tabindex", "-1");
+        if (entry.status === "today") cell.setAttribute("aria-current", "date");
+        cell.addEventListener("click", function () { renderDayDetail(entry); });
+        cell.addEventListener("keydown", function (e) {
+          // Solo frecce ←/→ per navigare tra giorni. Enter/Space li gestisce il <button> nativo come click.
+          var prev = cell.previousElementSibling;
+          var next = cell.nextElementSibling;
+          if (e.key === "ArrowRight" && next && next.classList.contains("piano-day")) {
+            e.preventDefault();
+            cell.setAttribute("tabindex", "-1");
+            next.setAttribute("tabindex", "0");
+            next.focus();
+          } else if (e.key === "ArrowLeft" && prev && prev.classList.contains("piano-day")) {
+            e.preventDefault();
+            cell.setAttribute("tabindex", "-1");
+            prev.setAttribute("tabindex", "0");
+            prev.focus();
+          }
+        });
+        grid.appendChild(cell);
+        if (!firstDetail && (entry.status === "today" || entry.status === "future")) firstDetail = entry;
+      });
+      renderDayDetail(firstDetail || schedule[0]);
+      showLayer("pianoActive");
+    }
+
+    function renderDayDetail(d) {
+      var box = $("pianoDayDetail"); if (!box) return;
+      var isDone = d.status === "done"; var isSkipped = d.status === "skipped";
+      var isRest = d.type === "rest"; var isToday = d.status === "today";
+      var actions = "";
+      if (isRest) {
+        actions = '<div class="piano-day-detail-msg">Giorno di riposo. Recupera le energie.</div>';
+      } else if (isDone) {
+        actions = '<div class="piano-day-detail-msg"><b>Voto:</b> ' + (typeof d.score === "number" ? d.score.toFixed(1) : "\u2014") + '</div>'
+               + '<div class="piano-day-detail-actions"><button type="button" class="btn-secondary" data-action="rivedi">Rivedi</button>'
+               + '<button type="button" class="btn-secondary" data-action="rifai">Rifai</button></div>';
+      } else if (isSkipped) {
+        actions = '<div class="piano-day-detail-msg">Saltata</div>'
+               + '<div class="piano-day-detail-actions"><button type="button" class="btn-primary" data-action="rifai"><span class="btn-text">Rifai</span></button></div>';
+      } else {
+        var label = isToday ? "Inizia ora \u2192" : "Inizia simulazione \u2192";
+        actions = '<div class="piano-day-detail-actions"><button type="button" class="btn-primary" data-action="inizia"><span class="btn-text">' + label + '</span></button></div>';
+      }
+      box.innerHTML =
+        '<div class="piano-day-detail-date">' + fmtIT(d.day) + '</div>' +
+        (d.materia ? '<div class="piano-day-detail-materia">' + d.materia + '</div>' : '') +
+        (d.focus ? '<div class="piano-day-detail-focus">Focus: ' + d.focus + '</div>' : '') +
+        (d.duration_min ? '<div class="piano-day-detail-dur">' + (TYPE_LABEL[d.type] || d.type) + ' \u00b7 ' + d.duration_min + 'min</div>' : '') +
+        actions;
+
+      // FASE 5: bind handleStart sulle celle attive.
+      var iniziaBtn = box.querySelector('[data-action="inizia"]');
+      if (iniziaBtn) iniziaBtn.addEventListener("click", function () { handleStart(d); });
+    }
+
+    // FASE 5: handleStart dalle celle del calendario.
+    // Set 5 localStorage keys (cai_bando_id, cai_input_method, cai_difficolta, cai_durata, cai_subjects)
+    // + redirect a simulation.html. Sblocca il flusso calendario \u2192 simulazione.
+    function handleStart(entry) {
+      if (!entry) return;
+      var bandoId = pianoCurrentBandoId;
+      var inputMethod = entry.materia ? "subjects" : "pdf";
+      var mattersArr = entry.materia ? [entry.materia] : [];
+      try {
+        if (bandoId) localStorage.setItem("cai_bando_id", bandoId);
+        localStorage.setItem("cai_input_method", inputMethod);
+        localStorage.setItem("cai_difficolta", "media");
+        localStorage.setItem("cai_durata", String(entry.duration_min || 20));
+        localStorage.setItem("cai_subjects", JSON.stringify(mattersArr));
+      } catch (e) { console.warn("[Fase 5] localStorage save failed", e); }
+      try {
+        var sb = getSb();
+        if (sb) sb.auth.getUser().then(function (r) {
+          var u = r && r.data && r.data.user;
+          if (!u) return;
+          sb.from("events").insert({
+            event: "piano_sim_start",
+            page: "tab-piano",
+            payload: { entry_day: entry.day, entry_type: entry.type, bando_id: bandoId, ts: new Date().toISOString() }
+          }).then(function () {}, function () {});
+        });
+      } catch (e) {}
+      window.location.href = "simulation.html";
+    }
+
+    // Welcome contestuale: prima vs ritorno + area più debole.
+    function writeWelcome(hasHistory, areeScores) {
+      var txt;
+      if (!hasHistory) {
+        txt = "Ciao! Ho creato il tuo primo piano.\nInizia dalla sessione di oggi.";
+      } else {
+        var weak = "Chiarezza";
+        var vals = areeScores || {};
+        var ch = typeof vals.chiarezza === "number" ? vals.chiarezza : null;
+        var st = typeof vals.struttura === "number" ? vals.struttura : null;
+        var co = typeof vals.contenuto === "number" ? vals.contenuto : null;
+        if (ch !== null && st !== null && co !== null) {
+          var min = ch; var name = "Chiarezza";
+          if (st < min) { min = st; name = "Struttura"; }
+          if (co < min) { min = co; name = "Contenuto"; }
+          weak = name;
+        }
+        txt = "Ho aggiornato il piano in base ai tuoi risultati.\nFocus su " + weak + " questa settimana.";
+      }
+      var el = $("pianoWelcomeText"); if (el) el.textContent = txt;
+    }
+
+    function maybeShowAdaptiveBanner(hasHistory) {
+      var b = $("pianoBanner"); if (!b) return;
+      var dismissed = false;
+      try { dismissed = localStorage.getItem("piano.banner.dismissed") === "1"; } catch (e) {}
+      b.classList.toggle("hidden", !(hasHistory && !dismissed));
+    }
+
+    function loadPianoSettimanale(weekStart) {
+      getUserId(function (userId, authed) {
+        if (!authed || !userId) {
+          renderWeek(buildFallbackSchedule(weekStart, 30), weekStart);
+          writeWelcome(false, null);
+          setChatEnabled(true);
+          return;
+        }
+        var sb = getSb();
+        sb.from("piano_settimanale")
+          .select("schedule, generated_at, updated_at, bando_id")
+          .eq("user_id", userId).eq("week_start", weekStart).maybeSingle()
+          .then(function (res) {
+            var row = res && res.data;
+            if (res.error || !row || !Array.isArray(row.schedule) || row.schedule.length !== 7) {
+              showLayer("pianoOnboarding");
+              setChatEnabled(false);
+              return;
+            }
+            renderWeek(row.schedule, weekStart);
+            pianoCurrentBandoId = row.bando_id || null;
+            currentSchedule = row.schedule;
+            // Conta simulazioni ultimissime per welcome contestuale.
+            // Usa column names reali: clarity_score, structure_score, content_score.
+            sb.from("simulazioni")
+              .select("id, clarity_score, structure_score, content_score, voto_finale")
+              .eq("user_id", userId)
+              .order("started_at", { ascending: false })
+              .limit(1)
+              .then(function (sr) {
+                var hasHistory = !!(sr && sr.data && sr.data.length > 0);
+                var last = sr && sr.data && sr.data[0];
+                var areeScores = last ? {
+                  chiarezza: last.clarity_score,
+                  struttura: last.structure_score,
+                  contenuto: last.content_score
+                } : null;
+                writeWelcome(hasHistory, areeScores);
+                maybeShowAdaptiveBanner(hasHistory);
+              }).catch(function () {
+                // Query simulazioni fallita (RLS / rete) — niente history, niente area debole.
+                writeWelcome(false, null);
+                maybeShowAdaptiveBanner(false);
+              });
+            setChatEnabled(true);
+          }).catch(function (e) {
+            console.warn("[Fase 4] piano_settimanale load fail", e);
+            renderWeek(buildFallbackSchedule(weekStart, 30), weekStart);
+            writeWelcome(false, null);
+            setChatEnabled(true);
+          });
+      });
+    }
+
+    function bindTabs() {
+      var currWeek = getWeekStart();
+      function reload() { loadPianoSettimanale(currWeek); }
+      var prev = $("pianoPrevWeek"); if (prev) prev.addEventListener("click", function () {
+        var d = new Date(currWeek + "T00:00:00"); d.setDate(d.getDate() - 7);
+        currWeek = d.toISOString().split("T")[0]; reload();
+      });
+      var next = $("pianoNextWeek"); if (next) next.addEventListener("click", function () {
+        var d = new Date(currWeek + "T00:00:00"); d.setDate(d.getDate() + 7);
+        currWeek = d.toISOString().split("T")[0]; reload();
+      });
+      var today = $("pianoToday"); if (today) today.addEventListener("click", function () {
+        currWeek = getWeekStart(); reload();
+      });
+      var dismiss = $("pianoBannerDismiss"); if (dismiss) dismiss.addEventListener("click", function () {
+        var b = $("pianoBanner"); if (b) b.classList.add("hidden");
+        try { localStorage.setItem("piano.banner.dismissed", "1"); } catch (e) {}
+      });
+      var noBandoBtn = $("pianoNoBandoGoBtn"); if (noBandoBtn) noBandoBtn.addEventListener("click", function () {
+        var t = document.querySelector('.nav-tab[data-tab="tab-prepara"]'); if (t) t.click();
+      });
+
+      // Onboarding 3-step
+      var exDate = $("pianoExamDate");
+      var sub = $("pianoOnboardingSubmit");
+      function validateOnboarding() { if (sub) sub.disabled = !(exDate && exDate.value); }
+      if (exDate) { exDate.addEventListener("input", validateOnboarding); exDate.addEventListener("change", validateOnboarding); }
+      if (sub) sub.addEventListener("click", handleGeneratePlan);
+      var toggles = $$(".piano-toggle");
+      toggles.forEach(function (b) {
+        b.addEventListener("click", function () {
+          toggles.forEach(function (x) { x.classList.remove("active"); x.setAttribute("aria-checked", "false"); });
+          b.classList.add("active"); b.setAttribute("aria-checked", "true");
+        });
+      });
+
+      // Chat form
+      var form = $("pianoChatForm");
+      if (form) form.addEventListener("submit", function (e) { e.preventDefault(); sendChatMessage(); });
+    }
+
+    function handleGeneratePlan() {
+      var exDate = $("pianoExamDate");
+      var sel = $$(".piano-toggle.active")[0];
+      var commitments = $("pianoCommitments");
+      if (!exDate || !exDate.value) return;
+      var dailyMin = sel ? (parseInt(sel.getAttribute("data-value"), 10) || 30) : 30;
+      var commitsTxt = commitments ? (commitments.value || "") : "";
+      var weekStart = getWeekStart();
+      var sched = buildFallbackSchedule(weekStart, dailyMin);
+
+      getUserId(function (userId, authed) {
+        if (!authed || !userId) {
+          renderWeek(sched, weekStart);
+          writeWelcome(false, null);
+          setChatEnabled(true);
+          showToast("Piano generato (offline). Lo salveremo al prossimo login.", "info");
+          return;
+        }
+        var sb = getSb();
+        var bandoId = null;
+        try {
+          var ab = localStorage.getItem("dashboard.activeBando");
+          if (ab) bandoId = (JSON.parse(ab) || {}).id || null;
+        } catch (e) {}
+        pianoCurrentBandoId = bandoId;
+        sb.from("piano_settimanale").upsert({
+          user_id: userId, week_start: weekStart, schedule: sched, bando_id: bandoId
+        }).then(function (res) {
+          if (res && res.error) console.warn("[Fase 4] upsert fail", res.error);
+        });
+        sb.from("events").insert({
+          event: "piano_generated", page: "tab-piano",
+          payload: { exam_date: exDate.value, daily_min: dailyMin, has_commitments: !!commitsTxt, week_start: weekStart, ts: new Date().toISOString() }
+        }).then(function () {});
+        renderWeek(sched, weekStart);
+        // Al primo generate l'utente NON ha ancora simulazioni -> welcome "Ciao! Ho creato il tuo primo piano"
+        writeWelcome(false, null);
+        maybeShowAdaptiveBanner(false);
+        setChatEnabled(true);
+        showToast("Piano generato!", "success");
+      });
+    }
+
+    function appendMsg(role, text) {
+      var box = $("pianoChatHistory"); if (!box) return;
+      var div = document.createElement("div");
+      div.className = "piano-msg piano-msg-" + role;
+      var label = role === "user" ? "Tu" : "AI";
+      var safe = (text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      div.innerHTML = '<div class="piano-msg-avatar" aria-hidden="true">' + label + '</div>'
+                    + '<div class="piano-msg-bubble">' + safe + '</div>';
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function sendChatMessage() {
+      var inp = $("pianoChatInput"); if (!inp || inp.disabled) return;
+      var msg = (inp.value || "").trim(); if (!msg) return;
+
+      // FASE 5: lock check 10/giorno (server enforce via api/chat.js).
+      var pianoChatToday = (new Date()).toISOString().slice(0, 10);
+      try {
+        var lockDay = localStorage.getItem("piano.chat.lockedUntil");
+        if (lockDay && lockDay >= pianoChatToday) {
+          appendMsg("bot", "Hai raggiunto il limite di 10 messaggi al giorno per la chat del piano. Riprova domani.");
+          return;
+        }
+      } catch (e) {}
+
+      var btn = $("pianoChatSend"); if (btn) btn.disabled = true;
+      inp.value = "";
+      appendMsg("user", msg);
+      // FASE 5: delega alla nuova logica /api/chat. Il blocco legacy sotto e' morto (early return).
+      pianoChatFase5(msg, pianoChatToday, btn);
+      return;
+      getUserId(function (userId, authed) {
+        var sb = getSb();
+        if (!authed || !userId || !sb) {
+          appendMsg("bot", "Il coach AI è in arrivo. Nel frattempo modifica manualmente le celle del calendario.");
+          if (btn) btn.disabled = false;
+          return;
+        }
+        sb.from("events").insert({
+          event: "piano_chat_message", page: "tab-piano",
+          payload: { role: "user", text: msg, ts: new Date().toISOString() }
+        }).then(function () {});
+        // Optimistic bot reply (no LLM call in v1 — il vero collegamento a api/chat.js arriva in Fase 5).
+        setTimeout(function () {
+          appendMsg("bot", "Sto aggiornando il piano in base al tuo messaggio\u2026");
+          if (btn) btn.disabled = false;
+        }, 400);
+      });
+    }
+
+    function showToast(msg, type) {
+      var t = $("toast"); var txt = $("toastText");
+      if (!t || !txt) return;
+      txt.textContent = msg;
+      t.className = "toast toast-" + (type || "info") + " show";
+      var pg = t.querySelector(".toast-progress");
+      if (pg) {
+        pg.style.transition = "none"; pg.style.transform = "scaleX(1)";
+        requestAnimationFrame(function () {
+          pg.style.transition = "transform 3s linear"; pg.style.transform = "scaleX(0)";
+        });
+      }
+      setTimeout(function () {
+        t.classList.remove("show"); t.classList.add("is-leaving");
+        setTimeout(function () { t.classList.remove("is-leaving"); }, 320);
+      }, 3000);
+    }
+
+    function boot() {
+      bindTabs();
+      loadPianoSettimanale(getWeekStart());
+      // FASE 5: avvia Supabase Realtime listener su simulazioni INSERT per patchare le celle.
+      // Single-shot: resta aperto per tutta la vita della pagina. Cleanup automatico al unload.
+      try {
+        getUserId(function (userId, authed) {
+          if (!authed || !userId) return;
+          var sb = getSb();
+          if (!sb || typeof sb.channel !== "function") return;
+          if (pianoRealtimeChannel) return;
+          pianoRealtimeChannel = sb.channel("sim-piano-sync")
+            .on("postgres_changes", {
+              event: "INSERT",
+              schema: "public",
+              table: "simulazioni",
+              filter: "user_id=eq." + userId
+            }, function (payload) {
+              handleRealtimeSimInsert(payload && payload.new);
+            })
+            .subscribe();
+        });
+      } catch (e) { console.warn("[Fase 5] realtime subscribe failed", e); }
+    }
+
+    function handleRealtimeSimInsert(simRow) {
+      if (!simRow || !simRow.started_at || !currentSchedule || !currentSchedule.length) return;
+      var d = new Date(simRow.started_at);
+      var dayISO = d.toISOString().slice(0, 10);
+      var entry = null;
+      for (var i = 0; i < currentSchedule.length; i++) {
+        if (currentSchedule[i].day === dayISO) { entry = currentSchedule[i]; break; }
+      }
+      if (!entry) return;
+      if (entry.status === "done" && entry.simulazione_id === simRow.id) return; // idempotent
+      entry.status = "done";
+      entry.simulazione_id = simRow.id;
+      if (typeof simRow.voto_finale === "number") entry.score = simRow.voto_finale;
+      renderWeek(currentSchedule, getWeekStart());
+      // Persist async + audit.
+      try {
+        var sb = getSb();
+        if (sb) {
+          sb.auth.getUser().then(function (r) {
+            var u = r && r.data && r.data.user;
+            if (!u) return;
+            sb.from("piano_settimanale").update({ schedule: currentSchedule, updated_at: new Date().toISOString() })
+              .eq("user_id", u.id).eq("week_start", getWeekStart()).then(function () {}, function (e) { console.warn("[Fase 5] realtime DB update fail", e); });              sb.from("events").insert({
+                event: "piano_cell_done_realtime",
+                page: "tab-piano",
+                payload: { day: dayISO, simulazione_id: simRow.id, voto_finale: simRow.voto_finale, ts: new Date().toISOString() }
+              }).then(function () {}, function () {});
+            });
+          }
+        } catch (e) {}
+      }
+
+    // FASE 5: vera integrazione /api/chat con mode='piano'.
+    // Chiamata da sendChatMessage (redirect dopo lock-check).
+    function pianoChatFase5(msg, today, btn) {
+      var sb = getSb();
+      if (!sb) {
+        appendMsg("bot", "Coach AI non disponibile (manca connessione Supabase).");
+        if (btn) btn.disabled = false;
+        return;
+      }
+      try {
+        sb.auth.getUser().then(function (r) {
+          var u2 = r && r.data && r.data.user;
+          if (!u2) return;
+          sb.from("events").insert({
+            event: "piano_chat_message", page: "tab-piano",
+            payload: { role: "user", text: msg, mode: "piano", ts: new Date().toISOString() }
+          }).then(function () {}, function () {});
+        });
+      } catch (e) {}
+      sb.auth.getSession().then(function (sessRes) {
+        var tk = sessRes && sessRes.data && sessRes.data.session && sessRes.data.session.access_token;
+        if (!tk) {
+          appendMsg("bot", "Sessione scaduta. Ricarica la pagina.");
+          if (btn) btn.disabled = false;
+          return null;
+        }
+        return fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + tk },
+          body: JSON.stringify({ mode: "piano", messages: [{ role: "user", content: msg }] })
+        });
+      }).then(function (r) {
+        if (!r) return null;
+        if (r.status === 429) {
+          return r.json().then(function (j) {
+            appendMsg("bot", (j && (j.details || j.error)) || "Limite raggiunto.");
+            try { localStorage.setItem("piano.chat.lockedUntil", today); } catch (e) {}
+            var inp = $("pianoChatInput"); if (inp) inp.disabled = true;
+            if (btn) btn.disabled = true;
+            return null;
+          });
+        }
+        if (!r.ok) {
+          appendMsg("bot", "Errore del coach AI (" + r.status + "). Riprova più tardi.");
+          return null;
+        }
+        return r.text().then(function (txt) {
+          var reply = txt;
+          try {
+            var parsed = JSON.parse(txt);
+            if (parsed && parsed.choices && parsed.choices[0] && parsed.choices[0].message) {
+              reply = parsed.choices[0].message.content || "(nessuna risposta)";
+            }
+          } catch (e) {}
+          appendMsg("bot", String(reply || "(nessuna risposta)").trim());
+        });
+      }).catch(function () {
+        appendMsg("bot", "Errore di rete. Riprova.");
+      }).finally(function () {
+        var inp2 = $("pianoChatInput");
+        if (btn && inp2 && !inp2.disabled) btn.disabled = false;
+      });
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+    else boot();
+  })();
+  </script>
+  </body>
 </html>

@@ -1,0 +1,12 @@
+﻿.concorso-ai/.claude structure setup report
+Generated: 2026-07-23 11:55:32
+============================================
+
+C:\Users\Ruman\Desktop\concorso-ai
++-- .claude/
+    +-- README.md        (pre-existing marker)
+    +-- setup-report.txt (this file)
+    +-- agents/          (wshobson) -
+1160 files in 833 directories
+    +-- sub-agents/      (lst97)    -
+55 files in 10 directories

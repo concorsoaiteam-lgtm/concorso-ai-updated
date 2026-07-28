@@ -32,7 +32,7 @@
     .section-eyebrow {
       letter-spacing: .28em;
       color: #0F4C81;
-      font-weight: 900;
+      font-weight: 700;
       font-size: .75rem;
       text-transform: uppercase;
     }
@@ -41,7 +41,7 @@
       background: rgba(255,255,255,.82);
       border: 1px solid rgba(214,232,255,.92);
       box-shadow: 0 8px 32px rgba(15,76,129,.06);
-      backdrop-filter: blur(18px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     }
 
     .card-hover {
@@ -115,11 +115,21 @@
       background: linear-gradient(90deg, transparent, rgba(15,76,129,.18), transparent);
     }
 
+    /* Glass-on-dark panel: usata dentro sezioni bg-brand-900.
+       Effetto frosted neutro — niente gradient, niente ombre nere.
+       position/padding/radius inclusi per togliere classi utility inline. */
     .premium-panel {
-      background: #FFFFFF;
-      border: 1px solid #D6E8FF;
-      box-shadow: 0 8px 32px rgba(15,76,129,.06);
+      position: relative;
+      border-radius: 1.5rem;
+      padding: 1.75rem 2rem;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 4px 16px rgba(15,76,129,.16);
     }
+    @media (min-width: 640px) {
+      .premium-panel { padding: 2rem 2rem; }
+    }
+    .premium-panel:hover { border-color: rgba(255,255,255,.22); transition: border-color .2s ease; }
 
     .faq-item {
       transition: border-color .2s ease, background .2s ease;
@@ -137,7 +147,7 @@
       border-radius: 999px;
       background: #EAF4FF;
       color: #0F4C81;
-      font-weight: 900;
+      font-weight: 700;
       line-height: 1;
       flex: 0 0 auto;
     }
@@ -152,7 +162,7 @@
       padding: .55rem .85rem;
       color: rgba(255,255,255,.92);
       font-size: .78rem;
-      font-weight: 800;
+      font-weight: 700;
     }
 
     .check-circle {
@@ -165,7 +175,7 @@
       background: #DCFCE7;
       color: #15803D;
       font-size: .78rem;
-      font-weight: 900;
+      font-weight: 700;
       flex: 0 0 auto;
     }
 

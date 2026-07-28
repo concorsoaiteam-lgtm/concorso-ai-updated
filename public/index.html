@@ -31,7 +31,8 @@
   <!-- Font: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.3/index.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.0.3/index.min.css" rel="stylesheet" />
 
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -73,7 +74,7 @@
       padding-bottom: max(12px, env(safe-area-inset-bottom));
       background: rgba(255,255,255,.96);
       border-top: 1px solid #D6E8FF;
-      backdrop-filter: blur(18px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 -8px 30px rgba(15,76,129,.10);
     }
     @media (max-width: 767px) {
@@ -139,6 +140,7 @@
     ]
   }
   </script>
+<script src="/js/telemetry.js"></script>
 </head>
 
 <body class="font-sans antialiased selection:bg-brand-200 selection:text-brand-900">
@@ -187,8 +189,7 @@
   <main id="main">
     <!-- HERO -->
     <section class="relative overflow-hidden pb-20 pt-14 sm:pb-28 sm:pt-20 lg:pb-32 lg:pt-24">
-      <div class="pointer-events-none absolute right-[-8rem] top-[-10rem] -z-10 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(224,231,255,.72)_0%,rgba(219,234,254,.42)_38%,transparent_72%)]"></div>
-      <div class="pointer-events-none absolute left-1/2 top-0 -z-10 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-brand-300/24 blur-3xl"></div>
+      <!-- decorazione permanente rimossa: ❌ particelle/blur decorativi persistenti (anti-slop) -->
 
       <div class="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
         <div class="reveal">
@@ -216,7 +217,7 @@
           </div>
 
           <p class="mt-4 text-sm font-bold leading-6 text-brand-600">
-            ✅ 3 simulazioni gratis · 10 minuti l'una · Nessuna carta · Disdici quando vuoi
+            3 simulazioni gratis · 10 minuti l'una · Nessuna carta · Disdici quando vuoi
           </p>
         </div>
 
@@ -231,7 +232,7 @@
                     <p class="text-sm font-black text-brand-900">Commissario AI</p>
                     <p class="mt-0.5 truncate text-[11px] font-semibold text-slate-500">Sessione 03 · Diritto Amministrativo</p>
                     <div class="mt-1 flex items-center gap-1.5 text-xs font-semibold text-brand-600">
-                      <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
                       <span>Simulazione in corso · 12:34</span>
                     </div>
                   </div>
@@ -413,8 +414,8 @@
         </div>
 
         <div class="mt-14 grid gap-6 lg:grid-cols-3">
-          <article class="reveal premium-panel relative rounded-3xl p-7 sm:p-8" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);box-shadow:0 8px 32px rgba(0,0,0,.18);">
-            <div class="step-number absolute right-6 top-4 text-7xl font-black text-white/10 sm:text-8xl">01</div>
+          <article class="reveal premium-panel">
+            <div class="absolute right-6 top-4 text-7xl font-black text-white/10 sm:text-8xl">01</div>
             <div class="relative">
               <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-white shadow-sm">
                 <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M8.5 13.5h7M8.5 17h4"/></svg>
@@ -425,8 +426,8 @@
             </div>
           </article>
 
-          <article class="reveal premium-panel relative rounded-3xl p-7 sm:p-8" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);box-shadow:0 8px 32px rgba(0,0,0,.18);transition-delay:90ms;">
-            <div class="step-number absolute right-6 top-4 text-7xl font-black text-white/10 sm:text-8xl">02</div>
+          <article class="reveal premium-panel" style="transition-delay:90ms;">
+            <div class="absolute right-6 top-4 text-7xl font-black text-white/10 sm:text-8xl">02</div>
             <div class="relative">
               <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-white shadow-sm">
                 <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm7-3a7 7 0 0 1-14 0"/></svg>
@@ -437,8 +438,8 @@
             </div>
           </article>
 
-          <article class="reveal premium-panel relative rounded-3xl p-7 sm:p-8" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);box-shadow:0 8px 32px rgba(0,0,0,.18);transition-delay:180ms;">
-            <div class="step-number absolute right-6 top-4 text-7xl font-black text-white/10 sm:text-8xl">03</div>
+          <article class="reveal premium-panel" style="transition-delay:180ms;">
+            <div class="absolute right-6 top-4 text-7xl font-black text-white/10 sm:text-8xl">03</div>
             <div class="relative">
               <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-white shadow-sm">
                 <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13h3l2-6 4 12 3-9 2 3h4"/></svg>

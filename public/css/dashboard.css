@@ -5,31 +5,72 @@
    ============================================================ */
 
 /* ---------- Design Tokens ---------- */
+/* ============================================================
+   CANONICAL DESIGN TOKENS — single source of truth.
+   All values match DESIGN.MD spec (luglio 2026).
+   Was: duplicated across inline <style> in dashboard.html (now removed).
+   ============================================================ */
 :root {
   color-scheme: light;
-  --bg: #F7FBFF;
-  --surface: #FFFFFF;
+
+  /* Surfaces & backgrounds */
+  --bg:                #F7FBFF;
+  --surface:           #FFFFFF;
   --surface-secondary: #F4F8FD;
-  --border: #DCE8F5;
-  --border-light: #EAF1F9;
-  --text: #0A1F38;
-  --text-secondary: #2D4A68;
-  --text-muted: #5C7593;
-  --accent: #0F4C81;
-  --accent-hover: #0B3A63;
+  --surface-raised:    #F0F6FF;
+
+  /* Borders */
+  --border:         #E2EEFF;
+  --border-light:   #EAF1F9;
+  --border-strong:  #C5D8F5;
+
+  /* Text */
+  --text:           #0A1628;
+  --text-primary:   #0A1628;
+  --text-secondary: #3D5A8A;
+  --text-muted:     #4A6FA5;
+  --text-disabled:  #B8CDE8;
+
+  /* Brand */
+  --brand:        #0F4C81;
+  --accent:       #2563EB;
+  --accent-hover: #1D4ED8;
   --accent-light: #EBF3FD;
-  --accent-ring: #2563EB;
-  --success: #15803D;
-  --success-light: #F0FDF4;
-  --warning: #B45309;
-  --warning-light: #FFFBEB;
-  --error: #B91C1C;
-  --error-light: #FEF2F2;
-  --streak-orange: #f97316;
-  --shadow-sm: 0 1px 2px rgba(10,31,56,.04);
-  --shadow-md: 0 4px 12px rgba(10,31,56,.06);
-  --radius: 12px;
-  --radius-lg: 16px;
+  --accent-ring:  #2563EB;
+
+  /* Status */
+  --success:        #16A34A;
+  --success-light:  #DCFCE7;
+  --success-muted:  #F0FDF4;
+  --warning:        #D97706;
+  --warning-light:  #FEF3C7;
+  --error:          #DC2626;
+  --error-light:    #FEE2E2;
+
+  /* Reward (gamification accent — milestones ONLY) */
+  --reward:         #F59E0B;
+  --reward-light:   rgba(245,158,11,0.10);
+  --reward-border:  rgba(245,158,11,0.25);
+
+  /* Streak */
+  --streak-orange:  #f97316;
+
+  /* Shadows — match DESIGN.MD livelli 1-4 */
+  --shadow-sm: 0 1px 3px rgba(15,76,129,0.06), 0 1px 2px rgba(15,76,129,0.04);
+  --shadow-md: 0 4px 16px rgba(15,76,129,0.10), 0 2px 6px rgba(15,76,129,0.06);
+  --sh-1: 0 1px 3px rgba(15,76,129,0.06), 0 1px 2px rgba(15,76,129,0.04);
+  --sh-2: 0 4px 16px rgba(15,76,129,0.10), 0 2px 6px rgba(15,76,129,0.06);
+  --sh-3: 0 8px 32px rgba(15,76,129,0.12), 0 2px 8px rgba(15,76,129,0.06);
+  --sh-4: 0 20px 60px rgba(15,76,129,0.16), 0 4px 16px rgba(15,76,129,0.08);
+
+  /* Radius — match DESIGN.MD */
+  --radius:     12px;
+  --radius-lg:  16px;
+  --r-btn:      10px;
+  --r-card:     16px;
+  --r-chip:      6px;
+  --r-icon-box: 12px;
+  --r-toast:    14px;
 }
 
 /* ---------- Reset & Base ---------- */
@@ -42,7 +83,7 @@ body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-family: 'Geist', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
   line-height: 1.5;
@@ -101,7 +142,7 @@ body {
 .container { max-width: 1080px; margin: 0 auto; padding: 0 28px 80px; }
 
 /* ---------- Typography ---------- */
-.text-accent { color: var(--accent); font-weight: 800; }
+.text-accent { color: var(--accent); font-weight: 700; }
 
 /* ---------- Buttons / CTA ---------- */
 .btn-primary {
@@ -110,7 +151,7 @@ body {
   padding: 12px 26px; border: none; border-radius: var(--radius); cursor: pointer;
   letter-spacing: -.01em;
   animation: ctaPulse 2.5s ease-in-out infinite;
-  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.25, 0, 0.15, 1), box-shadow 0.2s ease;
 }
 .btn-primary:hover {
   transform: scale(1.04) translateY(-2px); animation: none;
@@ -144,14 +185,17 @@ body {
 }
 
 /* ---------- Stats Row ---------- */
+/* FIX 6: clippa .stat-cell:hover translateY(-4px) — overflow visibile sblocca il lift.
+   Le 2 celle mantengono lo stesso aspetto del gap visivo via background del parent
+   (restano dentro al border-radius del parent grazie al grid-template). */
 .stats-row {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin-top: 38px;
   background: var(--border-light); border-radius: var(--radius-lg);
-  overflow: hidden; border: 1px solid var(--border-light);
+  overflow: visible; border: 1px solid var(--border-light);
 }
 .stat-cell {
   background: var(--surface); padding: 28px 24px;
-  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
+  transition: transform 0.25s cubic-bezier(0.25, 0, 0.15, 1), box-shadow 0.25s ease;
   cursor: default;
 }
 .stat-cell:hover {
@@ -164,14 +208,14 @@ body {
 .stat-cell-icon {
   display: flex; width: 36px; height: 36px; align-items: center; justify-content: center;
   border-radius: 8px; background: var(--accent-light); color: var(--accent-ring);
-  margin-bottom: 16px; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  margin-bottom: 16px; transition: transform 0.3s cubic-bezier(0.25, 0, 0.15, 1);
 }
 .stat-cell-label {
   font-size: .74rem; font-weight: 600; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px;
 }
 .stat-cell-value {
-  font-size: 2rem; font-weight: 800; color: var(--text);
+  font-size: 2rem; font-weight: 700; color: var(--text);
   letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums;
 }
 .stat-cell-empty { color: #9CA3AF; font-weight: 600; font-size: .9rem; }
@@ -219,7 +263,7 @@ body {
 /* ---------- Activity Items ---------- */
 .activity-item {
   display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 14px;
-  transition: background 0.15s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  transition: background 0.15s ease, transform 0.2s cubic-bezier(0.25, 0, 0.15, 1);
   cursor: default;
 }
 .activity-item:hover { background: rgba(234,244,255,0.7); transform: translateX(4px); }
@@ -234,7 +278,7 @@ body {
 }
 .activity-meta { font-size: .75rem; color: #6B7280; font-weight: 500; margin-top: 2px; }
 .activity-score {
-  font-weight: 800; font-size: 1.1rem; font-variant-numeric: tabular-nums;
+  font-weight: 700; font-size: 1.1rem; font-variant-numeric: tabular-nums;
   flex-shrink: 0; letter-spacing: -.03em;
 }
 
@@ -247,7 +291,11 @@ body {
   font-size: .84rem; font-weight: 600; color: var(--text-secondary);
 }
 .progress-track { height: 5px; background: var(--accent-light); border-radius: 999px; overflow: hidden; }
-.progress-fill { height: 100%; border-radius: 999px; transition: width .8s cubic-bezier(.2,.8,.2,1); }
+/* FIX 2: transform-driven fill. Baseline scaleX(1) (identity) keeps bars visible
+   even if JS still sets only el.style.width = 'X%' (no width-animation, but correct width).
+   For smooth entrance, JS should also set el.style.transform = 'scaleX(X/100)' so the
+   transition: transform animates from the current scaleX value. */
+.progress-fill { height: 100%; border-radius: 999px; transform: scaleX(1); transform-origin: left center; transition: transform .8s cubic-bezier(.2,.8,.2,1); }
 
 /* ---------- Empty State ---------- */
 .empty-state {
@@ -288,7 +336,7 @@ body {
 .count-chip {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 24px; height: 22px; padding: 0 8px; border-radius: 999px;
-  background: var(--accent-light); color: var(--accent-ring); font-size: .68rem; font-weight: 800;
+  background: var(--accent-light); color: var(--accent-ring); font-size: .68rem; font-weight: 700;
 }
 
 /* ---------- Upload Tabs ---------- */
@@ -334,7 +382,7 @@ body {
   min-height: 160px; width: 100%; resize: vertical; border: 1px solid var(--border);
   border-radius: var(--radius); padding: 14px; background: var(--surface);
   color: var(--text); font-size: .88rem; line-height: 1.65;
-  font-family: Inter, system-ui, sans-serif; outline: none; transition: border-color .15s ease;
+  font-family: 'Geist', system-ui, sans-serif; outline: none; transition: border-color .15s ease;
 }
 .upload-textarea:focus { border-color: var(--accent-ring); box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
 
@@ -352,7 +400,7 @@ body {
   border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 14px;
   background: var(--surface); color: var(--text-secondary); font-size: .82rem;
   font-weight: 600; text-align: left; cursor: pointer; font-family: inherit;
-  transition: all 0.18s cubic-bezier(0.34,1.56,0.64,1); position: relative; overflow: hidden;
+  transition: all 0.18s cubic-bezier(0.25, 0, 0.15, 1); position: relative; overflow: hidden;
 }
 .materia-toggle:hover { transform: translateY(-2px); border-color: var(--accent-ring); background: var(--accent-light); }
 .materia-toggle:active { transform: scale(0.95); }
@@ -382,10 +430,12 @@ body {
 .upload-progress-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .upload-progress-status, .upload-progress-percent { font-size: .74rem; font-weight: 600; color: var(--text-muted); }
 .upload-progress-bar { height: 4px; border-radius: 999px; background: var(--accent-light); overflow: hidden; }
+/* FIX 2: transform-driven fill. Baseline scaleX(1) keeps bar visible with JS-only-width. */
 .upload-progress-fill {
   height: 4px; border-radius: 4px;
   background: linear-gradient(90deg, #2563EB, #0F4C81);
-  transition: width 0.3s ease; position: relative; overflow: hidden;
+  transform: scaleX(1); transform-origin: left center;
+  transition: transform 0.3s ease; position: relative; overflow: hidden;
 }
 .upload-progress-fill::after {
   content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -436,17 +486,20 @@ body {
   border: 1px solid transparent; backdrop-filter: blur(8px);
   overflow: hidden;
 }
+/* FIX 5: inline element → keep border, trim shadow to ≤8px (was 32px). */
 .toast-success {
   background: rgba(240,253,244,0.95); border-color: rgba(74,222,128,0.3);
-  color: #15803d; box-shadow: 0 8px 32px rgba(74,222,128,0.15);
+  color: #15803d; box-shadow: 0 4px 8px rgba(74,222,128,0.12);
 }
+/* FIX 5: inline element → keep border, trim shadow to ≤8px (was 32px). */
 .toast-error {
   background: rgba(254,242,242,0.95); border-color: rgba(248,113,113,0.3);
-  color: #dc2626; box-shadow: 0 8px 32px rgba(248,113,113,0.15);
+  color: #dc2626; box-shadow: 0 4px 8px rgba(248,113,113,0.12);
 }
+/* FIX 5: inline element → keep border, trim shadow to ≤8px (was 32px). */
 .toast-warning {
   background: rgba(255,251,235,0.95); border-color: rgba(251,191,36,0.3);
-  color: #b45309; box-shadow: 0 8px 32px rgba(251,191,36,0.15);
+  color: #b45309; box-shadow: 0 4px 8px rgba(251,191,36,0.12);
 }
 .toast-success::before { content: '\2713'; font-weight: 900; font-size: 1rem; color: #16a34a; flex-shrink: 0; }
 .toast-error::before { content: '\2715'; font-weight: 900; font-size: 1rem; color: #dc2626; flex-shrink: 0; }
@@ -489,15 +542,15 @@ body {
   background: white; border: 1px solid rgba(37,99,235,0.15); border-radius: 20px;
   box-shadow: 0 24px 70px rgba(15,76,129,.18), 0 0 0 1px rgba(37,99,235,.08);
   padding: 24px; pointer-events: auto; cursor: pointer;
-  animation: tooltipIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+  animation: tooltipIn 0.3s cubic-bezier(0.25, 0, 0.15, 1) both;
 }
 .coach-tooltip-title { font-size: .94rem; font-weight: 750; color: var(--text); }
 .coach-tooltip-text { margin-top: 6px; font-size: .84rem; color: var(--text-secondary); line-height: 1.55; font-weight: 450; }
 .coach-tooltip-cta {
   margin-top: 16px; display: flex; align-items: center; justify-content: center;
   background: #0F4C81; color: white; border: none; border-radius: 12px;
-  padding: 12px 24px; font-weight: 800; font-size: 0.875rem; cursor: pointer; width: 100%;
-  transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  padding: 12px 24px; font-weight: 700; font-size: 0.875rem; cursor: pointer; width: 100%;
+  transition: all 0.2s cubic-bezier(0.25, 0, 0.15, 1);
 }
 .coach-tooltip-cta:hover { background: #2563EB; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37,99,235,0.3); }
 .coach-dots { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 97; display: flex; gap: 6px; pointer-events: none; }
@@ -532,10 +585,1116 @@ body { scrollbar-width: thin; scrollbar-color: rgba(10,31,56,.12) transparent; }
 }
 
 /* ---------- Reduced Motion ---------- */
+/* ============================================================
+   prefers-reduced-motion — enforce per DESIGN.MD section ANIMAZIONI.
+   Disabilita SOLO le animazioni decorative (loop, shimmer, draw).
+   Mantieni le transitions di stato (hover, focus, color change) per
+   accessibilità — l'utente reduced-motion deve comunque percepire
+   il feedback delle sue azioni.
+   ============================================================ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    animation-duration: .001ms !important;
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
   }
+  /* Shimmer posizioni: hard-stop invece di animare. */
+  .skeleton,
+  .upload-progress-fill { background-position: 0 0 !important; }
+  /* CTAs CTA-pulse e gauge-breathing: kill animation ma mantieni transform rispettato. */
+  .ctaPulse-animation,
+  .gauge-alive { animation: none !important; }
 }
+
+/* ============================================================
+   TAB 2 — PROGRESSI: Gauge + Streak + Accordion "Aree"
+   Aggiunto per completare il design system v4.
+   Stack: vanilla JS + CSS transitions (no GSAP).
+   ============================================================ */
+
+/* ---------- Header TAB 2 ---------- */
+.progressi-subtitle {
+  font-size: .95rem; font-weight: 500; color: var(--text-muted);
+  margin: 4px 0 24px; line-height: 1.55;
+}
+
+.progressi-top {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px;
+}
+
+/* ---------- Gauge SVG ---------- */
+.gauge-cell {
+  display: flex; justify-content: center; align-items: center;
+  padding: 16px 0; cursor: pointer;
+}
+.gauge-cell:focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 6px; border-radius: var(--radius-lg); }
+
+.gauge-wrap { position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; }
+.gauge-svg { width: 140px; height: 140px; transform: rotate(-90deg); }
+.gauge-bg { fill: none; stroke: var(--border); stroke-width: 10; }
+.gauge-fill {
+  fill: none; stroke-width: 10; stroke-linecap: round;
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease;
+  /* Hook per entrance: il JS setta stroke-dashoffset; il transform pulisce glitch */
+}
+.gauge-outer-arc {
+  fill: none; stroke: var(--accent-ring); stroke-width: 2;
+  stroke-dasharray: 314.159; opacity: 0.18;
+  animation: gaugeOuterSpin 12s linear infinite;
+}
+@keyframes gaugeOuterSpin { from { stroke-dashoffset: 314.159; } to { stroke-dashoffset: 0; } }
+
+.gauge-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.gauge-val {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 38px; font-weight: 700; letter-spacing: -0.03em;
+  color: var(--text); line-height: 1; font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease;
+}
+.gauge-band {
+  font-family: 'Geist', sans-serif;
+  font-size: 12px; font-weight: 600; margin-top: 6px; letter-spacing: 0.02em;
+  transition: color 0.3s ease;
+}
+.gauge-label { margin-top: 14px; font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; text-align: center; }
+.gauge-trend { margin-top: 4px; font-size: 13px; color: var(--text-muted); text-align: center; }
+
+.gauge-color-error   { stroke: var(--error); }
+.gauge-color-warning { stroke: var(--warning); }
+.gauge-color-success { stroke: var(--success); }
+.gauge-color-empty   { stroke: #9CA3AF; }
+
+@keyframes gaugeBreathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.015); }
+}
+.gauge-wrap.gauge-alive {
+  animation: gaugeBreathe 2.8s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* ---------- Streak ---------- */
+.streak-card {
+  background: var(--surface); border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg); padding: 26px 22px;
+  box-shadow: var(--shadow-sm);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+.streak-card.legend {
+  background: linear-gradient(160deg, #F5F3FF 0%, #FFFFFF 50%);
+  border-color: rgba(124, 58, 237, 0.20);
+}
+
+.streak-fire-wrap {
+  width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+}
+.streak-flame {
+  width: 48px; height: 48px;
+  display: block;
+  margin: 0 auto 8px;
+  transition: color 0.3s ease,
+              filter 0.3s ease;
+}
+.streak-flame.active {
+  animation: flameWave 1.8s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+@keyframes flameWave {
+  0%, 100% { transform: scaleY(1) rotate(-2deg); }
+  33%      { transform: scaleY(1.08) rotate(2deg); }
+  66%      { transform: scaleY(0.95) rotate(-1deg); }
+}
+
+.streak-unit  { font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-top: 10px; }
+.streak-value {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 64px; font-weight: 700; letter-spacing: -0.04em; line-height: 1;
+  font-variant-numeric: tabular-nums; transition: color 0.3s ease;
+}
+.streak-record { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-top: 4px; }
+
+.streak-color-gray   { color: #9CA3AF; }
+.streak-color-orange { color: var(--streak-orange); }
+.streak-color-red    { color: var(--error); }
+.streak-color-violet {
+  color: #7C3AED;
+  filter: drop-shadow(0 0 8px rgba(124, 58, 237, 0.5));
+}
+
+.streak-week {
+  display: flex; gap: 6px; margin-top: 14px; align-items: center;
+}
+.streak-day-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.streak-day-dot.on {
+  background: currentColor; border-color: transparent;
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.45);
+}
+.streak-card.legend .streak-day-dot.on { box-shadow: 0 0 8px rgba(124, 58, 237, 0.55); }
+
+/* FIX 2 — color inheritance per i pallini della settimana */
+.streak-card { color: inherit; }
+.streak-week .streak-day-dot.on {
+  color: var(--accent);
+  background: currentColor;
+}
+
+/* ---------- Accordion Aree ---------- */
+.aree-card {
+  background: var(--surface); border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg); padding: 22px;
+  box-shadow: var(--shadow-sm); margin-bottom: 18px;
+}
+.aree-toggle {
+  display: flex; justify-content: space-between; align-items: center;
+  width: 100%; padding: 0; border: none; background: transparent;
+  cursor: pointer; gap: 12px;
+  font-family: inherit; color: inherit;
+}
+.aree-toggle-l { text-align: left; flex: 1; }
+.aree-chevron {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  transition: transform 0.25s ease, color 0.2s ease, background 0.2s ease;
+}
+.aree-card.is-open .aree-chevron {
+  transform: rotate(180deg); color: var(--accent-ring);
+}
+
+/* Apertura fluida illimitata via grid (no max-height hardcoded) */
+.aree-body {
+  display: grid; grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.25s ease,
+              margin-top 0.28s ease;
+  margin-top: 0;
+}
+.aree-body > div { min-height: 0; overflow: hidden; }
+.aree-card.is-open .aree-body {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-top: 16px;
+}
+
+.aree-row { margin-bottom: 16px; }
+.aree-row:last-child { margin-bottom: 0; }
+.aree-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.aree-name { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+.aree-val {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.aree-val.color-error   { color: var(--error); }
+.aree-val.color-warning { color: var(--warning); }
+.aree-val.color-success { color: var(--success); }
+
+.aree-track {
+  height: 6px; border-radius: 3px; background: var(--border-light); overflow: hidden;
+}
+/* FIX 2: transform-driven fill. Baseline width: 0 (empty default) + scaleX(1)
+   (identity) → JS setters to el.style.width = 'X%' still render correctly. */
+.aree-fill {
+  height: 100%; border-radius: 3px; width: 0;
+  background: linear-gradient(90deg, var(--error), var(--warning), var(--success));
+  background-size: 1080px 6px;
+  transform: scaleX(1); transform-origin: left center;
+  /* Rispetta prefers-reduced-motion (impostato a .001ms dal reduced-motion block sopra) */
+  transition: transform 0.8s cubic-bezier(0.25, 0, 0.15, 1);
+}
+.aree-fill.is-weak { animation: weakPulse 2s ease-in-out infinite; }
+@keyframes weakPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+
+/* ---------- Trend ---------- */
+.trend-card {
+  background: var(--surface); border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg); padding: 24px;
+  box-shadow: var(--shadow-sm); margin-bottom: 18px;
+}
+.trend-canvas { position: relative; height: 160px; margin-top: 8px; }
+.trend-canvas svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.trend-line { fill: none; stroke: var(--accent-ring); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.trend-dot  { fill: var(--surface); stroke: var(--accent-ring); stroke-width: 2; cursor: pointer; }
+.trend-empty {
+  display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: var(--radius-lg);
+  background: linear-gradient(120deg, var(--surface-secondary), var(--surface));
+  border: 1px dashed var(--border);
+}
+.trend-empty-icon {
+  width: 40px; height: 40px; border-radius: 10px; background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent-ring); flex-shrink: 0; box-shadow: var(--shadow-sm);
+}
+.trend-empty-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.trend-empty-sub   { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+/* ---------- Responsive TAB 2 ---------- */
+@media (max-width: 900px) {
+  .progressi-top { grid-template-columns: 1fr; }
+  .gauge-val { font-size: 32px; }
+  .streak-value { font-size: 56px; }
+}
+@media (max-width: 640px) {
+  .streak-value { font-size: 48px; }
+  .gauge-val { font-size: 28px; }
+  .gauge-wrap { width: 100px; height: 100px; }
+  .gauge-svg { width: 100px; height: 100px; }
+  .aree-card { padding: 18px; }
+}
+
+/* ============================================================
+   TAB 1 — START CONFIG (Difficoltà + Durata)
+   Toggle group pre-lancio simulazione.
+   Vanilla CSS, niente librerie. Default selezionato via .active.
+   ============================================================ */
+.opt-section {
+  margin: 18px 0 0;
+}
+.opt-section:first-of-type {
+  margin-top: 22px;
+}
+.opt-label {
+  display: block;
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+.opt-toggle-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.opt-toggle {
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 10px 20px;
+  border-radius: 10px;
+  background: #FFFFFF;
+  border: 1px solid #E2EEFF;
+  color: #3D5A8A;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+.opt-toggle:hover:not(.active):not(:disabled) {
+  background: #F4F8FE;
+  border-color: #B8CFEA;
+}
+.opt-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+.opt-toggle.active,
+.opt-toggle[aria-checked="true"] {
+  background: #EAF4FF;
+  border: 1.5px solid #2563EB;
+  color: #0F4C81;
+}
+.opt-toggle:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.opt-toggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+  .opt-toggle-group { gap: 6px; }
+  .opt-toggle { padding: 9px 14px; font-size: 13px; }
+}
+
+/* ============================================================
+   BUTTON STATES — 4 stati asincroni (idle / loading / success / error)
+   Vanilla CSS, no GSAP. Icone iniettate da setButtonState(btn, state).
+   ============================================================ */
+.btn-spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  flex-shrink: 0;
+  vertical-align: -2px;
+  animation: btnSpin 0.8s linear infinite;
+}
+@keyframes btnSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.btn-icon { display: inline-block; flex-shrink: 0; vertical-align: -2px; }
+
+.btn-loading {
+  opacity: 0.85;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn-success {
+  background: #16A34A !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border-color: #16A34A !important;
+  cursor: default;
+}
+.btn-success:hover { filter: none; }
+.btn-error {
+  background: #DC2626 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border-color: #DC2626 !important;
+  cursor: pointer;
+}
+.btn-error:hover { filter: brightness(0.95); }
+
+/* Smooth transition tra stati */
+.btn-cta,
+.btn-primary,
+.btn-secondary {
+  transition:
+    background 0.22s ease,
+    background-image 0.22s ease,
+    color 0.22s ease,
+    border-color 0.22s ease,
+    opacity 0.2s ease,
+    transform 0.15s ease;
+}
+
+/* ============================================
+   TIMESTAMP & LIVE STATUS — "aggiornato X fa" + green dot
+   ============================================ */
+.timestamp-relative {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: default;
+  border-bottom: 1px dashed var(--border-light);
+  padding-bottom: 1px;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+}
+.timestamp-relative:hover { color: var(--text-secondary); }
+
+.live-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.live-indicator.hidden { display: none !important; }
+.live-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16A34A;
+  margin-right: 6px;
+  animation: livePulse 4s ease-in-out infinite;
+}
+.live-dot.faded {
+  opacity: 0.4;
+  animation: none;
+}
+@keyframes livePulse {
+  0%, 80%, 100% { transform: scale(1);   opacity: 1; }
+  90%           { transform: scale(1.6); opacity: 0.4; }
+}
+
+/* ============================================
+   RECENT SIMULATIONS CARD — TAB 2 pannello cronologia
+   ============================================ */
+.recent-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  box-shadow: var(--shadow-sm);
+  margin-top: 18px;
+}
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.recent-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-light);
+  background: var(--surface);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.recent-item:hover {
+  transform: translateY(-1px);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.recent-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+.recent-item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.recent-item-score {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.recent-item-score .score-suffix {
+  opacity: 0.5;
+  font-weight: 500;
+  font-size: 10px;
+  margin-left: 2px;
+}
+.recent-item-score.color-success { color: var(--success); }
+.recent-item-score.color-warning { color: var(--warning); }
+.recent-item-score.color-error   { color: var(--error); }
+
+.recent-empty {
+  text-align: center;
+  padding: 24px 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.recent-empty-title {
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   PRO PAYWALL CARD — usata da TAB 2 (Il tuo piano) quando
+   body[data-user-tier="free"]. Lucchetto SVG outline 1.5 stroke,
+   label "Funzionalità Pro", bottone "Passa a Pro".
+   Niente caroselli, niente comparazioni. PAYWALL SEMPLICE.
+   ============================================================ */
+.paywall-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 56px 32px;
+  text-align: center;
+  display: none; /* hidden by default; toggle via data-user-tier */
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  max-width: 480px;
+  margin: 48px auto;
+  box-shadow: var(--shadow-sm);
+}
+/* FIX 3: paywall header è una riga icon + title (no stack verticale). */
+.paywall-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.paywall-icon {
+  width: 64px; height: 64px;
+  border-radius: var(--r-icon-box);
+  background: var(--accent-light);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.paywall-title {
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  margin: 0;
+}
+.paywall-text {
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  max-width: 340px;
+  line-height: 1.55;
+  margin: 0;
+}
+.paywall-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 24px;
+  height: 44px;
+  margin-top: 8px;
+  border-radius: var(--r-btn);
+  background: var(--accent);
+  color: var(--surface);
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+.paywall-cta:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 6px 18px rgba(37,99,235,0.25);
+}
+.paywall-cta:active { transform: scale(0.97); }
+.paywall-cta:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 3px;
+}
+
+/* ============================================================
+   PRO BADGE — piccolo ribbon accanto al tab "Il tuo piano".
+   Default filled navy. Variant amber per free user (seganla "what's Pro").
+   ============================================================ */
+.pro-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--surface);
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-left: 6px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+.pro-badge.pro-badge-amber {
+  background: var(--reward);
+  color: #FFFFFF;
+}
+
+/* ============================================================
+   PRO GATING — single source of truth per tier-based visibility.
+   JS imposta body[data-user-tier="free"|"pro"] una volta per sessione.
+   Default: paywall hidden, Pro features visible (dev mode safe).
+   ============================================================ */
+body[data-user-tier="free"] .pro-locked { display: none !important; }
+body[data-user-tier="free"] .paywall-card { display: flex !important; }
+body[data-user-tier="pro"]  .pro-locked { display: block !important; }
+body[data-user-tier="pro"]  .paywall-card { display: none !important; }
+
+/* ============================================================
+   TOAST — primitive riusabile (canonical, overriding inline dup).
+   Pure CSS: opacity/transform translateX entrance 0.28s spring-fn.
+   States: .toast-success / .toast-error / .toast-info / .toast-warning.
+   ============================================================ */
+.toast { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+
+/* ============================================================
+   SKELETON — già brand-tinted (#EAF4FF → #D6E8FF). Niente #E5E7EB.
+   Forme per layout: .skeleton-number / .skeleton-title / .skeleton-meta /
+   .skeleton-avatar / .skeleton-bar.
+   ============================================================ */
+
+/* ============================================================
+   TUTORIAL 3-STEP FIRST ACCESS — Fase 2.
+   Triggered by fase 2 IIFE. Hide se localStorage flag OR DB count>0.
+   ============================================================ */
+.tutorial-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(10,31,56,.4);
+  pointer-events: auto;
+}
+.tutorial-overlay.hidden { display: none !important; }
+.tutorial-highlight {
+  position: fixed;
+  border-radius: 14px;
+  box-shadow: 0 0 0 4px rgba(37,99,235,.6), 0 0 0 8px rgba(37,99,235,.2), 0 0 40px rgba(37,99,235,.4);
+  pointer-events: none;
+  transition: all .35s cubic-bezier(.4,0,.2,1);
+  z-index: 201;
+}
+/* FIX 5: important card → keep shadow, drop border (was 1px border + 60px shadow). */
+.tutorial-tooltip {
+  position: fixed; z-index: 202;
+  width: 320px; max-width: calc(100vw - 32px);
+  background: var(--surface);
+  border: none;
+  border-radius: 14px;
+  padding: 18px 18px 14px;
+  box-shadow: 0 24px 60px rgba(15,76,129,.18), 0 4px 16px rgba(15,76,129,.10);
+  transition: top .32s cubic-bezier(.4,0,.2,1), left .32s cubic-bezier(.4,0,.2,1), opacity .25s;
+}
+.tutorial-tooltip-title {
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 15px; font-weight: 700; letter-spacing: -0.01em;
+  color: var(--text);
+}
+.tutorial-tooltip-text {
+  margin-top: 6px;
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 13px; font-weight: 450; line-height: 1.55;
+  color: var(--text-secondary);
+}
+.tutorial-tooltip-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-top: 16px;
+}
+.tutorial-progress-text {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+}
+.tutorial-dots { display: flex; gap: 5px; }
+.tutorial-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--border);
+  transition: background .2s ease, transform .2s ease;
+}
+.tutorial-dot.active {
+  background: var(--accent);
+  transform: scale(1.3);
+}
+.tutorial-next {
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 13px; font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--surface);
+  border: none; cursor: pointer;
+  transition: background .15s ease, transform .1s ease;
+}
+.tutorial-next:hover { background: var(--accent-hover); }
+.tutorial-next:active { transform: scale(.97); }
+.tutorial-skip {
+  position: fixed; top: 24px; right: 24px; z-index: 203;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.4);
+  background: rgba(255,255,255,.95);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 13px; font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(15,76,129,.15);
+  transition: background .15s ease, border-color .15s ease;
+}
+.tutorial-skip:hover {
+  background: var(--surface);
+  border-color: var(--accent-ring);
+}
+
+/* ============================================================
+   TAB 2 — IL TUO PIANO (Calendario + Chat AI) — Fase 4.
+   Vanilla CSS, niente Tailwind. Token da :root.
+   Honora prefers-reduced-motion (nessun movimento decorativo).
+   ============================================================ */
+
+/* ---------- Banner adattivo ---------- */
+.piano-banner {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; margin: 12px 0 20px;
+  background: linear-gradient(90deg, rgba(15,76,129,0.04), rgba(37,99,235,0.06));
+  border: 1px solid var(--border); border-radius: 12px;
+  font-size: 13px; color: var(--text-secondary);
+}
+.piano-banner-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.15);
+}
+.piano-banner-text { flex: 1; }
+.piano-banner-dismiss {
+  flex-shrink: 0; background: transparent; border: none; padding: 4px;
+  border-radius: 6px; color: var(--text-muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.piano-banner-dismiss:hover { background: var(--surface-raised); color: var(--text-primary); }
+
+/* ---------- No-bando ---------- */
+.piano-no-bando {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 12px; padding: 48px 28px; max-width: 480px; margin: 24px auto;
+  background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--r-card);
+}
+/* FIX 3: no-bando header è una riga icon + title. */
+.piano-no-bando-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.piano-no-bando-icon {
+  width: 56px; height: 56px; border-radius: var(--r-icon-box);
+  background: var(--accent-light); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+}
+.piano-no-bando-title {
+  font-family: 'Geist', sans-serif; font-size: 18px; font-weight: 600;
+  letter-spacing: -0.02em; color: var(--text-primary); margin: 0;
+}
+.piano-no-bando-text { font-size: 14px; color: var(--text-muted); margin: 0; line-height: 1.55; max-width: 36ch; }
+
+/* ---------- Onboarding 3-step ---------- */
+.piano-onboarding {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card);
+  padding: 26px; box-shadow: var(--sh-1); margin-top: 16px;
+}
+.piano-onboarding-head { margin-bottom: 20px; }
+.piano-onboarding-tag {
+  display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  color: var(--accent); text-transform: uppercase; margin-bottom: 8px;
+}
+.piano-onboarding-greeting {
+  font-family: 'Geist', sans-serif; font-size: 18px; font-weight: 600;
+  letter-spacing: -0.01em; color: var(--text-primary); margin: 0 0 6px;
+}
+.piano-onboarding-prompt { font-size: 14px; color: var(--text-secondary); line-height: 1.55; margin: 0; }
+.piano-steps { display: flex; flex-direction: column; gap: 18px; margin-bottom: 22px; }
+.piano-step { display: flex; flex-direction: column; gap: 8px; }
+.piano-step-label {
+  font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 600;
+  color: var(--text-secondary); letter-spacing: -0.01em;
+}
+.piano-input, .piano-textarea {
+  width: 100%; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--surface);
+  font-family: inherit; font-size: 14px; color: var(--text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.piano-textarea { min-height: 80px; resize: vertical; }
+.piano-input:focus, .piano-textarea:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
+}
+.piano-toggle-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.piano-toggle {
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  padding: 9px 16px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-secondary); cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s;
+}
+.piano-toggle:hover:not(.active) { background: var(--surface-raised); border-color: var(--border-strong); }
+.piano-toggle.active {
+  background: var(--accent-light); border: 1.5px solid var(--accent);
+  color: var(--brand); font-weight: 600;
+}
+.piano-onboarding-actions { display: flex; justify-content: flex-end; }
+
+/* ---------- Calendario attivo ---------- */
+.piano-active { margin-top: 16px; }
+.piano-week-nav {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+}
+.piano-week-btn {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary); cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.piano-week-btn:hover { background: var(--surface-raised); border-color: var(--border-strong); color: var(--text-primary); }
+.piano-week-today {
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  padding: 0 14px; height: 32px; border-radius: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-primary); cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.piano-week-today:hover { background: var(--surface-raised); border-color: var(--border-strong); }
+.piano-week-range {
+  margin-left: auto; font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums;
+}
+.piano-week-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+  margin-bottom: 16px;
+}
+.piano-day {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-card); padding: 12px 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; font-family: inherit; text-align: center;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  --day-color: #7B93B8;
+}
+.piano-day:hover { background: var(--surface-raised); border-color: var(--border-strong); }
+.piano-day.is-today {
+  border: 1.5px solid var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
+}
+.piano-day.is-done { background: var(--success-muted); border-color: rgba(22,163,74,0.20); }
+.piano-day.is-rest { background: var(--surface-secondary); }
+.piano-day.is-skipped { background: rgba(220,38,38,0.04); border-color: rgba(220,38,38,0.20); }
+.piano-day-name {
+  font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; font-weight: 600;
+  color: var(--text-muted); letter-spacing: 0.04em;
+}
+.piano-day-num {
+  font-family: 'Geist Mono', ui-monospace, monospace; font-size: 18px; font-weight: 700;
+  color: var(--text-primary); font-variant-numeric: tabular-nums;
+}
+.piano-day-icon {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--day-color); flex-shrink: 0;
+}
+.piano-day.is-rest .piano-day-icon { background: transparent; border: 1.5px solid var(--day-color); }
+.piano-day-meta {
+  font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500;
+  color: var(--text-muted); font-variant-numeric: tabular-nums;
+}
+.piano-day-detail {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-card); padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 6px;
+  box-shadow: var(--sh-1);
+  min-height: 84px;
+}
+.piano-day-detail-date {
+  font-size: 14px; font-weight: 600; color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+.piano-day-detail-materia {
+  font-size: 13px; color: var(--text-secondary); margin-top: 2px;
+}
+.piano-day-detail-focus {
+  font-size: 13px; color: var(--text-secondary); line-height: 1.5;
+}
+.piano-day-detail-dur {
+  display: inline-block; padding: 2px 8px; border-radius: 6px;
+  background: var(--surface-raised); border: 1px solid var(--border);
+  font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 600;
+  color: var(--text-secondary); margin-top: 6px;
+}
+.piano-day-detail-msg {
+  font-size: 13px; color: var(--text-secondary); margin-top: 6px; line-height: 1.6;
+}
+.piano-day-detail-msg b { color: var(--text-primary); font-family: 'Geist Mono', ui-monospace, monospace; }
+.piano-day-detail-actions {
+  display: flex; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap;
+}
+
+/* ---------- Chat AI ---------- */
+.piano-chat {
+  margin-top: 28px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-card);
+  box-shadow: var(--sh-1); overflow: hidden;
+  display: flex; flex-direction: column;
+  max-height: 480px;
+}
+.piano-chat-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  background: var(--surface-raised);
+}
+.piano-chat-eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  color: var(--accent); text-transform: uppercase;
+}
+.piano-chat-status {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 500; color: var(--text-muted);
+}
+.piano-chat-status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--success); box-shadow: 0 0 0 3px rgba(22,163,74,0.20);
+}
+.piano-chat-history {
+  flex: 1; padding: 18px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 12px;
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-secondary) 100%);
+}
+.piano-msg {
+  display: flex; gap: 10px; align-items: flex-start;
+  animation: pianoMsgFadeIn 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes pianoMsgFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.piano-msg-user { flex-direction: row-reverse; }
+.piano-msg-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand), var(--accent));
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; font-weight: 700;
+  flex-shrink: 0;
+}
+.piano-msg-user .piano-msg-avatar {
+  background: var(--surface); color: var(--text-secondary);
+  border: 1px solid var(--border-strong);
+}
+.piano-msg-bubble {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 10px 14px;
+  font-size: 14px; line-height: 1.55; color: var(--text-primary);
+  max-width: 320px; white-space: pre-wrap;
+}
+.piano-msg-user .piano-msg-bubble {
+  background: linear-gradient(135deg, var(--brand), var(--accent));
+  color: #fff; border-color: transparent;
+}
+.piano-chat-form {
+  display: flex; gap: 8px; padding: 12px;
+  border-top: 1px solid var(--border); background: var(--surface);
+}
+.piano-chat-input {
+  flex: 1; padding: 10px 14px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--surface);
+  font-family: inherit; font-size: 14px; color: var(--text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.piano-chat-input:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
+}
+.piano-chat-input:disabled { opacity: 0.5; cursor: not-allowed; }
+.piano-chat-send {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--accent); color: #fff;
+  border: none; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: background 0.15s ease, transform 0.1s;
+}
+.piano-chat-send:hover:not(:disabled) { background: var(--accent-hover); }
+.piano-chat-send:active { transform: scale(0.96); }
+.piano-chat-send:disabled { background: var(--text-disabled); cursor: not-allowed; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  .piano-week-grid { grid-template-columns: repeat(4, 1fr); }
+  .piano-day-detail-date { font-size: 13px; }
+  .piano-msg-bubble { max-width: 220px; }
+  .piano-chat { max-height: 360px; }
+  .piano-week-range { font-size: 11px; }
+}
+@media (max-width: 480px) {
+  .piano-week-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .piano-msg { animation: none !important; }
+}
+
+/* ============================================================
+   STATUS CHIP ICON — Fase 2 polish.
+   .bando-chip aggiunge un'icona SVG prefix via CSS mask-image.
+   Nessun emoji. Outline 1.5-style coerente al design system.
+   ============a==================================================== */
+.bando-chip {
+  position: relative;
+  padding-left: 22px !important;
+}
+.bando-chip::before {
+  content: '';
+  position: absolute;
+  left: 7px; top: 50%;
+  transform: translateY(-50%);
+  width: 11px; height: 11px;
+  background-color: currentColor;
+  -webkit-mask-position: center;          mask-position: center;
+  -webkit-mask-repeat:   no-repeat;      mask-repeat:   no-repeat;
+  -webkit-mask-size:     contain;        mask-size:     contain;
+}
+.chip-ready::before {
+  -webkit-mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+}
+.chip-attesa::before {
+  -webkit-mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpolyline points='12 7 12 12 16 14'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpolyline points='12 7 12 12 16 14'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   TREND CHART — Fase 3 primitives.
+   Trend SVG curva Bezier, tooltip su dots, area fill gradient.
+   ============================================================ */
+.trend-area-fill { fill: #2563EB; opacity: 0.10; }
+.trend-line {
+  fill: none;
+  stroke: var(--accent-ring);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.trend-dot {
+  fill: var(--surface);
+  stroke: var(--accent-ring);
+  stroke-width: 2;
+  cursor: pointer;
+  transition: r 0.18s ease, filter 0.18s ease;
+}
+.trend-dot:hover, .trend-dot:focus { r: 5; filter: drop-shadow(0 0 4px rgba(37,99,235,.5)); outline: none; }
+.trend-tooltip {
+  position: fixed; z-index: 150;
+  transform: translate(-50%, calc(-100% - 6px));
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 11px; font-weight: 600;
+  color: var(--text-secondary);
+  box-shadow: 0 4px 14px rgba(15,76,129,.10);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, calc(-100% - 2px));
+  transition: opacity .15s ease, transform .15s ease;
+}
+.trend-tooltip.visible {
+  opacity: 1;
+  transform: translate(-50%, calc(-100% - 10px));
+}
+.trend-note {
+  font-size: 13px; font-weight: 500; color: var(--text-muted);
+  margin-top: 14px; padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+  font-family: 'Geist', system-ui, sans-serif;
+}
+.trend-note b {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+

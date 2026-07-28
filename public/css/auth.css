@@ -35,7 +35,7 @@
       background: rgba(255,255,255,.88);
       border: 1px solid rgba(214,232,255,.95);
       box-shadow: 0 8px 32px rgba(15,76,129,.08);
-      backdrop-filter: blur(18px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     }
 
     @keyframes cardIn {
@@ -93,7 +93,7 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .toast { position:fixed; bottom:24px; right:24px; z-index:100; padding:12px 18px; border-radius:14px; font-size:.875rem; font-weight:800; backdrop-filter:blur(12px); background:rgba(255,255,255,.92); box-shadow:0 8px 32px rgba(15,76,129,.12); }
+    .toast { position:fixed; bottom:24px; right:24px; z-index:100; padding:12px 18px; border-radius:14px; font-size:.875rem;font-weight: 700; backdrop-filter:blur(12px); background:rgba(255,255,255,.92); box-shadow:0 8px 32px rgba(15,76,129,.12); }
     .toast-success { color:#16A34A; border:1px solid rgba(22,163,74,.22); }
     .toast-info { color:#0F4C81; border:1px solid rgba(214,232,255,.95); }
 

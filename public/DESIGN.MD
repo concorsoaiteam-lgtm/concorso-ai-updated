@@ -838,3 +838,27 @@ Solo il placeholder.
 ❌ NON mostrare sezioni vuote senza messaggio
 ❌ NON partire automaticamente dopo elaborazione
 ❌ NON badge ridondanti (bordo già basta)
+
+---
+
+# AGGIORNAMENTO STRUTTURA (Luglio 2026)
+
+Tab sono 4 non 3:
+1. **Prepara** — upload, bando, configurazione, lancio.
+2. **Il tuo piano** — Pro-gated da v1. Free = paywall.
+3. **Progressi** — gauge, streak, aree, trend, ultime simulazioni.
+4. **Classifica** — placeholder con waitlist email.
+
+Gauge canonico: **140px desktop, 100px mobile**.
+(Nessun'altra misura è accettata.)
+
+Paywall Free → Pro ("Il tuo piano"):
+- Icona lucchetto (Heroicons outline)
+- Testo "Funzionalità Pro"
+- Bottone "Passa a Pro"
+- Nient'altro. Niente carosello, niente comparazione tabella.
+
+Spec canonica di riferimento per dettagli:
+**DASHBOARD-DESIGN.md** (ha la precedenza su questo file in caso di divergenza).
+
+Decisioni concordate con l'utente il 23 luglio 2026.

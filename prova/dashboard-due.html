@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mission Control — ConcorsoAI</title>
+<meta name="description" content="Cruscotto tecnico di preparazione al concorso pubblico." />
+<meta name="theme-color" content="#0A0F1C" />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+/* ============================================================
+   MISSION CONTROL — Variant B
+   Principi: data-density, feedback loops immediati,
+   visual hierarchy algoritmica, spring/spring entrance,
+   monospace-quasi-everywhere, holographic borders.
+   Tema: dark-graphite + electric blue + neon cyan + alert orange
+   ============================================================ */
+
+:root {
+  /* Surface stack */
+  --bg-0:    #0A0F1C;         /* base graphite, sfondo pagina */
+  --bg-1:    #111827;         /* pannello principale */
+  --bg-2:    #1A2233;         /* pannello nested */
+  --bg-3:    #232E42;         /* hover base */
+  --border:  rgba(255, 255, 255, 0.06);
+  --border-2:rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.18);
+
+  /* Text */
+  --text:    #F1F5FA;
+  --text-2:  #C5CFDC;
+  --text-mute: #7D8BA1;
+  --text-dim:  #4A5670;
+
+  /* Brand signals */
+  --blue:    #3B82F6;
+  --blue-2:  #60A5FA;
+  --cyan:    #06B6D4;
+  --green:   #10B981;
+  --orange:  #F97316;
+  --red:     #EF4444;
+
+  /* Glow */
+  --glow-blue:   0 0 24px rgba(59, 130, 246, 0.40);
+  --glow-cyan:   0 0 24px rgba(6, 182, 212, 0.40);
+  --glow-orange: 0 0 18px rgba(249, 115, 22, 0.45);
+
+  /* Tipografia */
+  --sans:  'Geist', ui-sans-serif, system-ui, sans-serif;
+  --mono:  'Geist Mono', ui-monospace, monospace;
+
+  /* Misure */
+  --sb-w:  220px;
+  --topbar-h: 44px;
+  --max-w: 1320px;
+
+  /* Easing "tech" */
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:   cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--bg-0);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.003em;
+  min-height: 100vh;
+  /* Subtle grid background */
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-attachment: fixed;
+}
+img, svg { display: block; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+a { color: inherit; text-decoration: none; }
+::selection { background: var(--blue); color: white; }
+
+/* ============================================================
+   SHELL — Topbar + Sidebar + Main
+   ============================================================ */
+.shell {
+  display: grid;
+  grid-template-rows: var(--topbar-h) 1fr;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   TOPBAR (44px)
+   ============================================================ */
+.topbar {
+  position: sticky; top: 0; z-index: 30;
+  height: var(--topbar-h);
+  background: rgba(10, 15, 28, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: var(--sb-w) 1fr auto;
+  align-items: center;
+}
+.tb-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 18px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  border-right: 1px solid var(--border);
+  height: 100%;
+}
+.tb-brand .logo-mark {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+}
+.tb-crumbs {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 18px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-mute);
+}
+.tb-crumbs .crumb-sep { color: var(--text-dim); margin: 0 4px; }
+.tb-crumbs .crumb-current { color: var(--text); font-weight: 600; }
+.tb-status {
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 18px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-mute);
+}
+.tb-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+}
+.tb-pill.green { color: var(--green); border-color: rgba(16, 185, 129, 0.25); background: rgba(16, 185, 129, 0.06); }
+.tb-pill .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+}
+.tb-pill.green .dot { animation: liveBlip 1.6s ease-in-out infinite; }
+@keyframes liveBlip {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+.tb-avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ============================================================
+   LAYOUT (Sidebar + Main)
+   ============================================================ */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sb-w) 1fr;
+}
+
+/* ============================================================
+   SIDEBAR NAV
+   ============================================================ */
+.sidebar {
+  position: sticky; top: var(--topbar-h); align-self: start;
+  height: calc(100vh - var(--topbar-h));
+  background: var(--bg-0);
+  border-right: 1px solid var(--border);
+  padding: 16px 10px;
+  overflow-y: auto;
+  display: flex; flex-direction: column;
+  gap: 10px;
+}
+.sb-section {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 6px 12px 4px;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 12px 7px 10px;
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+  position: relative;
+  width: 100%;
+  text-align: left;
+}
+.sb-item:hover { background: var(--bg-2); color: var(--text); }
+.sb-item.active {
+  background: var(--bg-2);
+  color: var(--text);
+}
+.sb-item.active::before {
+  content: '';
+  position: absolute; left: -10px; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 16px;
+  background: var(--blue);
+  border-radius: 2px;
+  box-shadow: var(--glow-blue);
+}
+.sb-icon {
+  width: 16px; height: 16px;
+  color: var(--text-mute);
+  transition: color 0.2s;
+}
+.sb-item:hover .sb-icon,
+.sb-item.active .sb-icon { color: var(--blue-2); }
+.sb-num {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+.sb-tag {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--orange);
+  background: rgba(249, 115, 22, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.sb-footer {
+  margin-top: auto;
+  padding: 12px;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.sb-foot-row {
+  display: flex; justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-mute);
+}
+.sb-foot-row strong { color: var(--text); font-weight: 600; }
+.sb-foot-bar {
+  height: 4px; border-radius: 2px;
+  background: var(--bg-3);
+  overflow: hidden;
+  position: relative;
+}
+.sb-foot-bar-fill {
+  position: absolute; top: 0; bottom: 0; left: 0;
+  width: 40%;
+  background: linear-gradient(90deg, var(--blue), var(--cyan));
+  border-radius: 2px;
+  transition: width 0.5s var(--ease-out);
+}
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+.main {
+  padding: 22px 28px 60px;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  width: 100%;
+}
+.tab-panel { display: none; }
+.tab-panel.active {
+  display: block;
+  animation: panelSpring 0.5s var(--ease-spring);
+}
+@keyframes panelSpring {
+  from { opacity: 0; transform: translateY(8px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.page-head {
+  display: flex; justify-content: space-between; align-items: end;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 22px;
+}
+.page-head h1 {
+  font-family: var(--sans);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  line-height: 1.1;
+}
+.page-head h1 .acc {
+  color: var(--blue-2);
+  font-family: var(--mono);
+  font-weight: 700;
+}
+.page-head .ph-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  margin-bottom: 6px;
+}
+.page-head .ph-right {
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-mute);
+}
+.page-head .ph-right .pill {
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.page-head .ph-right .pill.acc { color: var(--blue-2); border-color: rgba(59,130,246,.30); background: rgba(59,130,246,.08); }
+
+/* ============================================================
+   BENTO GRID — the Mission Control signature
+   ============================================================ */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 14px;
+}
+.cell {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.4s var(--ease-out), transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-out);
+}
+.cell:hover { border-color: rgba(59, 130, 246, 0.4); transform: translateY(-2px); }
+.cell .c-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+}
+.c-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.c-corner {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.c-corner .live-blip {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: liveBlip 1.6s ease-in-out infinite;
+}
+/* holographic edge (celle primary) */
+.cell.holo {
+  background:
+    linear-gradient(var(--bg-1), var(--bg-1)) padding-box,
+    linear-gradient(135deg, rgba(59,130,246,.6), rgba(6,182,212,.4), rgba(59,130,246,.0)) border-box;
+  border: 1px solid transparent;
+}
+
+/* spans */
+.s-12 { grid-column: span 12; }
+.s-9 { grid-column: span 9; }
+.s-8 { grid-column: span 8; }
+.s-7 { grid-column: span 7; }
+.s-6 { grid-column: span 6; }
+.s-5 { grid-column: span 5; }
+.s-4 { grid-column: span 4; }
+.s-3 { grid-column: span 3; }
+@media (max-width: 1100px) {
+  .s-9, .s-8, .s-7 { grid-column: span 12; }
+  .s-5, .s-4 { grid-column: span 6; }
+  .s-3 { grid-column: span 6; }
+}
+@media (max-width: 720px) {
+  .s-6, .s-5, .s-4, .s-3 { grid-column: span 12; }
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+}
+
+/* ============================================================
+   TAB 1 — Mission Cell (Upload + Materie)
+   ============================================================ */
+.upload-cell {
+  min-height: 280px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.upload-cell .u-tabs {
+  display: inline-flex;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+  font-family: var(--mono);
+  font-size: 11px;
+  width: fit-content;
+}
+.upload-cell .u-tab {
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: var(--text-mute);
+  font-weight: 600;
+  transition: all 0.2s var(--ease-out);
+}
+.upload-cell .u-tab.active {
+  background: var(--bg-3);
+  color: var(--blue-2);
+  box-shadow: inset 0 0 0 1px rgba(59,130,246,.4);
+}
+.upload-cell .drop-area {
+  flex: 1;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: 12px;
+  padding: 28px;
+  display: flex; flex-direction: column; gap: 12px;
+  align-items: flex-start;
+  transition: all 0.3s var(--ease-out);
+  cursor: pointer;
+  position: relative;
+}
+.upload-cell .drop-area:hover {
+  border-color: var(--blue);
+  background: rgba(59, 130, 246, 0.03);
+  box-shadow: var(--glow-blue);
+}
+.upload-cell .drop-area .da-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(59,130,246,.18), rgba(6,182,212,.10));
+  border: 1px solid rgba(59,130,246,.30);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--blue-2);
+}
+.upload-cell .drop-area .da-title {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.upload-cell .drop-area .da-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-mute);
+}
+.upload-cell .drop-area .da-cta {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--blue);
+  color: white;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-top: 4px;
+  box-shadow: var(--glow-blue);
+}
+
+/* Config strip — separate cell */
+.config-cell {
+  display: flex; flex-direction: column; gap: 16px;
+}
+.config-cell .cfg-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.config-cell .cfg-toggle {
+  display: flex; gap: 4px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+}
+.config-cell .cfg-toggle button {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-mute);
+  transition: all 0.2s var(--ease-spring);
+}
+.config-cell .cfg-toggle button.active {
+  background: var(--blue);
+  color: white;
+  box-shadow: var(--glow-blue);
+}
+
+/* Bandi list cell */
+.bandi-cell {
+  display: flex; flex-direction: column; gap: 12px;
+}
+.bandi-cell .b-row {
+  display: grid;
+  grid-template-columns: 8px 1fr 100px 120px;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 12px;
+  border-radius: 8px;
+  background: var(--bg-2);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-out);
+}
+.bandi-cell .b-row:hover {
+  border-color: rgba(59,130,246,.30);
+  background: linear-gradient(90deg, rgba(59,130,246,.06), transparent);
+}
+.bandi-cell .b-row:hover .b-pulse { background: var(--blue); box-shadow: var(--glow-blue); }
+.bandi-cell .b-pulse {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  transition: all 0.3s var(--ease-out);
+}
+.bandi-cell .b-main {
+  display: flex; flex-direction: column; gap: 3px;
+}
+.bandi-cell .b-title {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.bandi-cell .b-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-mute);
+  letter-spacing: 0.04em;
+}
+.bandi-cell .b-stat {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.bandi-cell .b-stat small {
+  font-weight: 500;
+  color: var(--text-mute);
+  font-size: 11px;
+  display: block;
+}
+.bandi-cell .b-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--green);
+  background: rgba(16,185,129,.12);
+  padding: 4px 8px;
+  border-radius: 5px;
+  text-align: center;
+}
+.bandi-cell .b-tag.warn { color: var(--orange); background: rgba(249,115,22,.12); }
+.bandi-cell .b-tag.gray { color: var(--text-mute); background: var(--bg-3); }
+
+/* Primary CTA (single one, top right of Prepara page) */
+.cta-mission {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  color: white;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding: 11px 18px;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35), var(--glow-blue);
+  transition: transform 0.3s var(--ease-spring), box-shadow 0.3s var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+.cta-mission:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(59, 130, 246, 0.55); }
+.cta-mission .arr {
+  transition: transform 0.3s var(--ease-spring);
+}
+.cta-mission:hover .arr { transform: translateX(4px); }
+
+/* ============================================================
+   TAB 2 — Piano (Calendar Bento + Chat)
+   ============================================================ */
+.week-cell {
+  display: flex; flex-direction: column; gap: 16px;
+}
+.week-cell .week-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.week-cell .week-head h2 {
+  font-family: var(--sans);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.week-cell .week-head .range {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-mute);
+  letter-spacing: 0.04em;
+}
+.week-cell .week-head .nav-btns {
+  display: flex; gap: 4px;
+}
+.week-cell .week-head .nav-btns button {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  transition: all 0.2s var(--ease-out);
+}
+.week-cell .week-head .nav-btns button:hover { background: var(--blue); color: white; }
+
+.cal-bento {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+.cal-bento .day {
+  aspect-ratio: 1 / 1.1;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-spring);
+  position: relative;
+  overflow: hidden;
+}
+.cal-bento .day:hover {
+  transform: translateY(-3px);
+  border-color: var(--blue);
+  box-shadow: 0 0 0 1px rgba(59,130,246,.20), 0 12px 24px rgba(0,0,0,.4);
+}
+.cal-bento .day.today {
+  border-color: var(--blue);
+  background: linear-gradient(180deg, rgba(59,130,246,.10), var(--bg-2));
+}
+.cal-bento .day.has-pulse::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 10px;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px var(--blue);
+  animation: dayPulse 2.4s ease-in-out infinite;
+}
+@keyframes dayPulse {
+  0%, 100% { box-shadow: inset 0 0 0 1px var(--blue), 0 0 0 0 rgba(59,130,246,0); }
+  50%      { box-shadow: inset 0 0 0 1px var(--blue), 0 0 20px rgba(59,130,246,.30); }
+}
+.cal-bento .d-name {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--text-mute);
+}
+.cal-bento .d-num {
+  font-family: var(--sans);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  text-align: right;
+  line-height: 1;
+}
+.cal-bento .d-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--green);
+}
+.cal-bento .d-tag.warn { color: var(--orange); }
+.cal-bento .d-tag.gray { color: var(--text-dim); }
+.cal-bento .d-progress {
+  height: 2px; background: var(--bg-3); border-radius: 2px; overflow: hidden;
+}
+.cal-bento .d-progress > span {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--cyan));
+  transition: width 0.8s var(--ease-out);
+}
+
+/* Chat cell */
+.chat-cell {
+  display: flex; flex-direction: column;
+  min-height: 420px;
+}
+.chat-cell .c-head-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.chat-cell .ch-name {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  display: flex; align-items: center; gap: 8px;
+}
+.chat-cell .ch-name .ch-pulse {
+  width: 6px; height: 6px; background: var(--green); border-radius: 50%;
+  animation: liveBlip 1.6s ease-in-out infinite;
+}
+.chat-thread {
+  display: flex; flex-direction: column; gap: 10px;
+  flex: 1;
+}
+.msg-bot, .msg-u {
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.55;
+  padding: 10px 14px;
+  border-radius: 10px;
+  max-width: 86%;
+}
+.msg-bot {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+}
+.msg-bot .msg-stamp {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--text-mute);
+  margin-top: 4px;
+}
+.msg-u {
+  background: var(--blue);
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 2px;
+  box-shadow: var(--glow-blue);
+}
+.chat-form {
+  margin-top: 14px;
+  display: flex; gap: 8px;
+}
+.chat-form input {
+  flex: 1;
+  padding: 11px 14px;
+  border-radius: 8px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.chat-form input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,.18); }
+.chat-form button {
+  padding: 0 16px;
+  background: var(--blue);
+  color: white;
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+
+/* Paywall cell */
+.paywall-cell {
+  display: flex; flex-direction: column; gap: 12px;
+  position: relative;
+}
+.paywall-cell .pw-eyebrow {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.paywall-cell .pw-eyebrow .pw-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--orange);
+  background: rgba(249,115,22,.10);
+  border: 1px solid rgba(249,115,22,.30);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.paywall-cell .pw-headline {
+  font-family: var(--sans);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.2;
+}
+.paywall-cell .pw-headline .acc { color: var(--orange); font-family: var(--mono); }
+.paywall-cell .pw-stat-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.paywall-cell .pw-stat-row .ps-r {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.paywall-cell .pw-stat-row .ps-r .ps-k {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+}
+.paywall-cell .pw-stat-row .ps-r .ps-v {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.paywall-cell .pw-cta {
+  margin-top: 12px;
+  display: inline-flex; justify-content: space-between; align-items: center;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, var(--orange), #fb923c);
+  color: white;
+  border-radius: 10px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: var(--glow-orange);
+  transition: transform 0.3s var(--ease-spring);
+}
+.paywall-cell .pw-cta:hover { transform: translateY(-2px); }
+
+/* ============================================================
+   TAB 3 — Stats (Big Gauge + Streak + Aree)
+   ============================================================ */
+.gauge-cell {
+  display: flex; flex-direction: column; gap: 14px;
+  position: relative;
+}
+.gauge-cell .g-num-row {
+  display: flex; align-items: baseline; gap: 10px;
+}
+.gauge-cell .g-num {
+  font-family: var(--sans);
+  font-size: 78px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: var(--text);
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+.gauge-cell .g-num-out {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text-mute);
+  font-weight: 500;
+}
+.gauge-cell .g-delta {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green);
+  background: rgba(16,185,129,.10);
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+}
+.gauge-cell .g-band {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+}
+.gauge-cell .g-band strong { color: var(--text); font-weight: 700; }
+.gauge-cell svg { width: 100%; }
+
+/* Streak cell */
+.streak-cell {
+  display: flex; flex-direction: column; gap: 8px;
+  position: relative;
+}
+.streak-cell .s-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+}
+.streak-cell .s-head .s-eye {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--orange);
+  text-transform: uppercase;
+}
+.streak-cell .s-head .s-eye .s-blip {
+  width: 8px; height: 8px;
+  background: var(--orange);
+  border-radius: 50%;
+  box-shadow: var(--glow-orange);
+  animation: liveBlip 1.4s ease-in-out infinite;
+}
+.streak-cell .s-num {
+  font-family: var(--sans);
+  font-size: 64px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--orange);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.streak-cell .s-num-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-mute);
+  letter-spacing: 0.06em;
+  margin-top: -2px;
+}
+.streak-cell .s-flame {
+  position: absolute; top: 22px; right: 22px;
+  font-size: 30px;
+  filter: drop-shadow(0 0 6px rgba(249,115,22,.60));
+  animation: flameBeat 1.6s ease-in-out infinite;
+}
+@keyframes flameBeat {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50%      { transform: scale(1.08) translateY(-2px); }
+}
+.streak-cell .s-week {
+  display: flex; gap: 4px;
+  margin-top: 6px;
+}
+.streak-cell .s-week .d {
+  width: 22px; height: 3px;
+  border-radius: 2px;
+  background: var(--bg-3);
+  transition: background 0.3s, transform 0.3s var(--ease-spring);
+}
+.streak-cell .s-week .d.on { background: var(--orange); box-shadow: 0 0 8px rgba(249,115,22,.5); }
+.streak-cell .s-week .d.legend { background: linear-gradient(90deg, var(--orange), var(--red)); transform: scaleY(2.5); }
+
+/* Aree cell */
+.aree-cell .a-row {
+  display: grid;
+  grid-template-columns: 1fr 60px;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.aree-cell .a-row:last-child { border-bottom: none; }
+.aree-cell .a-row .a-name {
+  display: flex; flex-direction: column; gap: 5px;
+}
+.aree-cell .a-row .a-name .an-label {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.aree-cell .a-row .a-name .an-bar {
+  height: 4px; border-radius: 2px;
+  background: var(--bg-3);
+  position: relative;
+  overflow: hidden;
+}
+.aree-cell .a-row .a-name .an-bar > span {
+  position: absolute; top: 0; bottom: 0; left: 0;
+  background: linear-gradient(90deg, var(--red), var(--orange), var(--green));
+  border-radius: 2px;
+  width: 0;
+  transition: width 1.1s var(--ease-out);
+}
+.aree-cell .a-row .a-val {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.aree-cell .a-row .a-val.ok { color: var(--green); }
+.aree-cell .a-row .a-val.warn { color: var(--orange); }
+.aree-cell .a-row .a-val.bad { color: var(--red); }
+
+/* Trend cell (Sparkline) */
+.trend-cell svg { width: 100%; height: 140px; }
+.trend-cell .spark-line {
+  fill: none; stroke-width: 2;
+  stroke: url(#sparkGrad);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 800;
+  stroke-dashoffset: 800;
+  animation: sparkDraw 1.2s var(--ease-out) 0.2s forwards;
+}
+@keyframes sparkDraw { to { stroke-dashoffset: 0; } }
+.trend-cell .spark-area {
+  fill: url(#sparkGradArea);
+  opacity: 0;
+  animation: areaFade 0.8s var(--ease-out) 1.2s forwards;
+}
+@keyframes areaFade { to { opacity: 1; } }
+.trend-cell .spark-dot {
+  fill: var(--bg-1);
+  stroke: var(--blue);
+  stroke-width: 2;
+  opacity: 0;
+  animation: dotPop 0.4s var(--ease-spring) 1.4s forwards;
+}
+@keyframes dotPop { to { opacity: 1; } }
+.trend-cell .spark-axis-text {
+  font-family: var(--mono);
+  font-size: 9px;
+  fill: var(--text-mute);
+}
+.trend-cell .spark-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 8px;
+}
+.trend-cell .spark-stat {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--green);
+  font-weight: 700;
+}
+.trend-cell .spark-stat strong { font-size: 13px; }
+.trend-cell .spark-stat::before { content: '▲ '; opacity: 0.7; }
+
+/* ============================================================
+   TAB 4 — Classifica
+   ============================================================ */
+.cls-cell {
+  text-align: center;
+  padding: 36px;
+}
+.cls-cell .cls-icon {
+  width: 64px; height: 64px;
+  margin: 0 auto 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(59,130,246,.2), rgba(6,182,212,.10));
+  border: 1px solid rgba(59,130,246,.30);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--blue-2);
+  box-shadow: var(--glow-blue);
+}
+.cls-cell .cls-mode {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.cls-cell .cls-h {
+  font-family: var(--sans);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.cls-cell .cls-h .acc { color: var(--blue-2); }
+.cls-cell .cls-sub {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-mute);
+  line-height: 1.55;
+  max-width: 460px;
+  margin: 0 auto 18px;
+}
+.cls-cell .cls-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  max-width: 640px;
+  margin: 24px auto 28px;
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.cls-cell .cls-stat-row .cs-k {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.cls-cell .cls-stat-row .cs-v {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+.cls-cell .cls-stat-row .cs-v .cs-delta {
+  font-size: 10px;
+  color: var(--green);
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+@media (max-width: 720px) {
+  .cls-cell .cls-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+.cls-form {
+  display: flex; gap: 8px; max-width: 460px;
+  margin: 0 auto;
+}
+.cls-form input {
+  flex: 1;
+  padding: 11px 14px;
+  border-radius: 8px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  outline: none;
+}
+.cls-form input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,.18); }
+.cls-form button {
+  padding: 0 16px;
+  background: var(--blue);
+  color: white;
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+
+.cls-timeline {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  max-width: 720px;
+  margin: 32px auto 0;
+  text-align: left;
+}
+@media (max-width: 720px) { .cls-timeline { grid-template-columns: 1fr; } }
+.cls-step-card {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.cls-step-card .csc-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--blue-2);
+  background: rgba(59,130,246,.10);
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+}
+.cls-step-card .csc-m {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.cls-step-card .csc-t {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--text-mute);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   FOCUS / A11Y
+   ============================================================ */
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ============================================================
+   TOAST (tech console line)
+   ============================================================ */
+.toast {
+  position: fixed; top: 56px; right: 24px;
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--bg-1);
+  color: var(--text);
+  border: 1px solid rgba(59,130,246,.40);
+  box-shadow: 0 8px 24px rgba(0,0,0,.4), var(--glow-blue);
+  z-index: 90;
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out);
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.show { opacity: 1; transform: translateX(0); }
+.toast .t-dot { width: 6px; height: 6px; background: var(--blue); border-radius: 50%; }
+
+/* scan line pulse */
+@keyframes scanLine {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+.scan-overlay {
+  position: fixed; inset: 0; pointer-events: none; z-index: 5;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+}
+.scan-overlay::after {
+  content: '';
+  position: absolute; left: 0; right: 0; height: 100px;
+  background: linear-gradient(180deg, transparent, rgba(59,130,246,.04), transparent);
+  animation: scanLine 12s linear infinite;
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ============================================================
+       TOPBAR
+       ============================================================ -->
+  <header class="topbar">
+    <div class="tb-brand">
+      <span class="logo-mark">AI</span>
+      <span>concorso<span style="color: var(--text-mute)">/</span>mission</span>
+    </div>
+    <div class="tb-crumbs" aria-label="Breadcrumb">
+      <span>dashboard</span><span class="crumb-sep">›</span>
+      <span id="crumb-panel">prepara</span><span class="crumb-sep">›</span>
+      <span style="color: var(--blue-2); font-weight: 600;">milano-amministrativo-2026</span>
+    </div>
+    <div class="tb-status" aria-hidden="true">
+      <span class="tb-pill green"><span class="dot"></span>Sessione live</span>
+      <span class="tb-pill">v3.2.4 · build #1847</span>
+      <span class="tb-avatar">MR</span>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       LAYOUT (Sidebar + Main)
+       ============================================================ -->
+  <div class="layout">
+
+    <!-- ============================================================
+         SIDEBAR
+         ============================================================ -->
+    <aside class="sidebar" aria-label="Navigazione">
+      <div class="sb-section">Modulo</div>
+      <button class="sb-item active" role="tab" data-tab="t1">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Prepara</span>
+        <span class="sb-num">01</span>
+      </button>
+      <button class="sb-item" role="tab" data-tab="t2">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Il tuo piano</span>
+        <span class="sb-tag">PRO</span>
+      </button>
+      <button class="sb-item" role="tab" data-tab="t3">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Progressi</span>
+        <span class="sb-num">03</span>
+      </button>
+      <button class="sb-item" role="tab" data-tab="t4">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+        <span>Classifica</span>
+        <span class="sb-num">04</span>
+      </button>
+
+      <div class="sb-section" style="margin-top: 14px;">Sistema</div>
+      <button class="sb-item">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Telemetry</span>
+      </button>
+      <button class="sb-item">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings</span>
+      </button>
+
+      <!-- Footer: session credits -->
+      <div class="sb-footer">
+        <div style="font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--text-dim); text-transform: uppercase;">Session Credits</div>
+        <div class="sb-foot-row"><span>Used</span><strong>6 / 10</strong></div>
+        <div class="sb-foot-bar"><div class="sb-foot-bar-fill"></div></div>
+        <div class="sb-foot-row"><span>Reset</span><strong>23h 14m</strong></div>
+      </div>
+    </aside>
+
+    <!-- ============================================================
+         MAIN
+         ============================================================ -->
+    <main class="main">
+
+      <!-- ============================================================
+           TAB 1 — PREPARA (Bento)
+           ============================================================ -->
+      <section id="t1" class="tab-panel active" role="tabpanel">
+        <header class="page-head">
+          <div>
+            <div class="ph-eyebrow">Module · 01 / Prepara</div>
+            <h1>Carica il bando, <span class="acc">configura</span>, lancia.</h1>
+          </div>
+          <div class="ph-right">
+            <span class="pill acc">3 bandi attivi</span>
+            <span>Stima runtime · <strong style="color: var(--text);">~ 23m</strong></span>
+          </div>
+        </header>
+
+        <div class="bento">
+          <!-- Big upload cell -->
+          <div class="cell s-8 upload-cell">
+            <div class="c-head">
+              <span class="c-eyebrow">Pipeline · Ingest</span>
+              <span class="c-corner"><span class="live-blip"></span>ready</span>
+            </div>
+            <div class="u-tabs" role="tablist">
+              <button class="u-tab active" data-mode="pdf">PDF bando</button>
+              <button class="u-tab" data-mode="text">Incolla testo</button>
+              <button class="u-tab" data-mode="materie">Solo materie</button>
+            </div>
+            <div class="drop-area">
+              <div class="da-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </div>
+              <div class="da-title">Drop bando PDF — multi-upload</div>
+              <div class="da-meta">max 10 MB · max 3 files · auto-OCR via Mistral</div>
+              <button class="da-cta">
+                Browse files
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Config cell -->
+          <div class="cell s-4 holo config-cell">
+            <div class="c-head">
+              <span class="c-eyebrow">Config · Pre-flight</span>
+              <span class="c-corner" style="color: var(--blue-2);">●</span>
+            </div>
+            <div>
+              <div class="cfg-label">Difficoltà</div>
+              <div class="cfg-toggle">
+                <button>Facile</button>
+                <button class="active">Media</button>
+                <button>Difficile</button>
+              </div>
+            </div>
+            <div>
+              <div class="cfg-label">Durata · target</div>
+              <div class="cfg-toggle">
+                <button>10m</button>
+                <button class="active">20m</button>
+                <button>30m</button>
+                <button>45m</button>
+              </div>
+            </div>
+            <div style="padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div class="cfg-label">Stima totale</div>
+                <div style="font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--text);">~ 23 min</div>
+              </div>
+              <button class="cta-mission">
+                Lancia
+                <svg class="arr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><polyline points="13 5 20 12 13 19"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bandi list cell -->
+          <div class="cell s-12 bandi-cell">
+            <div class="c-head">
+              <span class="c-eyebrow">Local state · Bandi ({4})</span>
+              <span class="c-corner">sort · data ↓</span>
+            </div>
+            <div class="b-row">
+              <span class="b-pulse"></span>
+              <div class="b-main">
+                <span class="b-title">Funzionario Amministrativo</span>
+                <span class="b-meta">Comune di Milano · 2026 · 3 MATERIE · 18/07</span>
+              </div>
+              <span class="b-stat">7,4<small>voto medio</small></span>
+              <span class="b-tag">ready</span>
+            </div>
+            <div class="b-row">
+              <span class="b-pulse"></span>
+              <div class="b-main">
+                <span class="b-title">Istruttore Direttivo — Contabile</span>
+                <span class="b-meta">Ministero Economia · 2026 · 5 MATERIE · 12/07</span>
+              </div>
+              <span class="b-stat">6,8<small>voto medio</small></span>
+              <span class="b-tag">ready</span>
+            </div>
+            <div class="b-row">
+              <span class="b-pulse"></span>
+              <div class="b-main">
+                <span class="b-title">Collaboratore Amministrativo</span>
+                <span class="b-meta">INPS · 2025 · 4 MATERIE · 03/07</span>
+              </div>
+              <span class="b-stat">—<small>in attesa</small></span>
+              <span class="b-tag warn">OCR</span>
+            </div>
+            <div class="b-row">
+              <span class="b-pulse"></span>
+              <div class="b-main">
+                <span class="b-title">Assistente Giuridico</span>
+                <span class="b-meta">Comune di Roma · 2025 · 6 MATERIE · 27/06</span>
+              </div>
+              <span class="b-stat" style="color: var(--text-mute);">arch.<small>—</small></span>
+              <span class="b-tag gray">cold</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB 2 — PIANO (Bento calendar + chat)
+           ============================================================ -->
+      <section id="t2" class="tab-panel" role="tabpanel">
+        <header class="page-head">
+          <div>
+            <div class="ph-eyebrow">Module · 02 / Piano</div>
+            <h1>Piano <span class="acc">settimanale</span> · Week 3</h1>
+          </div>
+          <div class="ph-right">
+            <span class="pill acc">5 sessions scheduled</span>
+            <span>Coverage · <strong style="color: var(--text);">2h 15m</strong></span>
+          </div>
+        </header>
+
+        <div class="bento">
+          <!-- Calendar week -->
+          <div class="cell s-8 week-cell">
+            <div class="week-head">
+              <div>
+                <h2>Lun 21 → Dom 27 · Lug 2026</h2>
+                <div class="range">Settimana 3 · 7 giorni · focus Contabilità Pubblica</div>
+              </div>
+              <div class="nav-btns">
+                <button aria-label="Settimana precedente">‹</button>
+                <button aria-label="Oggi">•</button>
+                <button aria-label="Settimana successiva">›</button>
+              </div>
+            </div>
+            <div class="cal-bento">
+              <div class="day has-pulse">
+                <span class="d-name">LUN</span>
+                <span class="d-num">21</span>
+                <span class="d-tag">GUID</span>
+                <div class="d-progress"><span style="width: 100%;"></span></div>
+              </div>
+              <div class="day today">
+                <span class="d-name">MAR</span>
+                <span class="d-num">22</span>
+                <span class="d-tag warn">EXAM</span>
+                <div class="d-progress"><span style="width: 30%;"></span></div>
+              </div>
+              <div class="day">
+                <span class="d-name">MER</span>
+                <span class="d-num">23</span>
+                <span class="d-tag">GUID</span>
+                <div class="d-progress"><span style="width: 0%;"></span></div>
+              </div>
+              <div class="day">
+                <span class="d-name">GIO</span>
+                <span class="d-num">24</span>
+                <span class="d-tag gray">REST</span>
+                <div class="d-progress"><span style="width: 0%;"></span></div>
+              </div>
+              <div class="day">
+                <span class="d-name">VEN</span>
+                <span class="d-num">25</span>
+                <span class="d-tag">REP</span>
+                <div class="d-progress"><span style="width: 0%;"></span></div>
+              </div>
+              <div class="day">
+                <span class="d-name">SAB</span>
+                <span class="d-num">26</span>
+                <span class="d-tag warn">EXAM</span>
+                <div class="d-progress"><span style="width: 0%;"></span></div>
+              </div>
+              <div class="day">
+                <span class="d-name">DOM</span>
+                <span class="d-num">27</span>
+                <span class="d-tag gray">REST</span>
+                <div class="d-progress"><span style="width: 0%;"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat cell -->
+          <div class="cell s-4 chat-cell">
+            <div class="c-head-row">
+              <span class="ch-name"><span class="ch-pulse"></span> Coach.ai · live</span>
+              <span class="c-corner">latency 140ms</span>
+            </div>
+            <div class="chat-thread">
+              <div class="msg-bot">
+                Ho spostato Contabilità a martedì perché mercoledì storicamente vai peggio.
+                <span class="msg-stamp">14:02 · AI v3.2</span>
+              </div>
+              <div class="msg-u">Ok. Aggiungi un ripasso light venerdì.</div>
+              <div class="msg-bot">
+                Aggiunto: 20min · Diritto Amministrativo · focus Legge 241/1990.
+                <span class="msg-stamp">14:03 · AI v3.2</span>
+              </div>
+            </div>
+            <form class="chat-form" onsubmit="event.preventDefault(); pushMsg();">
+              <input type="text" id="chatInput" placeholder="Modifica piano… es. 'no simulazioni weekend'" />
+              <button>Push<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+            </form>
+          </div>
+
+          <!-- Paywall cell -->
+          <div class="cell s-12 paywall-cell">
+            <div class="pw-eyebrow">
+              <span class="c-eyebrow">Upsell · Pro tier</span>
+              <span class="pw-tag">PRO</span>
+            </div>
+            <div class="pw-headline">Coach auto-adattivo. Il tuo piano <span class="acc">riscritto</span> ogni lunedì.</div>
+            <p style="font-family: var(--sans); font-size: 13px; color: var(--text-mute); line-height: 1.55;">Analizziamo i tuoi risultati venerdì sera e riscriviamo il calendario della prossima settimana. Tu non devi più pensare a cosa studiare: apri e inizia. <span style="color: var(--text);">Da 1.847 candidati pilota.</span></p>
+            <div class="pw-stat-row">
+              <div class="ps-r"><span class="ps-k">+18%</span><span class="ps-v">miglioramento medio</span></div>
+              <div class="ps-r"><span class="ps-k">Lun 06:00</span><span class="ps-v">piano pronto</span></div>
+              <div class="ps-r"><span class="ps-k">NaN / mo</span><span class="ps-v">limit-free</span></div>
+            </div>
+            <button class="pw-cta" type="button" onclick="event.preventDefault(); document.getElementById('toast').classList.add('show'); setTimeout(()=>document.getElementById('toast').classList.remove('show'), 2400);">
+              Upgrade Pro · € 19 / mese
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><polyline points="13 5 20 12 13 19"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB 3 — PROGRESSI (Bento stats)
+           ============================================================ -->
+      <section id="t3" class="tab-panel" role="tabpanel">
+        <header class="page-head">
+          <div>
+            <div class="ph-eyebrow">Module · 03 / Stats</div>
+            <h1>Performance <span class="acc">live</span> · 14 simulazioni</h1>
+          </div>
+          <div class="ph-right">
+            <span class="pill acc">▲ trend +18%</span>
+            <span>voto medio · <strong style="color: var(--text);">7,2</strong></span>
+          </div>
+        </header>
+
+        <div class="bento">
+          <!-- Gauge cell -->
+          <div class="cell s-5 gauge-cell">
+            <div class="c-head">
+              <span class="c-eyebrow">Voto medio · live</span>
+              <span class="c-corner"><span class="live-blip"></span> aggiornato</span>
+            </div>
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <defs>
+                <linearGradient id="g-grad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#3B82F6"/>
+                  <stop offset="100%" stop-color="#06B6D4"/>
+                </linearGradient>
+              </defs>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="6"/>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="url(#g-grad)" stroke-width="6" stroke-linecap="round"
+                stroke-dasharray="251" stroke-dashoffset="69" transform="rotate(-90 50 50)"/>
+            </svg>
+            <div class="g-num-row">
+              <div class="g-num">7,2<span class="g-num-out">/ 10</span></div>
+              <span class="g-delta">▲ +0,4</span>
+            </div>
+            <div class="g-band">Fascia · <strong>Sufficiente</strong></div>
+          </div>
+
+          <!-- Streak cell -->
+          <div class="cell s-3 streak-cell">
+            <div class="s-head">
+              <span class="s-eye"><span class="s-blip"></span> Streak · live</span>
+            </div>
+            <div class="s-flame" aria-hidden="true">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <defs>
+                  <linearGradient id="flameGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%"  stop-color="#F97316"/>
+                    <stop offset="60%" stop-color="#EF4444"/>
+                    <stop offset="100%" stop-color="#F97316" stop-opacity="0.4"/>
+                  </linearGradient>
+                </defs>
+                <path d="M12 2 C 14 6, 17 9, 17 14 a 5 5 0 0 1 -10 0 C 7 11, 9 9, 12 2 Z"
+                      fill="url(#flameGrad)"/>
+                <path d="M12 9 C 13 11, 14 13, 14 15 a 2 2 0 0 1 -4 0 C 10 13, 11 11, 12 9 Z"
+                      fill="#FFFFFF" fill-opacity="0.85"/>
+              </svg>
+            </div>
+            <div class="s-num" id="streakN">0</div>
+            <div class="s-num-sub">giorni consecutivi</div>
+            <div class="s-num-sub" style="color: var(--text);">record <strong>11 gg</strong></div>
+            <div class="s-week" style="margin-top: 10px;">
+              <span class="d on"></span>
+              <span class="d on"></span>
+              <span class="d on"></span>
+              <span class="d legend"></span>
+              <span class="d on"></span>
+              <span class="d on"></span>
+              <span class="d"></span>
+            </div>
+          </div>
+
+          <!-- Trend cell -->
+          <div class="cell s-4 trend-cell">
+            <div class="spark-head">
+              <span class="c-eyebrow">Trend · ultimi 13</span>
+              <span class="spark-stat"><strong>7,8</strong></span>
+            </div>
+            <svg viewBox="0 0 360 140" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="sparkGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#3B82F6"/>
+                  <stop offset="100%" stop-color="#06B6D4"/>
+                </linearGradient>
+                <linearGradient id="sparkGradArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.30"/>
+                  <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="110" x2="360" y2="110" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
+              <line x1="0" y1="70"  x2="360" y2="70"  stroke="rgba(255,255,255,0.06)" stroke-width="0.5" stroke-dasharray="2 4"/>
+              <line x1="0" y1="30"  x2="360" y2="30"  stroke="rgba(255,255,255,0.06)" stroke-width="0.5" stroke-dasharray="2 4"/>
+              <path class="spark-area"
+                d="M20,90 L60,80 L100,95 L140,70 L180,60 L220,75 L260,40 L300,55 L340,30 L340,130 L20,130 Z"/>
+              <polyline class="spark-line"
+                points="20,90 60,80 100,95 140,70 180,60 220,75 260,40 300,55 340,30"/>
+              <circle class="spark-dot" cx="340" cy="30" r="4"/>
+              <text class="spark-axis-text" x="20"  y="135">apr</text>
+              <text class="spark-axis-text" x="100" y="135">mag</text>
+              <text class="spark-axis-text" x="180" y="135">giu</text>
+              <text class="spark-axis-text" x="260" y="135">lug</text>
+            </svg>
+          </div>
+
+          <!-- Aree cell -->
+          <div class="cell s-12 aree-cell">
+            <div class="c-head">
+              <span class="c-eyebrow">Skills · 3-axis breakdown</span>
+              <span class="c-corner">▸ tap per dettagli</span>
+            </div>
+            <div class="a-row">
+              <div class="a-name">
+                <span class="an-label">Chiarezza espositiva</span>
+                <div class="an-bar"><span data-w="82" style="width: 0;"></span></div>
+              </div>
+              <span class="a-val ok">8,2</span>
+            </div>
+            <div class="a-row">
+              <div class="a-name">
+                <span class="an-label">Struttura della risposta</span>
+                <div class="an-bar"><span data-w="70" style="width: 0;"></span></div>
+              </div>
+              <span class="a-val ok">7,0</span>
+            </div>
+            <div class="a-row">
+              <div class="a-name">
+                <span class="an-label">Contenuto tecnico</span>
+                <div class="an-bar"><span data-w="54" style="width: 0;"></span></div>
+              </div>
+              <span class="a-val warn">5,4</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB 4 — CLASSIFICA (centered)
+           ============================================================ -->
+      <section id="t4" class="tab-panel" role="tabpanel">
+        <header class="page-head" style="text-align: center; display: block; border: none; padding-bottom: 8px;">
+          <div class="ph-eyebrow">Module · 04 / Ranking</div>
+          <h1 style="font-size: 28px;">La classifica <span class="acc">sta arrivando.</span></h1>
+        </header>
+
+        <div class="bento" style="justify-content: center;">
+          <div class="cell s-12 cls-cell">
+            <div class="cls-icon" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                <path d="M4 22h16"/>
+                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+              </svg>
+            </div>
+            <div class="cls-mode">SISTEMA · BOOT SEQUENCE</div>
+            <div class="cls-h">Confrontati con candidati come <span class="acc">te.</span></div>
+            <p class="cls-sub">Punteggio per bando, regione, materia. Anonimato di default. Nessuna classifica tossica — solo il tuo margine di crescita rispetto a chi sta sostenendo lo stesso esame.</p>
+
+            <div class="cls-stats">
+              <div class="cls-stat-row">
+                <div class="cs-k">Bandi pilota</div>
+                <div class="cs-v">312</div>
+              </div>
+              <div class="cls-stat-row">
+                <div class="cs-k">Candidati</div>
+                <div class="cs-v">1.847</div>
+              </div>
+              <div class="cls-stat-row">
+                <div class="cs-k">Regioni</div>
+                <div class="cs-v">20/20</div>
+              </div>
+              <div class="cls-stat-row">
+                <div class="cs-k">Lancio</div>
+                <div class="cs-v">Q4 <span class="cs-delta">+0</span></div>
+              </div>
+            </div>
+
+            <form class="cls-form" onsubmit="event.preventDefault(); document.getElementById('toast').classList.add('show'); setTimeout(()=>document.getElementById('toast').classList.remove('show'), 2400);">
+              <input type="email" placeholder="email@dominio.it · riceverai la notifica" required />
+              <button>Notify me <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+            </form>
+
+            <div class="cls-timeline">
+              <div class="cls-step-card">
+                <div class="csc-tag">F01 · SET</div>
+                <div class="csc-m">Quality gates</div>
+                <div class="csc-t">Voti &lt; 5/10 esclusi. Soglie minime di qualità.</div>
+              </div>
+              <div class="cls-step-card">
+                <div class="csc-tag">F02 · OTT</div>
+                <div class="csc-m">Beta privata</div>
+                <div class="csc-t">200 candidati per bando. Materie + regioni.</div>
+              </div>
+              <div class="cls-step-card">
+                <div class="csc-tag">F03 · NOV</div>
+                <div class="csc-m">Lancio pubblico</div>
+                <div class="csc-t">Notifiche email. Classifica live nella dashboard.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite">
+  <span class="t-dot" aria-hidden="true"></span>
+  <span id="toastText">OK · notifiche attivate</span>
+</div>
+
+<script>
+/* ============================================================
+   Mission Control interactions — UI only
+   ============================================================ */
+(function () {
+  // ---- Tab switching with breadcrumb sync ----
+  var sbItems  = document.querySelectorAll('.sb-item[data-tab]');
+  var panels   = document.querySelectorAll('.tab-panel');
+  var crumbPanel = document.getElementById('crumb-panel');
+
+  function retriggerSparkline() {
+    var sparkLine = document.querySelector('.spark-line');
+    var sparkArea = document.querySelector('.spark-area');
+    var sparkDot  = document.querySelector('.spark-dot');
+    [sparkLine, sparkArea, sparkDot].forEach(function (el) {
+      if (!el) return;
+      var next = el.cloneNode(true);
+      el.parentNode.replaceChild(next, el);
+    });
+  }
+
+  function switchTab(key, label) {
+    sbItems.forEach(function (n) {
+      var active = n.getAttribute('data-tab') === key;
+      n.classList.toggle('active', active);
+    });
+    panels.forEach(function (p) {
+      p.classList.toggle('active', p.id === key);
+    });
+    if (crumbPanel && label) crumbPanel.textContent = label;
+    if (key === 't3') {
+      animateAreeBars();
+      retriggerSparkline();
+      animateStreak(6);
+    }
+  }
+  sbItems.forEach(function (n) {
+    var tab = n.getAttribute('data-tab');
+    var labelMap = { t1: 'prepara', t2: 'piano', t3: 'progressi', t4: 'classifica' };
+    n.addEventListener('click', function () {
+      switchTab(tab, labelMap[tab]);
+    });
+  });
+
+  // ---- Aree bars — animate on enter ----
+  function animateAreeBars() {
+    document.querySelectorAll('.a-row .an-bar > span').forEach(function (span) {
+      var w = span.getAttribute('data-w');
+      if (!w) return;
+      span.style.width = '0%';
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          span.style.transition = 'width 1.1s cubic-bezier(0.16, 1, 0.3, 1)';
+          span.style.width = w + '%';
+        });
+      });
+    });
+  }
+  animateAreeBars();
+
+  // ---- Streak countup ----
+  function animateStreak(target) {
+    var el = document.getElementById('streakN');
+    if (!el) return;
+    var cur = 0;
+    target = target || 0;
+    var dur = 1100;
+    var start = performance.now();
+    function step(now) {
+      var t = Math.min((now - start) / dur, 1);
+      // ease out cubic
+      var eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(target * eased);
+      if (t < 1) requestAnimationFrame(step);
+      else el.textContent = target;
+    }
+    requestAnimationFrame(step);
+  }
+  // Initial trigger
+  window.addEventListener('load', function () {
+    animateStreak(6);
+  });
+
+  // ---- Toggle groups (cfg-toggle and u-tabs) ----
+  document.querySelectorAll('.cfg-toggle, .u-tabs').forEach(function (group) {
+    group.querySelectorAll('button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        group.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        // haptic-feel mini animation: pulse the parent cell
+        var cell = btn.closest('.cell');
+        if (cell) {
+          cell.animate(
+            [
+              { transform: 'translateY(-2px) scale(1)' },
+              { transform: 'translateY(-2px) scale(1.012)' },
+              { transform: 'translateY(-2px) scale(1)' }
+            ],
+            { duration: 220, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
+          );
+        }
+      });
+    });
+  });
+
+  // ---- Hover tilt on bandi rows (CSS-only with mouse-tracking glow) ----
+  document.querySelectorAll('.b-row').forEach(function (row) {
+    row.addEventListener('mousemove', function (e) {
+      var rect = row.getBoundingClientRect();
+      var x = ((e.clientX - rect.left) / rect.width)  * 100;
+      var y = ((e.clientY - rect.top)  / rect.height) * 100;
+      row.style.background = 'radial-gradient(circle at ' + x + '% ' + y + '%, rgba(59,130,246,0.16), transparent 60%), linear-gradient(90deg, rgba(59,130,246,0.04), transparent)';
+    });
+    row.addEventListener('mouseleave', function () { row.style.background = ''; });
+  });
+
+  // ---- Push Chat ----
+  window.pushMsg = function () {
+    var input = document.getElementById('chatInput');
+    var thread = document.querySelector('.chat-thread');
+    if (!input || !thread || !input.value.trim()) return;
+    var t = input.value.trim();
+    var reply = document.createElement('div');
+    reply.className = 'msg-u';
+    reply.textContent = t;
+    thread.appendChild(reply);
+    input.value = '';
+    // fake AI reply
+    setTimeout(function () {
+      var bot = document.createElement('div');
+      bot.className = 'msg-bot';
+      bot.innerHTML = 'Aggiornato. Modifica accettata e salvata.<span class="msg-stamp">' + new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) + ' · AI v3.2</span>';
+      thread.appendChild(bot);
+      thread.scrollTop = thread.scrollHeight;
+    }, 800);
+    thread.scrollTop = thread.scrollHeight;
+  };
+
+  // ---- Day click → set today ----
+  document.querySelectorAll('.day').forEach(function (day) {
+    day.addEventListener('click', function () {
+      document.querySelectorAll('.day').forEach(function (d) {
+        d.classList.remove('today');
+        d.classList.remove('has-pulse');
+      });
+      day.classList.add('today');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

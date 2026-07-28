@@ -73,4 +73,4 @@ ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS insert_events ON public.events;
 CREATE POLICY insert_events ON public.events FOR INSERT WITH CHECK (true);
 DROP POLICY IF EXISTS select_own_events ON public.events;
-CREATE POLICY select_own_events ON public.events FOR SEbLECT USING (auth.uid() = user_id);
+CREATE POLICY select_own_events ON public.events FOR SELECT USING (auth.uid() = user_id);

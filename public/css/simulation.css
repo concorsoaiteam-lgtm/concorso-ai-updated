@@ -59,7 +59,7 @@
       display: grid;
       place-items: center;
       color: #FFFFFF;
-      font-weight: 800;
+      font-weight: 700;
       font-size: .9rem;
       box-shadow: 0 14px 34px rgba(37,99,235,.20);
       animation: emptyOrbPulse 2.2s ease-in-out infinite;
@@ -151,7 +151,7 @@
       background: rgba(255,255,255,.92);
       color: #1A6B9E;
       font-size: .82rem;
-      font-weight: 850;
+      font-weight: 700;
       cursor: pointer;
       transition: all .22s cubic-bezier(.2,.9,.2,1);
       box-shadow: 0 2px 8px rgba(26,107,158,.06);
@@ -175,7 +175,7 @@
       background: linear-gradient(135deg, #FFFFFF, rgba(247,251,255,.8));
       padding: 8px 14px;
       font-size: .78rem;
-      font-weight: 850;
+      font-weight: 700;
       color: #2A5A8C;
       transition: all .22s cubic-bezier(.2,.9,.2,1);
       box-shadow: 0 2px 8px rgba(26,107,158,.06);
@@ -236,7 +236,7 @@
 
     body {
       margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: 'Geist', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text);
       background: #F7FBFF;
     }
@@ -309,7 +309,7 @@
       color: #B91C1C;
       border: 1px solid rgba(239,68,68,.28);
       font-size: .82rem;
-      font-weight: 900;
+      font-weight: 700;
       transition: all .18s ease;
     }
 
@@ -326,7 +326,7 @@
       color: #1A6B9E;
       border: 1px solid rgba(37,99,235,.16);
       font-size: .85rem;
-      font-weight: 800;
+      font-weight: 700;
       box-shadow: 0 4px 16px rgba(26,107,158,.07);
       transition: all .18s ease;
     }
@@ -357,7 +357,7 @@
       background: #FFFFFF;
       color: var(--text-secondary);
       font-size: .9rem;
-      font-weight: 850;
+      font-weight: 700;
       box-shadow: 0 14px 40px rgba(26,107,158,.10);
     }
 
@@ -388,7 +388,7 @@
 
     .section-label {
       font-size: .84rem;
-      font-weight: 900;
+      font-weight: 700;
       color: var(--text-secondary);
     }
 
@@ -470,7 +470,7 @@
       white-space: nowrap;
       text-overflow: ellipsis;
       color: var(--text);
-      font-weight: 850;
+      font-weight: 700;
     }
 
     .bando-date {
@@ -489,7 +489,7 @@
       border: 1px solid rgba(37,99,235,.24);
       color: transparent;
       font-size: .8rem;
-      font-weight: 950;
+      font-weight: 700;
       transition: all .2s ease;
       transform: scale(.86);
       opacity: .42;
@@ -514,7 +514,7 @@
 
     .bando-cta-hover {
       font-size: .74rem;
-      font-weight: 800;
+      font-weight: 700;
       color: #2563EB;
       letter-spacing: -.005em;
       opacity: 0;
@@ -553,7 +553,7 @@
       margin: 0;
       color: #1E4D73;
       font-size: .92rem;
-      font-weight: 850;
+      font-weight: 700;
       letter-spacing: -.01em;
     }
     .empty-bandi-msg {
@@ -567,7 +567,7 @@
       margin-top: 10px;
       color: #1A6B9E;
       font-size: .82rem;
-      font-weight: 850;
+      font-weight: 700;
       transition: color .2s ease, transform .2s ease;
     }
     .empty-bandi-cta:hover {
@@ -600,7 +600,7 @@
       flex-shrink: 0;
       margin-top: 2px;
       font-size: .65rem;
-      font-weight: 900;
+      font-weight: 700;
       color: white;
     }
     .difficulty-card[data-difficulty="Facile"] .difficulty-icon { background: #22C55E; }
@@ -635,7 +635,7 @@
       background: rgba(37,99,235,.1);
       color: var(--accent-2);
       font-size: .68rem;
-      font-weight: 950;
+      font-weight: 700;
     }
 
     .duration-btn {
@@ -930,7 +930,7 @@
     }
     .feedback-title {
       color: var(--text);
-      font-weight: 950;
+      font-weight: 700;
       letter-spacing: -.02em;
     }
     .feedback-close-btn {
@@ -969,12 +969,15 @@
       background: var(--accent-muted);
     }
 
+    /* FIX 2: transform-driven fill (scaleX) instead of width. Baseline scaleX(1) keeps
+       JS-only-width compatible; for smooth fill sync el.style.transform='scaleX(X/100)'. */
     .feedback-fill {
       height: 100%;
       border-radius: 5px;
       width: 50%;
       background: #EAB308;
-      transition: width .5s ease, background .5s ease;
+      transform: scaleX(1); transform-origin: left center;
+      transition: transform .5s ease, background .5s ease;
     }
 
     .feedback-drawer-overlay {
@@ -1074,7 +1077,7 @@
       background: linear-gradient(135deg, #1A6B9E, #2563EB);
       color: #FFFFFF;
       font-size: 1.25rem;
-      font-weight: 950;
+      font-weight: 700;
       position: relative;
       box-shadow: 0 12px 30px rgba(37,99,235,.22);
       transition: transform .18s ease, opacity .18s ease, background .18s ease;
@@ -1122,7 +1125,7 @@
 
     .summary-stat-label {
       font-size: .68rem;
-      font-weight: 900;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: .12em;
       color: #9CA3AF;
@@ -1131,7 +1134,7 @@
     .summary-stat-value {
       margin-top: 4px;
       font-size: 1.65rem;
-      font-weight: 850;
+      font-weight: 700;
       line-height: 1.1;
     }
 
@@ -1148,7 +1151,7 @@
       background: #FFFFFF;
       color: var(--text-secondary);
       font-size: .88rem;
-      font-weight: 850;
+      font-weight: 700;
       box-shadow: 0 18px 44px rgba(26,107,158,.14);
     }
 
@@ -1250,7 +1253,7 @@
       background: rgba(37,99,235,.10);
       color: #1A6B9E;
       font-size: .65rem;
-      font-weight: 850;
+      font-weight: 700;
       letter-spacing: .02em;
     }
 
@@ -1406,7 +1409,7 @@
       background: linear-gradient(135deg, #1A6B9E, #2563EB);
       color: #FFFFFF;
       font-size: .86rem;
-      font-weight: 850;
+      font-weight: 700;
       box-shadow: 0 14px 30px rgba(37,99,235,.18);
     }
 
@@ -1427,7 +1430,7 @@
     .commissioner-name {
       color: #1E4D73;
       font-size: .96rem;
-      font-weight: 850;
+      font-weight: 700;
       letter-spacing: -.02em;
     }
 
@@ -1453,7 +1456,7 @@
       background: rgba(37,99,235,.055);
       color: var(--text-secondary);
       font-size: .7rem;
-      font-weight: 800;
+      font-weight: 700;
     }
 
     .message-role {
@@ -1463,7 +1466,7 @@
       margin-bottom: 6px;
       color: #2A5A8C;
       font-size: .74rem;
-      font-weight: 850;
+      font-weight: 700;
       letter-spacing: -.01em;
     }
 
@@ -1946,7 +1949,7 @@
       border-radius: 18px;
       background: linear-gradient(135deg, #1A6B9E, #2563EB);
       color: #FFFFFF;
-      font-weight: 800;
+      font-weight: 700;
       box-shadow: 0 16px 34px rgba(37,99,235,.24);
     }
 
@@ -2056,12 +2059,15 @@
       background: rgba(37,99,235,.08);
     }
 
+    /* FIX 2: transform-driven fill (scaleX). Baseline scaleX(1) keeps JS-only-width
+       compatible (bar visible, no width animation). */
     .session-progress-fill {
       width: 0%;
       height: 100%;
       border-radius: 999px;
       background: linear-gradient(90deg, #1A6B9E, #2563EB, #5EA0E8);
-      transition: width .55s cubic-bezier(.4,0,.2,1);
+      transform: scaleX(1); transform-origin: left center;
+      transition: transform .55s cubic-bezier(.4,0,.2,1);
       box-shadow: 0 0 18px rgba(37,99,235,.28);
     }
 
@@ -2112,12 +2118,14 @@
       background: rgba(37,99,235,.10);
     }
 
+    /* FIX 2: transform-driven fill (scaleX). Baseline scaleX(1) keeps JS-only-width compatible. */
     .typing-meter-fill {
       width: 0%;
       height: 100%;
       border-radius: 999px;
       background: linear-gradient(90deg, #2563EB, #22C55E);
-      transition: width .28s ease, background .28s ease;
+      transform: scaleX(1); transform-origin: left center;
+      transition: transform .28s ease, background .28s ease;
     }
 
     .input-shell.composer-active {
@@ -2367,7 +2375,7 @@
       background: rgba(255,255,255,.7);
       color: #4B6F8E;
       font-size: .68rem;
-      font-weight: 800;
+      font-weight: 700;
       letter-spacing: -.005em;
       transition: background .22s cubic-bezier(.2,.7,.2,1),
                   border-color .22s cubic-bezier(.2,.7,.2,1),
@@ -2415,7 +2423,7 @@
        ========================================================= */
     :root {
       --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
-      --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-bounce: cubic-bezier(0.25, 0, 0.15, 1);
       --dur-fast: 0.2s;
       --dur-slow: 0.5s;
       --dur-shimmer: 3.2s;
@@ -2541,7 +2549,7 @@
   background: rgba(37, 99, 235, 0.08);
   color: #1A6B9E;
   font-size: 0.7rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.01em;
   border: 1px solid rgba(37, 99, 235, 0.12);
   animation: fadeInBadge .38s ease-out;
