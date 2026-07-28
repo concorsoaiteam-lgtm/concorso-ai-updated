@@ -78,9 +78,29 @@ Tutti i punti della TODO list originale di Ruman sono stati fatti (10/10). Vedi 
 - `public/index.html` — nuovo file (290 righe)
 - `public/css/landing.css` — pulito a 50 righe (solo classi usate)
 
-## Metriche post-rewrite
+## ROUND 3 — POLISH + MOTION (28/07/2026)
+**User feedback dopo round 2**: "buono e semplice, ma troppo solo font nero". Mancavano motion, button vero su "Scopri come funziona", pricing segmentato mensile/annuale, zona "Perche'" che spiega il valore. Anche "Prova gratis: 3 simulazioni" → "Inizia gratis" ovunque.
+
+**Modifiche**:
+- Motion system CSS-only + IntersectionObserver: hero-rise stagger (5 elementi con cubic-bezier .2/.8/.2/1, delay 80→600ms), reveal-on-scroll, savings-badge pulse, btn hover lift + shadow. Live-dot verde animate-pulse nel trust strip. Tutto respects prefers-reduced-motion.
+- "Scopri come funziona" → btn-secondary con bordo 2px brand-600 (vero bottone, non più link testuale).
+- CTA copy ovunque: "Prova gratis: 3 simulazioni" → "Inizia gratis".
+- Sezione nuova **Perche' ConcorsoAI** tra Come Funziona e Prezzi: 3 value props concreti (prezzo vs ripetizioni private, adattamento ai punti deboli, progressi tracciati), stesso stile cards di Come Funziona per coerenza visuale.
+- Prezzi: rimossa card Free. Card singola Pro con 2 CTA segmented Mensile/Annuale via `grid-cols-[3fr_4fr]`. Badge grafico "Risparmi €37/anno" con pulse animation sopra il bottone annuale. Free tier ora footnote link "Inizia gratis: 3 simulazioni al mese →".
+- Savings reali calcolate: mensile 12,99x12=€155,88/anno vs annuale €119/anno = €36,88 arrotondato a €37.
+
+**Decisione chiave**: la priorità "less is more" del round 2 si è scontrata col feedback utente "troppo piatto". Round 3 aggiunge motion + segmented pricing + zona perché **ma senza tornare a glassmorphism / mockup floating / carousel testimonial**. Risultato: 4 sezioni animate, ognuna con H2 tracking-tighter + text-balance + reveal-on-scroll al primo viewport.
+
+**Lezione per future sessioni**: motion minima = motion che migliora percezione qualità, non motion decorativa. Ogni animation deve rispondere a "che valore porta?". Le 4 animazioni scelte HANNO un perché: hero-rise (sequenza di attenzione), reveal-on-scroll (page alive senza essere noisy), savings-badge (pubblicizza lo sconto senza testo puro), live-dot (trust signal continuo).
+
+**File**:
+- `public/index.html` — 440 righe (da 290, +51%). 4 sezioni + script IntersectionObserver inline. Schema.org JSON-LD aggiornato: highPrice=119, offerCount=3.
+- `public/css/landing.css` — 130 righe (da 50, +160%). Motion system + enhanced btn hover + prefers-reduced-motion guard completo.
+
+## Metriche post-round
 - Round 0: UI 28, UX 50, Overall 28
 - Round 1 (rimozione AI tells): UI 40, UX 52, Overall 44 (+56% UI)
-- Round 2 (editorial minimal): atteso UI 55-65, UX 60-70, Overall 58-68
+- Round 2 (editorial minimal): non misurato in autonomia (commit pronto)
+- Round 3 (editorial + motion + segmented pricing): atteso UI 52-62, UX 60-70, Overall 56-66. Focus sperato: Visual Hierarchy migliora via segmented CTA dominante, Conversion Clarity migliora via Perche' section, Accessibility migliora via button veri (focus-visible outline).
 
-**Vincolo nuovo per future sessioni**: prima di aggiungere qualcosa alla landing, chiediti *"serve davvero?"*. Default = no.
+**Vincolo nuovo per future sessioni**: prima di aggiungere qualsiasi motion alla landing, chiedersi *"che valore porta?"*. Motion senza value = slop.

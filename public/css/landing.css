@@ -1,5 +1,6 @@
-/* Landing CSS - solo regole usate dal nuovo index.html minimal */
+/* Landing CSS — anti-slop finale + motion system minimal */
 
+/* Reset base */
 * { box-sizing: border-box; }
 
 body {
@@ -10,41 +11,114 @@ body {
 
 a { text-decoration: none; }
 
-/* btn-primary: blu petrolio pieno */
+/* ---------------------------------------------------------------------------
+   Buttons
+   --------------------------------------------------------------------------- */
+
 .btn-primary {
   background: #0F4C81;
   color: #ffffff;
-  transition: background .18s ease, transform .18s ease;
+  box-shadow: 0 2px 8px rgba(15, 76, 129, .18);
+  transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .btn-primary:hover {
   background: #0B3A63;
   transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 76, 129, .32);
+}
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(15, 76, 129, .18);
 }
 .btn-primary:focus-visible {
   outline: 2px solid #2563EB;
   outline-offset: 2px;
 }
 
-/* btn-secondary: bianco con bordo blu */
 .btn-secondary {
   background: #ffffff;
   color: #0F4C81;
-  border: 1px solid #D6E8FF;
-  transition: border-color .18s ease, background .18s ease;
+  border: 2px solid #0F4C81;
+  transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .btn-secondary:hover {
-  border-color: #A9CDF8;
   background: #F7FBFF;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(15, 76, 129, .18);
+}
+.btn-secondary:active {
+  transform: translateY(0);
 }
 .btn-secondary:focus-visible {
   outline: 2px solid #2563EB;
   outline-offset: 2px;
 }
 
-/* Reduced motion: nessuna animazione di pagina come prima */
+/* ---------------------------------------------------------------------------
+   Motion system
+   --------------------------------------------------------------------------- */
+
+/* Hero entrance: stagger fade-in + slight upward translate */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-rise > * {
+  opacity: 0;
+  animation: hero-rise .6s cubic-bezier(.2, .8, .2, 1) forwards;
+}
+.hero-rise > *:nth-child(1) { animation-delay: 60ms; }
+.hero-rise > *:nth-child(2) { animation-delay: 160ms; }
+.hero-rise > *:nth-child(3) { animation-delay: 260ms; }
+.hero-rise > *:nth-child(4) { animation-delay: 360ms; }
+.hero-rise > *:nth-child(5) { animation-delay: 460ms; }
+
+/* Section reveal on scroll */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity .65s ease-out, transform .65s ease-out;
+  will-change: opacity, transform;
+}
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Savings badge subtle lift */
+@keyframes savings-pulse {
+  0%, 100% { transform: translate(-50%, 0); }
+  50%      { transform: translate(-50%, -2px); }
+}
+.savings-badge {
+  animation: savings-pulse 3.2s ease-in-out infinite;
+}
+
+/* Reduced motion: override all key motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .001ms !important;
     transition-duration: .001ms !important;
+  }
+  .hero-rise > *,
+  .reveal-on-scroll {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .savings-badge {
+    animation: none !important;
   }
 }
