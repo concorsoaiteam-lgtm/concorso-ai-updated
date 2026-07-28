@@ -42,3 +42,19 @@ Tutti i punti della TODO list originale di Ruman sono stati fatti (10/10). Vedi 
 - Error handling specifico: 401, 403, 429, 502, 503 con messaggi user-friendly
 - CSS wave animation + mic-pulse aggiunti a simulation.css (parity con landing mockup)
 - Max tokens portato a 700 (era 500) per risposte più complete
+
+## ANTI-SLOP CLEANUP (28/07/2026)
+**Round di rimozione AI-slop su public/index.html:**
+- Rimosso tutti i 5 micro-eyebrows `section-eyebrow`
+- Rimossi i 3 numeri giganti decorativi "01/02/03" in Come Funziona
+- Rimosso `glass-card`, `premium-panel`, gradient decorativi
+- Sostituiti em-dash nel copy
+- Aggiunto palette `ink` (500/700/900) per contrasto WCAG-AA
+- Creato `slop-registry.md` con i 12 pattern trovati
+
+**Lezione importante per future sessioni:**
+- NON aggiungere CTA più aggressive con bordo solido + drop shadow fisica — designmeter l'ha letto come "troppo contrasto/pesante" → Color Contrast Severe peggiorato da High. Tenere glow/diffusion per le CTA.
+- Aggiungere elementi nuovi può peggiorare i punteggi quanto rimuoverli può migliorarli. Pure rimozioni sono più sicure.
+- Em-dash è bandito dal framework anti-slop (`design-taste-frontend`): zero in copy, headline, button, pillola, FAQ.
+- Quando rimuovi classi CSS che davano padding/bg/border, COMPENSA inline con classi Tailwind esplicite altrimenti gli elementi su dark bg diventano invisibili (caso reale: rimozione `.premium-panel` da articoli Come Funziona → ho dovuto aggiungere `border border-white/10 bg-white/5 p-7`).
+- `shadow-glowBlue` token rimosso da tailwind.config, ma il `class="shadow-glowBlue"` era ancora usato su chat bubble hero (riga 257) → sostituito con `shadow-sm`. Sempre cercare residui per token rimossi.
