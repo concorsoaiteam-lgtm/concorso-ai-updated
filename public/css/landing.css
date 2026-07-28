@@ -34,8 +34,8 @@ a { text-decoration: none; }
   box-shadow: 0 2px 8px rgba(15, 76, 129, .18);
 }
 .btn-primary:focus-visible {
-  outline: 2px solid #2563EB;
-  outline-offset: 2px;
+  outline: 2px solid #071D33;
+  outline-offset: 4px;
 }
 
 .btn-secondary {
@@ -56,8 +56,8 @@ a { text-decoration: none; }
   transform: translateY(0);
 }
 .btn-secondary:focus-visible {
-  outline: 2px solid #2563EB;
-  outline-offset: 2px;
+  outline: 2px solid #071D33;
+  outline-offset: 4px;
 }
 
 /* ---------------------------------------------------------------------------

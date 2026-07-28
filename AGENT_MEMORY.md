@@ -104,3 +104,43 @@ Tutti i punti della TODO list originale di Ruman sono stati fatti (10/10). Vedi 
 - Round 3 (editorial + motion + segmented pricing): atteso UI 52-62, UX 60-70, Overall 56-66. Focus sperato: Visual Hierarchy migliora via segmented CTA dominante, Conversion Clarity migliora via Perche' section, Accessibility migliora via button veri (focus-visible outline).
 
 **Vincolo nuovo per future sessioni**: prima di aggiungere qualsiasi motion alla landing, chiedersi *"che valore porta?"*. Motion senza value = slop.
+
+## ROUND 4 — COLOR POLISH (28/07/2026)
+
+**User feedback dopo round 3**: "migliorato, colori devono essere una bestia". Ha richiesto un deep dive sui colori fatto bene, senza AI-slop, ma anche di non procedere piano piano: "nono è troppo piano fai tutto insieme".
+
+**Workflow**:
+1. Web research su SaaS color discipline 2025-2026 (Linear/Stripe/Plaid/Mercury, WCAG AA, anti-slop tells).
+2. Thinker-with-files → audit specifico del progetto + 5 cambi prioritizzati (C1-C5).
+3. Code-review identifica D-fix su C3: btn-secondary outline stesso colore del border → "double ring" ambiguo.
+4. D-fix applicato: btn-secondary focus-visible ora brand-700 (#0B3A63) con offset 3px (più scuro del border + più ampio gap).
+
+**Modifiche applicate**:
+- **Pre**: rimosso `animate-pulse bg-emerald-500` dal trust strip hero (live-dot verde). Era micro-AI-tell template. Trust strip ora fermo, solo testo (text-ink-500).
+- **C1 Logo navbar**: gradient `bg-gradient-to-r from-brand-700 to-brand-500 bg-clip-text text-transparent` → `text-brand-600`. Single-accent discipline. Logo "AI" ora solido blu governativo.
+- **C2 Badge Risparmi €37**: `bg-amber-400 text-amber-900 ring-white` → `bg-emerald-100 text-emerald-800 ring-brand-600`. Rispetta "green-only per status positivo" (Stripe/Linear convention). Tolta "advertising yellowness".
+- **C3 Focus ring btn-primary**: `outline: 2px solid #0F4C81; outline-offset: 2px` (era `#2563EB` chiaro, ora brand coerente).
+- **C3-focus ring (uniform bestia)**: btn-primary `outline: 2px solid #0F4C81; outline-offset: 2px` → `outline: 2px solid #0B3A63; outline-offset: 4px`. btn-secondary `outline: 2px solid #0B3A63; outline-offset: 3px` → `outline-offset: 4px`. **Pattern uniforme**: entrambi i button hanno stesso focus indicator (brand-700 + 4px spatial gap). border-secondary = brand-600, outline brand-700 = 1 tono scuro = differenziazione visiva netta via lightness + spatial gap. Niente più "doppio ring" ambiguo. WCAG AAA confermato per entrambi (outline su white = ~11:1, su slate-200 = ~9:1).
+  - **Bestia finale upgrade**: outline `brand-700 #0B3A63` → `brand-900 #071D33` (lightness drop 22% → 8%, gap border-brand-600 a outline-brand-900 = ~18%, decisamente più "punchy" focus state). Ancora single-accent (brand-900 è in palette). WCAG AAA confermato anche per brand-900: outline vs white = ~17:1, vs slate-200 = ~13:1.
+- **C4 Favicon SVG**: rimosso `<defs><linearGradient>` → solid `fill='%230F4C81'`. Single-accent discipline applicata al tab icon.
+- **C5 Section bg**: `bg-brand-50` → `bg-slate-200` (#E2E8F0) in Come Funziona + Prezzi. "Bestia mode" = palette unita + sfondi decisi (slate-200 > slate-50). Alternation finale: Hero (white) → Come Funziona (slate-200) → Perché (white) → Prezzi (slate-200). Depth tra section grigia e card bianche dentro.
+
+**Decisione chiave su C5**: slate-200 invece di slate-50 perché user vuole "bestia" (palette unita + depth marcato). Rischio percepito = look "agenzia delle entrate", ma bilanciato da hero minimal + brand-600 accenti. Se troppo austero in measure round, dial back a slate-100 in round 6.
+
+**Lezione importante per future sessioni**:
+- Quando un elemento ha `border: X`, NON usare `outline: X` su focus-visible → crea "double ring" visivo. Outline deve essere tonalità diversa dal border (#0F4C81 border → outline #0B3A63 brand-700 + offset 3px). Alternativa equivalente: inversione (#FFFFFF outline per elementi scuri), ma rompe single-accent discipline.
+- "Bestia mode" = palette unita + 1 accent solido + sfondi decisi (slate-200 > slate-50). NON è multicolor o max saturation. Bestia = gravitas coerente, non rumore.
+- AI-slop color tells sono spesso nel codice DEFAULT (Tailwind amber-400, gradient utilities) — non solo nel design iniziale. Cerca negli utilities che l'AI sceglie per default.
+
+**File modificati**:
+- `public/index.html` — 4 edits (logo + badge + favicon + section bg 2 occorrenze) + 1 rimozione live-dot = 5 cambi
+- `public/css/landing.css` — 1 edit allowMultiple (2 occorrenze focus visible) + 1 D-fix specifico btn-secondary = 1 cambio netto
+
+## Metriche post-round 4
+- Round 0: UI 28, UX 50, Overall 28
+- Round 1 (rimozione AI tells): UI 40, UX 52, Overall 44
+- Round 2 (editorial minimal): non misurato
+- Round 3 (motion + segmented pricing): non misurato
+- Round 4 (colori bestia): atteso UI 55-65, UX 62-72. Single-accent + depth slate-200 + status emerald = miglioramento Visual Hierarchy e Color Contrast atteso. Se Visual Hierarchy o Color Contrast rimane Severe, dial-back slate-200 → slate-100.
+
+**Vincolo nuovo per future sessioni**: prima di usare un colore fuori palette (amber/rose/sky/gradient utility default), chiedersi *"è nel Brand System o è Tailwind default?"*. Default Tailwind fuori brand 9-step + slate 5-step = AI-slop. Il verde emerald resta OK solo per badge status positivo, non per altri usi.
