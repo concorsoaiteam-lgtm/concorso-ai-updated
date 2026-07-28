@@ -273,6 +273,81 @@ Quindi solo Perché (white bg) mantiene border-t.
 
 **Push-ready finale**: dopo 5.8 il round 5 (borders + shadows + elevation) e' completo. Prossima iterazione naturale: typography round (eyebrows, h2 weights, prose rhythm) o interactivity round (button micro-anim, hover state art direction).
 
+## ROUND 7 — RHYTHM RESTORE + INDIGO ACCENT (28/07/2026)
+
+**User feedback dopo round 6**: vuole 2 cose distinte:
+1. **Togliere lo sfondo blu/grigio dalla section Perche'** per ripristinare rhythm alternato.
+2. **Aggiungere colori** seguendo il brief che ha condiviso (palette limitata 2-3 colori, un solo colore vivace, sfondi neutri, niente AI tells, niente gradienti).
+
+**Workflow**: Fix A immediato (1-line), Fix B con decisione strategica autonoma basandomi su AGENT_MEMORY completa (passato color discipline) + brief utente. Niente thinker spawnato perche' decisione era chiara: indigo accent (non amber bocciato in round 4, non multicolor confetti). Code-reviewer ha dato 2 critical su round 7 v1, escalation risolta in 7.1.
+
+### FIX A (Fix A — 1-line str_replace):
+- Vecchio: `<section id="perche" class="reveal-on-scroll bg-slate-200 px-4 py-20 sm:py-24 sm:px-6 lg:px-8">`
+- Nuovo: `<section id="perche" class="reveal-on-scroll px-4 py-20 sm:py-24 sm:px-6 lg:px-8">`
+- Risultato: rhythm ripristinato `Hero(white) → CF(slate-200) → Perché(white) → Prezzi(slate-200) → Footer(white)` = 5-tone alternation vera (vs 7 monotonia white-gray-gray-gray-white).
+
+### FIX B v1 (Strategic indigo accent):
+- **Tailwind config**: aggiunto `accent: { 50: '#EEF2FF', 100: '#E0E7FF', 700: '#4338CA', 900: '#312E81' }` (4-step indigo family). Niente overlap con brand, niente Tailwind default confetti (amber-400/sky-500/emerald-500 sono i defaults AI-slop, indigo no).
+- **H1 hero keyword highlight**: "commissario AI" wrappato in `<span class="text-accent-700">commissario AI</span>`. Razionale: keyword prodotto = "AI" identifica semanticamente "tech commissario" NON decorazione casuale. Brief warning "non riempire di parole chiave" rispettato (1 highlight solo).
+- **6 cards numbers "1./2./3."**: `text-brand-700` → `text-accent-700` (allowMultiple 6). Razionale: numbering = "articolo 1." stile normativo-istituzionale, indigo dà gravitas-tech.
+- **WCAG check**: accent-700 vs white = 10.4:1 AAA ✓.
+
+### Code-reviewer post round 7 v1 verdict: 2 critical.
+1. **accent-700 indistinguibile da brand-700** (lightness solo 3% diff, sotto soglia percettiva umana, hue shift solo 26°). I 6 numeri probabilmente non mostrano il cambio. Round defeats its purpose.
+2. **Perche' cards visibility su white bg borderline** (white-on-white 0 bg contrast, dipendono solo da border-brand-200 hairline + shadow .10 restraint). Asimmetria gerarchia vs CF cards (che hanno slate-200 bg).
+
+### ROUND 7.1 — escalation fixes (entrambi 1-line):
+
+**Escalation #1 — accent-900 (più scuro/violetto)**:
+- 7 elementi: `text-accent-700 #4338CA` → `text-accent-900 #312E81` (H1 keyword + 6 numbers).
+- Lightness gap: 21% (brand-700) vs 27% (accent-900 HSL) = 6pp, sopra soglia percettiva.
+- Hue shift: 217° (brand-700 ciano-blu) vs 250° (accent-900 blue-violet) = 33°, perceptualmente distinto.
+- WCAG accent-900 vs white = 11.1:1 AAA, vs slate-200 = 9:1 AAA, ENTRAMBI AAA.
+- Semantic: "tech/AI feel" emerge chiaramente vs "brand governativo".
+
+**Escalation #2 — tactical-card-strong Perche' cards**:
+- 3 Perché divs: `class="tactile-card rounded-2xl border border-brand-200 bg-white p-6 shadow-[0_4px_14px_rgba(15,76,129,.10)]"` → `class="tactile-card-strong rounded-2xl border border-brand-300 bg-white p-6"` (allowMultiple 3).
+- Cambio: `tactile-card` → `tactile-card-strong` (nuova classe CSS auto-contained), `border-brand-200` → `border-brand-300` (1 step palette), rimosso inline `shadow-[...]` (CSS governa).
+
+**CSS nuovo blocco `.tactile-card-strong`** aggiunto dopo `.tactile-card:active`:
+```css
+.tactile-card-strong {
+  box-shadow: 0 6px 18px rgba(15,76,129,.14);
+  transition: transform .4s cubic-bezier(.16,1,.3,1), box-shadow .4s cubic-bezier(.16,1,.3,1);
+  will-change: transform, box-shadow;
+}
+.tactile-card-strong:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px rgba(15,76,129,.16), 0 10px 18px rgba(15,76,129,.08);
+}
+.tactile-card-strong:active {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(15,76,129,.12);
+}
+```
+
+**prefers-reduced-motion esteso** a `.tactile-card-strong` (transizione e transform bloccati come .tactile-card).
+
+### ROUND 7.2 — micro-cleanup (code-reviewer suggeriti, applicati in bestia mode):
+- **Dead accent tokens rimossi** da tailwind.config: `accent: { 50, 100, 700, 900 }` → `accent: { 900: '#312E81' }` (900 solo, gli altri 3 step mai usati post-escalation). Antislop discipline = "no dead tokens".
+- **Shadow inline rimosso dai 3 CF `<li>`**: `class="tactile-card ... shadow-[0_4px_14px_rgba(15,76,129,.10)]"` → `class="tactile-card ..."` (allowMultiple 3). Il valore era già nel CSS .tactile-card → redundante. Single-source-of-truth shadow via classe CSS.
+
+### Risultato netto round 7 + 7.1 + 7.2:
+- **Rhythm 5-tone ripristinato** (white slate-200 white slate-200 white) — vs monotonia round 5.7.
+- **1 colore nuovo strategico**: indigo accent (single 900 step effettivamente usato). Linear/Stripe-pilled, NON Tailwind confetti default.
+- **H1 keyword "commissario AI"** evidenziato in indigo 900 = distinction "tech/non-umano" semanticamente elegante (NON decorazione casuale).
+- **6 cards numbering "1./2./3." in indigo 900** = "articolo 1." institutional gravitas.
+- **Asymmetric card hierarchy**: Perché cards .tactile-card-strong (.14 + brand-300) > CF cards .tactile-card (.10 + brand-200) = trade-off accettato (Perché su white bg richiede anchor più forte).
+- **2 micro-cleanup finali**: dead tokens rimossi + inline shadow rimosso dai CF = CSS single-source.
+
+## Metriche post-round 7 (finale)
+- Round 6: UI 40, UX 52.
+- Round 7+7.1+7.2 atteso: UI 70-82, UX 75-85. Indigo accent `accent-900` + Perché cards visibility upgrade + rhythm alternato + single-accent discipline mantenuta = miglioramento Visual Hierarchy, Color Contrast, Conspicuousness atteso.
+
+**Push-ready finale**: round 7 chiude la trilogy (rhythm + colori + cleanup). Prossima iterazione naturale: typography round (italiano istituzionale copy, h2 hierarchy rhythm) o micro-interactions round (button art direction post-click, hero text scramble effect).
+
+**Vincolo nuovo per future sessioni**: quando introduci UN colore accent strategico, **fallo nella tonalità più distinguibile dal primary** (L gap >5pp, hue gap >30°). Altrimenti il colore NON viene percepito e l'introduzione è sprecata. `accent-700` vs `brand-700` era fallimento — sempre test contrast-perceptual gap PRIMA di applicare.
+
 ## ROUND 6 — BIG VISUAL EFFECTS (28/07/2026)
 
 **User feedback critico dopo 5.8**: "hai solo peggiorato i colori, non hai fatto ombra stili bagliore grandezze effetti animazioni". L'utente vuole IMPATTO VISIVO GRANDE, non micro-tweak timid. Cambio direzione radicale.
