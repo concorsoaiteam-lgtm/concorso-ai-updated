@@ -58,3 +58,29 @@ Tutti i punti della TODO list originale di Ruman sono stati fatti (10/10). Vedi 
 - Em-dash è bandito dal framework anti-slop (`design-taste-frontend`): zero in copy, headline, button, pillola, FAQ.
 - Quando rimuovi classi CSS che davano padding/bg/border, COMPENSA inline con classi Tailwind esplicite altrimenti gli elementi su dark bg diventano invisibili (caso reale: rimozione `.premium-panel` da articoli Come Funziona → ho dovuto aggiungere `border border-white/10 bg-white/5 p-7`).
 - `shadow-glowBlue` token rimosso da tailwind.config, ma il `class="shadow-glowBlue"` era ancora usato su chat bubble hero (riga 257) → sostituito con `shadow-sm`. Sempre cercare residui per token rimossi.
+
+## EDITORIAL REWRITE (28/07/2026 - round 2)
+**Decisione**: il round 1 (rimozioni chirurgiche AI tells) ha portato il punteggio designmeter a 40/52 ma la pagina aveva ancora problemi strutturali (5 CTA con stesso intento, hero mockup fittizio, 8 sezioni dense). Le rimozioni superficiali non bastano quando la pagina è sovraccarica.
+
+**Soluzione**: riscrittura completa di `public/index.html` come landing editoriale minimal.
+- Da ~700 a ~290 righe (-59%)
+- 8 sezioni → 4 sezioni (Navbar + Hero + Come Funziona + Prezzi)
+- 5+ CTA con stesso intento → 4 CTA distinti (navbar / hero / prezzi-Pro / sticky mobile — sono entry-point, non duplicati)
+- Hero mockup chat finta rimosso completamente
+- Hero centered con H1 specifico + subhead onesto
+- Pricing tight 2-card senza tier fantasma
+- Footer leggero strip trust + 3 link
+
+**Lezione importante**: per landing page SaaS dense come ConcorsoAI, **la riduzione di sezioni batte il pattern-by-pattern fixing**. Una pagina con 8 sezioni non può arrivare a UI>60 perché il designmeter la flagga come "decision fatigue".
+
+**File di riferimento**:
+- `slop-registry.md` — dettaglio rimozioni e regole anti-slop
+- `public/index.html` — nuovo file (290 righe)
+- `public/css/landing.css` — pulito a 50 righe (solo classi usate)
+
+## Metriche post-rewrite
+- Round 0: UI 28, UX 50, Overall 28
+- Round 1 (rimozione AI tells): UI 40, UX 52, Overall 44 (+56% UI)
+- Round 2 (editorial minimal): atteso UI 55-65, UX 60-70, Overall 58-68
+
+**Vincolo nuovo per future sessioni**: prima di aggiungere qualcosa alla landing, chiediti *"serve davvero?"*. Default = no.

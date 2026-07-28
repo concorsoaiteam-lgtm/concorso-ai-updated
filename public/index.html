@@ -4,31 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ConcorsoAI — Esercitati all'orale con un commissario AI</title>
-  <meta name="description" content="L'orale ti terrorizza? Carica il bando del tuo concorso e simula con un commissario AI. Feedback immediato su chiarezza, struttura e contenuto. 3 simulazioni gratis." />
+  <meta name="description" content="Simula l'orale del tuo concorso pubblico italiano con un commissario AI basato sul tuo bando. Feedback immediato. 3 simulazioni gratis." />
   <meta name="keywords" content="concorso pubblico, simulazione orale, commissario AI, preparazione concorso, esame orale, diritto amministrativo, ripetizioni concorso" />
   <meta name="robots" content="index, follow" />
-  <meta name="author" content="ConcorsoAI" />
-  <meta name="theme-color" content="#F7FBFF" />
+  <link rel="canonical" href="https://concorso-ai.vercel.app/" />
 
   <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%230F4C81'/><stop offset='100%' style='stop-color:%232563EB'/></linearGradient></defs><rect width='100' height='100' rx='24' fill='url(%23g)'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='system-ui' font-weight='900'>CA</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%230F4C81'/><stop offset='100%' style='stop-color:%232563EB'/></linearGradient></defs><rect width='100' height='100' rx='24' fill='url(%23g)'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='system-ui' font-weight='900'>CA</text></svg>" />
 
   <!-- Open Graph -->
   <meta property="og:title" content="ConcorsoAI — Esercitati all'orale con un commissario AI" />
-  <meta property="og:description" content="Carica il bando del tuo concorso e simula con un commissario AI. Feedback su chiarezza, struttura e contenuto. 3 simulazioni gratis, senza carta." />
+  <meta property="og:description" content="Simula l'orale del tuo concorso pubblico con un commissario AI basato sul tuo bando. 3 simulazioni gratis." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://concorso-ai.vercel.app" />
   <meta property="og:locale" content="it_IT" />
-  <meta property="og:site_name" content="ConcorsoAI" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="ConcorsoAI — Esercitati all'orale con un commissario AI" />
-  <meta name="twitter:description" content="Carica il bando, simula, ricevi feedback immediato. 3 simulazioni gratis." />
-  <link rel="canonical" href="https://concorso-ai.vercel.app/" />
-  <meta property="og:image" content="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 630'><defs><linearGradient id='og' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%23071D33'/><stop offset='100%25' style='stop-color:%232563EB'/></linearGradient></defs><rect width='1200' height='630' fill='url(%23og)'/><text x='600' y='280' font-size='72' text-anchor='middle' fill='white' font-family='Inter,system-ui' font-weight='900'>ConcorsoAI</text><text x='600' y='370' font-size='28' text-anchor='middle' fill='rgba(255,255,255,.82)' font-family='Inter,system-ui' font-weight='600'>Simula l&apos;orale e vinci il concorso pubblico</text></svg>" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
 
-  <!-- Font: Inter -->
+  <!-- Font: Geist -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.3/index.min.css" rel="stylesheet" />
@@ -40,7 +31,6 @@
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
           colors: {
             brand: {
               50: '#F7FBFF', 100: '#EAF4FF', 200: '#D6E8FF', 300: '#A9CDF8',
@@ -64,8 +54,8 @@
 
   <link rel="stylesheet" href="/css/landing.css" />
 
-  <!-- Sticky mobile CTA styles + scroll margin + FAQ animations -->
   <style>
+    /* Sticky mobile CTA iOS safe-area */
     .sticky-mobile-cta {
       position: fixed;
       bottom: 0;
@@ -74,7 +64,6 @@
       z-index: 60;
       display: none;
       padding: 12px 16px;
-      /* iOS safe-area-inset-bottom: solleva la CTA sopra la barra HOME di iPhone */
       padding-bottom: max(12px, env(safe-area-inset-bottom));
       background: rgba(255,255,255,.96);
       border-top: 1px solid #D6E8FF;
@@ -86,33 +75,17 @@
       body { padding-bottom: 72px; }
     }
 
-    #come-funziona, #prezzi, #faq { scroll-margin-top: 5rem; }
+    /* iOS smooth scroll handled by html.scroll-smooth */
 
-    .faq-chevron { transition: transform .3s cubic-bezier(.2,.8,.2,1); }
-    .faq-item[open] .faq-chevron { transform: rotate(180deg); }
-    .faq-answer {
-      overflow: hidden;
-      max-height: 0;
-      transition: max-height .35s cubic-bezier(.2,.8,.2,1), opacity .25s ease;
-      opacity: 0;
-    }
-    .faq-item[open] .faq-answer {
-      max-height: 300px;
-      opacity: 1;
-    }
+    /* Reduced motion */
     @media (prefers-reduced-motion: reduce) {
-      .faq-chevron, .faq-answer { transition: none; }
-      .faq-item[open] .faq-answer { max-height: none; opacity: 1; }
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        transition-duration: .001ms !important;
+      }
     }
   </style>
 
-  <!-- GSAP -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-
-
-  <!-- Schema.org structured data (FAQ, Product, SoftwareApplication, Reviews) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -122,7 +95,7 @@
         "name": "ConcorsoAI",
         "applicationCategory": "EducationalApplication",
         "operatingSystem": "Web",
-        "description": "Simulatore orale AI per concorsi pubblici italiani. Carica il bando, affronta un commissario AI, ricevi feedback su chiarezza, struttura e contenuto.",
+        "description": "Simulatore orale AI per concorsi pubblici italiani basato sul bando del candidato. Feedback immediato su chiarezza, struttura e contenuto.",
         "url": "https://concorso-ai.vercel.app",
         "offers": {
           "@type": "AggregateOffer",
@@ -135,583 +108,146 @@
       {
         "@type": "FAQPage",
         "mainEntity": [
-          {"@type":"Question","name":"Le domande sono davvero sul mio bando?","acceptedAnswer":{"@type":"Answer","text":"Sì. Carichi il PDF, il sistema estrae i capitoli e li passa al commissario AI. Se il tuo bando parla di Appalti pubblici, le domande saranno su quello. Non è un quiz generico."}},
-          {"@type":"Question","name":"Quanto è realistico il commissario?","acceptedAnswer":{"@type":"Answer","text":"Abbiamo 3 livelli. Il livello Realistico è calibrato come una commissione vera: domande aperte, tempo limitato, il commissario ti interrompe se vai fuori traccia."}},
-          {"@type":"Question","name":"E se il commissario sbaglia?","acceptedAnswer":{"@type":"Answer","text":"Puoi dirlo. C'è un pulsante Non sono d'accordo sotto ogni feedback. Il commissario prende nota e corregge la rotta."}},
-          {"@type":"Question","name":"Devo pagare subito?","acceptedAnswer":{"@type":"Answer","text":"No. 3 simulazioni gratis al mese, per sempre, senza carta. Se vuoi fare sul serio passi a Pro a 12,99 euro al mese. Disdici quando vuoi."}}
+          {"@type":"Question","name":"Le domande sono davvero sul mio bando?","acceptedAnswer":{"@type":"Answer","text":"Sì. Carichi il PDF del tuo bando e il commissario AI interroga sui contenuti specifici del concorso, non su quiz generici."}},
+          {"@type":"Question","name":"E se il commissario sbaglia?","acceptedAnswer":{"@type":"Answer","text":"Lo correggi: ogni feedback ha un pulsante per aggiustare la rotta quando l'AI fraintende."}},
+          {"@type":"Question","name":"Devo pagare subito?","acceptedAnswer":{"@type":"Answer","text":"No. 3 simulazioni gratis al mese, senza carta. Se vuoi fare sul serio passi a Pro a 12,99 euro al mese, disdicibile quando vuoi."}}
         ]
       }
     ]
   }
   </script>
-<script src="/js/telemetry.js"></script>
 </head>
 
-<body class="font-sans antialiased selection:bg-brand-200 selection:text-brand-900">
-  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-brand-800 focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-white">Salta al contenuto</a>
+<body class="bg-white font-sans antialiased text-ink-900 selection:bg-brand-200 selection:text-brand-900">
+
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-brand-900 focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-white">Salta al contenuto</a>
 
   <!-- NAVBAR -->
-  <header class="sticky top-0 z-50 border-b border-brand-200/80 bg-white/86 backdrop-blur-xl shadow-sm shadow-brand-200/40">
-    <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Navigazione principale">
-      <a href="#" class="rounded-xl text-xl font-extrabold tracking-tight text-brand-900 outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white" aria-label="ConcorsoAI home">
-        Concorso<span class="text-gradient">AI</span>
+  <header class="border-b border-brand-200 bg-white">
+    <nav class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Navigazione principale">
+      <a href="/" class="text-lg font-bold tracking-tight text-ink-900" aria-label="ConcorsoAI home">
+        Concorso<span class="bg-gradient-to-r from-brand-700 to-brand-500 bg-clip-text text-transparent">AI</span>
       </a>
-
-      <div class="hidden items-center gap-1 lg:flex">
-        <a href="#come-funziona" class="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-50 hover:text-brand-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Come funziona</a>
-        <a href="#prezzi" class="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-50 hover:text-brand-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Prezzi</a>
-        <a href="#faq" class="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-50 hover:text-brand-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">FAQ</a>
+      <div class="hidden items-center gap-6 sm:flex">
+        <a href="#come-funziona" class="text-sm font-semibold text-ink-700 hover:text-brand-700">Come funziona</a>
+        <a href="#prezzi" class="text-sm font-semibold text-ink-700 hover:text-brand-700">Prezzi</a>
+        <a href="auth.html" class="text-sm font-semibold text-ink-700 hover:text-brand-700">Accedi</a>
+        <a href="auth.html?mode=register" class="btn-primary rounded-xl px-4 py-2 text-sm font-bold">Prova gratis</a>
       </div>
-
-      <div class="hidden items-center gap-3 lg:flex">
-        <a href="auth.html" class="rounded-xl border border-brand-200 bg-white px-4 py-2 text-sm font-bold text-brand-700 transition hover:border-brand-300 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Accedi</a>
-        <a href="auth.html?mode=register" class="btn-primary rounded-xl px-4 py-2 text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white">Crea un profilo</a>
-      </div>
-
-      <button id="menu-toggle" type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-brand-200 bg-white text-brand-800 transition hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 lg:hidden" aria-label="Apri menu" aria-expanded="false" aria-controls="mobile-menu">
-        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path class="menu-icon-open" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
-          <path class="menu-icon-close hidden" stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18" />
-        </svg>
-      </button>
+      <a href="auth.html?mode=register" class="btn-primary rounded-xl px-4 py-2 text-sm font-bold sm:hidden">Prova gratis</a>
     </nav>
-
-    <div id="mobile-menu" class="hidden border-t border-brand-200 bg-white/96 px-4 py-4 lg:hidden">
-      <div class="mx-auto flex max-w-7xl flex-col gap-2">            <a href="#come-funziona" class="mobile-link rounded-xl px-3 py-3 text-sm font-bold text-brand-700 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Come funziona</a>
-        <a href="#prezzi" class="mobile-link rounded-xl px-3 py-3 text-sm font-bold text-brand-700 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Prezzi</a>
-        <a href="#faq" class="mobile-link rounded-xl px-3 py-3 text-sm font-bold text-brand-700 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">FAQ</a>
-        <div class="mt-3 grid grid-cols-2 gap-3">
-          <a href="auth.html" class="mobile-link rounded-xl border border-brand-200 bg-white px-4 py-3 text-center text-sm font-bold text-brand-700 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Accedi</a>
-          <a href="auth.html?mode=register" class="mobile-link btn-primary rounded-xl px-4 py-3 text-center text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Crea un profilo</a>
-        </div>
-      </div>
-    </div>
   </header>
 
   <main id="main">
-    <!-- HERO -->
-    <section class="relative overflow-hidden pb-20 pt-14 sm:pb-28 sm:pt-20 lg:pb-32 lg:pt-24">
-      <!-- decorazione permanente rimossa: ❌ particelle/blur decorativi persistenti (anti-slop) -->
 
-      <div class="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
-        <div class="reveal">
-          <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white/82 px-3 py-1.5 text-xs font-extrabold text-brand-700 shadow-sm shadow-brand-200/50 backdrop-blur">
-            <span class="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true"></span>
-            <span>Fatto in Italia · 3 simulazioni gratis</span>
-          </div>
-
-          <h1 class="max-w-3xl text-4xl font-black leading-[1.04] tracking-[-0.045em] text-brand-900 sm:text-5xl md:text-6xl lg:text-7xl">
-            L'orale ti terrorizza? Esercitati con un <span class="text-gradient">commissario AI</span> prima del giorno vero.
-          </h1>
-
-          <p class="mt-6 max-w-2xl text-base leading-8 text-brand-700 sm:text-lg lg:text-xl">
-            Carichi il bando del tuo concorso. Il commissario AI ti interroga. Ricevi un feedback immediato su chiarezza, struttura e contenuto.
-          </p>
-
-          <div class="mt-8 inline-flex flex-col overflow-hidden rounded-2xl border-2 border-brand-700 shadow-[0_8px_0_#0B2A4A] hover:border-brand-900 hover:shadow-[0_10px_0_#0B2A4A] hover:-translate-y-0.5 transition-all sm:flex-row sm:items-stretch">
-            <a href="auth.html?mode=register" class="btn-primary group inline-flex items-center justify-center gap-2 px-7 py-5 text-lg font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white sm:min-w-[20rem]">
-              Prova la prima simulazione gratis
-              <svg class="h-5 w-5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-            </a>
-            <a href="#come-funziona" class="inline-flex items-center justify-center gap-2 border-t border-brand-200 bg-white px-5 py-5 text-base font-black text-brand-700 transition hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white sm:min-w-[14rem] sm:border-l sm:border-t-0">
-              Scopri come funziona ↓
-            </a>
-          </div>
-
-          <p class="mt-4 text-sm font-bold leading-6 text-brand-600">
-            3 simulazioni gratis · 10 minuti l'una · Nessuna carta · Disdici quando vuoi
-          </p>
+    <!-- 1. HERO -->
+    <section class="px-4 py-20 sm:py-28 lg:py-32 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-3xl text-center">
+        <h1 class="text-4xl font-bold leading-[1.08] tracking-tight text-ink-900 sm:text-5xl lg:text-6xl">
+          Esercitati all'orale di un concorso pubblico con un commissario AI.
+        </h1>
+        <p class="mx-auto mt-6 max-w-2xl text-base leading-7 text-ink-700 sm:text-lg lg:text-xl">
+          Carica il bando del tuo concorso. Un commissario AI ti interroga sui contenuti del bando vero, non su quiz generici. Ricevi feedback immediato su chiarezza, struttura e contenuto: le stesse tre metriche che la commissione valuta davvero.
+        </p>
+        <div class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <a href="auth.html?mode=register" class="btn-primary rounded-xl px-7 py-4 text-base font-bold">Prova gratis: 3 simulazioni</a>
+          <a href="#come-funziona" class="text-sm font-semibold text-ink-700 underline-offset-4 hover:text-brand-700 hover:underline">Scopri come funziona ↓</a>
         </div>
-
-        <!-- Hero mockup: simulation interface -->
-        <div class="reveal lg:justify-self-end" style="transition-delay: 120ms;">
-          <div class="relative mx-auto w-full max-w-[34rem]">
-            <div class="p-3">
-              <div class="overflow-hidden rounded-[1.55rem] border border-brand-200 bg-white">
-                <div class="flex items-center gap-3 border-b border-brand-200 bg-brand-50 px-4 py-3 sm:px-5">
-                  <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-black text-white">CA</div>
-                  <div class="min-w-0">
-                    <p class="text-sm font-black text-brand-900">Commissario AI</p>
-                    <p class="mt-0.5 truncate text-[11px] font-semibold text-ink-500">Sessione 03 · Diritto Amministrativo</p>
-                    <div class="mt-1 flex items-center gap-1.5 text-xs font-semibold text-brand-600">
-                      <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                      <span>Simulazione in corso · 12:34</span>
-                    </div>
-                  </div>
-                  <button class="mic-pulse ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100" aria-label="Microfono attivo">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm7-3a7 7 0 0 1-14 0m7 7v3m-4 0h8" /></svg>
-                  </button>
-                </div>
-
-                <div class="space-y-3.5 px-4 py-4 sm:px-5">
-                  <div class="grid grid-cols-3 gap-2 text-center text-[11px] font-black text-brand-700">
-                    <div class="rounded-xl border border-brand-200 bg-white px-2 py-2">Domanda 4/12</div>
-                    <div class="rounded-xl border border-brand-200 bg-white px-2 py-2" style="font-variant-numeric: tabular-nums;">Timer 12:34</div>
-                    <div class="rounded-xl border border-brand-200 bg-white px-2 py-2">Voce attiva</div>
-                  </div>
-
-                  <div class="max-w-[88%] rounded-2xl rounded-tl-sm border border-brand-200 bg-brand-50 p-4 text-sm leading-6 text-brand-900 shadow-sm">
-                    Buongiorno. Cominciamo con una domanda di diritto amministrativo: ci parli del principio di trasparenza nella Pubblica Amministrazione.
-                  </div>
-
-                  <div class="ml-auto max-w-[88%] rounded-2xl rounded-tr-sm bg-brand-600 p-4 text-sm leading-6 text-white shadow-sm">
-                    <div class="flex items-start gap-2">
-                      <svg class="mt-0.5 h-4 w-4 shrink-0 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm7-3a7 7 0 0 1-14 0" /></svg>
-                      <span>Il principio di trasparenza è sancito dall'art. 1 della legge 241/90...</span>
-                    </div>
-                    <div class="wave mt-3 flex h-8 items-center gap-1.5" aria-hidden="true">
-                      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                    </div>
-                  </div>
-
-                  <div class="max-w-[88%] rounded-2xl rounded-tl-sm border border-brand-200 bg-brand-50 p-4 text-sm leading-6 text-brand-900 shadow-sm">
-                    Bene. Mi può fare un esempio pratico di come si applica nell'accesso agli atti?
-                  </div>
-
-                  <div class="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm">
-                    <h4 class="text-sm font-black text-brand-900">Feedback live</h4>
-                    <div class="mt-4 space-y-3.5">
-                      <div>
-                        <div class="mb-1.5 flex justify-between text-xs font-bold text-brand-700"><span>Chiarezza</span><span class="text-emerald-600" style="font-variant-numeric: tabular-nums;">8/10</span></div>
-                        <div class="h-2 rounded-full bg-brand-100"><div class="h-2 w-[80%] rounded-full bg-emerald-500"></div></div>
-                        <p class="mt-2 text-[11px] leading-5 text-brand-700">Idea chiara, hai collegato bene i concetti.</p>
-                      </div>
-                      <div>
-                        <div class="mb-1.5 flex justify-between text-xs font-bold text-brand-700"><span>Struttura</span><span class="text-amber-600" style="font-variant-numeric: tabular-nums;">7/10</span></div>
-                        <div class="h-2 rounded-full bg-brand-100"><div class="h-2 w-[70%] rounded-full bg-amber-400"></div></div>
-                        <p class="mt-2 text-[11px] leading-5 text-brand-700">Parti dal generale, poi cala nel caso concreto.</p>
-                      </div>
-                      <div>
-                        <div class="mb-1.5 flex justify-between text-xs font-bold text-brand-700"><span>Contenuto</span><span class="text-emerald-600" style="font-variant-numeric: tabular-nums;">9/10</span></div>
-                        <div class="h-2 rounded-full bg-brand-100"><div class="h-2 w-[90%] rounded-full bg-emerald-500"></div></div>
-                        <p class="mt-2 text-[11px] leading-5 text-brand-700">Hai citato l'art. 1 L. 241/90, perfetto.</p>
-                      </div>
-                    </div>
-                    <button type="button" class="mt-3 w-full rounded-lg border border-brand-200 bg-white px-2 py-1.5 text-[11px] font-bold text-brand-700 transition hover:border-brand-300 hover:bg-brand-50">Non sono d'accordo · correggi</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <p class="mt-6 text-sm font-medium text-ink-500">Nessuna carta richiesta. Cifratura server UE. Made in Italy.</p>
       </div>
     </section>
 
-    <!-- Sticky mobile CTA -->
-    <div class="sticky-mobile-cta">
-      <a href="auth.html?mode=register" class="btn-primary flex items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-black">
-        Prova gratis — 3 simulazioni
-        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-      </a>
-    </div>
+    <!-- 2. COME FUNZIONA -->
+    <section id="come-funziona" class="border-t border-brand-200 bg-brand-50 px-4 py-20 sm:py-24 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-5xl">
+        <div class="max-w-2xl">
+          <h2 class="text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">Come funziona.</h2>
+          <p class="mt-4 text-base text-ink-700">Tre passaggi per esercitarti con il commissario AI prima del giorno dell'orale.</p>
+        </div>
 
-    <!-- BADGE FIDUCIA -->
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-wrap items-center justify-center gap-8 py-8">
-        <div class="flex items-center gap-3 text-sm font-bold text-brand-700">
-          <svg class="h-6 w-6 text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0 1 12 2.944a11.955 11.955 0 0 1-8.618 3.04A12.02 12.02 0 0 0 3 9c0 5.69 3.972 10.472 9 11.646 5.028-1.174 9-5.956 9-11.646 0-1.36-.226-2.668-.64-3.884z" />
-          </svg>
-          <span>Dati crittografati</span>
-        </div>
-        <div class="flex items-center gap-2 text-sm font-bold text-brand-700">
-          <svg class="h-6 w-6 text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 0 1 2 2v1a2 2 0 0 0 2 2 2 2 0 0 1 2 2v2.945M8 3.935V5.5A2.5 2.5 0 0 0 10.5 8h.5a2 2 0 0 1 2 2 2 2 0 0 0 4 0 2 2 0 0 1 2-2h1.064M15 20.488V18a2 2 0 0 1 2-2h3.064M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
-          </svg>
-          <span>Server in UE (GDPR)</span>
-        </div>
-        <div class="flex items-center gap-2 text-sm font-bold text-brand-700">
-          <svg class="h-6 w-6 text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z" />
-          </svg>
-          <span>Nessuna carta richiesta</span>
-        </div>
-        <div class="flex items-center gap-2 text-sm font-bold text-brand-700">
-          <svg class="h-6 w-6 text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 0 0 1.946-.806 3.42 3.42 0 0 1 4.438 0 3.42 3.42 0 0 0 1.946.806 3.42 3.42 0 0 1 3.138 3.138 3.42 3.42 0 0 0 .806 1.946 3.42 3.42 0 0 1 0 4.438 3.42 3.42 0 0 0-.806 1.946 3.42 3.42 0 0 1-3.138 3.138 3.42 3.42 0 0 0-1.946.806 3.42 3.42 0 0 1-4.438 0 3.42 3.42 0 0 0-1.946-.806 3.42 3.42 0 0 1-3.138-3.138 3.42 3.42 0 0 0-.806-1.946 3.42 3.42 0 0 1 0-4.438 3.42 3.42 0 0 0 .806-1.946 3.42 3.42 0 0 1 3.138-3.138z" />
-          </svg>
-          <span>Disdici quando vuoi</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- SOCIAL PROOF -->
-    <section class="bg-brand-50 py-10">
-      <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="reveal text-sm font-semibold text-ink-700">Ogni simulazione usa il tuo bando vero. Il commissario AI è calibrato su 3 livelli di difficoltà reale. Feedback su chiarezza, struttura e contenuto. Sono le tre metriche che la commissione valuta davvero.</p>
+        <ol class="mt-10 grid gap-6 sm:grid-cols-3">
+          <li class="rounded-2xl border border-brand-200 bg-white p-6">
+            <span class="text-2xl font-bold text-brand-700">1.</span>
+            <h3 class="mt-3 text-base font-bold text-ink-900">Carica il bando</h3>
+            <p class="mt-2 text-sm leading-6 text-ink-700">PDF, testo libero o materie generiche. Il commissario AI estrae i contenuti specifici del tuo concorso.</p>
+          </li>
+          <li class="rounded-2xl border border-brand-200 bg-white p-6">
+            <span class="text-2xl font-bold text-brand-700">2.</span>
+            <h3 class="mt-3 text-base font-bold text-ink-900">Affronta l'orale</h3>
+            <p class="mt-2 text-sm leading-6 text-ink-700">Domande a voce o per iscritto. Timer realistico. Le domande sono calibrate sul bando che hai caricato.</p>
+          </li>
+          <li class="rounded-2xl border border-brand-200 bg-white p-6">
+            <span class="text-2xl font-bold text-brand-700">3.</span>
+            <h3 class="mt-3 text-base font-bold text-ink-900">Ricevi feedback</h3>
+            <p class="mt-2 text-sm leading-6 text-ink-700">Chiarezza, struttura, contenuto. Sai subito cosa migliorare alla prossima sessione.</p>
+          </li>
+        </ol>
       </div>
     </section>
 
-    <!-- IL PROBLEMA -->
-    <section class="bg-white py-20 sm:py-28">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="reveal mx-auto max-w-3xl text-center">
+    <!-- 3. PREZZI -->
+    <section id="prezzi" class="border-t border-brand-200 px-4 py-20 sm:py-24 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-4xl">
+        <h2 class="text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">Prezzi semplici.</h2>
+        <p class="mt-4 text-base text-ink-700">Parti gratis. Passa a Pro quando sei pronto a fare sul serio.</p>
 
-          <h2 class="mt-4 text-3xl font-bold tracking-[-0.035em] text-brand-900 sm:text-4xl lg:text-5xl">Hai studiato tutto. Poi arriva l'orale.</h2>
-          <p class="mt-5 text-base leading-8 text-brand-700 sm:text-lg">La prova scritta è andata. Ma il pensiero di sederti davanti alla commissione ti blocca. Non sei solo.</p>
-        </div>
-
-        <div class="mt-14 grid gap-5 md:grid-cols-3">
-          <article class="reveal card-hover rounded-3xl border border-brand-200 bg-white p-6 shadow-card sm:p-8">
-            <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 shadow-sm"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13h3l2-6 4 12 3-9 2 3h4" /></svg></div>
-            <h3 class="text-xl font-black text-brand-900">Ansia da prestazione</h3>
-            <p class="mt-3 text-sm leading-7 text-brand-700">Ti trema la voce, dimentichi cose che sapevi perfettamente. La pressione della commissione è reale.</p>
-          </article>
-          <article class="reveal card-hover rounded-3xl border border-brand-200 bg-white p-6 shadow-card sm:p-8" style="transition-delay:90ms;">
-            <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 shadow-sm"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9.5 9a2.8 2.8 0 1 1 4.3 2.36c-.93.57-1.8 1.26-1.8 2.64M12 18h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg></div>
-            <h3 class="text-xl font-black text-brand-900">Paura dell'imprevisto</h3>
-            <p class="mt-3 text-sm leading-7 text-brand-700">Le domande che non ti aspetti. L'argomento che hai ripassato meno. Il vuoto. E se capitasse proprio a te?</p>
-          </article>
-          <article class="reveal card-hover rounded-3xl border border-brand-200 bg-white p-6 shadow-card sm:p-8" style="transition-delay:180ms;">
-            <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-100 text-brand-600 shadow-sm"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM5 21a7 7 0 0 1 14 0" /></svg></div>
-            <h3 class="text-xl font-black text-brand-900">Nessuno con cui esercitarti</h3>
-            <p class="mt-3 text-sm leading-7 text-brand-700">Amici e parenti non conoscono la materia. Ti alleni da solo, davanti allo specchio.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- PRIMA / DOPO -->
-    <section class="py-20 sm:py-24">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="reveal mx-auto max-w-3xl text-center">
-
-          <h2 class="mt-4 text-3xl font-bold tracking-[-0.035em] text-brand-900 sm:text-4xl lg:text-5xl">Non studi di più. Ti alleni meglio.</h2>
-          <p class="mt-5 text-base leading-8 text-brand-700 sm:text-lg">La differenza è passare dal ripasso passivo a una simulazione che ti costringe a esporre, ragionare e migliorare.</p>
-        </div>
-        <div class="mt-12 grid gap-6 lg:grid-cols-2">
-          <article class="reveal flex flex-col rounded-3xl border border-slate-200 bg-white p-7 shadow-card">
-            <div class="mb-6 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-black uppercase tracking-[.18em] text-slate-600">Prima</div>
-            <h3 class="text-2xl font-bold text-brand-900">Ripassi da solo e speri che basti.</h3>
-            <ul class="mt-6 space-y-4 text-sm leading-7 text-brand-700 flex-1">
-              <li class="flex gap-3"><span class="mt-1 h-2 w-2 rounded-full bg-slate-300"></span><span>Leggi appunti e manuali, ma non provi davvero l'esposizione orale.</span></li>
-              <li class="flex gap-3"><span class="mt-1 h-2 w-2 rounded-full bg-slate-300"></span><span>Non sai quanto sei chiaro finché qualcuno non ti ascolta.</span></li>
-              <li class="flex gap-3"><span class="mt-1 h-2 w-2 rounded-full bg-slate-300"></span><span>Le domande impreviste restano la parte che fa più paura.</span></li>
+        <div class="mt-10 grid gap-6 lg:grid-cols-2">
+          <article class="rounded-2xl border border-brand-200 bg-white p-7 shadow-card">
+            <h3 class="text-xl font-bold text-ink-900">Free</h3>
+            <p class="mt-1 text-sm text-ink-500">Per provare senza impegno.</p>
+            <p class="mt-6 text-4xl font-bold text-ink-900">€0</p>
+            <p class="text-sm font-medium text-ink-500">per sempre</p>
+            <ul class="mt-6 space-y-2 text-sm text-ink-700">
+              <li>3 simulazioni gratis al mese</li>
+              <li>Tutte le materie, tutti i livelli di difficoltà</li>
+              <li>Feedback su 3 metriche live</li>
             </ul>
-            <a href="auth.html" class="btn-secondary mt-auto inline-flex w-full items-center justify-center rounded-2xl px-5 py-3.5 text-sm font-black shadow-md hover:shadow-lg">Prova gratis:
-              <svg class="ml-1.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
+            <a href="auth.html?mode=register" class="btn-secondary mt-7 inline-flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-bold">Inizia gratis</a>
           </article>
-          <article class="reveal flex flex-col rounded-3xl border border-brand-200 bg-brand-50 p-7 shadow-card" style="transition-delay:120ms;">
-            <div class="mb-6 inline-flex rounded-full bg-brand-100 px-3 py-1 text-xs font-black uppercase tracking-[.18em] text-brand-700">Con ConcorsoAI</div>
-            <h3 class="text-2xl font-bold text-brand-900">Simuli, rispondi, ricevi feedback.</h3>
-            <ul class="mt-6 space-y-4 text-sm leading-7 text-brand-700 flex-1">
-              <li class="flex gap-3"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Ti alleni con domande generate dai materiali che carichi.</span></li>
-              <li class="flex gap-3"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Pratichi l'esposizione a voce o per iscritto, con timer.</span></li>
-              <li class="flex gap-3"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Capisci cosa migliorare su chiarezza, struttura e contenuto.</span></li>
+
+          <article class="rounded-2xl border-2 border-brand-600 bg-white p-7 shadow-card">
+            <h3 class="text-xl font-bold text-ink-900">Pro</h3>
+            <p class="mt-1 text-sm text-ink-500">Per chi vuole fare sul serio.</p>
+            <p class="mt-6 text-4xl font-bold text-ink-900">€12.99 <span class="text-lg font-semibold text-ink-700">/mese</span></p>
+            <p class="mt-1 text-sm font-semibold text-ink-700">€0,43 al giorno. Oppure €119/anno.</p>
+            <ul class="mt-6 space-y-2 text-sm text-ink-700">
+              <li>Tutto di Free</li>
+              <li>Simulazioni senza limiti</li>
+              <li>Storico progressi e aree da migliorare</li>
+              <li>Report PDF delle simulazioni</li>
             </ul>
-            <a href="auth.html" class="btn-primary mt-auto inline-flex w-full items-center justify-center rounded-2xl px-5 py-3.5 text-sm font-black">Prova gratis:
-              <svg class="ml-1.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
-          </article>
-        </div>
-      </div>
-    </section>
-
-
-
-    <!-- COME FUNZIONA -->
-    <section id="come-funziona" class="bg-brand-900 py-20 sm:py-28">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="reveal mx-auto max-w-3xl text-center">
-
-          <h2 class="mt-4 text-3xl font-bold tracking-[-0.035em] text-white sm:text-4xl lg:text-5xl">Tre passaggi. Un orale vero.</h2>
-          <p class="mt-5 text-base leading-8 text-brand-200 sm:text-lg">Setup tecnico zero: carichi il bando, scegli la modalità e il commissario AI comincia.</p>
-        </div>
-
-        <div class="mt-14 grid gap-6 lg:grid-cols-3">
-          <article class="reveal relative rounded-2xl border border-white/10 bg-white/5 p-7 sm:p-8">
-
-            <div class="relative">
-              <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-white shadow-sm">
-                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M8.5 13.5h7M8.5 17h4"/></svg>
-              </div>
-              <h3 class="text-xl font-black text-white">Carica il tuo bando</h3>
-              <p class="mt-3 text-sm leading-7 text-brand-200">PDF, testo libero o materie generali. Il commissario AI estrae i contenuti e prepara le domande sui tuoi materiali veri.</p>
-
-            </div>
-          </article>
-
-          <article class="reveal relative rounded-2xl border border-white/10 bg-white/5 p-7 sm:p-8" style="transition-delay:90ms;">
-
-            <div class="relative">
-              <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-white shadow-sm">
-                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm7-3a7 7 0 0 1-14 0"/></svg>
-              </div>
-              <h3 class="text-xl font-black text-white">Affronta l'orale</h3>
-              <p class="mt-3 text-sm leading-7 text-brand-200">Il commissario ti interroga a voce o per iscritto. Timer realistico. Le domande sono calibrate sui tuoi argomenti deboli, non su quelli che conosci già.</p>
-
-            </div>
-          </article>
-
-          <article class="reveal relative rounded-2xl border border-white/10 bg-white/5 p-7 sm:p-8" style="transition-delay:180ms;">
-
-            <div class="relative">
-              <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-white shadow-sm">
-                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13h3l2-6 4 12 3-9 2 3h4"/></svg>
-              </div>
-              <h3 class="text-xl font-black text-white">Ricevi feedback reale</h3>
-              <p class="mt-3 text-sm leading-7 text-brand-200">Tre metriche live su chiarezza, struttura e contenuto. Puoi correggere il commissario quando sbaglia. Niente voti a caso: solo margini concreti di miglioramento.</p>
-
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- Sezione demo rimossa: il placeholder "Demo video in arrivo" danneggiava il punteggio
-         designmeter (Conversion Clarity - Severe Risk). Da rivedere quando avremo un video vero. -->
-
-    <!-- PREZZI -->
-    <section id="prezzi" class="bg-brand-50 py-20 sm:py-28">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="reveal mx-auto max-w-3xl text-center">
-
-          <h2 class="mt-4 text-3xl font-bold tracking-[-0.035em] text-brand-900 sm:text-4xl lg:text-5xl">Parti gratis. Cresci quando sei pronto.</h2>
-          <p class="mt-5 text-base leading-8 text-brand-700 sm:text-lg">Scegli il piano adatto a te. Puoi partire gratis e passare a Pro quando sei pronto. Nessuna carta richiesta per iniziare.</p>
-          </div>
-
-        <div class="mt-12 grid gap-6 lg:grid-cols-2 lg:max-w-4xl mx-auto">
-          <article class="reveal rounded-3xl border border-brand-200 bg-white p-7 shadow-card">
-            <h3 class="text-xl font-black text-brand-900">Free</h3>
-            <p class="mt-2 text-sm font-semibold text-brand-700">Per provare senza impegno.</p>
-            <p class="mt-5 text-4xl font-black tracking-tight text-brand-900">€0</p>
-            <p class="mt-1 text-sm font-semibold text-brand-600">per sempre</p>
-            <ul class="mt-6 space-y-3 text-sm leading-6 text-brand-700">
-              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>3 simulazioni gratis al mese</li>
-              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Tutte le materie e i 3 livelli di difficoltà</li>
-              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Feedback su 3 metriche live</li>
-              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Profilo base della dashboard</li>
-              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Per sempre gratuito, niente carta</li>
-            </ul>
-            <a href="auth.html" class="btn-secondary mt-7 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3.5 font-black text-base shadow-md hover:shadow-lg">Inizia gratis <svg class="ml-1 h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
-          </article>
-
-          <article class="reveal rounded-3xl border-2 border-brand-500 bg-white p-7 shadow-card" style="transition-delay:90ms;">
-            <h3 class="text-xl font-black text-brand-900">Pro</h3>
-            <p class="mt-2 text-sm font-semibold text-brand-700">Per chi vuole fare sul serio.</p>
-            <p class="mt-5 text-4xl font-black tracking-tight text-brand-900" style="font-variant-numeric: tabular-nums;">€12,99<span class="text-lg font-extrabold text-brand-700">/mese</span></p>
-            <p class="mt-1 text-sm font-semibold text-brand-700">Equivale a <span class="text-emerald-600 font-black">€0,43 al giorno</span></p>
-            <p class="mt-1 text-sm font-semibold text-brand-600">oppure €119/anno <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-emerald-700"><svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1a1 1 0 011 1v2.586l2.293-2.293a1 1 0 111.414 1.414L11 7.414V11a1 1 0 11-2 0V7.414L6.293 5.707a1 1 0 011.414-1.414L10 6.586V4V2a1 1 0 011-1z"/><path d="M4 11a6 6 0 1112 0v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/></svg> Risparmia il 24%</span></p>
-            <ul class="mt-6 space-y-3 text-sm leading-6 text-brand-700">
-              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Tutto del piano Free</li>
-              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Simulazioni senza limiti</li>
-              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Storico progressi e aree da migliorare</li>
-              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Durata estesa e difficoltà avanzata</li>
-              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Report PDF delle simulazioni</li>
-              <li class="flex gap-2"><span class="check-circle"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Grafico evoluzione punteggi nel tempo</li>
-            </ul>
-            <a href="auth.html?mode=register" class="btn-primary mt-7 inline-flex w-full items-center justify-center rounded-2xl px-5 py-4 text-base font-black">Inizia la tua prima simulazione · €12,99/mese <svg class="ml-1 h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
-            <div class="mt-3 flex items-center justify-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800">
-              <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            <p class="mt-5 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+              <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
               Disdici con 1 clic. Nessun vincolo.
-            </div>
+            </p>
+            <a href="auth.html?mode=register" class="btn-primary mt-7 inline-flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-bold">Crea il tuo profilo candidato</a>
           </article>
-
-
-        </div>
-
-        <!-- Comparison table -->
-        <div class="reveal mx-auto mt-16 max-w-4xl">
-          <p class="text-center text-xs font-extrabold uppercase tracking-[.18em] text-brand-500">Confronta i piani nel dettaglio</p>
-          <div class="mt-6 overflow-x-auto rounded-3xl border border-brand-200 bg-white shadow-card">
-            <table class="w-full text-left text-sm leading-relaxed">
-              <thead>
-                <tr class="border-b border-brand-200 text-xs font-extrabold uppercase tracking-wider text-brand-600">
-                  <th class="p-4 sm:p-5 w-[34%]">Feature</th>
-                  <th class="p-4 sm:p-5 text-center">Free</th>
-                  <th class="p-4 sm:p-5 text-center bg-brand-50 text-brand-800">Pro</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-brand-100">
-                <tr><td class="p-4 sm:p-5 font-bold text-brand-800">Simulazioni AI</td><td class="p-4 sm:p-5 text-center text-brand-600">5/mese</td><td class="p-4 sm:p-5 text-center bg-brand-50 font-bold text-brand-800">Illimitate</td></tr>
-                <tr><td class="p-4 sm:p-5 font-bold text-brand-800">Materie caricabili</td><td class="p-4 sm:p-5 text-center text-brand-600">Fino a 3</td><td class="p-4 sm:p-5 text-center bg-brand-50 font-bold text-brand-800">Illimitate</td></tr>
-                <tr><td class="p-4 sm:p-5 font-bold text-brand-800">Feedback live (3 metriche)</td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center bg-brand-50"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td></tr>
-                <tr><td class="p-4 sm:p-5 font-bold text-brand-800">Statistiche e grafici</td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-brand-300" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#D6E8FF"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center bg-brand-50"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td></tr>
-                <tr><td class="p-4 sm:p-5 font-bold text-brand-800">Report PDF</td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-brand-300" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#D6E8FF"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center bg-brand-50"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td></tr>
-                <tr><td class="p-4 sm:p-5 font-bold text-brand-800">Durata simulazione estesa</td><td class="p-4 sm:p-5 text-center"><svg class="mx-auto h-4 w-4 text-brand-300" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#D6E8FF"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td><td class="p-4 sm:p-5 text-center bg-brand-50"><svg class="mx-auto h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#16A34A"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></td></tr>
-                
-              </tbody>
-            </table>
-          </div>
         </div>
       </div>
     </section>
 
-    <!-- FAQ -->
-    <section id="faq" class="py-20 sm:py-28">
-      <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div class="reveal text-center">
-
-          <h2 class="mt-4 text-3xl font-bold tracking-[-0.035em] text-brand-900 sm:text-4xl">Domande vere. Risposte oneste.</h2>
-        </div>
-
-        <div class="mt-12 space-y-4">
-          <details class="reveal faq-item group rounded-2xl border border-brand-200 bg-white p-6 shadow-card">
-            <summary class="flex cursor-pointer items-start gap-4 list-none">
-              <svg class="faq-chevron mt-1 h-5 w-5 shrink-0 text-brand-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
-              <div class="flex-1">
-                <h3 class="text-base font-black text-brand-900">Le domande sono davvero sul mio bando?</h3>
-              </div>
-            </summary>
-            <div class="faq-answer">
-              <p class="mt-3 text-sm leading-7 text-brand-700">Sì. Carichi il PDF, il sistema estrae i capitoli e li passa al commissario AI. Se il tuo bando parla di Appalti pubblici, le domande saranno su quello. Non è un quiz generico.</p>
-            </div>
-          </details>
-
-          <details class="reveal faq-item group rounded-2xl border border-brand-200 bg-white p-6 shadow-card" style="transition-delay:60ms;">
-            <summary class="flex cursor-pointer items-start gap-4 list-none">
-              <svg class="faq-chevron mt-1 h-5 w-5 shrink-0 text-brand-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
-              <div class="flex-1">
-                <h3 class="text-base font-black text-brand-900">Quanto è realistico il commissario?</h3>
-              </div>
-            </summary>
-            <div class="faq-answer">
-              <p class="mt-3 text-sm leading-7 text-brand-700">Abbiamo 3 livelli. Il livello Realistico è calibrato come una commissione vera: domande aperte, tempo limitato, il commissario ti interrompe se vai fuori traccia. Non è una chat amichevole. È pratica vera.</p>
-            </div>
-          </details>
-
-          <details class="reveal faq-item group rounded-2xl border border-brand-200 bg-white p-6 shadow-card" style="transition-delay:120ms;">
-            <summary class="flex cursor-pointer items-start gap-4 list-none">
-              <svg class="faq-chevron mt-1 h-5 w-5 shrink-0 text-brand-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
-              <div class="flex-1">
-                <h3 class="text-base font-black text-brand-900">E se il commissario sbaglia?</h3>
-              </div>
-            </summary>
-            <div class="faq-answer">
-              <p class="mt-3 text-sm leading-7 text-brand-700">Puoi dirlo. C'è un pulsante "Non sono d'accordo" sotto ogni feedback. Il commissario prende nota e corregge la rotta nella domanda successiva. Non è infallibile e lo sappiamo.</p>
-            </div>
-          </details>
-
-          <details class="reveal faq-item group rounded-2xl border border-brand-200 bg-white p-6 shadow-card" style="transition-delay:180ms;">
-            <summary class="flex cursor-pointer items-start gap-4 list-none">
-              <svg class="faq-chevron mt-1 h-5 w-5 shrink-0 text-brand-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
-              <div class="flex-1">
-                <h3 class="text-base font-black text-brand-900">Devo pagare subito?</h3>
-              </div>
-            </summary>
-            <div class="faq-answer">
-              <p class="mt-3 text-sm leading-7 text-brand-700">No. 3 simulazioni gratis al mese, per sempre, senza carta. Se vuoi fare sul serio (più simulazioni, storico progressi), passi a Pro a €12,99/mese. Disdici quando vuoi.</p>
-            </div>
-          </details>
-        </div>
-      </div>
-    </section>
-
-    <!-- CTA FINALE -->
-    <section class="bg-brand-50 py-16 sm:py-20">
-      <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-        <div class="reveal relative rounded-2xl border border-brand-200 bg-white p-10 sm:p-14 shadow-card">
-          <h2 class="text-3xl font-black tracking-[-0.035em] text-brand-900 sm:text-4xl">Pronto a sentirti più sicuro?</h2>
-          <p class="mt-4 text-base leading-8 text-brand-700 sm:text-lg">Il commissario AI lavora sui tuoi materiali veri. Niente finti passi, niente giudizi. Solo pratica reale prima della commissione.</p>
-          <a href="auth.html?mode=register" class="btn-primary mt-8 inline-flex items-center justify-center rounded-2xl px-7 py-4 text-base font-black">Prova gratis: 3 simulazioni incluse <svg class="ml-1 h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></a>
-          <p class="mt-5 text-xs font-bold text-brand-600">Setup in 2 minuti · Disdici quando vuoi · Nessuna carta richiesta</p>
-        </div>
-      </div>
-    </section>
   </main>
 
-  <!-- FOOTER -->
-  <footer class="border-t border-brand-200 bg-white/70 py-12">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="grid gap-8 md:grid-cols-3">
-        <div>
-          <p class="text-lg font-extrabold tracking-tight text-brand-900">Concorso<span class="text-gradient">AI</span></p>
-          <p class="mt-2 text-sm leading-7 text-brand-700">Preparazione orale per concorsi pubblici italiani. Con un commissario AI che lavora sui tuoi materiali veri.</p>
-        </div>
-        <div>
-          <p class="text-xs font-black uppercase tracking-[.18em] text-brand-600">Prodotto</p>
-          <ul class="mt-4 space-y-2 text-sm font-semibold text-brand-700">
-            <li><a href="#come-funziona" class="footer-link">Come funziona</a></li>
-            <li><a href="#prezzi" class="footer-link">Piani</a></li>
-            <li><a href="#prezzi" class="footer-link">Prezzi</a></li>
-            <li><a href="#faq" class="footer-link">FAQ</a></li>
-          </ul>
-        </div>
-        <div>
-          <p class="text-xs font-black uppercase tracking-[.18em] text-brand-600">Account</p>
-          <ul class="mt-4 space-y-2 text-sm font-semibold text-brand-700">
-            <li><a href="auth.html" class="footer-link">Accedi</a></li>
-            <li><a href="auth.html?mode=register" class="footer-link">Crea un profilo</a></li>
-            <li><a href="auth.html" class="footer-link">Dashboard</a></li>
-          </ul>
-        </div>
+  <!-- Trust strip + Footer -->
+  <footer class="border-t border-brand-200 bg-brand-50 px-4 py-10 sm:px-6 lg:px-8">
+    <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 sm:flex-row">
+      <div class="text-center sm:text-left">
+        <p class="text-base font-bold text-ink-900">ConcorsoAI</p>
+        <p class="mt-1 text-xs text-ink-500">Made in Italy · Server UE (GDPR) · Nessuna carta richiesta</p>
       </div>
-      <div class="mt-8 flex flex-wrap justify-center gap-4 text-xs font-semibold text-brand-600">
-        <a href="terms.html" class="footer-link">Termini di Servizio</a>
-        <a href="privacy.html" class="footer-link">Privacy Policy</a>
-      </div>
-      <div class="mt-6 border-t border-brand-200 pt-6 text-center text-xs font-semibold text-brand-600">
-        ConcorsoAI · Made in Italy · Built for civil servants in training.
-      </div>
+      <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-ink-700">
+        <li><a href="terms.html" class="hover:text-brand-700 hover:underline">Termini</a></li>
+        <li><a href="privacy.html" class="hover:text-brand-700 hover:underline">Privacy</a></li>
+        <li><a href="auth.html" class="hover:text-brand-700 hover:underline">Accedi</a></li>
+      </ul>
     </div>
+    <p class="mt-6 text-center text-xs text-ink-500">© 2026 ConcorsoAI · Tutti i diritti riservati</p>
   </footer>
 
-  <script>
-    // Reveal on scroll (rispetta prefers-reduced-motion)
-    if ('IntersectionObserver' in window) {
-      const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            revealObserver.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-      document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
-    } else {
-      document.querySelectorAll('.reveal').forEach((el) => el.classList.add('is-visible'));
-    }
+  <!-- Sticky mobile CTA -->
+  <div class="sticky-mobile-cta">
+    <a href="auth.html?mode=register" class="btn-primary flex items-center justify-center rounded-2xl px-5 py-3.5 text-sm font-bold">Prova gratis: 3 simulazioni</a>
+  </div>
 
-    // Mobile menu toggle
-    const menuToggle = document.getElementById('menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
-    if (menuToggle && mobileMenu) {
-      menuToggle.addEventListener('click', () => {
-        const isOpen = !mobileMenu.classList.contains('hidden');
-        mobileMenu.classList.toggle('hidden', isOpen);
-        menuToggle.setAttribute('aria-expanded', String(!isOpen));
-      });
-      document.querySelectorAll('.mobile-link').forEach((link) => {
-        link.addEventListener('click', () => {
-          mobileMenu.classList.add('hidden');
-          menuToggle.setAttribute('aria-expanded', 'false');
-        });
-      });
-    }
-
-    // Page transitions per CTA principali
-    document.querySelectorAll('a[href^="auth.html"]').forEach(link => {
-      link.addEventListener('click', (e) => {
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        e.preventDefault();
-        const href = link.getAttribute('href');
-        gsap.to('body', {
-          opacity: 0,
-          y: -20,
-          duration: 0.25,
-          ease: 'power2.in',
-          onComplete: () => { window.location.href = href; }
-        });
-      });
-    });
-  </script>
-  <!-- CTA loading state -->
-  <script>
-    document.querySelectorAll('a.btn-primary, a.btn-secondary, .btn-primary, .btn-secondary').forEach(function(btn) {
-      // Only apply to CTA buttons that link to auth
-      if (!btn.href || !btn.href.includes('auth')) return;
-      var originalHTML = btn.innerHTML;
-      btn.addEventListener('click', function() {
-        if (btn.classList.contains('btn-loading')) return;
-        btn.classList.add('btn-loading');
-        btn.style.pointerEvents = 'none';
-        btn.style.opacity = '0.7';
-        var spinner = document.createElement('span');
-        spinner.innerHTML = '<svg class="spinner h-4 w-4 animate-spin inline-block" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>';
-        btn.innerHTML = '';
-        btn.appendChild(spinner);
-        btn.appendChild(document.createTextNode(' Caricamento...'));
-      });
-    });
-  </script>
 </body>
 </html>

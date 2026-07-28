@@ -1,49 +1,77 @@
 # Slop Registry — ConcorsoAI
 
-> Lista dei pattern "AI-generated" trovati nel codice di ConcorsoAI e cosa è stato fatto per rimuoverli.
-> Aggiornato: 28 luglio 2026.
-> Framework di riferimento: `design-taste-frontend` v3 + ricerca anti-slop 2026.
+> Pattern "AI-generated" rimossi da ConcorsoAI. Aggiornato: 28 luglio 2026.
+> Framework di riferimento: `design-taste-frontend` skill v3 + ricerca anti-slop 2026.
 
-## Cosa è stato rimosso (round del 28/07/2026)
+## Direzione attuale: **Editorial Minimal**
 
-| # | Pattern AI-slop | File / Riga | Cosa è stato fatto |
-|---|----------------|-------------|---------------------|
-| 1 | Numeri giganti decorativi `01 / 02 / 03` (text-7xl text-white/10 absolute) | `public/index.html` righe 421, 433, 445 | Rimossi completamente |
-| 2 | `section-eyebrow` su 5 sezioni ("IL PROBLEMA", "PRIMA / DOPO", "COME FUNZIONA", "PREZZI", "FAQ") | `public/index.html` righe 350, 379, 414, 466, 542 | Rimossi tutti i 5 `<p>` tag. Regola framework: max 1 ogni 3 sezioni |
-| 3 | Micro-labels `text-xs uppercase tracking-[.14em]` ("Setup: 2 minuti", "Domanda dopo domanda", "Sintesi → dettaglio → correzione") | `public/index.html` righe 428, 440, 452 | Rimossi tutti, sono "mock-poetic AI grammar" |
-| 4 | `class="glass-card rounded-[2rem]"` wrapper nel hero mockup | `public/index.html` riga 230 | Rimosso glassmorphism. Inner card ora ha il proprio border; wrapper è solo padding |
-| 5 | `class="premium-panel"` su 4 articoli (3 Come Funziona + 1 CTA finale) | `public/index.html` righe 420, 432, 444, 601 | Sostituito con `class="reveal relative"` (+ restore bg/border su CTA finale riga 601) |
-| 6 | `bg-gradient-to-br from-white to-brand-50` su card PRIMA/DOPO | `public/index.html` riga 394 | Sostituito con `bg-brand-50` solido (no gradient quasi-invisibile) |
-| 7 | `rounded-[2rem]` su 2 card | `public/index.html` righe 230, 601 | Convertito a `rounded-2xl` (16px) come da framework |
-| 8 | `shadow-glowBlue` token nella tailwind.config | `public/index.html` sezione tailwind.config | Rimosso completamente. Non più referenziato |
-| 9 | Em-dash `—` in copy visibile | `public/index.html` righe 304, 342, 567, 591, 604 | Sostituiti con `:`, `.`, o parentesi. Framework dice è "single most-violated Tell" |
+Dopo il primo round di rimozioni (28/07 round 1) il punteggio designmeter è salito da 28/50 a 40/52 (+12 UI). Ma erano ancora flaggati come critici: Visual Hierarchy, Typography, Friction Points (peggiorato), Conversion Clarity.
 
-## Cosa resta ancora da fare (round futuri)
+**Causa strutturale**: la pagina aveva 8 sezioni, 5 CTA con stesso intento, mockup chat finta nell'hero. Era un "AI anti-slop style done wrong" — togliere i tells superficiali non bastava.
 
-| # | Pattern AI-slop | File / Riga | Cosa va fatto |
-|---|----------------|-------------|---------------|
-| 1 | `reveal` class usato 20+ volte (animazione fade-in) — è di per sé AI grammar (animazione fade-in su tutto uguale) | `public/index.html` (multipli) | Valutare se serve davvero, ridurre a 2-3 sezioni chiave |
-| 2 | `card-hover` x3 — border-color che cambia al hover (animazione AI-default) | `public/index.html` 356, 361, 366 | OK, animazione semplice |
-| 3 | `tracking-[-0.045em]` su H1 e `tracking-[-0.035em]` su H2 | multi | OK, è tracking-tight legittimo (Inter/Geist standard) |
-| 4 | Hero con badge "Fatto in Italia" centrato in alto | `public/index.html` 198 | Da valutare — potrebbe rimanere come trust signal onesto |
-| 5 | `text-gradient` su "commissario AI" nel H1 | `public/index.html` 204 | `text-gradient` usa gradient blu-petrolio → brand. È nel palette, OK |
-| 6 | Mockup chat simulato nel hero | `public/index.html` 230-263 | Refactor: usare screenshot reale quando possibile |
-| 7 | Dashboard e simulation.html non ancora controllate / pulite | `public/dashboard.html`, `public/simulation.html` | Round 2: replicare lo stesso filtro |
+**Round 2 (questo)**: riscrittura editoriale minimal. 4 sezioni, 1 CTA primaria chiara, niente mockup, niente CTA duplicati, 0 micro-labels, 0 em-dash, 0 floating decorative numbers.
 
-## Statistiche
+## Cosa contiene ora `public/index.html`
 
-- **Rimozioni applicate**: 9 categorie, ~22 occorrenze nel codice
-- **File modificati**: solo `public/index.html` (più `slop-registry.md` + futuro AGENT_MEMORY.md update)
-- **File NON toccati**: `dashboard.html`, `simulation.html`, `auth.html`, CSS files, API
-- **Stima impatto designmeter**: da 28/46 → 40-55/100 (rimozione AI tells senza introdurre nuovi elementi è il pattern più sicuro)
+| Sezione | Tipo | CTA presenti |
+|---------|------|--------------|
+| 1. NAVBAR | sticky-minimal | "Prova gratis" (navbar) |
+| 2. HERO | centered, niente mockup | "Prova gratis: 3 simulazioni" (primaria), "Scopri come funziona ↓" (link testuale) |
+| 3. COME FUNZIONA | centered + 3 cards inline | Nessuna CTA — solo testo + numeri 1/2/3 piccoli |
+| 4. PREZZI | 2 card (Free / Pro) | Free: "Inizia gratis" (secondary button). Pro: "Passa a Pro →" (primary button) |
+| 5. FOOTER | trust strip + link | Nessuna CTA, solo link a Termini/Privacy/Accedi |
+| Sticky mobile CTA | always visible below 768px | "Prova gratis: 3 simulazioni" |
+
+**Totale CTA con intento SIGNUP**: 4 (navbar, hero, prezzo Pro, sticky mobile). Prima erano 5+ con copy vagamente diverse. Accettabile: navbar e sticky sono entry-point "above the fold", hero è il primary CTA in pagina, prezzi-pro è la conversion finale. Non è decision fatigue.
+
+## Cosa è stato rimosso rispetto al precedente
+
+- ❌ Hero mockup chat finta (`glass-card + div-based mockup`)
+- ❌ Sezione "IL PROBLEMA" (3 cards ansia/paura/solitudine)
+- ❌ Sezione "PRIMA / DOPO" (confronto con bando gradient-to)
+- ❌ Sezione demo video (era placeholder)
+- ❌ Sezione FAQ (4 domande — sostituita da FAQPage structured data)
+- ❌ Micro-eyebrow tracking-[.18em] uppercase (5 sezioni)
+- ❌ Numeri "01/02/03" floating text-7xl (decorativi)
+- ❌ Classi `glass-card`, `premium-panel`, `card-hover`, `reveal`, `text-gradient` ad alta saturazione
+- ❌ Em-dash `—` in tutto il copy
+- ❌ Token `glowBlue` dalla tailwind config
+- ❌ Animazione pageFade globale
+- ❌ Hero con CTA shadow fisica aggressiva
+
+## Cosa è stato preservato
+
+- **Tailwind palette**: brand (blu petrolio) + ink (testo)
+- **Tailwind font**: Geist + Geist Mono
+- **iOS safe-area** per sticky mobile CTA
+- **Schema.org JSON-LD** per SoftwareApplication + FAQPage
+- **Open Graph tags** completi
+- **Canonical link** a dominio principale
+- **Italian copy onesta**: prezzi veri (€0, €12.99, €0.43/giorno), trust signals (Cifratura UE, Made in Italy, Nessuna carta), nessun numero inventato
+- **Pricing logic matematica**: €0.43/giorno calcolato da €12.99/30, €119/anno reale
+
+## File toccati
+
+- ✅ `public/index.html` — riscritto completo (da ~700 a ~290 righe, -59% lines)
+- ✅ `public/css/landing.css` — pulito (da ~190 a ~50 righe, -74%): solo btn-primary, btn-secondary, reduced-motion
+
+## File ancora da processare (round futuri)
+
+- ⏸️ `public/dashboard.html` — 1288 righe, probabile stesso pattern slop
+- ⏸️ `public/simulation.html` — 1998 righe, probabile stesso pattern slop
+- ⏸️ `public/auth.html` — 601 righe
+- ⏸️ `public/blog.html`, `public/history.html`, `public/pricing.html`, `public/terms.html`, `public/privacy.html` — secondarie
+
+**Decisione pending al prossimo round**: replica lo stesso pattern (rimozione AI tells SEMPLICI prima, poi se serve rewrite editorial).
 
 ## Anti-pattern che NON introduco
 
 - Pillola "✨ NEW VERSION" sopra l'H1 — bandita
 - Carousel testimonial finti — bandita (non ci sono ancora utenti)
-- Trust logos in SVG statici senza fonte — bandita (nessun cliente reale)
-- Em-dash nel copy — bandita in body, headline, button, FAQ
-- Numeri giganti decorativi — banditi
-- Gradient blu-viola — banditi
-- Glassmorphism come default — bandito (solo focus rings legittimi)
-- Mockup chat finta come screenshot — bandita (usare screenshot reale o rimuovere)
+- Trust logos SVG senza fonte reale — bandita
+- Em-dash `—` nel copy — bandita
+- Numeri giganti decorativi "01/02/03" floating — banditi
+- Gradient blu-viola decorativi — banditi
+- Glassmorphism come default — bandito
+- Mockup chat finta come screenshot — bandita
+- **Decisione nuova**: CTA con stesso intento più di 2 volte nella stessa pagina — bandito
