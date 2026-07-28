@@ -18,7 +18,7 @@ a { text-decoration: none; }
 .btn-primary {
   background: #0F4C81;
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(15, 76, 129, .18);
+  box-shadow: 0 4px 14px rgba(15, 76, 129, .25);
   transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
   display: inline-flex;
   align-items: center;
@@ -26,8 +26,8 @@ a { text-decoration: none; }
 }
 .btn-primary:hover {
   background: #0B3A63;
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(15, 76, 129, .32);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(15, 76, 129, .35);
 }
 .btn-primary:active {
   transform: translateY(0);
@@ -36,6 +36,7 @@ a { text-decoration: none; }
 .btn-primary:focus-visible {
   outline: 2px solid #071D33;
   outline-offset: 4px;
+  box-shadow: 0 0 0 8px rgba(11,58,99,.20);
 }
 
 .btn-secondary {
@@ -58,6 +59,25 @@ a { text-decoration: none; }
 .btn-secondary:focus-visible {
   outline: 2px solid #071D33;
   outline-offset: 4px;
+  box-shadow: 0 0 0 8px rgba(11,58,99,.20);
+}
+
+/* ---------------------------------------------------------------------------
+   Tactile cards (round 6 BIG VISUAL EFFECTS)
+   Smooth lift on hover with depth-tiered shadow escalation
+   --------------------------------------------------------------------------- */
+.tactile-card {
+  box-shadow: 0 4px 14px rgba(15,76,129,.10);
+  transition: transform .4s cubic-bezier(.16,1,.3,1), box-shadow .4s cubic-bezier(.16,1,.3,1);
+  will-change: transform, box-shadow;
+}
+.tactile-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(15,76,129,.12), 0 8px 16px rgba(15,76,129,.06);
+}
+.tactile-card:active {
+  transform: translateY(-1px);
+  box-shadow: 0 1px 4px rgba(15,76,129,.08);
 }
 
 /* ---------------------------------------------------------------------------
@@ -107,6 +127,18 @@ a { text-decoration: none; }
   animation: savings-pulse 3.2s ease-in-out infinite;
 }
 
+/* Hero CTA subtle pulse-breathing (round 6 BIG VISUAL EFFECTS)
+   4-second ultra-slow scale 1 → 1.02 → 1.
+   Imperceptible istantaneamente, attira occhio periferiale.
+   Rispettato da prefers-reduced-motion. */
+@keyframes subtle-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.02); }
+}
+.hero-cta-pulse {
+  animation: subtle-pulse 4s ease-in-out infinite;
+}
+
 /* Reduced motion: override all key motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -118,7 +150,14 @@ a { text-decoration: none; }
     opacity: 1 !important;
     transform: none !important;
   }
-  .savings-badge {
+  .savings-badge,
+  .hero-cta-pulse {
     animation: none !important;
+  }
+  .tactile-card {
+    transition: none !important;
+  }
+  .tactile-card:hover {
+    transform: none !important;
   }
 }

@@ -272,3 +272,57 @@ Quindi solo Perché (white bg) mantiene border-t.
 - Round 5-5.8 (borders + shadows + depth completo): atteso UI 68-78, UX 72-82. Cards depth escalation finale chiude il perimetro borders/shadows/elevation. Component stack completo: section bg < cards (.10) < Pro card (.12). Single-accent compliance mantenuta. Bestia mode pieno.
 
 **Push-ready finale**: dopo 5.8 il round 5 (borders + shadows + elevation) e' completo. Prossima iterazione naturale: typography round (eyebrows, h2 weights, prose rhythm) o interactivity round (button micro-anim, hover state art direction).
+
+## ROUND 6 — BIG VISUAL EFFECTS (28/07/2026)
+
+**User feedback critico dopo 5.8**: "hai solo peggiorato i colori, non hai fatto ombra stili bagliore grandezze effetti animazioni". L'utente vuole IMPATTO VISIVO GRANDE, non micro-tweak timid. Cambio direzione radicale.
+
+**Workflow**: Thinker-with-files ha letto lo stato corrente + pianificato 6 modifiche coordinate in bestia mode. Output = 6 cambi specifici con codice esatto. Applicati 12 cambi totali (6 HTML + 6 CSS) + 2 micro-fix reviewer = 14 modifiche totali.
+
+**Modifiche HTML (6) public/index.html**:
+1. **Tailwind config**: aggiunto `elevated: '0 40px 100px rgba(15,76,129,.18)'` in theme.extend.boxShadow.
+2. **H1 escalation**: text-4xl/5xl/6xl → text-5xl/6xl/7xl + font-semibold → font-bold + leading-[1.1] → leading-[1.05]. Hero H1 ora DOMINA.
+3. **Hero btn-primary**: aggiunto `hero-cta-pulse` class + size `px-7 py-4 text-base` → `px-8 py-5 text-lg`. Solo HERO (NON navbar/sticky/prezzi-Annuale).
+4. **Hero btn-secondary**: size escalation come sopra.
+5. **6 cards tactile-card**: aggiunto classe a 3 <li> in CF + 3 <div> in Perché (allowMultiple).
+6. **Pro card shadow-elevated**: `shadow-card` → `shadow-elevated` (100px blur .18 = altare visivo).
+
+**Modifiche CSS (6) public/css/landing.css**:
+7. **btn-primary resting shadow**: `0 2px 8px (.18)` → `0 4px 14px (.25)`. Bottone "salta" dalla pagina gia' al resting.
+8. **btn-primary:hover**: `translateY(-1px)` → `translateY(-3px)`, shadow `0 10px 24px (.32)` → `0 16px 40px (.35)`. Effetto gravitazionale reale.
+9. **btn-primary:focus-visible**: aggiunto box-shadow `0 0 0 8px rgba(11,58,99,.20)` (focus glow brand-700 con alpha 20%).
+10. **btn-secondary:focus-visible**: stesso glow.
+11. **Blocco .tactile-card**: nuova classe con transition `.4s cubic-bezier(.16,1,.3,1)` (spring iOS/Stripe). Hover: translateY(-4px) + 2-layer shadow `0 20px 40px .12 + 0 8px 16px .06`. Active: translateY(-1px) + shadow compresso (micro-fix E applicato).
+12. **@keyframes subtle-pulse + .hero-cta-pulse**: scale 1 → 1.02 → 1, 4s ease-in-out infinite (ultra-slow breathing). Reduced-motion block aggiornato.
+
+**Code-reviewer post-round**: verdict push-ready + 2 micro-fix opzionali. Entrambi applicati:
+- **E pressed feedback**: `.tactile-card:active` shadow compresso `0 1px 4px rgba(15,76,129,.08)` (vs default `0 4px 14px .10`) = vera feedback "pressed".
+- **E-bis CSS self-containment**: `.tactile-card` block ora ha box-shadow default nel CSS, non dipende piu' da inline class. Inline `shadow-[...]` su 6 cards ora ridondante ma harmless.
+
+**Risultato netto**: hero dominato da H1 7xl + 2 CTA oversize con shadow dramatic + focus glow + pulse breathing 4s. Cards "vive" con hover tattile 4px lift + 2-layer shadow + pressed feedback compresso. Pro pricing ha elevazione 100px blur = altare della pagina.
+
+**Bestia mode discipline mantenuta**:
+- Single-accent: tutti i nuovi effetti usano rgba(15,76,129,...) = brand-600 con alpha + rgba(11,58,99,...) = brand-700 con alpha. ZERO nuovi hex.
+- prefers-reduced-motion rispettato per .tactile-card, .hero-cta-pulse, .savings-badge.
+- No neon glow (no #00FF66), no glassmorphism pesante, no bouncy cartoon animations. Spring bezier (.16,1,.3,1) = iOS/Stripe feel.
+- Hero CTA pulse scale 1.02 = breathing sobrio, NON bounce.
+
+**Lezione fondamentale per future sessioni**: bestia mode = fare cose con IMPATTO VISIVO REALE, non micro-tweak timid.
+- Hero H1 sempre >= text-5xl base / text-7xl lg.
+- Hero CTA sempre px-8 py-5 minimum.
+- btn-primary resting shadow sempre >= 4px blur .25 alpha.
+- btn-primary:hover lift sempre >= 3px.
+- Cards con interactive hover devono avere .tactile-card class (4px lift + 2-layer shadow).
+- Focus state sempre con GLOW (box-shadow) oltre a outline.
+
+## Metriche post-round 6
+- Round 0: UI 28, UX 50
+- Round 1 (AI tells removal): UI 40, UX 52
+- Round 4 (colori bestia): atteso UI 55-65
+- Round 5 (borders + shadows): atteso UI 60-70
+- Round 5.8 (cards shadow escalation): atteso UI 65-75
+- **Round 6 (BIG VISUAL EFFECTS): atteso UI 72-85, UX 75-85**. Hero dominance + tactile cards + dramatic CTA shadow + focus glow = impatto visivo finalmente al livello che l'utente chiedeva da 2 round.
+
+**File modificati**:
+- public/index.html — 6 modifiche (tailwind config +1 token, H1 +1, hero buttons +2, cards tactile-card x 6 allowMultiple, Pro card +1)
+- public/css/landing.css — 6 modifiche + 2 micro-fix reviewer = 8 cambi totali
