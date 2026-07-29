@@ -192,25 +192,6 @@ a { text-decoration: none; }
 }
 
 /* -----------------------------------------------------------------------
-   Round 8 — Number bounce-in on card section reveal
-   When .reveal-on-scroll section becomes .is-visible, the 1./2./3. numbers
-   scale-in con spring overdone (1.18 overshoot). Single 0.45s animation,
-   percepito come "schiocco" di numero = vita alle cards.
-   ----------------------------------------------------------------------- */
-@keyframes num-bounce {
-  0%   { opacity: 0; transform: scale(.4); }
-  60%  { opacity: 1; transform: scale(1.18); }
-  100% { transform: scale(1); }
-}
-.num-bounce {
-  display: inline-block;
-  opacity: 0;
-}
-.reveal-on-scroll.is-visible .num-bounce {
-  animation: num-bounce .45s cubic-bezier(.16,1,.3,1) .15s forwards;
-}
-
-/* -----------------------------------------------------------------------
    Round 8 — Nav link underline grow on hover
    Pseudo ::after width 0->100% con transform-origin left. Feedback motion
    su tutte le navbar links prima "solo color-shift hover". 250ms ease-out.
@@ -285,8 +266,7 @@ a { text-decoration: none; }
   }
   .hero-rise > *,
   .reveal-on-scroll,
-  .word-rise,
-  .num-bounce {
+  .word-rise {
     opacity: 1 !important;
     transform: none !important;
   }
