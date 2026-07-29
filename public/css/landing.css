@@ -233,6 +233,50 @@ a { text-decoration: none; }
   width: 100%;
 }
 
+/* -----------------------------------------------------------------------
+   Round 9 — FAQ accordion (native <details>)
+   Pattern no-JS: <details>/<summary> è accessibile di default (keyboard +
+   screen reader). CSS aggiunge smooth expand + chevron rotate + tactile hover.
+   ----------------------------------------------------------------------- */
+.faq-item summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::marker { display: none; content: ''; }
+.faq-chevron {
+  display: inline-block;
+  transition: transform .25s cubic-bezier(.16,1,.3,1);
+  color: #0B3A63;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.faq-item[open] .faq-chevron {
+  transform: rotate(180deg);
+}
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height .4s ease, opacity .25s ease, margin-top .4s ease;
+}
+.faq-item[open] .faq-answer {
+  max-height: 600px;
+  opacity: 1;
+  margin-top: 1rem;
+}
+.faq-item {
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.faq-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(15,76,129,.10);
+}
+
 /* Reduced motion: override all key motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -257,5 +301,14 @@ a { text-decoration: none; }
   .tactile-card:hover,
   .tactile-card-strong:hover {
     transform: none !important;
+  }
+  .faq-item,
+  .faq-chevron,
+  .faq-answer {
+    transition: none !important;
+  }
+  .faq-item:hover {
+    transform: none !important;
+    box-shadow: none !important;
   }
 }
