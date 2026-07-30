@@ -4,14 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>ConcorsoAI — Passa l'orale. Senza ansia.</title>
-<meta name="description" content="Simula l'orale del tuo concorso pubblico con un commissario AI che fa le domande del tuo bando. 3 simulazioni gratis al mese, senza carta. Made in Italy." />
+<meta name="description" content="Simula l'orale del tuo concorso pubblico con un commissario AI che fa le domande del tuo bando. Made in Italy." />
 <meta name="theme-color" content="#FFFFFF" />
 <link rel="canonical" href="https://concorso-ai.vercel.app/" />
 
-<!-- Favicon inline: nessuna richiesta di rete -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231A73E8'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='system-ui' font-weight='900'%3EC%3C/text%3E%3C/svg%3E" />
 
-<!-- OpenGraph -->
 <meta property="og:title" content="ConcorsoAI — Passa l'orale. Senza ansia." />
 <meta property="og:description" content="Simula l'orale del concorso con un commissario AI che fa le domande del tuo bando." />
 <meta property="og:type" content="website" />
@@ -23,7 +21,7 @@
    ConcorsoAI Landing — minimal, anti-AI-slop
    - 0 librerie esterne (no Tailwind, no Google Fonts, no GSAP)
    - system-ui only (caricamento < 2s)
-   - palette ristretta: 1 cta rosso, 1 blu per link, 2 toni testo, 1 grigio bg
+   - palette ristretta: 1 cta blu, 2 toni testo, 1 grigio bg
    - niente gradienti, niente glassmorphism, niente parallasse
    ========================================================================== */
 
@@ -40,6 +38,7 @@
   --cta: #1A73E8;
   --cta-hover: #1457B0;
   --border: #E5E7EB;
+  --success: #16A34A;
 }
 
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
@@ -64,16 +63,13 @@ p { margin: 0; }
 a { color: inherit; text-decoration: none; }
 ul { list-style: none; padding: 0; margin: 0; }
 
-/* hidden helper per tab panel swap (visually-hidden-friendly) */
 .hidden { display: none !important; }
 
 .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
 @media (min-width: 768px) { .container { padding: 0 32px; } }
 
-/* ---------- Selezione testo ---------- */
-::selection { background: #FEE2E2; color: var(--text-primary); }
+::selection { background: #EFF6FF; color: var(--text-primary); }
 
-/* ---------- Skip link (accessibilità) ---------- */
 .skip-link {
   position: fixed; top: 8px; left: 8px;
   background: var(--text-primary); color: #fff;
@@ -122,15 +118,12 @@ ul { list-style: none; padding: 0; margin: 0; }
   align-items: center;
 }
 @media (min-width: 900px) {
-  .hero-grid { grid-template-columns: 1fr 1fr; gap: 64px; }
+  .hero-grid { grid-template-columns: 0.9fr 1.1fr; gap: 48px; }
 }
 
 .hero-text { max-width: 560px; }
 
-/* =================================================================
-   STAT CALLOUT (round 15): verified product-feature social-proof
-   "3 simulazioni gratuite al mese" — factual, no fake numbers
-   ================================================================= */
+/* Stat callout: benefit-first microcopy */
 .stat-callout {
   display: flex;
   align-items: center;
@@ -152,10 +145,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   letter-spacing: -0.02em;
   flex-shrink: 0;
 }
-.stat-callout-body {
-  flex: 1;
-  line-height: 1.35;
-}
+.stat-callout-body { flex: 1; line-height: 1.35; }
 .stat-callout-body strong { color: var(--text-primary); }
 .stat-callout-note {
   font-size: 11px;
@@ -177,7 +167,18 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 .trust-badge svg { width: 16px; height: 16px; flex-shrink: 0; }
 
-.hero h1 { margin-bottom: 20px; }
+.hero h1 { margin-bottom: 16px; }
+
+/* Hero tagline: terza riga sotto H1, eval-suggested */
+.hero-tagline {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  font-weight: 500;
+  margin-bottom: 18px;
+  line-height: 1.4;
+  max-width: 540px;
+}
 
 .hero-subtitle {
   font-size: 1.0625rem;
@@ -225,7 +226,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 .cta-link:hover { color: var(--accent-dark); }
 .cta-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 
-/* Hero FOMO microline (round 16): loss-aversion copy sotto CTA */
+/* Hero FOMO microline: loss-aversion copy sotto CTA */
 .hero-fomo {
   margin-top: 18px;
   font-size: 13px;
@@ -236,28 +237,204 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 
 /* =================================================================
-   HERO MOCKUP — Interactive 3-tab widget +30-40% larger (round 15)
-   mostra un esempio reale di simulazione:
-   Tab 1 "Domanda" → Tab 2 "La tua risposta" → Tab 3 "Report AI"
-   Vanilla JS, no GSAP, prefers-reduced-motion-safe.
+   HERO MOCKUP — Real SaaS dashboard look (round 17)
+   Header chrome + sidebar + status bar + tab content + animazioni
    ================================================================= */
 .mockup-card {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 30px;
-  box-shadow: 0 18px 48px rgba(15, 23, 42, .08);
-  max-width: 600px;
+  border-radius: 14px;
+  box-shadow:
+    0 24px 56px rgba(15, 23, 42, .10),
+    0 4px 14px rgba(15, 23, 42, .06),
+    inset 0 1px 0 rgba(255, 255, 255, .8);
+  max-width: 690px;
   width: 100%;
   margin: 0 auto;
+  overflow: hidden;
+  position: relative;
 }
+
+/* App chrome header: logo + breadcrumb + avatar */
+.mockup-chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+.mockup-chrome-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  flex: 1;
+}
+.mockup-chrome-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-primary);
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
+}
+.mockup-chrome-dot {
+  width: 8px; height: 8px;
+  background: var(--cta);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.mockup-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mockup-breadcrumb-current {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.mockup-breadcrumb-sep { opacity: .5; }
+
+.mockup-chrome-avatar {
+  width: 28px; height: 28px;
+  background: var(--cta);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: .02em;
+}
+
+/* Body: sidebar | main */
+.mockup-body {
+  display: flex;
+  align-items: stretch;
+  min-height: 380px;
+}
+
+/* Sidebar nav */
+.mockup-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  width: 56px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: var(--bg-alt);
+}
+.mockup-nav-item {
+  width: 44px; height: 44px;   /* WCAG 2.5.5: touch target */
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 0;
+  transition: background .15s ease, color .15s ease;
+}
+.mockup-nav-item:hover { background: rgba(26, 115, 232, .08); color: var(--text-primary); }
+.mockup-nav-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mockup-nav-item.is-active {
+  background: #EFF6FF;
+  color: var(--cta);
+}
+.mockup-nav-item svg { width: 18px; height: 18px; }
+
+/* Main content area */
+.mockup-main {
+  flex: 1;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Status bar: AI connection + timer + progress */
+.mockup-status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 10px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.mockup-status-item { display: inline-flex; align-items: center; gap: 6px; }
+.mockup-status-item.mockup-status-progress {
+  margin-left: auto;
+  flex: 1 1 140px;
+  max-width: 200px;
+}
+.mockup-status-dot {
+  width: 7px; height: 7px;
+  background: var(--success);
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: status-blink 2s ease-in-out infinite;
+}
+.mockup-status-timer {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .02em;
+}
+.timer-num { color: var(--cta); }
+.timer-of { color: var(--text-tertiary); font-weight: 500; }
+.mockup-progress-track {
+  display: block;
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+.mockup-progress-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--cta);
+  border-radius: 2px;
+  animation: progress-fill 7s ease-out infinite alternate;
+}
+.mockup-progress-text {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .mockup-eyebrow {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: .12em;
   font-weight: 800;
   color: var(--text-tertiary);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -269,20 +446,20 @@ ul { list-style: none; padding: 0; margin: 0; }
   display: inline-block;
 }
 
-/* Tab switcher: nav a 3 stati */
+/* Tab switcher con prefix numerico e ARIA aria-controls */
 .mockup-tabs {
   display: flex;
   gap: 4px;
   background: var(--bg-alt);
   border-radius: 10px;
   padding: 4px;
-  margin-bottom: 22px;
+  margin-bottom: 16px;
 }
 .mockup-tab {
   flex: 1;
   background: transparent;
   border: none;
-  padding: 10px 12px;
+  padding: 9px 10px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 700;
@@ -290,7 +467,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   cursor: pointer;
   transition: background .15s ease, color .15s ease;
   font-family: inherit;
-  min-height: 44px;        /* WCAG 2.5.5: target size */
+  min-height: 44px;
   text-align: center;
 }
 .mockup-tab:hover { color: var(--text-primary); }
@@ -311,6 +488,8 @@ ul { list-style: none; padding: 0; margin: 0; }
   letter-spacing: .08em;
   font-weight: 700;
   margin-bottom: 10px;
+  display: flex;
+  align-items: center;
 }
 .mockup-meta-hint {
   font-size: 12px;
@@ -319,7 +498,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   margin-top: 12px;
 }
 .mockup-content {
-  font-size: 17px;          /* round 15: +2px */
+  font-size: 16px;
   line-height: 1.55;
   color: var(--text-primary);
 }
@@ -334,17 +513,29 @@ ul { list-style: none; padding: 0; margin: 0; }
   text-decoration-thickness: 1.5px;
 }
 
-/* Score circle in report panel — round 15: 72→96 */
+/* Typing cursor (round 17): blink dopo parole in "Tu rispondi" */
+.typing-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 0.9em;
+  background: var(--cta);
+  margin-left: 6px;
+  vertical-align: text-bottom;
+  animation: typing-blink 1s steps(2, end) infinite;
+  border-radius: 1px;
+}
+
+/* Score circle */
 .mockup-score-row {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding-bottom: 18px;
-  margin-bottom: 18px;
+  gap: 18px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
   border-bottom: 1px solid var(--border);
 }
 .mockup-score-circle {
-  width: 96px; height: 96px;   /* round 15: 72→96 */
+  width: 84px; height: 84px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -356,42 +547,42 @@ ul { list-style: none; padding: 0; margin: 0; }
   line-height: 1;
 }
 .mockup-score-num {
-  font-size: 32px;             /* round 15: 26→32 */
+  font-size: 28px;
   font-weight: 800;
   color: var(--text-primary);
 }
 .mockup-score-of {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-tertiary);
   font-weight: 600;
   margin-top: 2px;
 }
 .mockup-score-detail { flex: 1; }
 .mockup-score-label {
-  font-size: 16px;             /* round 15: 14→16 */
+  font-size: 14px;
   color: var(--text-primary);
   font-weight: 700;
   line-height: 1.4;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 .mockup-score-note {
-  font-size: 13px;             /* round 15: 12→13 */
+  font-size: 12px;
   color: var(--text-tertiary);
   line-height: 1.5;
 }
 
 .mockup-feedback {
-  margin: 0 0 18px 0;
+  margin: 0 0 14px 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 .mockup-feedback li {
-  font-size: 15px;             /* round 15: 14→15 */
+  font-size: 14px;
   color: var(--text-primary);
-  padding: 11px 14px;
+  padding: 10px 12px;
   border-radius: 8px;
   display: flex;
   align-items: flex-start;
@@ -404,8 +595,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 18px; height: 18px;
   border-radius: 50%;
   font-weight: 800;
   font-size: 12px;
@@ -416,64 +606,60 @@ ul { list-style: none; padding: 0; margin: 0; }
 .mockup-feedback .report-good .report-icon { background: #0F766E; }
 .mockup-feedback .report-work .report-icon { background: #B45309; }
 
-/* =================================================================
-   Mini prima/dopo progression (round 15)
-   Mostra "primo tentativo → con feedback" come evoluzione tipo.
-   Disclaimer trasparente: "tipico" non "garantito".
-   ================================================================= */
+/* Mini prima/dopo progression */
 .mockup-progression {
   background: var(--bg-alt);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 14px 16px;
-  margin-bottom: 16px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
-/* Semantic color del prima/dopo sulle singole chip (niente gradient sul container). */
 .mockup-progression .prog-step:first-of-type { background: #FEF3C7; }
 .mockup-progression .prog-step:last-of-type  { background: #ECFDF5; }
 .mockup-progression-label {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: .08em;
   font-weight: 800;
-  flex: 0 0 auto;
+  flex: 0 0 100%;
+  margin-bottom: 4px;
 }
 .prog-step {
   display: inline-flex;
   align-items: baseline;
   gap: 2px;
   font-weight: 800;
-  font-size: 18px;
+  font-size: 16px;
   color: var(--text-primary);
   background: var(--bg);
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 8px;
   border: 1px solid var(--border);
 }
-.prog-step small { font-size: 11px; color: var(--text-tertiary); font-weight: 600; }
+.prog-step small { font-size: 10px; color: var(--text-tertiary); font-weight: 600; }
 .prog-arrow {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--cta);
   line-height: 1;
 }
 .mockup-progression-note {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-secondary);
   line-height: 1.5;
-  margin-top: -4px;
-  margin-bottom: 4px;
+  margin-top: 2px;
+  flex: 0 0 100%;
 }
 
 .mockup-extra {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-secondary);
-  padding-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid var(--border);
   line-height: 1.5;
 }
@@ -513,15 +699,6 @@ ul { list-style: none; padding: 0; margin: 0; }
   font-size: 14px;
   color: var(--text-primary);
   line-height: 1.5;
-}
-
-/* ---------- Fiducia context line ---------- */
-.fiducia-lead {
-  font-size: 1.0625rem;
-  color: var(--text-secondary);
-  line-height: 1.7;
-  margin-bottom: 16px;
-  font-weight: 500;
 }
 
 /* ---------- Section base ---------- */
@@ -611,9 +788,7 @@ section.bg-alt { background: var(--bg-alt); }
   font-weight: 500;
 }
 
-.tier-features {
-  margin: 0 0 28px 0;
-}
+.tier-features { margin: 0 0 28px 0; }
 .tier-features li {
   padding: 10px 0;
   color: var(--text-primary);
@@ -748,23 +923,23 @@ footer {
   color: var(--text-tertiary);
 }
 
-/* ---------- Animazioni sobrie (max 400ms) ---------- */
-
-/* Hero entrance: stagger fade-in + leggero upward translate */
+/* ---------- Animazioni sobrie ---------- */
 .hero-rise > * {
   opacity: 0;
   animation: hero-rise-anim .5s cubic-bezier(.2, .8, .2, 1) forwards;
 }
 .hero-rise > *:nth-child(1) { animation-delay: 60ms; }
-.hero-rise > *:nth-child(2) { animation-delay: 160ms; }
-.hero-rise > *:nth-child(3) { animation-delay: 260ms; }
-.hero-rise > *:nth-child(4) { animation-delay: 360ms; }
+.hero-rise > *:nth-child(2) { animation-delay: 130ms; }
+.hero-rise > *:nth-child(3) { animation-delay: 200ms; }
+.hero-rise > *:nth-child(4) { animation-delay: 270ms; }
+.hero-rise > *:nth-child(5) { animation-delay: 340ms; }
+.hero-rise > *:nth-child(6) { animation-delay: 410ms; }
+.hero-rise > *:nth-child(7) { animation-delay: 480ms; }
 @keyframes hero-rise-anim {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Fade-in on scroll per sezioni successive */
 .fade-in {
   opacity: 0;
   transform: translateY(10px);
@@ -775,7 +950,20 @@ footer {
   transform: translateY(0);
 }
 
-/* prefers-reduced-motion: zero motion */
+/* Round 17: animationi dashboard mockup sobrie, prefers-remotion-safe via @media reduce */
+@keyframes status-blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .55; transform: scale(.85); }
+}
+@keyframes typing-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes progress-fill {
+  0% { width: 8%; }
+  100% { width: 62%; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .001ms !important;
@@ -785,6 +973,7 @@ footer {
   }
   .hero-rise > * { opacity: 1 !important; transform: none !important; }
   .fade-in { opacity: 1 !important; transform: none !important; }
+  .mockup-progress-fill { width: 35% !important; }
 }
 </style>
 </head>
@@ -793,7 +982,7 @@ footer {
 
 <a href="#main" class="skip-link">Salta al contenuto</a>
 
-<!-- ========== NAVBAR ========== -->
+<!-- Navbar -->
 <header class="navbar">
   <div class="container navbar-inner">
     <a href="/" class="logo" aria-label="ConcorsoAI home">Concorso<span>AI</span></a>
@@ -803,12 +992,11 @@ footer {
 
 <main id="main">
 
-<!-- ========== 1. HERO ========== -->
+<!-- HERO -->
 <section class="hero">
   <div class="container">
     <div class="hero-grid">
       <div class="hero-text hero-rise">
-        <!-- Stat callout round 15: dato reale (3 simulazioni gratuite al mese dal Free tier) -->
         <div class="stat-callout" aria-label="Correzione immediata su quello che scrivi">
           <span class="stat-callout-num" aria-hidden="true">&#x2713;</span>
           <span class="stat-callout-body">
@@ -825,85 +1013,152 @@ footer {
           Garanzia 100% soddisfatto o rimborsato
         </span>
         <h1>Passa l'orale. Senza ansia.</h1>
+        <p class="hero-tagline">Perché ti alleni con le stesse domande che potresti ricevere.</p>
         <p class="hero-subtitle">Carica il bando o il manuale. L'AI ti interroga come una commissione vera e ti dice cosa migliorare prima dell'orale.</p>
         <div class="hero-cta-group">
-          <!-- CTA copy round 15: più specifico, orientato all'azione -->
           <a href="auth.html?mode=register" class="cta-primary">Simula l'orale gratuitamente</a>
-          <a href="#tier" class="cta-link">Passa al Pro</a>
+          <!-- secondary CTA cambio copy + href: mostra il prodotto invece di pushare Pro -->
+          <a href="#come-funziona" class="cta-link">Vedi una simulazione</a>
         </div>
-        <!-- FOMO soft (round 16): loss-aversion copy sotto CTA per creare urgenza -->
+        <!-- FOMO microline sotto CTA: loss-aversion copy -->
         <p class="hero-fomo">Ogni simulazione che non fai è una domanda che potresti ricevere il giorno dell'orale.</p>
       </div>
 
-      <!-- Mockup interattivo 3 tab (round 14 + round 15: ingrandito) -->
+      <!-- Mockup hero: real SaaS dashboard look (round 17) -->
       <div class="mockup-card hero-rise" role="region" aria-label="Esempio interattivo di una simulazione in Diritto Amministrativo">
-        <div class="mockup-eyebrow">
-          <span class="mockup-eyebrow-dot" aria-hidden="true"></span>
-          Esempio reale · Diritto Amministrativo
+        <!-- App chrome header: logo + breadcrumb + avatar -->
+        <div class="mockup-chrome">
+          <div class="mockup-chrome-left">
+            <span class="mockup-chrome-logo">
+              <span class="mockup-chrome-dot" aria-hidden="true"></span>
+              ConcorsoAI
+            </span>
+            <span class="mockup-breadcrumb" aria-label="Posizione nella simulazione">
+              <span>Simulazione</span>
+              <span class="mockup-breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
+              <span class="mockup-breadcrumb-current">Diritto Amministrativo · Esame 1</span>
+            </span>
+          </div>
+          <span class="mockup-chrome-avatar" aria-label="Profilo utente">MR</span>
         </div>
 
-        <div class="mockup-tabs" role="tablist" aria-label="Stati di una simulazione">
-          <button class="mockup-tab is-active" role="tab" aria-selected="true" data-tab="question" id="tab-question">Domanda</button>
-          <button class="mockup-tab" role="tab" aria-selected="false" data-tab="answer" id="tab-answer">La tua risposta</button>
-          <button class="mockup-tab" role="tab" aria-selected="false" data-tab="report" id="tab-report">Report AI</button>
-        </div>
+        <!-- Body: sidebar nav + main content -->
+        <div class="mockup-body">
+          <nav class="mockup-sidebar" aria-label="Menu della simulazione">
+            <button class="mockup-nav-item is-active" type="button" aria-current="true" aria-label="Simulazione attiva">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </button>
+            <button class="mockup-nav-item" type="button" aria-label="Report">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 3v18h18" />
+                <path d="M7 14l4-4 4 4 5-6" />
+              </svg>
+            </button>
+            <button class="mockup-nav-item" type="button" aria-label="Storico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </button>
+            <button class="mockup-nav-item" type="button" aria-label="Impostazioni">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+            </button>
+          </nav>
 
-        <div class="mockup-panel" role="tabpanel" aria-labelledby="tab-question" data-panel="question">
-          <p class="mockup-meta">Il commissario ti chiede:</p>
-          <p class="mockup-content">"Mi parli del principio di imparzialità della Pubblica Amministrazione. A quale norma si riferisce?"</p>
-          <p class="mockup-meta-hint">Clicca "La tua risposta" per vedere come rispondi.</p>
-        </div>
-
-        <div class="mockup-panel hidden" role="tabpanel" aria-labelledby="tab-answer" data-panel="answer">
-          <p class="mockup-meta">Tu rispondi:</p>
-          <p class="mockup-content">"L'imparzialità è un principio cardine della PA. La PA deve comportarsi in modo equo verso i cittadini, senza favorire nessuno. È un principio generale che discende dalla <em class="missed">Costituzione</em>."</p>
-          <p class="mockup-meta-hint">Clicca "Report AI" per vedere il feedback.</p>
-        </div>
-
-        <div class="mockup-panel hidden" role="tabpanel" aria-labelledby="tab-report" data-panel="report">
-          <p class="mockup-meta">Punteggio di esempio (il tuo dipende dalle risposte):</p>
-          <div class="mockup-score-row">
-            <div class="mockup-score-circle" aria-label="Punteggio 78 su 100">
-              <div class="mockup-score-num">78</div>
-              <div class="mockup-score-of">/ 100</div>
+          <div class="mockup-main">
+            <div class="mockup-eyebrow">
+              <span class="mockup-eyebrow-dot" aria-hidden="true"></span>
+              Esempio reale · Diritto Amministrativo
             </div>
-            <div class="mockup-score-detail">
-              <p class="mockup-score-label">Corretta ma incompleta</p>
-              <p class="mockup-score-note">La risposta è pertinente, ma manca il riferimento normativo specifico.</p>
+
+            <!-- Status bar: AI connected + timer + progress -->
+            <div class="mockup-status" aria-label="Stato della simulazione">
+              <span class="mockup-status-item">
+                <span class="mockup-status-dot" aria-hidden="true"></span>
+                Connessione AI · attiva
+              </span>
+              <span class="mockup-status-item" aria-label="Timer simulazione: 01:23 di 05:00">
+                <span class="mockup-status-timer">
+                  <span class="timer-num">01:23</span>
+                  <span class="timer-of">&nbsp;/&nbsp;05:00</span>
+                </span>
+              </span>
+              <span class="mockup-status-item mockup-status-progress">
+                <span class="mockup-progress-track" aria-hidden="true">
+                  <span class="mockup-progress-fill"></span>
+                </span>
+                <span class="mockup-progress-text">Domanda 1 / 3</span>
+              </span>
+            </div>
+
+            <div class="mockup-tabs" role="tablist" aria-label="Stati di una simulazione">
+              <button class="mockup-tab is-active" role="tab" aria-selected="true" data-tab="question" id="tab-question" aria-controls="panel-question">1. Domanda</button>
+              <button class="mockup-tab" role="tab" aria-selected="false" data-tab="answer" id="tab-answer" aria-controls="panel-answer">2. La tua risposta</button>
+              <button class="mockup-tab" role="tab" aria-selected="false" data-tab="report" id="tab-report" aria-controls="panel-report">3. Report AI</button>
+            </div>
+
+            <div class="mockup-panel" role="tabpanel" aria-labelledby="tab-question" id="panel-question" data-panel="question">
+              <p class="mockup-meta">Il commissario ti chiede:</p>
+              <p class="mockup-content">"Mi parli del principio di imparzialità della Pubblica Amministrazione. A quale norma si riferisce?"</p>
+              <p class="mockup-meta-hint">Clicca "2. La tua risposta" per vedere come rispondi.</p>
+            </div>
+
+            <div class="mockup-panel hidden" role="tabpanel" aria-labelledby="tab-answer" id="panel-answer" data-panel="answer">
+              <p class="mockup-meta">Tu rispondi:<span class="typing-cursor" aria-hidden="true"></span></p>
+              <p class="mockup-content">"L'imparzialità è un principio cardine della PA. La PA deve comportarsi in modo equo verso i cittadini, senza favorire nessuno. È un principio generale che discende dalla <em class="missed">Costituzione</em>."</p>
+              <p class="mockup-meta-hint">Clicca "3. Report AI" per vedere il feedback.</p>
+            </div>
+
+            <div class="mockup-panel hidden" role="tabpanel" aria-labelledby="tab-report" id="panel-report" data-panel="report">
+              <p class="mockup-meta">Punteggio di esempio (il tuo dipende dalle risposte):</p>
+              <div class="mockup-score-row">
+                <div class="mockup-score-circle" aria-label="Punteggio 78 su 100">
+                  <div class="mockup-score-num">78</div>
+                  <div class="mockup-score-of">/ 100</div>
+                </div>
+                <div class="mockup-score-detail">
+                  <p class="mockup-score-label">Corretta ma incompleta</p>
+                  <p class="mockup-score-note">La risposta è pertinente, ma manca il riferimento normativo specifico.</p>
+                </div>
+              </div>
+
+              <div class="mockup-progression" role="figure" aria-label="Progressione tipica di una simulazione">
+                <span class="mockup-progression-label">Tipico percorso di pratica sulla stessa materia:</span>
+                <span class="prog-step" aria-label="Primo punteggio di esempio: 42 su 100">42<small>/100</small></span>
+                <span class="prog-arrow" aria-hidden="true">&rarr;</span>
+                <span class="prog-step" aria-label="Punteggio dopo pratica: 88 su 100">88<small>/100</small></span>
+                <span class="mockup-progression-note">Dopo 6-8 simulazioni con feedback mirato: punteggio stabilmente sopra 80.</span>
+              </div>
+
+              <ul class="mockup-feedback">
+                <li class="report-good">
+                  <span class="report-icon" aria-hidden="true">+</span>
+                  <span>Concetti generali corretti: imparzialità come dovere dell'amministrazione</span>
+                </li>
+                <li class="report-good">
+                  <span class="report-icon" aria-hidden="true">+</span>
+                  <span>Linguaggio istituzionale appropriato per la commissione</span>
+                </li>
+                <li class="report-work">
+                  <span class="report-icon" aria-hidden="true">&#8599;</span>
+                  <span>Mancava il riferimento all'art. 3 della Legge 241/1990 e al principio di buon andamento ex art. 97 Cost.</span>
+                </li>
+              </ul>
+              <p class="mockup-extra">Tutto questo entra nel tuo profilo, con storico per materia e progressi settimana dopo settimana.</p>
             </div>
           </div>
-
-          <!-- Mini prima/dopo progression (round 15) -->
-          <p class="mockup-progression-label">Tipico percorso di pratica sulla stessa materia:</p>
-          <div class="mockup-progression" role="figure" aria-label="Progressione tipica di una simulazione">
-            <span class="prog-step" aria-label="Primo punteggio di esempio: 42 su 100">42<small>/100</small></span>
-            <span class="prog-arrow" aria-hidden="true">&rarr;</span>
-            <span class="prog-step" aria-label="Punteggio dopo pratica: 88 su 100">88<small>/100</small></span>
-          </div>
-          <p class="mockup-progression-note">Dopo 6-8 simulazioni con feedback mirato: punteggio stabilmente sopra 80.</p>
-
-          <ul class="mockup-feedback">
-            <li class="report-good">
-              <span class="report-icon" aria-hidden="true">+</span>
-              <span>Concetti generali corretti: imparzialità come dovere dell'amministrazione</span>
-            </li>
-            <li class="report-good">
-              <span class="report-icon" aria-hidden="true">+</span>
-              <span>Linguaggio istituzionale appropriato per la commissione</span>
-            </li>
-            <li class="report-work">
-              <span class="report-icon" aria-hidden="true">&#8599;</span>
-              <span>Mancava il riferimento all'art. 3 della Legge 241/1990 e al principio di buon andamento ex art. 97 Cost.</span>
-            </li>
-          </ul>
-          <p class="mockup-extra">Tutto questo entra nel tuo profilo, con storico per materia e progressi settimana dopo settimana.</p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ========== 2. COME FUNZIONA ========== -->
+<!-- COME FUNZIONA -->
 <section id="come-funziona" class="content-section bg-alt">
   <div class="container">
     <div class="section-heading fade-in">
@@ -946,7 +1201,6 @@ footer {
       </article>
     </div>
 
-    <!-- CF distinctive band -->
     <div class="cf-band fade-in" role="note" aria-label="Garanzia e accesso per PA">
       <div class="cf-band-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -962,7 +1216,7 @@ footer {
   </div>
 </section>
 
-<!-- ========== 3. TIER (benefici-first, round 14+15) ========== -->
+<!-- TIER -->
 <section id="tier" class="content-section">
   <div class="container">
     <div class="section-heading fade-in">
@@ -994,11 +1248,12 @@ footer {
         <a href="auth.html?mode=register&amp;plan=pro" class="tier-cta pro">Passa al Pro</a>
       </article>
     </div>
-    <p class="tier-footnote">14,99€ al mese. Sono una pizza e una birra. O due caffè a settimana. Se ti aiuta a passare l'orale, è niente. Se non ti aiuta, ti rimborso.</p>
+    <!-- footnote pricing rewrite round 17: anchor vs reali (delete endpoint non wired) -->
+    <p class="tier-footnote">Meno del costo di un manuale. Puoi disdire quando vuoi dalla pagina del profilo.</p>
   </div>
 </section>
 
-<!-- ========== 4. FIDUCIA ========== -->
+<!-- FIDUCIA -->
 <section id="fiducia" class="content-section bg-alt">
   <div class="container">
     <div class="fiducia-content fade-in">
@@ -1019,7 +1274,7 @@ footer {
 
 </main>
 
-<!-- ========== FOOTER ========== -->
+<!-- FOOTER -->
 <footer>
   <div class="container footer-inner">
     <div>
@@ -1036,12 +1291,10 @@ footer {
 </footer>
 
 <script>
-/* Fade-in on scroll quando le sezioni entrano in viewport.
-   Niente librerie, IntersectionObserver nativo. */
+/* Fade-in on scroll: IntersectionObserver nativo */
 (function () {
   var els = document.querySelectorAll('.fade-in');
-  if (!els.length) return;
-  if (!('IntersectionObserver' in window)) {
+  if (!els.length || !('IntersectionObserver' in window)) {
     els.forEach(function (el) { el.classList.add('is-visible'); });
     return;
   }
@@ -1055,10 +1308,8 @@ footer {
   }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
   els.forEach(function (el) { obs.observe(el); });
 })();
-</script>
 
-<!-- Mockup 3-tab switcher (round 14, vanilla JS, no GSAP needed). -->
-<script>
+/* Mockup 3-tab switcher (round 14+, ARIA-completo round 17) */
 (function () {
   var tabs = document.querySelectorAll('.mockup-tab');
   var panels = document.querySelectorAll('.mockup-panel');
@@ -1072,7 +1323,14 @@ footer {
       tab.tabIndex = isActive ? 0 : -1;
     });
     panels.forEach(function (panel) {
-      panel.classList.toggle('hidden', panel.getAttribute('data-panel') !== targetKey);
+      var matches = panel.getAttribute('data-panel') === targetKey;
+      panel.classList.toggle('hidden', !matches);
+      panel.setAttribute('aria-hidden', matches ? 'false' : 'true');
+      if (matches) {
+        panel.removeAttribute('hidden');
+      } else {
+        panel.setAttribute('hidden', '');
+      }
     });
   }
 
@@ -1091,6 +1349,20 @@ footer {
       activate(tabs[nextIdx].getAttribute('data-tab'));
     });
   });
+
+  /* Sidebar nav (round 17): demo-only, click switch tab attivo + addisactive state */
+  var navItems = document.querySelectorAll('.mockup-nav-item');
+  if (navItems.length) {
+    navItems.forEach(function (item, idx) {
+      item.addEventListener('click', function () {
+        navItems.forEach(function (n) { n.classList.remove('is-active'); });
+        item.classList.add('is-active');
+        /* Item 0 = simulazione (default), 1 = report (tab 3), 2 = storico (no-op), 3 = impostazioni (no-op) */
+        if (idx === 1) activate('report');
+        else if (idx === 0) activate('question');
+      });
+    });
+  }
 })();
 </script>
 
