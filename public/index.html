@@ -225,6 +225,16 @@ ul { list-style: none; padding: 0; margin: 0; }
 .cta-link:hover { color: var(--accent-dark); }
 .cta-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 
+/* Hero FOMO microline (round 16): loss-aversion copy sotto CTA */
+.hero-fomo {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  font-style: italic;
+  line-height: 1.5;
+  max-width: 540px;
+}
+
 /* =================================================================
    HERO MOCKUP — Interactive 3-tab widget +30-40% larger (round 15)
    mostra un esempio reale di simulazione:
@@ -777,10 +787,6 @@ footer {
   .fade-in { opacity: 1 !important; transform: none !important; }
 }
 </style>
-
-<!-- GSAP plugin (CDN, ~25KB gzipped). Loaded deferred so non blocca il primo render.
-     Silent fallback: se bloccato o prefers-reduced-motion, lo script GSAP si auto-disattiva. -->
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
 </head>
 
 <body>
@@ -803,11 +809,11 @@ footer {
     <div class="hero-grid">
       <div class="hero-text hero-rise">
         <!-- Stat callout round 15: dato reale (3 simulazioni gratuite al mese dal Free tier) -->
-        <div class="stat-callout" aria-label="3 simulazioni gratuite al mese senza carta">
-          <span class="stat-callout-num" aria-hidden="true">3</span>
+        <div class="stat-callout" aria-label="Correzione immediata su quello che scrivi">
+          <span class="stat-callout-num" aria-hidden="true">&#x2713;</span>
           <span class="stat-callout-body">
-            <strong>simulazioni gratuite</strong> al mese. Senza carta.
-            <span class="stat-callout-note">Subito. Anche da smartphone.</span>
+            <strong>Correzione immediata.</strong> Appena scrivi.
+            <span class="stat-callout-note">Feedback completo, anche in pochi minuti.</span>
           </span>
         </div>
 
@@ -819,12 +825,14 @@ footer {
           Garanzia 100% soddisfatto o rimborsato
         </span>
         <h1>Passa l'orale. Senza ansia.</h1>
-        <p class="hero-subtitle">Carica il tuo materiale. L'AI ti fa le domande che la commissione ti farà, così arrivi preparato e sai già cosa aspettarti.</p>
+        <p class="hero-subtitle">Carica il bando o il manuale. L'AI ti interroga come una commissione vera e ti dice cosa migliorare prima dell'orale.</p>
         <div class="hero-cta-group">
           <!-- CTA copy round 15: più specifico, orientato all'azione -->
           <a href="auth.html?mode=register" class="cta-primary">Simula l'orale gratuitamente</a>
           <a href="#tier" class="cta-link">Passa al Pro</a>
         </div>
+        <!-- FOMO soft (round 16): loss-aversion copy sotto CTA per creare urgenza -->
+        <p class="hero-fomo">Ogni simulazione che non fai è una domanda che potresti ricevere il giorno dell'orale.</p>
       </div>
 
       <!-- Mockup interattivo 3 tab (round 14 + round 15: ingrandito) -->
@@ -994,9 +1002,9 @@ footer {
 <section id="fiducia" class="content-section bg-alt">
   <div class="container">
     <div class="fiducia-content fade-in">
-      <p class="fiducia-lead">Non ti chiediamo di fidarti sulla parola. Ti diamo subito un output concreto, su tre cose specifiche, salvato nel tuo profilo.</p>
-      <h2>Non abbiamo recensioni. Ma abbiamo una promessa.</h2>
-      <p class="fiducia-copy">Siamo appena partiti. Zero recensioni finte. Se il prodotto non è buono, ti rimborsiamo il 100% in 5 minuti. Senza storie. Non c'è niente da perdere.</p>
+      <p class="fiducia-lead">Siamo appena partiti. Preferiamo darti una garanzia totale invece di mostrarti recensioni che ancora non abbiamo.</p>
+      <h2>Una garanzia vera. Perché siamo onesti, non perfetti.</h2>
+      <p class="fiducia-copy">Se il prodotto non è buono, ti rimborsiamo il 100% in 5 minuti. Senza storie. Non c'è niente da perdere.</p>
       <div class="guarantee-icon" aria-hidden="true">
         <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M32 6L12 13v12c0 13.5 9.3 26.2 20 29 10.7-2.8 20-15.5 20-29V13L32 6z"
@@ -1083,38 +1091,6 @@ footer {
       activate(tabs[nextIdx].getAttribute('data-tab'));
     });
   });
-})();
-</script>
-
-<!-- GSAP round 15: motion sobrio aggiunto al mockup + Pro card hover (round 11).
-     Silent fallback su prefers-reduced-motion e gsap undefined. -->
-<script>
-(function () {
-  if (typeof gsap === 'undefined') return;
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-  var mockup = document.querySelector('.mockup-card');
-  // Sub-hero breathing: -2px / +2px su Y, lentissimo. 7.5s ciclo. anti-cartoon (no rimbalzo, no vibrazione percepita).
-  if (mockup) {
-    gsap.to(mockup, {
-      y: '+=2',
-      duration: 7.5,
-      ease: 'sine.inOut',
-      yoyo: true,
-      repeat: -1,
-      delay: 1.2,
-    });
-  }
-
-  var proCard = document.querySelector('.tier-col.recommended');
-  if (proCard) {
-    proCard.addEventListener('mouseenter', function () {
-      gsap.to(proCard, { y: -4, duration: 0.3, ease: 'power3.out', overwrite: 'auto' });
-    });
-    proCard.addEventListener('mouseleave', function () {
-      gsap.to(proCard, { y: 0, duration: 0.42, ease: 'power2.out', overwrite: 'auto' });
-    });
-  }
 })();
 </script>
 
