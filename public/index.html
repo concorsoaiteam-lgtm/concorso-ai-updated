@@ -122,10 +122,48 @@ ul { list-style: none; padding: 0; margin: 0; }
   align-items: center;
 }
 @media (min-width: 900px) {
-  .hero-grid { grid-template-columns: 1.05fr 0.95fr; gap: 64px; }
+  .hero-grid { grid-template-columns: 1fr 1fr; gap: 64px; }
 }
 
 .hero-text { max-width: 560px; }
+
+/* =================================================================
+   STAT CALLOUT (round 15): verified product-feature social-proof
+   "3 simulazioni gratuite al mese" — factual, no fake numbers
+   ================================================================= */
+.stat-callout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.stat-callout-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--cta);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+.stat-callout-body {
+  flex: 1;
+  line-height: 1.35;
+}
+.stat-callout-body strong { color: var(--text-primary); }
+.stat-callout-note {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+  margin-top: 2px;
+  display: block;
+}
 
 .trust-badge {
   display: inline-flex; align-items: center; gap: 8px;
@@ -188,18 +226,19 @@ ul { list-style: none; padding: 0; margin: 0; }
 .cta-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 
 /* =================================================================
-   HERO MOCKUP — Interactive 3-tab widget (round 14, A4 WOW boost)
-   Mostra un esempio reale di simulazione:
+   HERO MOCKUP — Interactive 3-tab widget +30-40% larger (round 15)
+   mostra un esempio reale di simulazione:
    Tab 1 "Domanda" → Tab 2 "La tua risposta" → Tab 3 "Report AI"
    Vanilla JS, no GSAP, prefers-reduced-motion-safe.
    ================================================================= */
 .mockup-card {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 22px;
-  box-shadow: 0 12px 36px rgba(15, 23, 42, .06);
-  max-width: 460px;
+  border-radius: 18px;
+  padding: 30px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, .08);
+  max-width: 600px;
+  width: 100%;
   margin: 0 auto;
 }
 .mockup-eyebrow {
@@ -208,7 +247,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   letter-spacing: .12em;
   font-weight: 800;
   color: var(--text-tertiary);
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -227,13 +266,13 @@ ul { list-style: none; padding: 0; margin: 0; }
   background: var(--bg-alt);
   border-radius: 10px;
   padding: 4px;
-  margin-bottom: 18px;
+  margin-bottom: 22px;
 }
 .mockup-tab {
   flex: 1;
   background: transparent;
   border: none;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 700;
@@ -261,16 +300,16 @@ ul { list-style: none; padding: 0; margin: 0; }
   text-transform: uppercase;
   letter-spacing: .08em;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 .mockup-meta-hint {
   font-size: 12px;
   color: var(--text-tertiary);
   font-style: italic;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 .mockup-content {
-  font-size: 15px;
+  font-size: 17px;          /* round 15: +2px */
   line-height: 1.55;
   color: var(--text-primary);
 }
@@ -285,17 +324,17 @@ ul { list-style: none; padding: 0; margin: 0; }
   text-decoration-thickness: 1.5px;
 }
 
-/* Score circle in report panel */
+/* Score circle in report panel — round 15: 72→96 */
 .mockup-score-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding-bottom: 14px;
-  margin-bottom: 14px;
+  gap: 20px;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
   border-bottom: 1px solid var(--border);
 }
 .mockup-score-circle {
-  width: 72px; height: 72px;
+  width: 96px; height: 96px;   /* round 15: 72→96 */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -307,47 +346,47 @@ ul { list-style: none; padding: 0; margin: 0; }
   line-height: 1;
 }
 .mockup-score-num {
-  font-size: 26px;
+  font-size: 32px;             /* round 15: 26→32 */
   font-weight: 800;
   color: var(--text-primary);
 }
 .mockup-score-of {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-tertiary);
   font-weight: 600;
   margin-top: 2px;
 }
 .mockup-score-detail { flex: 1; }
 .mockup-score-label {
-  font-size: 14px;
+  font-size: 16px;             /* round 15: 14→16 */
   color: var(--text-primary);
   font-weight: 700;
   line-height: 1.4;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 .mockup-score-note {
-  font-size: 12px;
+  font-size: 13px;             /* round 15: 12→13 */
   color: var(--text-tertiary);
   line-height: 1.5;
 }
 
 .mockup-feedback {
-  margin: 0 0 14px 0;
+  margin: 0 0 18px 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 .mockup-feedback li {
-  font-size: 14px;
+  font-size: 15px;             /* round 15: 14→15 */
   color: var(--text-primary);
-  padding: 10px 12px;
+  padding: 11px 14px;
   border-radius: 8px;
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 .mockup-feedback .report-good { background: #ECFDF5; }
 .mockup-feedback .report-work { background: #FFFBEB; }
@@ -367,15 +406,69 @@ ul { list-style: none; padding: 0; margin: 0; }
 .mockup-feedback .report-good .report-icon { background: #0F766E; }
 .mockup-feedback .report-work .report-icon { background: #B45309; }
 
+/* =================================================================
+   Mini prima/dopo progression (round 15)
+   Mostra "primo tentativo → con feedback" come evoluzione tipo.
+   Disclaimer trasparente: "tipico" non "garantito".
+   ================================================================= */
+.mockup-progression {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+/* Semantic color del prima/dopo sulle singole chip (niente gradient sul container). */
+.mockup-progression .prog-step:first-of-type { background: #FEF3C7; }
+.mockup-progression .prog-step:last-of-type  { background: #ECFDF5; }
+.mockup-progression-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+.prog-step {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--text-primary);
+  background: var(--bg);
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.prog-step small { font-size: 11px; color: var(--text-tertiary); font-weight: 600; }
+.prog-arrow {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--cta);
+  line-height: 1;
+}
+.mockup-progression-note {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: -4px;
+  margin-bottom: 4px;
+}
+
 .mockup-extra {
   font-size: 13px;
   color: var(--text-secondary);
-  padding-top: 12px;
+  padding-top: 14px;
   border-top: 1px solid var(--border);
   line-height: 1.5;
 }
 
-/* ---------- CF distinctive band (round 14, finalmente accettato) ---------- */
+/* ---------- CF distinctive band ---------- */
 .cf-band {
   margin-top: 36px;
   background: #EFF6FF;
@@ -412,7 +505,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   line-height: 1.5;
 }
 
-/* ---------- Fiducia context line (round 13, preservato) ---------- */
+/* ---------- Fiducia context line ---------- */
 .fiducia-lead {
   font-size: 1.0625rem;
   color: var(--text-secondary);
@@ -577,7 +670,6 @@ section.bg-alt { background: var(--bg-alt); }
   white-space: nowrap;
 }
 
-/* Outcome banner inside Pro card (round 14, benefit-first anchor) */
 .tier-outcome {
   font-size: 1.125rem;
   color: var(--text-primary);
@@ -710,6 +802,15 @@ footer {
   <div class="container">
     <div class="hero-grid">
       <div class="hero-text hero-rise">
+        <!-- Stat callout round 15: dato reale (3 simulazioni gratuite al mese dal Free tier) -->
+        <div class="stat-callout" aria-label="3 simulazioni gratuite al mese senza carta">
+          <span class="stat-callout-num" aria-hidden="true">3</span>
+          <span class="stat-callout-body">
+            <strong>simulazioni gratuite</strong> al mese. Senza carta.
+            <span class="stat-callout-note">Subito. Anche da smartphone.</span>
+          </span>
+        </div>
+
         <span class="trust-badge">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z" />
@@ -720,12 +821,13 @@ footer {
         <h1>Passa l'orale. Senza ansia.</h1>
         <p class="hero-subtitle">Carica il tuo materiale. L'AI ti fa le domande che la commissione ti farà, così arrivi preparato e sai già cosa aspettarti.</p>
         <div class="hero-cta-group">
-          <a href="auth.html?mode=register" class="cta-primary">Inizia gratis. Nessuna carta.</a>
+          <!-- CTA copy round 15: più specifico, orientato all'azione -->
+          <a href="auth.html?mode=register" class="cta-primary">Simula l'orale gratuitamente</a>
           <a href="#tier" class="cta-link">Passa al Pro</a>
         </div>
       </div>
 
-      <!-- Mockup interattivo 3 tab (round 14) -->
+      <!-- Mockup interattivo 3 tab (round 14 + round 15: ingrandito) -->
       <div class="mockup-card hero-rise" role="region" aria-label="Esempio interattivo di una simulazione in Diritto Amministrativo">
         <div class="mockup-eyebrow">
           <span class="mockup-eyebrow-dot" aria-hidden="true"></span>
@@ -762,6 +864,16 @@ footer {
               <p class="mockup-score-note">La risposta è pertinente, ma manca il riferimento normativo specifico.</p>
             </div>
           </div>
+
+          <!-- Mini prima/dopo progression (round 15) -->
+          <p class="mockup-progression-label">Tipico percorso di pratica sulla stessa materia:</p>
+          <div class="mockup-progression" role="figure" aria-label="Progressione tipica di una simulazione">
+            <span class="prog-step" aria-label="Primo punteggio di esempio: 42 su 100">42<small>/100</small></span>
+            <span class="prog-arrow" aria-hidden="true">&rarr;</span>
+            <span class="prog-step" aria-label="Punteggio dopo pratica: 88 su 100">88<small>/100</small></span>
+          </div>
+          <p class="mockup-progression-note">Dopo 6-8 simulazioni con feedback mirato: punteggio stabilmente sopra 80.</p>
+
           <ul class="mockup-feedback">
             <li class="report-good">
               <span class="report-icon" aria-hidden="true">+</span>
@@ -826,7 +938,7 @@ footer {
       </article>
     </div>
 
-    <!-- CF distinctive band (round 14, finalmente accettato + finalmente accettato) -->
+    <!-- CF distinctive band -->
     <div class="cf-band fade-in" role="note" aria-label="Garanzia e accesso per PA">
       <div class="cf-band-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -842,7 +954,7 @@ footer {
   </div>
 </section>
 
-<!-- ========== 3. TIER (benefici-first, round 14) ========== -->
+<!-- ========== 3. TIER (benefici-first, round 14+15) ========== -->
 <section id="tier" class="content-section">
   <div class="container">
     <div class="section-heading fade-in">
@@ -937,9 +1049,7 @@ footer {
 })();
 </script>
 
-<!-- Mockup 3-tab switcher (round 14, vanilla JS, no GSAP needed).
-     Click su tab → show/hide panel + toggle aria-selected. Keyboard-accessibile via tab/focus.
-     Compatibile con prefers-reduced-motion (transizione opacity .2s comunque leggera). -->
+<!-- Mockup 3-tab switcher (round 14, vanilla JS, no GSAP needed). -->
 <script>
 (function () {
   var tabs = document.querySelectorAll('.mockup-tab');
@@ -976,14 +1086,26 @@ footer {
 })();
 </script>
 
-<!-- GSAP micro-interactions: silent fallback al CSS hover/reveal quando la libreria non carica o prefers-reduced-motion attivo. -->
+<!-- GSAP round 15: motion sobrio aggiunto al mockup + Pro card hover (round 11).
+     Silent fallback su prefers-reduced-motion e gsap undefined. -->
 <script>
 (function () {
   if (typeof gsap === 'undefined') return;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  // Tier Pro card hover: GSAP interpola -4px con curve power3 (più "sostanza" all'ingresso, meno a uscita).
-  // Hover CSS resta come fallback se GSAP fallisce.
+  var mockup = document.querySelector('.mockup-card');
+  // Sub-hero breathing: -2px / +2px su Y, lentissimo. 7.5s ciclo. anti-cartoon (no rimbalzo, no vibrazione percepita).
+  if (mockup) {
+    gsap.to(mockup, {
+      y: '+=2',
+      duration: 7.5,
+      ease: 'sine.inOut',
+      yoyo: true,
+      repeat: -1,
+      delay: 1.2,
+    });
+  }
+
   var proCard = document.querySelector('.tier-col.recommended');
   if (proCard) {
     proCard.addEventListener('mouseenter', function () {
