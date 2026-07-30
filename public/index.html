@@ -9,7 +9,7 @@
 <link rel="canonical" href="https://concorso-ai.vercel.app/" />
 
 <!-- Favicon inline: nessuna richiesta di rete -->
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23E63946'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='system-ui' font-weight='900'%3EC%3C/text%3E%3C/svg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231A73E8'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='system-ui' font-weight='900'%3EC%3C/text%3E%3C/svg%3E" />
 
 <!-- OpenGraph -->
 <meta property="og:title" content="ConcorsoAI — Passa l'orale. Senza ansia." />
@@ -37,8 +37,8 @@
   --text-tertiary: #6B7280;
   --accent: #1A73E8;
   --accent-dark: #1457B0;
-  --cta: #E63946;
-  --cta-hover: #C92A37;
+  --cta: #1A73E8;
+  --cta-hover: #1457B0;
   --border: #E5E7EB;
 }
 
@@ -102,10 +102,10 @@ ul { list-style: none; padding: 0; margin: 0; }
   font-size: 15px;
   min-height: 48px;
   display: inline-flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 8px rgba(230, 57, 70, .22);
+  box-shadow: 0 2px 8px rgba(26, 115, 232, .22);
   transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
 }
-.nav-cta:hover { background: var(--cta-hover); transform: scale(1.03); box-shadow: 0 8px 20px rgba(230, 57, 70, .32); }
+.nav-cta:hover { background: var(--cta-hover); transform: scale(1.03); box-shadow: 0 8px 20px rgba(26, 115, 232, .32); }
 .nav-cta:active { transform: scale(1.0); }
 .nav-cta:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
 
@@ -126,9 +126,9 @@ ul { list-style: none; padding: 0; margin: 0; }
 
 .trust-badge {
   display: inline-flex; align-items: center; gap: 8px;
-  background: #FEF2F2;
-  color: #991B1B;
-  border: 1px solid #FECACA;
+  background: #EFF6FF;
+  color: #1457B0;
+  border: 1px solid #BFDBFE;
   padding: 8px 14px;
   border-radius: 999px;
   font-size: 13px; font-weight: 700;
@@ -163,12 +163,12 @@ ul { list-style: none; padding: 0; margin: 0; }
   font-size: 1.0625rem;
   min-height: 56px;
   display: inline-flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 14px rgba(230, 57, 70, .28);
+  box-shadow: 0 4px 14px rgba(26, 115, 232, .28);
   transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
 }
 @media (min-width: 768px) { .cta-primary { font-size: 1.125rem; padding: 19px 34px; } }
-.cta-primary:hover { background: var(--cta-hover); transform: scale(1.03); box-shadow: 0 10px 24px rgba(230, 57, 70, .38); }
-.cta-primary:active { transform: scale(1.0); box-shadow: 0 2px 6px rgba(230, 57, 70, .25); }
+.cta-primary:hover { background: var(--cta-hover); transform: scale(1.03); box-shadow: 0 10px 24px rgba(26, 115, 232, .38); }
+.cta-primary:active { transform: scale(1.0); box-shadow: 0 2px 6px rgba(26, 115, 232, .25); }
 .cta-primary:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
 
 .cta-link {
@@ -184,7 +184,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 .cta-link:hover { color: var(--accent-dark); }
 .cta-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 
-/* ---------- Hero mockup (chat esempio, niente fake data) ---------- */
+/* ---------- Hero mockup (mini-report card output, round 13) ---------- */
 .mockup-card {
   background: var(--bg);
   border: 1px solid var(--border);
@@ -202,57 +202,84 @@ ul { list-style: none; padding: 0; margin: 0; }
   color: var(--text-tertiary);
   margin-bottom: 16px;
 }
-.mockup-bubble {
-  border-radius: 14px;
-  padding: 12px 16px;
-  margin-bottom: 10px;
-  font-size: 15px;
+.mockup-report-label {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 14px;
   line-height: 1.5;
 }
-.mockup-bubble.commissario {
-  background: #F3F4F6;
-  color: var(--text-primary);
-  border-bottom-left-radius: 4px;
-}
-.mockup-bubble.candidato {
-  background: #EFF6FF;
-  color: var(--text-primary);
-  border-bottom-right-radius: 4px;
-  text-align: left;
-}
-.mockup-bubble-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--text-tertiary);
-  margin-bottom: 4px;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-}
-.mockup-feedback {
+.mockup-report {
+  list-style: none;
+  margin: 0 0 14px 0;
+  padding: 0;
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 18px;
-  padding-top: 16px;
+}
+.mockup-report li {
+  font-size: 14px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+.report-good { background: #ECFDF5; }
+.report-work { background: #FFFBEB; }
+.report-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-weight: 800;
+  font-size: 12px;
+  flex-shrink: 0;
+  color: #fff;
+  margin-top: 1px;
+}
+.report-good .report-icon { background: #0F766E; }
+.report-work .report-icon { background: #B45309; }
+.mockup-extra {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding-top: 12px;
   border-top: 1px solid var(--border);
+  margin-top: 4px;
 }
-.mockup-feedback-label {
-  width: 100%;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-tertiary);
+
+/* ---------- CF distinctive band (round 13) ---------- */
+.cf-band {
+  margin-top: 36px;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 12px;
+  padding: 16px 22px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.cf-band-label {
+  font-weight: 800;
+  color: #1457B0;
+  margin-right: 4px;
   text-transform: uppercase;
-  letter-spacing: .04em;
-  margin-bottom: 6px;
-}
-.mockup-pill {
-  background: #FEF2F2;
-  color: #991B1B;
+  letter-spacing: .05em;
   font-size: 12px;
-  font-weight: 700;
-  padding: 6px 12px;
-  border-radius: 999px;
+}
+
+/* ---------- Fiducia context line (round 13) ---------- */
+.fiducia-lead {
+  font-size: 1.0625rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 16px;
+  font-weight: 500;
 }
 
 /* ---------- Section base ---------- */
@@ -288,7 +315,7 @@ section.bg-alt { background: var(--bg-alt); }
 .step-icon {
   width: 48px; height: 48px;
   display: flex; align-items: center; justify-content: center;
-  background: #FEF2F2;
+  background: #EFF6FF;
   border-radius: 12px;
   margin-bottom: 20px;
 }
@@ -388,9 +415,9 @@ section.bg-alt { background: var(--bg-alt); }
 .tier-cta.pro {
   background: var(--cta);
   color: #fff;
-  box-shadow: 0 4px 14px rgba(230, 57, 70, .28);
+  box-shadow: 0 4px 14px rgba(26, 115, 232, .28);
 }
-.tier-cta.pro:hover { background: var(--cta-hover); transform: scale(1.03); box-shadow: 0 10px 24px rgba(230, 57, 70, .38); }
+.tier-cta.pro:hover { background: var(--cta-hover); transform: scale(1.03); box-shadow: 0 10px 24px rgba(26, 115, 232, .38); }
 .tier-cta.pro:active { transform: scale(1.0); }
 .tier-cta.pro:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
 
@@ -432,7 +459,7 @@ section.bg-alt { background: var(--bg-alt); }
   width: 120px; height: 120px;
   margin: 0 auto;
   display: flex; align-items: center; justify-content: center;
-  background: #FEF2F2;
+  background: #EFF6FF;
   border-radius: 50%;
 }
 .guarantee-icon svg { width: 80px; height: 80px; }
@@ -548,22 +575,24 @@ footer {
         </div>
       </div>
 
-      <div class="mockup-card hero-rise" role="img" aria-label="Esempio di una sessione di simulazione">
-        <div class="mockup-eyebrow">Esempio di sessione</div>
-        <div class="mockup-bubble commissario">
-          <span class="mockup-bubble-label">Commissario AI</span>
-          Ti faccio una domanda sul tema del tuo bando. Come la imposteresti?
-        </div>
-        <div class="mockup-bubble candidato">
-          <span class="mockup-bubble-label">Tu</span>
-          La tua risposta qui. A voce o scritta, come preferisci.
-        </div>
-        <div class="mockup-feedback">
-          <div class="mockup-feedback-label">Feedback su 3 cose:</div>
-          <span class="mockup-pill">Chiarezza</span>
-          <span class="mockup-pill">Struttura</span>
-          <span class="mockup-pill">Contenuto</span>
-        </div>
+      <div class="mockup-card hero-rise" role="img" aria-label="Esempio di output che ricevi dopo una simulazione">
+        <div class="mockup-eyebrow">Esempio di output</div>
+        <p class="mockup-report-label">Dopo la tua risposta, il sistema restituisce:</p>
+        <ul class="mockup-report">
+          <li class="report-good">
+            <span class="report-icon" aria-hidden="true">+</span>
+            <span>Cosa è andato bene nella tua risposta</span>
+          </li>
+          <li class="report-good">
+            <span class="report-icon" aria-hidden="true">+</span>
+            <span>Quali argomenti hai citato bene</span>
+          </li>
+          <li class="report-work">
+            <span class="report-icon" aria-hidden="true">&uarr;</span>
+            <span>Cosa migliorare alla prossima sessione</span>
+          </li>
+        </ul>
+        <p class="mockup-extra">Salva tutto nel tuo profilo, con storico per materia.</p>
       </div>
     </div>
   </div>
@@ -650,14 +679,15 @@ footer {
 <section id="fiducia" class="content-section bg-alt">
   <div class="container">
     <div class="fiducia-content fade-in">
+      <p class="fiducia-lead">Non ti chiediamo di fidarti sulla parola. Ti diamo subito un output concreto, su tre cose specifiche, salvato nel tuo profilo.</p>
       <h2>Non abbiamo recensioni. Ma abbiamo una promessa.</h2>
       <p class="fiducia-copy">Siamo appena partiti. Zero recensioni finte. Se il prodotto non è buono, ti rimborsiamo il 100% in 5 minuti. Senza storie. Non c'è niente da perdere.</p>
       <div class="guarantee-icon" aria-hidden="true">
         <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M32 6L12 13v12c0 13.5 9.3 26.2 20 29 10.7-2.8 20-15.5 20-29V13L32 6z"
-                stroke="#E63946" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                stroke="#1A73E8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
           <text x="32" y="40" text-anchor="middle"
-                fill="#E63946" font-size="13" font-weight="900" font-family="system-ui">GARANZIA</text>
+                fill="#1A73E8" font-size="13" font-weight="900" font-family="system-ui">100%</text>
         </svg>
       </div>
     </div>
@@ -710,14 +740,14 @@ footer {
   if (typeof gsap === 'undefined') return;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  // Mockup card 3 metric pills: stagger reveal con leggero scale-fade dopo l'entrance dell'hero.
+  // Mockup card 3 report items: stagger reveal con leggero scale-fade dopo l'entrance dell'hero.
   // power2.out = iOS/Stripe smooth, no overshoot (anti Material bouncy cartoon).
-  gsap.from('.mockup-pill', {
+  gsap.from('.mockup-report li', {
     opacity: 0,
-    scale: 0.9,
-    duration: 0.45,
+    scale: 0.95,
+    duration: 0.4,
     ease: 'power2.out',
-    stagger: 0.09,
+    stagger: 0.1,
     delay: 0.55,
     clearProps: 'opacity,scale',
   });
