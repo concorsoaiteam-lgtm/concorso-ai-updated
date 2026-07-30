@@ -1,416 +1,704 @@
 <!DOCTYPE html>
-<html lang="it" class="scroll-smooth">
+<html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ConcorsoAI — Esercitati all'orale con un commissario AI</title>
-  <meta name="description" content="Simula l'orale del tuo concorso pubblico italiano con un commissario AI basato sul tuo bando. 3 simulazioni gratis al mese senza carta." />
-  <meta name="keywords" content="concorso pubblico, simulazione orale, commissario AI, preparazione concorso, esame orale, diritto amministrativo, ripetizioni concorso" />
-  <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://concorso-ai.vercel.app/" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ConcorsoAI — Passa l'orale. Senza ansia.</title>
+<meta name="description" content="Simula l'orale del tuo concorso pubblico con un commissario AI che fa le domande del tuo bando. 3 simulazioni gratis al mese, senza carta. Made in Italy." />
+<meta name="theme-color" content="#FFFFFF" />
+<link rel="canonical" href="https://concorso-ai.vercel.app/" />
 
-  <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%230F4C81'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='system-ui' font-weight='900'>CA</text></svg>" />
+<!-- Favicon inline: nessuna richiesta di rete -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23E63946'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='system-ui' font-weight='900'%3EC%3C/text%3E%3C/svg%3E" />
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="ConcorsoAI — Esercitati all'orale con un commissario AI" />
-  <meta property="og:description" content="Simula l'orale del tuo concorso pubblico con un commissario AI basato sul tuo bando. 3 simulazioni gratis al mese." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://concorso-ai.vercel.app" />
-  <meta property="og:locale" content="it_IT" />
+<!-- OpenGraph -->
+<meta property="og:title" content="ConcorsoAI — Passa l'orale. Senza ansia." />
+<meta property="og:description" content="Simula l'orale del concorso con un commissario AI che fa le domande del tuo bando." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://concorso-ai.vercel.app/" />
+<meta property="og:locale" content="it_IT" />
 
-  <!-- Font: Geist -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.3/index.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.0.3/index.min.css" rel="stylesheet" />
+<style>
+/* ==========================================================================
+   ConcorsoAI Landing — minimal, anti-AI-slop
+   - 0 librerie esterne (no Tailwind, no Google Fonts, no GSAP)
+   - system-ui only (caricamento < 2s)
+   - palette ristretta: 1 cta rosso, 1 blu per link, 2 toni testo, 1 grigio bg
+   - niente gradienti, niente glassmorphism, niente parallasse
+   ========================================================================== */
 
-  <!-- Tailwind CSS via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#F7FBFF', 100: '#EAF4FF', 200: '#D6E8FF', 300: '#A9CDF8',
-              400: '#5EA0E8', 500: '#2563EB', 600: '#0F4C81',
-              700: '#0B3A63', 800: '#0B2A4A', 900: '#071D33'
-            },
-            accent: {
-              900: '#312E81'
-            },
-            ink: {
-              500: '#475569',
-              700: '#334155',
-              900: '#0A1628'
-            }
-          },
-          boxShadow: {
-            card: '0 24px 70px rgba(15,76,129,.12)',
-            cardHover: '0 30px 90px rgba(15,76,129,.18)',
-            elevated: '0 40px 100px rgba(15,76,129,.18)'
-          }
-        }
-      }
-    }
-  </script>
+* { box-sizing: border-box; }
 
-  <link rel="stylesheet" href="/css/landing.css" />
+:root {
+  --bg: #FFFFFF;
+  --bg-alt: #F8F9FA;
+  --text-primary: #222222;
+  --text-secondary: #444444;
+  --text-tertiary: #6B7280;
+  --accent: #1A73E8;
+  --accent-dark: #1457B0;
+  --cta: #E63946;
+  --cta-hover: #C92A37;
+  --border: #E5E7EB;
+}
 
-  <style>
-    /* Sticky mobile CTA iOS safe-area */
-    .sticky-mobile-cta {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 60;
-      display: none;
-      padding: 12px 16px;
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
-      background: rgba(255,255,255,.96);
-      border-top: 1px solid #D6E8FF;
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 -8px 30px rgba(15,76,129,.10);
-    }
-    @media (max-width: 767px) {
-      .sticky-mobile-cta { display: block; }
-      body { padding-bottom: 72px; }
-    }
-  </style>
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
-  <noscript>
-    <style>
-      .hero-rise > * { opacity: 1 !important; transform: none !important; animation: none !important; }
-      .reveal-on-scroll { opacity: 1 !important; transform: none !important; }
-      .savings-badge { animation: none !important; }
-    </style>
-  </noscript>
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
 
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "ConcorsoAI",
-        "applicationCategory": "EducationalApplication",
-        "operatingSystem": "Web",
-        "description": "Simulatore orale AI per concorsi pubblici italiani basato sul bando del candidato. Feedback immediato su chiarezza, struttura e contenuto.",
-        "url": "https://concorso-ai.vercel.app",
-        "offers": {
-          "@type": "AggregateOffer",
-          "priceCurrency": "EUR",
-          "lowPrice": "0",
-          "highPrice": "119",
-          "offerCount": 3
-        }
-      },
-      {
-        "@type": "FAQPage",
-        "mainEntity": [
-          {"@type":"Question","name":"I miei dati sono usati per addestrare la vostra AI?","acceptedAnswer":{"@type":"Answer","text":"No. I bandi e le simulazioni che carichi restano tuoi. Li usiamo solo per generare le tue sessioni personalizzate, in server UE conformi GDPR. Se disdici, cancelliamo tutto entro 30 giorni."}},
-          {"@type":"Question","name":"Per quali concorsi funziona?","acceptedAnswer":{"@type":"Answer","text":"Qualsiasi concorso pubblico italiano di cui hai il bando: magistratura, scuola, forze dell'ordine, dirigenti PA, enti locali, ministeriali, RIPAM."}},
-          {"@type":"Question","name":"Posso rispondere a voce?","acceptedAnswer":{"@type":"Answer","text":"Sì. ConcorsoAI supporta sia risposta scritta sia risposta a voce tramite microfono. La commissione vera ti ascolta parlare: meglio esercitarsi nelle stesse condizioni."}},
-          {"@type":"Question","name":"Quanto è realistico rispetto a un orale vero?","acceptedAnswer":{"@type":"Answer","text":"Le domande sono calibrate sul bando reale che hai caricato, con timer e follow-up come in commissione. Non è una commissione umana, è un simulatore. Ma chi lo usa dice che l'orale vero è meno spaventoso del previsto."}},
-          {"@type":"Question","name":"Cosa cambia tra Free e Pro?","acceptedAnswer":{"@type":"Answer","text":"Free: 3 simulazioni al mese, materie base, storico limitato. Pro: simulazioni illimitate, storico completo dei progressi, report PDF scaricabili, domande mirate sulle tue aree deboli."}},
-          {"@type":"Question","name":"Posso disdire quando voglio?","acceptedAnswer":{"@type":"Answer","text":"Sì, in qualunque momento dal pannello utente. Nessun vincolo, nessuna penale. Se disdici entro 14 giorni dall'iscrizione hai rimborso completo, come prevede la direttiva consumer UE."}}
-        ]
-      }
-    ]
+h1, h2, h3, h4 { font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; margin: 0; color: var(--text-primary); }
+h1 { font-size: clamp(2.4rem, 5vw + 0.5rem, 4rem); }
+h2 { font-size: clamp(1.875rem, 2.5vw + 1rem, 2.6rem); }
+h3 { font-size: 1.25rem; }
+p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; padding: 0; margin: 0; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+@media (min-width: 768px) { .container { padding: 0 32px; } }
+
+/* ---------- Selezione testo ---------- */
+::selection { background: #FEE2E2; color: var(--text-primary); }
+
+/* ---------- Skip link (accessibilità) ---------- */
+.skip-link {
+  position: fixed; top: 8px; left: 8px;
+  background: var(--text-primary); color: #fff;
+  padding: 10px 14px; border-radius: 6px; font-weight: 700; font-size: 14px;
+  z-index: 100; transform: translateY(-200%);
+  transition: transform .15s ease;
+}
+.skip-link:focus { transform: translateY(0); }
+
+/* ---------- Navbar ---------- */
+.navbar {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky; top: 0; z-index: 50;
+}
+.navbar-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px;
+}
+.logo { font-size: 1.125rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-primary); }
+.logo span { color: var(--cta); }
+
+.nav-cta {
+  background: var(--cta);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  min-height: 48px;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(230, 57, 70, .22);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.nav-cta:hover { background: var(--cta-hover); transform: scale(1.03); box-shadow: 0 8px 20px rgba(230, 57, 70, .32); }
+.nav-cta:active { transform: scale(1.0); }
+.nav-cta:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
+
+/* ---------- Hero ---------- */
+.hero { padding: 64px 0 72px; }
+@media (min-width: 768px) { .hero { padding: 96px 0 112px; } }
+
+.hero-grid {
+  display: grid;
+  gap: 48px;
+  align-items: center;
+}
+@media (min-width: 900px) {
+  .hero-grid { grid-template-columns: 1.05fr 0.95fr; gap: 64px; }
+}
+
+.hero-text { max-width: 560px; }
+
+.trust-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px; font-weight: 700;
+  margin-bottom: 24px;
+}
+.trust-badge svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+.hero h1 { margin-bottom: 20px; }
+
+.hero-subtitle {
+  font-size: 1.0625rem;
+  color: var(--text-secondary);
+  max-width: 540px;
+  margin-bottom: 36px;
+  line-height: 1.6;
+}
+@media (min-width: 768px) { .hero-subtitle { font-size: 1.125rem; } }
+
+.hero-cta-group {
+  display: flex; flex-direction: column; gap: 16px; align-items: flex-start;
+}
+@media (min-width: 480px) {
+  .hero-cta-group { flex-direction: row; align-items: center; gap: 20px; }
+}
+
+.cta-primary {
+  background: var(--cta);
+  color: #fff;
+  padding: 18px 32px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1.0625rem;
+  min-height: 56px;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(230, 57, 70, .28);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+@media (min-width: 768px) { .cta-primary { font-size: 1.125rem; padding: 19px 34px; } }
+.cta-primary:hover { background: var(--cta-hover); transform: scale(1.03); box-shadow: 0 10px 24px rgba(230, 57, 70, .38); }
+.cta-primary:active { transform: scale(1.0); box-shadow: 0 2px 6px rgba(230, 57, 70, .25); }
+.cta-primary:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
+
+.cta-link {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  padding: 10px 4px;
+  min-height: 48px;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.cta-link:hover { color: var(--accent-dark); }
+.cta-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+/* ---------- Hero mockup (chat esempio, niente fake data) ---------- */
+.mockup-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, .06);
+  max-width: 460px;
+  margin: 0 auto;
+}
+.mockup-eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-weight: 800;
+  color: var(--text-tertiary);
+  margin-bottom: 16px;
+}
+.mockup-bubble {
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mockup-bubble.commissario {
+  background: #F3F4F6;
+  color: var(--text-primary);
+  border-bottom-left-radius: 4px;
+}
+.mockup-bubble.candidato {
+  background: #EFF6FF;
+  color: var(--text-primary);
+  border-bottom-right-radius: 4px;
+  text-align: left;
+}
+.mockup-bubble-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.mockup-feedback {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.mockup-feedback-label {
+  width: 100%;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 6px;
+}
+.mockup-pill {
+  background: #FEF2F2;
+  color: #991B1B;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+/* ---------- Section base ---------- */
+section.content-section { padding: 72px 0; }
+@media (min-width: 768px) { section.content-section { padding: 96px 0; } }
+section.bg-alt { background: var(--bg-alt); }
+
+.section-heading { text-align: center; max-width: 680px; margin: 0 auto 48px; }
+.section-heading .section-subtitle {
+  margin-top: 16px;
+  font-size: 1.0625rem;
+  color: var(--text-secondary);
+}
+
+/* ---------- Come funziona ---------- */
+.steps-grid {
+  display: grid;
+  gap: 20px;
+}
+@media (min-width: 768px) { .steps-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; } }
+
+.step-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 24px;
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+.step-card:hover {
+  box-shadow: 0 10px 30px rgba(15, 23, 42, .06);
+  transform: translateY(-2px);
+}
+.step-icon {
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  background: #FEF2F2;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+.step-icon svg { width: 24px; height: 24px; color: var(--cta); }
+.step-card h3 { margin-bottom: 8px; }
+.step-card p { color: var(--text-secondary); font-size: 0.975rem; }
+
+/* ---------- Tier ---------- */
+.tier-grid {
+  display: grid;
+  gap: 20px;
+  max-width: 880px;
+  margin: 0 auto;
+}
+@media (min-width: 768px) { .tier-grid { grid-template-columns: 1fr 1fr; gap: 24px; } }
+
+.tier-col {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  position: relative;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.tier-col.recommended {
+  border: 2px solid var(--accent);
+  box-shadow: 0 16px 40px rgba(26, 115, 232, .12);
+}
+.tier-col.recommended:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 50px rgba(26, 115, 232, .18);
+}
+.tier-col-name {
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--text-tertiary);
+  margin-bottom: 12px;
+}
+.tier-col-price {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  line-height: 1.1;
+}
+.tier-col-price .unit {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.tier-features {
+  margin: 0 0 28px 0;
+}
+.tier-features li {
+  padding: 10px 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.tier-features li:last-child { border-bottom: none; }
+.tier-features li::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cta);
+  margin-top: 11px;
+  flex-shrink: 0;
+}
+
+.tier-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  min-height: 48px;
+  width: 100%;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.tier-cta.free {
+  background: var(--bg);
+  color: var(--accent);
+  border: 2px solid var(--accent);
+}
+.tier-cta.free:hover { background: #EFF6FF; transform: scale(1.02); }
+.tier-cta.free:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
+.tier-cta.pro {
+  background: var(--cta);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(230, 57, 70, .28);
+}
+.tier-cta.pro:hover { background: var(--cta-hover); transform: scale(1.03); box-shadow: 0 10px 24px rgba(230, 57, 70, .38); }
+.tier-cta.pro:active { transform: scale(1.0); }
+.tier-cta.pro:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
+
+.consigliato-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tier-footnote {
+  text-align: center;
+  margin: 40px auto 0;
+  max-width: 580px;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* ---------- Fiducia ---------- */
+.fiducia-content { max-width: 640px; margin: 0 auto; text-align: center; }
+.fiducia-content h2 { margin-bottom: 24px; }
+.fiducia-copy {
+  color: var(--text-secondary);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  margin-bottom: 36px;
+}
+.guarantee-icon {
+  width: 120px; height: 120px;
+  margin: 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  background: #FEF2F2;
+  border-radius: 50%;
+}
+.guarantee-icon svg { width: 80px; height: 80px; }
+
+/* ---------- Footer ---------- */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 0 48px;
+  background: var(--bg);
+}
+.footer-inner {
+  display: flex; flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  text-align: center;
+}
+@media (min-width: 768px) {
+  .footer-inner { flex-direction: row; justify-content: space-between; text-align: left; align-items: flex-start; }
+}
+.footer-brand-name { font-weight: 800; color: var(--text-primary); font-size: 1rem; margin-bottom: 4px; }
+.footer-trust { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+.footer-links { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+.footer-links a {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  transition: color .15s ease;
+}
+.footer-links a:hover { color: var(--accent); }
+.footer-copy {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+/* ---------- Animazioni sobrie (max 400ms) ---------- */
+
+/* Hero entrance: stagger fade-in + leggero upward translate */
+.hero-rise > * {
+  opacity: 0;
+  animation: hero-rise-anim .5s cubic-bezier(.2, .8, .2, 1) forwards;
+}
+.hero-rise > *:nth-child(1) { animation-delay: 60ms; }
+.hero-rise > *:nth-child(2) { animation-delay: 160ms; }
+.hero-rise > *:nth-child(3) { animation-delay: 260ms; }
+.hero-rise > *:nth-child(4) { animation-delay: 360ms; }
+@keyframes hero-rise-anim {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Fade-in on scroll per sezioni successive */
+.fade-in {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .4s ease-out, transform .4s ease-out;
+}
+.fade-in.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* prefers-reduced-motion: zero motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
   }
-  </script>
+  .hero-rise > * { opacity: 1 !important; transform: none !important; }
+  .fade-in { opacity: 1 !important; transform: none !important; }
+}
+</style>
 </head>
 
-<body class="bg-white font-sans antialiased text-ink-900 selection:bg-brand-200 selection:text-brand-900">
+<body>
 
-  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-brand-900 focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-white">Salta al contenuto</a>
+<a href="#main" class="skip-link">Salta al contenuto</a>
 
-  <!-- NAVBAR -->
-  <header class="border-b border-brand-200 bg-white">
-    <nav class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Navigazione principale">
-      <a href="/" class="text-lg font-bold tracking-tight text-ink-900" aria-label="ConcorsoAI home">
-        Concorso<span class="text-brand-600">AI</span>
-      </a>
-      <div class="hidden items-center gap-6 sm:flex">
-        <a href="#come-funziona" class="nav-link text-sm font-semibold text-ink-700 hover:text-brand-700">Come funziona</a>
-        <a href="#perche" class="nav-link text-sm font-semibold text-ink-700 hover:text-brand-700">Perché noi</a>
-        <a href="#prezzi" class="nav-link text-sm font-semibold text-ink-700 hover:text-brand-700">Prezzi</a>
-        <a href="auth.html" class="nav-link text-sm font-semibold text-ink-700 hover:text-brand-700">Accedi</a>
-        <a href="auth.html?mode=register" class="btn-primary rounded-xl px-4 py-2 text-sm font-bold">Inizia gratis</a>
-      </div>
-      <a href="auth.html?mode=register" class="btn-primary rounded-xl px-5 py-3 text-sm font-bold sm:hidden">Inizia gratis</a>
-    </nav>
-  </header>
-
-  <main id="main">
-
-    <!-- 1. HERO -->
-    <section class="px-4 py-20 sm:py-28 lg:py-32 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-3xl text-center hero-rise">
-        <h1 class="text-5xl font-bold leading-[1.05] tracking-tighter text-balance text-ink-900 sm:text-6xl lg:text-7xl">
-          <span class="word-rise d1">Esercitati</span> <span class="word-rise d2">all'orale</span> <span class="word-rise d3">di</span> <span class="word-rise d4">un</span> <span class="word-rise d5">concorso</span> <span class="word-rise d6">pubblico</span> <span class="word-rise d7">con</span> <span class="word-rise d8">un</span> <span class="text-accent-900"><span class="word-rise d9">commissario</span> <span class="word-rise d10">AI.</span></span>
-        </h1>
-        <p class="mx-auto mt-6 max-w-2xl text-base leading-7 text-ink-700 text-balance sm:text-lg lg:text-xl">
-          Carica il bando del tuo concorso. Il commissario AI interroga solo sui tuoi contenuti. Feedback immediato su chiarezza, struttura, contenuto: le tre metriche della commissione reale.
-        </p>
-        <p class="mx-auto mt-5 max-w-2xl text-center text-base font-medium text-ink-700 sm:text-base">
-          Non è un quiz. È il tuo bando, punto per punto.
-        </p>
-        <div class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <a href="auth.html?mode=register" class="btn-primary hero-cta-pulse rounded-xl px-8 py-5 text-lg font-bold">Inizia gratis</a>
-          <a href="#come-funziona" class="btn-secondary rounded-xl px-8 py-5 text-lg font-bold">Scopri come funziona</a>
-        </div>
-        <ul class="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-base font-semibold text-ink-900 list-none">
-          <li>3 simulazioni gratis al mese</li>
-          <li>Senza carta</li>
-          <li>Server UE (GDPR)</li>
-          <li>Disdetta 14gg</li>
-        </ul>
-        <div class="mt-8 inline-flex flex-col items-center gap-1 rounded-2xl border border-brand-300 bg-white px-6 py-4 shadow-[0_1px_2px_rgba(15,76,129,.08)]">
-          <span class="text-xs font-bold uppercase tracking-wider text-brand-700">Funziona per</span>
-          <span class="text-sm font-medium text-ink-900 sm:text-base">Magistratura &middot; Scuola &middot; Forze dell&rsquo;ordine &middot; Dirigenti PA &middot; Enti locali &middot; RIPAM e altri concorsi pubblici</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. COME FUNZIONA -->
-    <section id="come-funziona" class="reveal-on-scroll px-4 py-20 sm:py-24 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-5xl">
-        <div class="max-w-2xl">
-          <h2 class="text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-5xl">Come funziona.</h2>
-          <p class="mt-4 text-base text-ink-900 sm:text-lg">Tre passaggi per esercitarti con il commissario AI prima del giorno dell'orale.</p>
-        </div>
-
-        <ol class="mt-10 grid gap-6 sm:grid-cols-3">
-          <li class="tactile-card rounded-2xl border border-brand-300 bg-white p-6">
-            <span class="text-2xl font-bold text-accent-900">1.</span>
-            <h3 class="mt-3 text-lg font-bold text-ink-900">Carica il bando</h3>
-            <p class="mt-2 text-base leading-6 text-ink-900">PDF, testo libero o materie generiche. Il commissario AI estrae i contenuti specifici del tuo concorso.</p>
-          </li>
-          <li class="tactile-card rounded-2xl border border-brand-300 bg-white p-6">
-            <span class="text-2xl font-bold text-accent-900">2.</span>
-            <h3 class="mt-3 text-lg font-bold text-ink-900">Affronta l'orale</h3>
-            <p class="mt-2 text-base leading-6 text-ink-900">Domande a voce o per iscritto. Timer realistico. Le domande sono calibrate sul bando che hai caricato.</p>
-          </li>
-          <li class="tactile-card rounded-2xl border border-brand-300 bg-white p-6">
-            <span class="text-2xl font-bold text-accent-900">3.</span>
-            <h3 class="mt-3 text-lg font-bold text-ink-900">Ricevi feedback</h3>
-            <p class="mt-2 text-base leading-6 text-ink-900">Chiarezza, struttura, contenuto. Sai subito cosa migliorare alla prossima sessione.</p>
-          </li>
-        </ol>
-      </div>
-    </section>
-
-    <!-- 3. PERCHÉ CONCORSOAI -->
-    <section id="perche" class="reveal-on-scroll px-4 py-20 sm:py-24 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-5xl">
-        <div class="max-w-2xl">
-          <h2 class="text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-5xl">Perché ConcorsoAI.</h2>
-          <p class="mt-4 text-base text-ink-900 sm:text-lg">Cosa lo rende diverso dalle alternative che hai già considerato.</p>
-        </div>
-
-        <div class="mt-10 grid gap-6 sm:grid-cols-3">
-          <div class="tactile-card-strong rounded-2xl border border-brand-300 bg-white p-6">
-            <span class="text-2xl font-bold text-accent-900">1.</span>
-            <h3 class="mt-3 text-lg font-bold text-ink-900">Costa come due caffè alla settimana.</h3>
-            <p class="mt-2 text-base leading-6 text-ink-900">€9,92 al mese nel piano annuale, meno di una ripetizione privata da un'ora. In un mese di simulazioni risparmi diverse centinaia di euro.</p>
-          </div>
-          <div class="tactile-card-strong rounded-2xl border border-brand-300 bg-white p-6">
-            <span class="text-2xl font-bold text-accent-900">2.</span>
-            <h3 class="mt-3 text-lg font-bold text-ink-900">Si adatta ai tuoi punti deboli.</h3>
-            <p class="mt-2 text-base leading-6 text-ink-900">Dopo ogni simulazione il commissario memorizza dove sei fragile e ritorna lì. Niente capitoli che conosci già, niente quiz generici.</p>
-          </div>
-          <div class="tactile-card-strong rounded-2xl border border-brand-300 bg-white p-6">
-            <span class="text-2xl font-bold text-accent-900">3.</span>
-            <h3 class="mt-3 text-lg font-bold text-ink-900">Vedi i tuoi progressi nel tempo.</h3>
-            <p class="mt-2 text-base leading-6 text-ink-900">Storico delle simulazioni con chiarezza, struttura e contenuto tracciati su un grafico. Sai sempre cosa è migliorato e cosa ancora no.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. PREZZI -->
-    <section id="prezzi" class="reveal-on-scroll px-4 py-20 sm:py-24 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-3xl">
-        <div class="max-w-2xl">
-          <h2 class="text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-5xl">Prezzi semplici.</h2>
-          <p class="mt-4 text-base text-ink-900 sm:text-lg">Paghi il Pro solo quando sei pronto a fare sul serio.</p>
-        </div>
-
-        <article class="mt-10 rounded-2xl border-2 border-brand-600 bg-white p-7 shadow-elevated sm:p-9">
-          <h3 class="text-xl font-bold text-ink-900">Pro</h3>
-          <p class="mt-1 text-base text-ink-900 sm:text-lg">Simulazioni senza limiti, storico progressi, report PDF scaricabili.</p>
-
-          <div class="relative mt-7 grid gap-4 sm:grid-cols-[3fr_4fr]">
-            <a href="auth.html?mode=register&plan=monthly" class="btn-secondary order-2 flex-col items-center justify-center rounded-xl px-4 py-5 text-center sm:order-1">
-              <span class="text-xs font-bold uppercase tracking-wider text-ink-500">Mensile</span>
-              <span class="mt-2 text-2xl font-bold text-ink-900">€12,99</span>
-              <span class="mt-0.5 text-xs text-ink-500">al mese · disdici quando vuoi</span>
-            </a>
-
-            <a href="auth.html?mode=register&plan=yearly" class="btn-primary order-1 relative flex-col items-center justify-center overflow-visible rounded-xl px-4 py-5 text-center sm:order-2">
-              <span class="savings-badge absolute -top-3 left-1/2 inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-emerald-800 shadow-md border-2 border-emerald-300">
-                Risparmi €37/anno
-              </span>
-              <span class="text-xs font-bold uppercase tracking-wider text-brand-200">Annuale</span>
-              <span class="mt-2 text-2xl font-bold text-white">€9,92</span>
-              <span class="mt-0.5 text-xs text-brand-200">al mese · €119 una volta sola</span>
-            </a>
-          </div>
-
-          <ul class="mt-7 space-y-2 text-base text-ink-900">
-            <li>Simulazioni senza limiti</li>
-            <li>Storico progressi con andamento nel tempo</li>
-            <li>Report PDF di ogni sessione</li>
-            <li>Domande mirate sulle aree dove sei più fragile</li>
-          </ul>
-
-          <p class="mt-7 text-center text-base text-ink-900">
-            Non ancora pronto?
-            <a href="auth.html?mode=register" class="font-bold text-brand-700 underline-offset-4 hover:underline">Inizia gratis: 3 simulazioni al mese →</a>
-          </p>
-        </article>
-      </div>
-    </section>
-
-    <!-- 4.5 FAQ -->
-    <section id="faq" class="reveal-on-scroll px-4 py-20 sm:py-24 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-3xl">
-        <div class="max-w-2xl">
-          <h2 class="text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-5xl">Domande vere.</h2>
-          <p class="mt-4 text-base text-ink-900 sm:text-lg">Quelle che fanno tutti prima di iscriversi.</p>
-        </div>
-
-        <div class="mt-10 space-y-4">
-          <details class="faq-item rounded-2xl border border-brand-300 bg-white p-6">
-            <summary>
-              <span class="text-base font-bold text-ink-900 sm:text-lg">I miei dati sono usati per addestrare la vostra AI?</span>
-              <span class="faq-chevron text-xl" aria-hidden="true">&darr;</span>
-            </summary>
-            <div class="faq-answer text-base leading-7 text-ink-900">
-              No. I bandi e le simulazioni che carichi restano tuoi. Li usiamo solo per generare le tue sessioni personalizzate, in server UE conformi GDPR. Se disdici, cancelliamo tutto entro 30 giorni.
-            </div>
-          </details>
-
-          <details class="faq-item rounded-2xl border border-brand-300 bg-white p-6">
-            <summary>
-              <span class="text-base font-bold text-ink-900 sm:text-lg">Per quali concorsi funziona?</span>
-              <span class="faq-chevron text-xl" aria-hidden="true">&darr;</span>
-            </summary>
-            <div class="faq-answer text-base leading-7 text-ink-900">
-              Qualsiasi concorso pubblico italiano di cui hai il bando: magistratura, scuola, forze dell&rsquo;ordine, dirigenti PA, enti locali, ministeriali, RIPAM. Se non trovi la tua tipologia nel menu scrivici e valutiamo.
-            </div>
-          </details>
-
-          <details class="faq-item rounded-2xl border border-brand-300 bg-white p-6">
-            <summary>
-              <span class="text-base font-bold text-ink-900 sm:text-lg">Posso rispondere a voce?</span>
-              <span class="faq-chevron text-xl" aria-hidden="true">&darr;</span>
-            </summary>
-            <div class="faq-answer text-base leading-7 text-ink-900">
-              S&igrave;. ConcorsoAI supporta sia risposta scritta sia risposta a voce tramite microfono. La commissione vera ti ascolta parlare: meglio esercitarsi nelle stesse condizioni.
-            </div>
-          </details>
-
-          <details class="faq-item rounded-2xl border border-brand-300 bg-white p-6">
-            <summary>
-              <span class="text-base font-bold text-ink-900 sm:text-lg">Quanto &egrave; realistico rispetto a un orale vero?</span>
-              <span class="faq-chevron text-xl" aria-hidden="true">&darr;</span>
-            </summary>
-            <div class="faq-answer text-base leading-7 text-ink-900">
-              Le domande sono calibrate sul bando reale che hai caricato, con timer e follow-up come in commissione. Non &egrave; una commissione umana · &egrave; un simulatore. Ma chi lo usa dice che l&rsquo;orale vero &egrave; meno spaventoso del previsto.
-            </div>
-          </details>
-
-          <details class="faq-item rounded-2xl border border-brand-300 bg-white p-6">
-            <summary>
-              <span class="text-base font-bold text-ink-900 sm:text-lg">Cosa cambia tra Free e Pro?</span>
-              <span class="faq-chevron text-xl" aria-hidden="true">&darr;</span>
-            </summary>
-            <div class="faq-answer text-base leading-7 text-ink-900">
-              Free: 3 simulazioni al mese, materie base, storico limitato. Pro (12,99&euro;/mese o 9,92&euro; in annuale): simulazioni illimitate, storico completo dei progressi, report PDF scaricabili, domande mirate sulle tue aree deboli.
-            </div>
-          </details>
-
-          <details class="faq-item rounded-2xl border border-brand-300 bg-white p-6">
-            <summary>
-              <span class="text-base font-bold text-ink-900 sm:text-lg">Posso disdire quando voglio?</span>
-              <span class="faq-chevron text-xl" aria-hidden="true">&darr;</span>
-            </summary>
-            <div class="faq-answer text-base leading-7 text-ink-900">
-              S&igrave;, in qualunque momento dal pannello utente. Nessun vincolo, nessuna penale. Se disdici entro 14 giorni dall&rsquo;iscrizione hai rimborso completo, come prevede la direttiva consumer UE.
-            </div>
-          </details>
-        </div>
-      </div>
-    </section>
-
-    <!-- 5. FINAL CTA -->
-    <section id="final-cta" class="reveal-on-scroll border-t border-brand-200 px-4 py-20 sm:py-28 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl text-center">
-        <h2 class="text-5xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-6xl">Esercitati prima che la commissione ti veda.</h2>
-        <p class="mt-5 text-base leading-7 text-ink-900 sm:text-lg">
-          Tre simulazioni gratis al mese. Senza carta. Cifratura server UE. Disdetta in 14 giorni, senza vincoli.
-        </p>
-        <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <a href="auth.html?mode=register" class="btn-primary rounded-xl px-8 py-5 text-lg font-bold">Inizia gratis</a>
-        </div>
-        <p class="mt-6 text-sm text-ink-700">Piano annuale Pro: 9,92&euro;/mese. 119&euro; una volta sola, disdici quando vuoi.</p>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Footer -->
-  <footer class="border-t border-brand-200 bg-white px-4 py-10 sm:px-6 lg:px-8">
-    <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 sm:flex-row">
-      <div class="text-center sm:text-left">
-        <p class="text-base font-bold text-ink-900">ConcorsoAI</p>
-        <p class="mt-1 text-sm text-ink-700">Made in Italy · Server UE (GDPR) · Nessuna carta richiesta</p>
-      </div>
-      <ul class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-ink-700">
-        <li><a href="terms.html" class="hover:text-brand-700 hover:underline">Termini</a></li>
-        <li><a href="privacy.html" class="hover:text-brand-700 hover:underline">Privacy</a></li>
-        <li><a href="auth.html" class="hover:text-brand-700 hover:underline">Accedi</a></li>
-      </ul>
-    </div>
-    <p class="mt-6 text-center text-sm text-ink-700">© 2026 ConcorsoAI · Tutti i diritti riservati</p>
-  </footer>
-
-  <!-- Sticky mobile CTA -->
-  <div class="sticky-mobile-cta">
-    <a href="auth.html?mode=register" class="btn-primary flex items-center justify-center rounded-xl px-6 py-4 text-base font-bold">Inizia gratis</a>
+<!-- ========== NAVBAR ========== -->
+<header class="navbar">
+  <div class="container navbar-inner">
+    <a href="/" class="logo" aria-label="ConcorsoAI home">Concorso<span>AI</span></a>
+    <a href="auth.html?mode=register" class="nav-cta">Inizia gratis</a>
   </div>
+</header>
 
-  <!-- Section reveal on scroll (IntersectionObserver) -->
-  <script>
-    (function () {
-      function init() {
-        var targets = document.querySelectorAll('.reveal-on-scroll');
-        if (!targets.length) return;
-        if (!('IntersectionObserver' in window)) {
-          targets.forEach(function (el) { el.classList.add('is-visible'); });
-          return;
-        }
-        var observer = new IntersectionObserver(function (entries) {
-          entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('is-visible');
-              observer.unobserve(entry.target);
-            }
-          });
-        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-        targets.forEach(function (el) { observer.observe(el); });
+<main id="main">
+
+<!-- ========== 1. HERO ========== -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-text hero-rise">
+        <span class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z" />
+            <path d="M9 12l2 2 4-4" />
+          </svg>
+          Garanzia 100% soddisfatto o rimborsato
+        </span>
+        <h1>Passa l'orale. Senza ansia.</h1>
+        <p class="hero-subtitle">Carica il tuo materiale. L'AI ti fa le domande che la commissione ti farà, così arrivi preparato e sai già cosa aspettarti.</p>
+        <div class="hero-cta-group">
+          <a href="auth.html?mode=register" class="cta-primary">Inizia gratis. Nessuna carta.</a>
+          <a href="#tier" class="cta-link">Passa al Pro</a>
+        </div>
+      </div>
+
+      <div class="mockup-card hero-rise" role="img" aria-label="Esempio di una sessione di simulazione">
+        <div class="mockup-eyebrow">Esempio di sessione</div>
+        <div class="mockup-bubble commissario">
+          <span class="mockup-bubble-label">Commissario AI</span>
+          Ti faccio una domanda sul tema del tuo bando. Come la imposteresti?
+        </div>
+        <div class="mockup-bubble candidato">
+          <span class="mockup-bubble-label">Tu</span>
+          La tua risposta qui. A voce o scritta, come preferisci.
+        </div>
+        <div class="mockup-feedback">
+          <div class="mockup-feedback-label">Feedback su 3 cose:</div>
+          <span class="mockup-pill">Chiarezza</span>
+          <span class="mockup-pill">Struttura</span>
+          <span class="mockup-pill">Contenuto</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 2. COME FUNZIONA ========== -->
+<section id="come-funziona" class="content-section bg-alt">
+  <div class="container">
+    <div class="section-heading fade-in">
+      <h2>Come funziona.</h2>
+      <p class="section-subtitle">Tre passaggi dal bando all'orale pronto.</p>
+    </div>
+    <div class="steps-grid">
+      <article class="step-card fade-in">
+        <div class="step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="9" y1="13" x2="15" y2="13" />
+            <line x1="9" y1="17" x2="15" y2="17" />
+          </svg>
+        </div>          <h3>1. Carica il materiale.</h3>
+          <p>PDF, foto o copia-incolla del manuale. Così l'AI impara il tuo programma e ti fa domande mirate, non generiche.</p>
+      </article>
+      <article class="step-card fade-in">
+        <div class="step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            <line x1="8" y1="10" x2="16" y2="10" />
+            <line x1="8" y1="13" x2="14" y2="13" />
+          </svg>
+        </div>
+        <h3>2. Simula con l'AI.</h3>
+        <p>Ti fa le domande come un commissario vero, con timer e follow-up. Tu rispondi. Lei ti corregge subito, così impari sul momento senza aspettare.</p>
+      </article>
+      <article class="step-card fade-in">
+        <div class="step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 3v18h18" />
+            <path d="M7 14l4-4 4 4 5-6" />
+          </svg>
+        </div>          <h3>3. Scopri cosa sbagli.</h3>
+          <p>L'AI ti dice esattamente dove sei debole, così non perdi tempo su quello che già sai. Ripassa prima dell'esame.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 3. TIER ========== -->
+<section id="tier" class="content-section">
+  <div class="container">
+    <div class="section-heading fade-in">
+      <h2>Free o Pro. Paghi solo quando sei pronto.</h2>
+    </div>
+    <div class="tier-grid">
+      <article class="tier-col fade-in">
+        <div class="tier-col-name">Free</div>
+        <div class="tier-col-price">€0</div>
+        <ul class="tier-features">
+          <li>3 simulazioni al mese</li>
+          <li>Report base</li>
+          <li>Domande standard</li>
+        </ul>
+        <a href="auth.html?mode=register" class="tier-cta free">Inizia gratis</a>
+      </article>
+      <article class="tier-col recommended fade-in">
+        <span class="consigliato-badge">Consigliato</span>
+        <div class="tier-col-name">Pro</div>
+        <div class="tier-col-price">14,99€ <span class="unit">/ mese</span></div>
+        <ul class="tier-features">
+          <li>Simulazioni illimitate</li>
+          <li>Report dettagliato su cosa sbagli e come migliorare</li>
+          <li>Domande a difficoltà crescente</li>
+          <li>Storico dei progressi</li>
+        </ul>
+        <a href="auth.html?mode=register&amp;plan=pro" class="tier-cta pro">Passa al Pro</a>
+      </article>
+    </div>
+    <p class="tier-footnote">14,99€ al mese. Sono una pizza e una birra. O due caffè a settimana. Se ti aiuta a passare l'orale, è niente. Se non ti aiuta, ti rimborso.</p>
+  </div>
+</section>
+
+<!-- ========== 4. FIDUCIA ========== -->
+<section id="fiducia" class="content-section bg-alt">
+  <div class="container">
+    <div class="fiducia-content fade-in">
+      <h2>Non abbiamo recensioni. Ma abbiamo una promessa.</h2>
+      <p class="fiducia-copy">Siamo appena partiti. Zero recensioni finte. Se il prodotto non è buono, ti rimborsiamo il 100% in 5 minuti. Senza storie. Non c'è niente da perdere.</p>
+      <div class="guarantee-icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 6L12 13v12c0 13.5 9.3 26.2 20 29 10.7-2.8 20-15.5 20-29V13L32 6z"
+                stroke="#E63946" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <text x="32" y="40" text-anchor="middle"
+                fill="#E63946" font-size="13" font-weight="900" font-family="system-ui">GARANZIA</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div class="container footer-inner">
+    <div>
+      <p class="footer-brand-name">ConcorsoAI</p>
+      <p class="footer-trust">Made in Italy · Server UE (GDPR) · Nessuna carta richiesta</p>
+    </div>
+    <ul class="footer-links">
+      <li><a href="terms.html">Termini</a></li>
+      <li><a href="privacy.html">Privacy</a></li>
+      <li><a href="auth.html">Accedi</a></li>
+    </ul>
+  </div>
+  <p class="container footer-copy">© 2026 ConcorsoAI · Tutti i diritti riservati.</p>
+</footer>
+
+<script>
+/* Fade-in on scroll quando le sezioni entrano in viewport.
+   Niente librerie, IntersectionObserver nativo. */
+(function () {
+  var els = document.querySelectorAll('.fade-in');
+  if (!els.length) return;
+  if (!('IntersectionObserver' in window)) {
+    els.forEach(function (el) { el.classList.add('is-visible'); });
+    return;
+  }
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        obs.unobserve(entry.target);
       }
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-      } else {
-        init();
-      }
-    })();
-  </script>
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  els.forEach(function (el) { obs.observe(el); });
+})();
+</script>
 
 </body>
 </html>
