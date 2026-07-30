@@ -318,7 +318,7 @@ section.bg-alt { background: var(--bg-alt); }
   box-shadow: 0 16px 40px rgba(26, 115, 232, .12);
 }
 .tier-col.recommended:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
   box-shadow: 0 22px 50px rgba(26, 115, 232, .18);
 }
 .tier-col-name {
@@ -508,6 +508,10 @@ footer {
   .fade-in { opacity: 1 !important; transform: none !important; }
 }
 </style>
+
+<!-- GSAP plugin (CDN, ~25KB gzipped). Loaded deferred so non blocca il primo render.
+     Silent fallback: se bloccato o prefers-reduced-motion, lo script GSAP si auto-disattiva. -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
 </head>
 
 <body>
@@ -697,6 +701,38 @@ footer {
     });
   }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
   els.forEach(function (el) { obs.observe(el); });
+})();
+</script>
+
+<!-- GSAP micro-interactions: silent fallback al CSS hover/reveal quando la libreria non carica o prefers-reduced-motion attivo. -->
+<script>
+(function () {
+  if (typeof gsap === 'undefined') return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  // Mockup card 3 metric pills: stagger reveal con leggero scale-fade dopo l'entrance dell'hero.
+  // power2.out = iOS/Stripe smooth, no overshoot (anti Material bouncy cartoon).
+  gsap.from('.mockup-pill', {
+    opacity: 0,
+    scale: 0.9,
+    duration: 0.45,
+    ease: 'power2.out',
+    stagger: 0.09,
+    delay: 0.55,
+    clearProps: 'opacity,scale',
+  });
+
+  // Tier Pro card hover: GSAP interpola -4px con curve power3 (più "sostanza" all'ingresso, meno a uscita).
+  // Hover CSS resta come fallback se GSAP fallisce.
+  var proCard = document.querySelector('.tier-col.recommended');
+  if (proCard) {
+    proCard.addEventListener('mouseenter', function () {
+      gsap.to(proCard, { y: -4, duration: 0.3, ease: 'power3.out', overwrite: 'auto' });
+    });
+    proCard.addEventListener('mouseleave', function () {
+      gsap.to(proCard, { y: 0, duration: 0.42, ease: 'power2.out', overwrite: 'auto' });
+    });
+  }
 })();
 </script>
 
