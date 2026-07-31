@@ -1113,7 +1113,7 @@ body { scrollbar-width: thin; scrollbar-color: rgba(10,31,56,.12) transparent; }
   border-radius: var(--radius-lg);
   padding: 56px 32px;
   text-align: center;
-  display: none; /* hidden by default; toggle via data-user-tier */
+  display: flex; /* stato iniziale sicuro: paywall finché il tier non è verificato */
   flex-direction: column;
   align-items: center;
   gap: 18px;
@@ -1210,8 +1210,9 @@ body { scrollbar-width: thin; scrollbar-color: rgba(10,31,56,.12) transparent; }
 /* ============================================================
    PRO GATING — single source of truth per tier-based visibility.
    JS imposta body[data-user-tier="free"|"pro"] una volta per sessione.
-   Default: paywall hidden, Pro features visible (dev mode safe).
+   Default sicuro: paywall visibile, contenuto Pro nascosto finché il tier non è verificato.
    ============================================================ */
+.pro-locked { display: none; }
 body[data-user-tier="free"] .pro-locked { display: none !important; }
 body[data-user-tier="free"] .paywall-card { display: flex !important; }
 body[data-user-tier="pro"]  .pro-locked { display: block !important; }

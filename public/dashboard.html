@@ -1360,6 +1360,10 @@
         var user = r && r.data && r.data.user;
         if (!user) { window.location.href = "auth.html"; return null; }
         state.user = user;
+        // Fase 4: il tier reale aggiorna il paywall dopo il caricamento auth.
+        var userPlan = String((user.user_metadata && (user.user_metadata.plan || user.user_metadata.tier)) || "free").toLowerCase();
+        window.__USER_TIER__ = userPlan === "pro" ? "pro" : "free";
+        fase1ApplyTier();
         // FIX 2 — render user identity (nome reale) DOPO che l'utente Supabase \u00e8 stato caricato
         renderUserIdentity(user);
         return sb.from("bandi").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).then(function (bRes) {
@@ -1541,6 +1545,7 @@
       loadDashboardData().then(function () {
         renderRecent();
         if (typeof window.fase3Init === "function") window.fase3Init();
+        document.dispatchEvent(new CustomEvent("concorsoai:auth-ready"));
       });
     }
 
@@ -2222,7 +2227,7 @@
       if (!grid) return;
       grid.innerHTML = "";
       var firstDetail = null;
-      schedule.forEach(function (entry) {
+      schedule.forEach(function (entry, idx) {
         var cell = document.createElement("button");
         cell.type = "button";
         cell.className = "piano-day";
@@ -2329,6 +2334,11 @@
     }
 
     // Welcome contestuale: prima vs ritorno + area più debole.
+    function writeNoBandoWelcome() {
+      var el = $("pianoWelcomeText");
+      if (el) el.textContent = "Prima di creare il piano, carica un bando in 'Prepara'.";
+    }
+
     function writeWelcome(hasHistory, areeScores) {
       var txt;
       if (!hasHistory) {
@@ -2366,19 +2376,39 @@
           return;
         }
         var sb = getSb();
-        sb.from("piano_settimanale")
-          .select("schedule, generated_at, updated_at, bando_id")
-          .eq("user_id", userId).eq("week_start", weekStart).maybeSingle()
-          .then(function (res) {
+        sb.from("bandi")
+          .select("id")
+          .eq("user_id", userId)
+          .limit(1)
+          .then(function (bandiRes) {
+            if (bandiRes.error) {
+              console.warn("[Fase 4] bandi load fail", bandiRes.error);
+              currentSchedule = [];
+              showLayer("pianoOnboarding");
+              setChatEnabled(false);
+              writeWelcome(false, null);
+              return null;
+            }
+            if (!bandiRes.data || bandiRes.data.length === 0) {
+              currentSchedule = [];
+              showLayer("pianoNoBando");
+              setChatEnabled(false);
+              writeNoBandoWelcome();
+              return null;
+            }
+            return sb.from("piano_settimanale")
+              .select("schedule, generated_at, updated_at, bando_id")
+              .eq("user_id", userId).eq("week_start", weekStart).maybeSingle()
+              .then(function (res) {
             var row = res && res.data;
             if (res.error || !row || !Array.isArray(row.schedule) || row.schedule.length !== 7) {
               showLayer("pianoOnboarding");
               setChatEnabled(false);
               return;
             }
-            renderWeek(row.schedule, weekStart);
             pianoCurrentBandoId = row.bando_id || null;
             currentSchedule = row.schedule;
+            renderWeek(row.schedule, weekStart);
             // Conta simulazioni ultimissime per welcome contestuale.
             // Usa column names reali: clarity_score, structure_score, content_score.
             sb.from("simulazioni")
@@ -2402,11 +2432,13 @@
                 maybeShowAdaptiveBanner(false);
               });
             setChatEnabled(true);
+              });
           }).catch(function (e) {
-            console.warn("[Fase 4] piano_settimanale load fail", e);
-            renderWeek(buildFallbackSchedule(weekStart, 30), weekStart);
+            console.warn("[Fase 4] piano load fail", e);
+            currentSchedule = [];
+            showLayer("pianoOnboarding");
             writeWelcome(false, null);
-            setChatEnabled(true);
+            setChatEnabled(false);
           });
       });
     }
@@ -2452,46 +2484,150 @@
       if (form) form.addEventListener("submit", function (e) { e.preventDefault(); sendChatMessage(); });
     }
 
+    function sbEvent(eventName, payload) {
+      try {
+        var sb = getSb();
+        if (!sb) return;
+        sb.auth.getUser().then(function (result) {
+          var user = result && result.data && result.data.user;
+          if (!user) return;
+          return sb.from("events").insert({
+            event: eventName,
+            page: "tab-piano",
+            payload: payload || {}
+          });
+        }).catch(function () {});
+      } catch (e) {}
+    }
+
+    function pianoExtractContent(raw) {
+      var value = String(raw || "");
+      try {
+        var parsed = JSON.parse(value);
+        if (parsed && parsed.choices && parsed.choices[0] && parsed.choices[0].message) {
+          return String(parsed.choices[0].message.content || "");
+        }
+      } catch (e) {}
+      return value;
+    }
+
+    function pianoParseSchedule(raw, weekStart) {
+      var text = pianoExtractContent(raw).trim();
+      text = text.replace(/^```(?:json)?\\s*/i, "").replace(/\\s*```$/i, "").trim();
+      var parsed = null;
+      try { parsed = JSON.parse(text); } catch (e) {
+        var first = Math.min.apply(null, [text.indexOf("{"), text.indexOf("[")].filter(function (n) { return n >= 0; }));
+        var last = Math.max(text.lastIndexOf("}"), text.lastIndexOf("]"));
+        if (first >= 0 && last > first) {
+          try { parsed = JSON.parse(text.slice(first, last + 1)); } catch (ignore) {}
+        }
+      }
+      var list = Array.isArray(parsed) ? parsed : (parsed && (parsed.schedule || parsed.days));
+      if (!Array.isArray(list) || list.length !== 7) return null;
+      var normalized = [];
+      for (var i = 0; i < 7; i++) {
+        var source = list[i] || {};
+        var date = new Date(weekStart + "T00:00:00");
+        date.setDate(date.getDate() + i);
+        var fallbackDay = date.toISOString().split("T")[0];
+        var day = fallbackDay;
+        var type = ["sessione_guidata", "pratica_libera", "prova_esame", "rest"].indexOf(source.type) >= 0 ? source.type : "pratica_libera";
+        var duration = Number(source.duration_min);
+        if (!isFinite(duration) || duration < 0) duration = type === "rest" ? 0 : 30;
+        duration = Math.min(180, Math.round(duration));
+        var status = ["future", "today", "done", "skipped"].indexOf(source.status) >= 0 ? source.status : "future";
+        normalized.push({
+          day: day,
+          type: type,
+          duration_min: type === "rest" ? 0 : duration,
+          materia: source.materia ? String(source.materia).slice(0, 120) : null,
+          focus: source.focus ? String(source.focus).slice(0, 200) : null,
+          status: status,
+          simulazione_id: source.simulazione_id || null,
+          score: typeof source.score === "number" ? source.score : undefined
+        });
+      }
+      return normalized;
+    }
+
+    function pianoRequestAI(prompt, callback) {
+      var sb = getSb();
+      if (!sb) return callback(new Error("Supabase non disponibile"));
+      sb.auth.getSession().then(function (sessionRes) {
+        var token = sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.access_token;
+        if (!token) return callback(new Error("Sessione scaduta"));
+        return fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify({ mode: "piano", messages: [{ role: "user", content: prompt }] })
+        });
+      }).then(function (response) {
+        if (!response) return;
+        if (!response.ok) throw new Error("AI " + response.status);
+        return response.text().then(function (body) { callback(null, pianoExtractContent(body)); });
+      }).catch(function (error) { callback(error); });
+    }
+
+    function pianoPersistSchedule(schedule, weekStart, bandoId, callback) {
+      getUserId(function (userId, authed) {
+        if (!authed || !userId) return callback && callback(new Error("Sessione scaduta"));
+        var sb = getSb();
+        sb.from("piano_settimanale").upsert({
+          user_id: userId, week_start: weekStart, schedule: schedule, bando_id: bandoId || null
+        }, { onConflict: "user_id,week_start" }).then(function (res) {
+          if (res && res.error) return callback && callback(res.error);
+          if (callback) callback(null);
+        }).catch(function (error) {
+          if (callback) callback(error);
+        });
+      });
+    }
+
     function handleGeneratePlan() {
       var exDate = $("pianoExamDate");
       var sel = $$(".piano-toggle.active")[0];
       var commitments = $("pianoCommitments");
+      var submit = $("pianoOnboardingSubmit");
       if (!exDate || !exDate.value) return;
       var dailyMin = sel ? (parseInt(sel.getAttribute("data-value"), 10) || 30) : 30;
       var commitsTxt = commitments ? (commitments.value || "") : "";
       var weekStart = getWeekStart();
-      var sched = buildFallbackSchedule(weekStart, dailyMin);
+      var fallback = buildFallbackSchedule(weekStart, dailyMin);
+      if (submit) { submit.disabled = true; submit.dataset.busy = "1"; }
 
       getUserId(function (userId, authed) {
         if (!authed || !userId) {
-          renderWeek(sched, weekStart);
+          currentSchedule = fallback;
+          renderWeek(fallback, weekStart);
           writeWelcome(false, null);
           setChatEnabled(true);
+          if (submit) { submit.disabled = false; submit.dataset.busy = ""; }
           showToast("Piano generato (offline). Lo salveremo al prossimo login.", "info");
           return;
         }
-        var sb = getSb();
         var bandoId = null;
         try {
           var ab = localStorage.getItem("dashboard.activeBando");
           if (ab) bandoId = (JSON.parse(ab) || {}).id || null;
         } catch (e) {}
         pianoCurrentBandoId = bandoId;
-        sb.from("piano_settimanale").upsert({
-          user_id: userId, week_start: weekStart, schedule: sched, bando_id: bandoId
-        }).then(function (res) {
-          if (res && res.error) console.warn("[Fase 4] upsert fail", res.error);
+        var prompt = "Crea un piano settimanale per un concorso pubblico italiano. Rispondi SOLO con JSON valido nel formato {\\\"schedule\\\":[7 elementi]}. Ogni elemento deve avere day (ISO), type (sessione_guidata|pratica_libera|prova_esame|rest), duration_min, materia, focus, status. Settimana da lunedì " + weekStart + ", esame il " + exDate.value + ", tempo giornaliero " + dailyMin + " minuti, impegni da escludere: " + (commitsTxt || "nessuno") + ".";
+        pianoRequestAI(prompt, function (error, content) {
+          var sched = error ? null : pianoParseSchedule(content, weekStart);
+          var usedFallback = !sched;
+          if (!sched) sched = fallback;
+          currentSchedule = sched;
+          renderWeek(sched, weekStart);
+          pianoPersistSchedule(sched, weekStart, bandoId, function (saveError) {
+            if (saveError) console.warn("[Fase 4] piano save fail", saveError);
+          });
+          sbEvent("piano_generated", { exam_date: exDate.value, daily_min: dailyMin, has_commitments: !!commitsTxt, week_start: weekStart, ai: !usedFallback });
+          writeWelcome(false, null);
+          maybeShowAdaptiveBanner(false);
+          setChatEnabled(true);
+          if (submit) { submit.disabled = false; submit.dataset.busy = ""; }
+          showToast(usedFallback ? "Piano generato con configurazione locale." : "Piano generato dall'AI!", usedFallback ? "info" : "success");
         });
-        sb.from("events").insert({
-          event: "piano_generated", page: "tab-piano",
-          payload: { exam_date: exDate.value, daily_min: dailyMin, has_commitments: !!commitsTxt, week_start: weekStart, ts: new Date().toISOString() }
-        }).then(function () {});
-        renderWeek(sched, weekStart);
-        // Al primo generate l'utente NON ha ancora simulazioni -> welcome "Ciao! Ho creato il tuo primo piano"
-        writeWelcome(false, null);
-        maybeShowAdaptiveBanner(false);
-        setChatEnabled(true);
-        showToast("Piano generato!", "success");
       });
     }
 
@@ -2564,7 +2700,10 @@
       }, 3000);
     }
 
+    var pianoBooted = false;
     function boot() {
+      if (pianoBooted || document.body.getAttribute("data-user-tier") !== "pro") return;
+      pianoBooted = true;
       bindTabs();
       loadPianoSettimanale(getWeekStart());
       // FASE 5: avvia Supabase Realtime listener su simulazioni INSERT per patchare le celle.
@@ -2622,68 +2761,43 @@
       }
 
     // FASE 5: vera integrazione /api/chat con mode='piano'.
-    // Chiamata da sendChatMessage (redirect dopo lock-check).
+    // L'AI puo' restituire testo + schedule JSON; il calendario viene applicato solo dopo validazione.
     function pianoChatFase5(msg, today, btn) {
-      var sb = getSb();
-      if (!sb) {
+      if (!getSb()) {
         appendMsg("bot", "Coach AI non disponibile (manca connessione Supabase).");
         if (btn) btn.disabled = false;
         return;
       }
-      try {
-        sb.auth.getUser().then(function (r) {
-          var u2 = r && r.data && r.data.user;
-          if (!u2) return;
-          sb.from("events").insert({
-            event: "piano_chat_message", page: "tab-piano",
-            payload: { role: "user", text: msg, mode: "piano", ts: new Date().toISOString() }
-          }).then(function () {}, function () {});
-        });
-      } catch (e) {}
-      sb.auth.getSession().then(function (sessRes) {
-        var tk = sessRes && sessRes.data && sessRes.data.session && sessRes.data.session.access_token;
-        if (!tk) {
-          appendMsg("bot", "Sessione scaduta. Ricarica la pagina.");
+      var weekStart = currentSchedule[0] && currentSchedule[0].day ? getWeekStart(currentSchedule[0].day) : getWeekStart();
+      var prompt = "L'utente chiede: " + msg + ". Rispondi in italiano e SOLO con JSON valido nel formato {\\\"reply\\\":\\\"messaggio breve\\\",\\\"schedule\\\":[7 elementi]}. Mantieni invariati i giorni non coinvolti. Settimana: " + weekStart + ". Calendario attuale: " + JSON.stringify(currentSchedule) + ". Ogni elemento deve avere day, type, duration_min, materia, focus, status.";
+      pianoRequestAI(prompt, function (error, content) {
+        if (error) {
+          appendMsg("bot", "Errore di rete. Riprova.");
           if (btn) btn.disabled = false;
-          return null;
+          return;
         }
-        return fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + tk },
-          body: JSON.stringify({ mode: "piano", messages: [{ role: "user", content: msg }] })
-        });
-      }).then(function (r) {
-        if (!r) return null;
-        if (r.status === 429) {
-          return r.json().then(function (j) {
-            appendMsg("bot", (j && (j.details || j.error)) || "Limite raggiunto.");
-            try { localStorage.setItem("piano.chat.lockedUntil", today); } catch (e) {}
-            var inp = $("pianoChatInput"); if (inp) inp.disabled = true;
-            if (btn) btn.disabled = true;
-            return null;
+        var text = pianoExtractContent(content);
+        var parsed = null;
+        try {
+          var clean = text.replace(/^```(?:json)?\\s*/i, "").replace(/\\s*```$/i, "").trim();
+          parsed = JSON.parse(clean);
+        } catch (e) {}
+        var reply = parsed && parsed.reply ? String(parsed.reply) : text;
+        var updated = parsed && pianoParseSchedule(JSON.stringify(parsed.schedule || parsed.days || []), weekStart);
+        if (updated) {
+          currentSchedule = updated;
+          renderWeek(updated, weekStart);
+          pianoPersistSchedule(updated, weekStart, pianoCurrentBandoId, function (saveError) {
+            if (saveError) console.warn("[Fase 4] piano chat save fail", saveError);
           });
+          if (!reply) reply = "Piano aggiornato.";
         }
-        if (!r.ok) {
-          appendMsg("bot", "Errore del coach AI (" + r.status + "). Riprova più tardi.");
-          return null;
-        }
-        return r.text().then(function (txt) {
-          var reply = txt;
-          try {
-            var parsed = JSON.parse(txt);
-            if (parsed && parsed.choices && parsed.choices[0] && parsed.choices[0].message) {
-              reply = parsed.choices[0].message.content || "(nessuna risposta)";
-            }
-          } catch (e) {}
-          appendMsg("bot", String(reply || "(nessuna risposta)").trim());
-        });
-      }).catch(function () {
-        appendMsg("bot", "Errore di rete. Riprova.");
-      }).finally(function () {
-        var inp2 = $("pianoChatInput");
-        if (btn && inp2 && !inp2.disabled) btn.disabled = false;
+        appendMsg("bot", String(reply || "Piano ricevuto. Ora puoi controllare il calendario.").trim());
+        sbEvent("piano_chat_message", { role: "assistant", updated_schedule: !!updated, ts: new Date().toISOString() });
+        if (btn) btn.disabled = false;
       });
     }
+    document.addEventListener("concorsoai:auth-ready", boot);
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();
   })();

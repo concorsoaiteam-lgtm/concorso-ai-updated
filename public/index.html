@@ -101,10 +101,9 @@ ul { list-style: none; padding: 0; margin: 0; }
   font-size: 15px;
   min-height: 48px;
   display: inline-flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 8px rgba(26, 115, 232, .22);
-  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  transition: transform .15s ease, background .15s ease;
 }
-.nav-cta:hover { background: var(--cta-hover); transform: scale(1.03); box-shadow: 0 8px 20px rgba(26, 115, 232, .32); }
+.nav-cta:hover { background: var(--cta-hover); transform: scale(1.02); }
 .nav-cta:active { transform: scale(1.0); }
 .nav-cta:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
 
@@ -170,12 +169,11 @@ ul { list-style: none; padding: 0; margin: 0; }
   font-size: 1.0625rem;
   min-height: 56px;
   display: inline-flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 14px rgba(26, 115, 232, .28);
-  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  transition: transform .15s ease, background .15s ease;
 }
 @media (min-width: 768px) { .cta-primary { font-size: 1.125rem; padding: 19px 34px; } }
-.cta-primary:hover { background: var(--cta-hover); transform: scale(1.03); box-shadow: 0 10px 24px rgba(26, 115, 232, .38); }
-.cta-primary:active { transform: scale(1.0); box-shadow: 0 2px 6px rgba(26, 115, 232, .25); }
+.cta-primary:hover { background: var(--cta-hover); transform: scale(1.02); }
+.cta-primary:active { transform: scale(1.0); }
 .cta-primary:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
 
 .cta-link {
@@ -193,13 +191,12 @@ ul { list-style: none; padding: 0; margin: 0; }
 
 /* =================================================================
    HERO MOCKUP — Real SaaS dashboard look (round 17)
-   Header chrome + sidebar + status bar + tab content + animazioni
+   Header chrome + status bar + tab content + animazioni
    ================================================================= */
 .mockup-card {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
   max-width: 690px;
   width: 100%;
   margin: 0 auto;
@@ -271,52 +268,12 @@ ul { list-style: none; padding: 0; margin: 0; }
   letter-spacing: .02em;
 }
 
-/* Body: sidebar | main */
+/* Main content area */
 .mockup-body {
-  display: flex;
-  align-items: stretch;
   min-height: 380px;
 }
-
-/* Sidebar nav */
-.mockup-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 6px;
-  width: 56px;
-  flex-shrink: 0;
-  border-right: 1px solid var(--border);
-  background: var(--bg-alt);
-}
-.mockup-nav-item {
-  width: 44px; height: 44px;   /* WCAG 2.5.5: touch target */
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  padding: 0;
-  transition: background .15s ease, color .15s ease;
-}  .mockup-nav-item:hover { background: rgba(26, 115, 232, .08); color: var(--text-primary); }
-.mockup-nav-item:disabled { cursor: default; opacity: .55; }
-.mockup-nav-item:disabled:hover { background: transparent; color: var(--text-tertiary); }
-.mockup-nav-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.mockup-nav-item.is-active {
-  background: #EFF6FF;
-  color: var(--cta);
-}
-.mockup-nav-item svg { width: 18px; height: 18px; }
-
-/* Main content area */
 .mockup-main {
-  flex: 1;
   padding: 18px;
-  display: flex;
-  flex-direction: column;
   min-width: 0;
 }
 
@@ -345,7 +302,6 @@ ul { list-style: none; padding: 0; margin: 0; }
   background: var(--success);
   border-radius: 50%;
   flex-shrink: 0;
-  animation: status-blink 2s ease-in-out infinite;
 }
 .mockup-status-timer {
   font-weight: 700;
@@ -370,7 +326,6 @@ ul { list-style: none; padding: 0; margin: 0; }
   width: 0;
   background: var(--cta);
   border-radius: 2px;
-  animation: progress-fill 7s ease-out infinite alternate;
 }
 .mockup-progress-text {
   font-size: 10px;
@@ -428,7 +383,6 @@ ul { list-style: none; padding: 0; margin: 0; }
 .mockup-tab.is-active {
   background: var(--bg);
   color: var(--cta);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
 }
 
 /* Tab panels */
@@ -631,7 +585,6 @@ section.bg-alt { background: var(--bg-alt); }
   transition: box-shadow .2s ease, transform .2s ease;
 }
 .step-card:hover {
-  box-shadow: 0 10px 30px rgba(15, 23, 42, .06);
   transform: translateY(-2px);
 }
 .step-icon {
@@ -662,13 +615,14 @@ section.bg-alt { background: var(--bg-alt); }
   position: relative;
   transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
 }
+.tier-col-free {
+  border-color: #BFDBFE;
+}
 .tier-col.recommended {
   border: 2px solid var(--accent);
-  box-shadow: 0 6px 18px rgba(26, 115, 232, .10);
 }
 .tier-col.recommended:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(26, 115, 232, .14);
 }
 .tier-col-name {
   font-size: 0.875rem;
@@ -696,22 +650,10 @@ section.bg-alt { background: var(--bg-alt); }
   padding: 10px 0;
   color: var(--text-primary);
   font-size: 1rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
   border-bottom: 1px solid var(--border);
   line-height: 1.5;
 }
 .tier-features li:last-child { border-bottom: none; }
-.tier-features li::before {
-  content: '';
-  display: inline-block;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--cta);
-  margin-top: 11px;
-  flex-shrink: 0;
-}
 
 .tier-cta {
   display: flex;
@@ -724,21 +666,20 @@ section.bg-alt { background: var(--bg-alt); }
   font-size: 1rem;
   min-height: 48px;
   width: 100%;
-  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  transition: transform .15s ease, background .15s ease;
 }
 .tier-cta.free {
   background: var(--bg);
-  color: var(--accent);
-  border: 2px solid var(--accent);
+  color: var(--accent-dark);
+  border: 1px solid #93C5FD;
 }
-.tier-cta.free:hover { background: #EFF6FF; transform: scale(1.02); }
+.tier-cta.free:hover { background: #F8FBFF; transform: scale(1.01); }
 .tier-cta.free:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
 .tier-cta.pro {
   background: var(--cta);
   color: #fff;
-  box-shadow: 0 4px 14px rgba(26, 115, 232, .28);
 }
-.tier-cta.pro:hover { background: var(--cta-hover); transform: scale(1.03); box-shadow: 0 10px 24px rgba(26, 115, 232, .38); }
+.tier-cta.pro:hover { background: var(--cta-hover); transform: scale(1.02); }
 .tier-cta.pro:active { transform: scale(1.0); }
 .tier-cta.pro:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
 
@@ -760,8 +701,53 @@ section.bg-alt { background: var(--bg-alt); }
   line-height: 1.7;
 }
 
+/* ---------- Garanzia ---------- */
+.guarantee-section { padding-top: 24px !important; }
+.guarantee-card {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 28px 30px;
+  border: 1px solid #BFDBFE;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: #F8FBFF;
+}
+.guarantee-copy { max-width: 680px; }
+.guarantee-kicker {
+  color: var(--accent-dark);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.guarantee-card h2 { font-size: clamp(1.5rem, 2vw, 2rem); margin-bottom: 10px; }
+.guarantee-card p { color: var(--text-secondary); }
+.guarantee-note { margin-top: 10px; font-size: 13px; color: var(--text-tertiary) !important; }
+.guarantee-mark {
+  color: var(--accent-dark);
+  font-size: 3rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .guarantee-card { align-items: flex-start; padding: 24px 20px; }
+  .guarantee-mark { display: none; }
+}
+
 /* ---------- Fiducia ---------- */
 .fiducia-content { max-width: 640px; margin: 0 auto; text-align: center; }
+.fiducia-lead {
+  color: var(--accent-dark);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
 .fiducia-content h2 { margin-bottom: 24px; }
 .fiducia-copy {
   color: var(--text-secondary);
@@ -837,20 +823,11 @@ footer {
   transform: translateY(0);
 }
 
-/* Round 17: animationi dashboard mockup sobrie, prefers-remotion-safe via @media reduce */
-@keyframes status-blink {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: .55; transform: scale(.85); }
-}
+/* Animazioni sobrie, senza glow */
 @keyframes typing-blink {
   0%, 49% { opacity: 1; }
   50%, 100% { opacity: 0; }
 }
-@keyframes progress-fill {
-  0% { width: 8%; }
-  100% { width: 62%; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .001ms !important;
@@ -860,7 +837,6 @@ footer {
   }
   .hero-rise > * { opacity: 1 !important; transform: none !important; }
   .fade-in { opacity: 1 !important; transform: none !important; }
-  .mockup-progress-fill { width: 35% !important; }
 }
 </style>
 </head>
@@ -885,8 +861,8 @@ footer {
     <div class="hero-grid">
       <div class="hero-text hero-rise">
         <p class="hero-offer">3 simulazioni gratis al mese · Nessuna carta richiesta</p>
-        <h1>Simula l'orale sul programma del tuo concorso.</h1>
-        <p class="hero-tagline">Arriva preparato, senza improvvisare.</p>
+        <h1>Arriva all'orale senza ansia.</h1>
+        <p class="hero-tagline">Allenati sul programma del tuo concorso, non su domande generiche.</p>
         <p class="hero-subtitle">Carica il bando o il manuale. ConcorsoAI ti fa domande sugli argomenti caricati, valuta le tue risposte e ti indica cosa approfondire prima dell'orale.</p>
         <div class="hero-cta-group">
           <a href="auth.html?mode=register" class="cta-primary">Simula l'orale gratuitamente</a>
@@ -913,34 +889,9 @@ footer {
           <span class="mockup-chrome-avatar" aria-label="Profilo utente">MR</span>
         </div>
 
-        <!-- Body: sidebar nav + main content -->
+        <!-- Main content: il prodotto in primo piano -->
         <div class="mockup-body">
-          <nav class="mockup-sidebar" aria-label="Menu della simulazione">
-            <button class="mockup-nav-item is-active" type="button" aria-current="page" aria-label="Simulazione attiva">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
-            </button>
-            <button class="mockup-nav-item" type="button" aria-label="Report">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 3v18h18" />
-                <path d="M7 14l4-4 4 4 5-6" />
-              </svg>
-            </button>
-            <button class="mockup-nav-item" type="button" aria-label="Storico" disabled>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-            </button>
-            <button class="mockup-nav-item" type="button" aria-label="Impostazioni" disabled>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-              </svg>
-            </button>
-          </nav>
-
+          <!-- M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" -->
           <div class="mockup-main">
             <div class="mockup-eyebrow">
               <span class="mockup-eyebrow-dot" aria-hidden="true"></span>
@@ -953,17 +904,17 @@ footer {
                 <span class="mockup-status-dot" aria-hidden="true"></span>
                 Sessione di esempio
               </span>
-              <span class="mockup-status-item" aria-label="Timer simulazione: 01:23 di 05:00">
+              <span class="mockup-status-item" id="mockup-timer-status" aria-label="Timer simulazione: 01:23 di 05:00">
                 <span class="mockup-status-timer">
-                  <span class="timer-num">01:23</span>
+                  <span class="timer-num" id="mockup-timer">01:23</span>
                   <span class="timer-of">&nbsp;/&nbsp;05:00</span>
                 </span>
               </span>
               <span class="mockup-status-item mockup-status-progress">
                 <span class="mockup-progress-track" aria-hidden="true">
-                  <span class="mockup-progress-fill"></span>
+                  <span class="mockup-progress-fill" id="mockup-progress-fill"></span>
                 </span>
-                <span class="mockup-progress-text">Domanda 1 / 3</span>
+                <span class="mockup-progress-text" id="mockup-progress-text">Tempo trascorso</span>
               </span>
             </div>
 
@@ -1001,15 +952,15 @@ footer {
               <ul class="mockup-feedback">
                 <li class="report-good">
                   <span class="report-icon" aria-hidden="true">+</span>
-                  <span>Concetti generali corretti: imparzialità come dovere dell'amministrazione</span>
+                  <span>Hai spiegato correttamente cosa significa imparzialità.</span>
                 </li>
                 <li class="report-good">
                   <span class="report-icon" aria-hidden="true">+</span>
-                  <span>Risposta chiara e pertinente</span>
+                  <span>Risposta breve e comprensibile, senza uscire dal tema.</span>
                 </li>
                 <li class="report-work">
                   <span class="report-icon" aria-hidden="true">&#8599;</span>
-                  <span>Mancava il riferimento all'art. 3 della Legge 241/1990 e al principio di buon andamento ex art. 97 Cost.</span>
+                  <span>Per completarla, collega il principio all'art. 97 della Costituzione e all'art. 1 della Legge 241/1990.</span>
                 </li>
               </ul>
               <p class="mockup-extra">Esci dalla sessione con un punto preciso da ripassare.</p>
@@ -1087,7 +1038,7 @@ footer {
       <p class="section-subtitle">Inizia gratis. Scopri Pro quando vuoi allenarti con più continuità.</p>
     </div>
     <div class="tier-grid">
-      <article class="tier-col fade-in">
+      <article class="tier-col tier-col-free fade-in">
         <div class="tier-col-name">Free</div>
         <div class="tier-col-price">€0</div>
         <ul class="tier-features">
@@ -1097,7 +1048,8 @@ footer {
         </ul>
         <a href="auth.html?mode=register" class="tier-cta free">Inizia gratis</a>
       </article>
-      <article class="tier-col recommended fade-in">        <div class="tier-col-name">Pro</div>
+      <article class="tier-col recommended fade-in">
+        <div class="tier-col-name">Pro</div>
         <div class="tier-col-price">14,99€ <span class="unit">/ mese</span></div>
         <p class="tier-outcome">Allenati con continuità prima dell'orale.</p>
         <ul class="tier-features">
@@ -1106,10 +1058,25 @@ footer {
           <li>Più sessioni per allenarti sul tuo programma.</li>
           <li>Vedi i tuoi progressi. Settimana dopo settimana.</li>
         </ul>
-        <a href="auth.html?mode=register" class="tier-cta pro">Inizia gratis · Pro in arrivo</a>
+        <a href="auth.html?mode=register" class="tier-cta pro">Inizia con il piano Free</a>
       </article>
     </div>
     <p class="tier-footnote">Prezzo indicativo. Il piano Pro sarà attivabile quando i pagamenti saranno disponibili.</p>
+  </div>
+</section>
+
+<!-- GARANZIA -->
+<section id="garanzia" class="content-section guarantee-section">
+  <div class="container">
+    <div class="guarantee-card fade-in">
+      <div class="guarantee-copy">
+        <p class="guarantee-kicker">Quando il piano Pro sarà attivo</p>
+        <h2>30 giorni soddisfatto o rimborsato.</h2>
+        <p>Quando Pro sarà attivo, potrai provarlo senza sentirti intrappolato: se non fa per te, potrai chiedere il rimborso secondo le condizioni pubblicate al momento del pagamento.</p>
+        <p class="guarantee-note">La garanzia sarà attiva dal lancio del pagamento Pro, non è ancora operativa.</p>
+      </div>
+      <div class="guarantee-mark" aria-hidden="true">↩</div>
+    </div>
   </div>
 </section>
 
@@ -1170,7 +1137,33 @@ footer {
   els.forEach(function (el) { obs.observe(el); });
 })();
 
-/* Mockup 3-tab switcher (round 14+, ARIA-completo round 17) */
+/* Mockup demo timer: elapsed time based on the real browser clock. */
+(function () {
+  var timer = document.getElementById('mockup-timer');
+  var timerStatus = document.getElementById('mockup-timer-status');
+  var progress = document.getElementById('mockup-progress-fill');
+  if (!timer || !timerStatus || !progress) return;
+
+  var initialSeconds = 83;
+  var maxSeconds = 300;
+  var startedAt = Date.now();
+  var intervalId = null;
+
+  function renderTimer() {
+    var elapsed = Math.min(maxSeconds, initialSeconds + Math.floor((Date.now() - startedAt) / 1000));
+    var minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
+    var seconds = String(elapsed % 60).padStart(2, '0');
+    timer.textContent = minutes + ':' + seconds;
+    timerStatus.setAttribute('aria-label', 'Timer simulazione: ' + minutes + ':' + seconds + ' di 05:00');
+    progress.style.width = ((elapsed / maxSeconds) * 100).toFixed(2) + '%';
+    if (elapsed >= maxSeconds) window.clearInterval(intervalId);
+  }
+
+  renderTimer();
+  intervalId = window.setInterval(renderTimer, 250);
+})();
+
+/* Mockup 3-tab switcher */
 (function () {
   var tabs = document.querySelectorAll('.mockup-tab');
   var panels = document.querySelectorAll('.mockup-panel');
@@ -1194,16 +1187,6 @@ footer {
       }
     });
 
-    /* Sidebar e tab devono descrivere lo stesso stato del mockup. */
-    if (navItems && navItems.length) {
-      var activeNavIndex = targetKey === 'report' ? 1 : 0;
-      navItems.forEach(function (item, idx) {
-        var isActive = idx === activeNavIndex;
-        item.classList.toggle('is-active', isActive);
-        if (isActive) item.setAttribute('aria-current', 'page');
-        else item.removeAttribute('aria-current');
-      });
-    }
   }
 
   tabs.forEach(function (tab) {
@@ -1221,18 +1204,6 @@ footer {
       activate(tabs[nextIdx].getAttribute('data-tab'));
     });
   });
-
-  /* Sidebar nav (round 17): demo-only, click switch tab attivo + addisactive state */
-  var navItems = document.querySelectorAll('.mockup-nav-item');
-  if (navItems.length) {
-    navItems.forEach(function (item, idx) {
-      item.addEventListener('click', function () {
-        /* Item 0 = simulazione (default), 1 = report (tab 3), 2 = storico (no-op), 3 = impostazioni (no-op) */
-        if (idx === 1) activate('report');
-        else if (idx === 0) activate('question');
-      });
-    });
-  }
 })();
 </script>
 
