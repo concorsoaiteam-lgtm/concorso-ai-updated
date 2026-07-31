@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ConcorsoAI — Passa l'orale. Senza ansia.</title>
-<meta name="description" content="Simula l'orale del tuo concorso pubblico con un commissario AI che fa le domande del tuo bando. Made in Italy." />
+<title>ConcorsoAI — Simula l'orale sul tuo programma</title>
+<meta name="description" content="Simula l'orale del tuo concorso pubblico con domande basate sul programma del tuo bando. Made in Italy." />
 <meta name="theme-color" content="#FFFFFF" />
 <link rel="canonical" href="https://concorso-ai.vercel.app/" />
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231A73E8'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='system-ui' font-weight='900'%3EC%3C/text%3E%3C/svg%3E" />
 
-<meta property="og:title" content="ConcorsoAI — Passa l'orale. Senza ansia." />
-<meta property="og:description" content="Simula l'orale del concorso con un commissario AI che fa le domande del tuo bando." />
+<meta property="og:title" content="ConcorsoAI — Simula l'orale sul tuo programma" />
+<meta property="og:description" content="Simula l'orale del concorso con domande basate sul programma del tuo bando e feedback sulle tue risposte." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://concorso-ai.vercel.app/" />
 <meta property="og:locale" content="it_IT" />
@@ -123,50 +123,15 @@ ul { list-style: none; padding: 0; margin: 0; }
 
 .hero-text { max-width: 560px; }
 
-/* Stat callout: benefit-first microcopy */
-.stat-callout {
-  display: flex;
+.hero-offer {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-  padding: 10px 14px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  font-size: 13px;
-  color: var(--text-primary);
-  font-weight: 600;
-}
-.stat-callout-num {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--cta);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  flex-shrink: 0;
-}
-.stat-callout-body { flex: 1; line-height: 1.35; }
-.stat-callout-body strong { color: var(--text-primary); }
-.stat-callout-note {
-  font-size: 11px;
-  color: var(--text-tertiary);
-  font-weight: 500;
-  margin-top: 2px;
-  display: block;
-}
-
-.trust-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: #EFF6FF;
+  gap: 8px;
   color: #1457B0;
-  border: 1px solid #BFDBFE;
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 13px; font-weight: 700;
-  margin-bottom: 24px;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 20px;
 }
-.trust-badge svg { width: 16px; height: 16px; flex-shrink: 0; }
-
 .hero h1 { margin-bottom: 16px; }
 
 /* Hero tagline: terza riga sotto H1, eval-suggested */
@@ -226,16 +191,6 @@ ul { list-style: none; padding: 0; margin: 0; }
 .cta-link:hover { color: var(--accent-dark); }
 .cta-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 
-/* Hero FOMO microline: loss-aversion copy sotto CTA */
-.hero-fomo {
-  margin-top: 18px;
-  font-size: 13px;
-  color: var(--text-tertiary);
-  font-style: italic;
-  line-height: 1.5;
-  max-width: 540px;
-}
-
 /* =================================================================
    HERO MOCKUP — Real SaaS dashboard look (round 17)
    Header chrome + sidebar + status bar + tab content + animazioni
@@ -244,10 +199,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 14px;
-  box-shadow:
-    0 24px 56px rgba(15, 23, 42, .10),
-    0 4px 14px rgba(15, 23, 42, .06),
-    inset 0 1px 0 rgba(255, 255, 255, .8);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
   max-width: 690px;
   width: 100%;
   margin: 0 auto;
@@ -349,8 +301,9 @@ ul { list-style: none; padding: 0; margin: 0; }
   cursor: pointer;
   padding: 0;
   transition: background .15s ease, color .15s ease;
-}
-.mockup-nav-item:hover { background: rgba(26, 115, 232, .08); color: var(--text-primary); }
+}  .mockup-nav-item:hover { background: rgba(26, 115, 232, .08); color: var(--text-primary); }
+.mockup-nav-item:disabled { cursor: default; opacity: .55; }
+.mockup-nav-item:disabled:hover { background: transparent; color: var(--text-tertiary); }
 .mockup-nav-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .mockup-nav-item.is-active {
   background: #EFF6FF;
@@ -606,56 +559,6 @@ ul { list-style: none; padding: 0; margin: 0; }
 .mockup-feedback .report-good .report-icon { background: #0F766E; }
 .mockup-feedback .report-work .report-icon { background: #B45309; }
 
-/* Mini prima/dopo progression */
-.mockup-progression {
-  background: var(--bg-alt);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.mockup-progression .prog-step:first-of-type { background: #FEF3C7; }
-.mockup-progression .prog-step:last-of-type  { background: #ECFDF5; }
-.mockup-progression-label {
-  font-size: 10px;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  font-weight: 800;
-  flex: 0 0 100%;
-  margin-bottom: 4px;
-}
-.prog-step {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 2px;
-  font-weight: 800;
-  font-size: 16px;
-  color: var(--text-primary);
-  background: var(--bg);
-  padding: 3px 8px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-}
-.prog-step small { font-size: 10px; color: var(--text-tertiary); font-weight: 600; }
-.prog-arrow {
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--cta);
-  line-height: 1;
-}
-.mockup-progression-note {
-  font-size: 11px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  margin-top: 2px;
-  flex: 0 0 100%;
-}
-
 .mockup-extra {
   font-size: 12px;
   color: var(--text-secondary);
@@ -761,11 +664,11 @@ section.bg-alt { background: var(--bg-alt); }
 }
 .tier-col.recommended {
   border: 2px solid var(--accent);
-  box-shadow: 0 16px 40px rgba(26, 115, 232, .12);
+  box-shadow: 0 6px 18px rgba(26, 115, 232, .10);
 }
 .tier-col.recommended:hover {
   transform: translateY(-4px);
-  box-shadow: 0 22px 50px rgba(26, 115, 232, .18);
+  box-shadow: 0 10px 24px rgba(26, 115, 232, .14);
 }
 .tier-col-name {
   font-size: 0.875rem;
@@ -839,22 +742,6 @@ section.bg-alt { background: var(--bg-alt); }
 .tier-cta.pro:active { transform: scale(1.0); }
 .tier-cta.pro:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
 
-.consigliato-badge {
-  position: absolute;
-  top: -14px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--accent);
-  color: #fff;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
 .tier-outcome {
   font-size: 1.125rem;
   color: var(--text-primary);
@@ -882,14 +769,14 @@ section.bg-alt { background: var(--bg-alt); }
   line-height: 1.7;
   margin-bottom: 36px;
 }
-.guarantee-icon {
+.free-trial-icon {
   width: 120px; height: 120px;
   margin: 0 auto;
   display: flex; align-items: center; justify-content: center;
   background: #EFF6FF;
   border-radius: 50%;
 }
-.guarantee-icon svg { width: 80px; height: 80px; }
+.free-trial-icon svg { width: 80px; height: 80px; }
 
 /* ---------- Footer ---------- */
 footer {
@@ -997,35 +884,19 @@ footer {
   <div class="container">
     <div class="hero-grid">
       <div class="hero-text hero-rise">
-        <div class="stat-callout" aria-label="Correzione immediata su quello che scrivi">
-          <span class="stat-callout-num" aria-hidden="true">&#x2713;</span>
-          <span class="stat-callout-body">
-            <strong>Correzione immediata.</strong> Appena scrivi.
-            <span class="stat-callout-note">Feedback completo, anche in pochi minuti.</span>
-          </span>
-        </div>
-
-        <span class="trust-badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z" />
-            <path d="M9 12l2 2 4-4" />
-          </svg>
-          Garanzia 100% soddisfatto o rimborsato
-        </span>
-        <h1>Passa l'orale. Senza ansia.</h1>
-        <p class="hero-tagline">Perché ti alleni con le stesse domande che potresti ricevere.</p>
-        <p class="hero-subtitle">Carica il bando o il manuale. L'AI ti interroga come una commissione vera e ti dice cosa migliorare prima dell'orale.</p>
+        <p class="hero-offer">3 simulazioni gratis al mese · Nessuna carta richiesta</p>
+        <h1>Simula l'orale sul programma del tuo concorso.</h1>
+        <p class="hero-tagline">Arriva preparato, senza improvvisare.</p>
+        <p class="hero-subtitle">Carica il bando o il manuale. ConcorsoAI ti fa domande sugli argomenti caricati, valuta le tue risposte e ti indica cosa approfondire prima dell'orale.</p>
         <div class="hero-cta-group">
           <a href="auth.html?mode=register" class="cta-primary">Simula l'orale gratuitamente</a>
           <!-- secondary CTA cambio copy + href: mostra il prodotto invece di pushare Pro -->
           <a href="#come-funziona" class="cta-link">Vedi una simulazione</a>
         </div>
-        <!-- FOMO microline sotto CTA: loss-aversion copy -->
-        <p class="hero-fomo">Ogni simulazione che non fai è una domanda che potresti ricevere il giorno dell'orale.</p>
       </div>
 
       <!-- Mockup hero: real SaaS dashboard look (round 17) -->
-      <div class="mockup-card hero-rise" role="region" aria-label="Esempio interattivo di una simulazione in Diritto Amministrativo">
+      <div class="mockup-card hero-rise" role="region" aria-label="Esempio del flusso di una simulazione in Diritto Amministrativo">
         <!-- App chrome header: logo + breadcrumb + avatar -->
         <div class="mockup-chrome">
           <div class="mockup-chrome-left">
@@ -1045,7 +916,7 @@ footer {
         <!-- Body: sidebar nav + main content -->
         <div class="mockup-body">
           <nav class="mockup-sidebar" aria-label="Menu della simulazione">
-            <button class="mockup-nav-item is-active" type="button" aria-current="true" aria-label="Simulazione attiva">
+            <button class="mockup-nav-item is-active" type="button" aria-current="page" aria-label="Simulazione attiva">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
@@ -1056,13 +927,13 @@ footer {
                 <path d="M7 14l4-4 4 4 5-6" />
               </svg>
             </button>
-            <button class="mockup-nav-item" type="button" aria-label="Storico">
+            <button class="mockup-nav-item" type="button" aria-label="Storico" disabled>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
             </button>
-            <button class="mockup-nav-item" type="button" aria-label="Impostazioni">
+            <button class="mockup-nav-item" type="button" aria-label="Impostazioni" disabled>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <circle cx="12" cy="12" r="3" />
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
@@ -1073,14 +944,14 @@ footer {
           <div class="mockup-main">
             <div class="mockup-eyebrow">
               <span class="mockup-eyebrow-dot" aria-hidden="true"></span>
-              Esempio reale · Diritto Amministrativo
+              Esempio di sessione · Diritto Amministrativo
             </div>
 
             <!-- Status bar: AI connected + timer + progress -->
             <div class="mockup-status" aria-label="Stato della simulazione">
               <span class="mockup-status-item">
                 <span class="mockup-status-dot" aria-hidden="true"></span>
-                Connessione AI · attiva
+                Sessione di esempio
               </span>
               <span class="mockup-status-item" aria-label="Timer simulazione: 01:23 di 05:00">
                 <span class="mockup-status-timer">
@@ -1097,24 +968,24 @@ footer {
             </div>
 
             <div class="mockup-tabs" role="tablist" aria-label="Stati di una simulazione">
-              <button class="mockup-tab is-active" role="tab" aria-selected="true" data-tab="question" id="tab-question" aria-controls="panel-question">1. Domanda</button>
-              <button class="mockup-tab" role="tab" aria-selected="false" data-tab="answer" id="tab-answer" aria-controls="panel-answer">2. La tua risposta</button>
-              <button class="mockup-tab" role="tab" aria-selected="false" data-tab="report" id="tab-report" aria-controls="panel-report">3. Report AI</button>
+              <button class="mockup-tab is-active" role="tab" aria-selected="true" tabindex="0" data-tab="question" id="tab-question" aria-controls="panel-question">1. Domanda</button>
+              <button class="mockup-tab" role="tab" aria-selected="false" tabindex="-1" data-tab="answer" id="tab-answer" aria-controls="panel-answer">2. La tua risposta</button>
+              <button class="mockup-tab" role="tab" aria-selected="false" tabindex="-1" data-tab="report" id="tab-report" aria-controls="panel-report">3. Report AI</button>
             </div>
 
-            <div class="mockup-panel" role="tabpanel" aria-labelledby="tab-question" id="panel-question" data-panel="question">
-              <p class="mockup-meta">Il commissario ti chiede:</p>
+            <div class="mockup-panel" role="tabpanel" aria-labelledby="tab-question" id="panel-question" data-panel="question" aria-hidden="false">
+              <p class="mockup-meta">Domanda di esempio:</p>
               <p class="mockup-content">"Mi parli del principio di imparzialità della Pubblica Amministrazione. A quale norma si riferisce?"</p>
               <p class="mockup-meta-hint">Clicca "2. La tua risposta" per vedere come rispondi.</p>
             </div>
 
-            <div class="mockup-panel hidden" role="tabpanel" aria-labelledby="tab-answer" id="panel-answer" data-panel="answer">
+            <div class="mockup-panel hidden" hidden role="tabpanel" aria-labelledby="tab-answer" id="panel-answer" data-panel="answer" aria-hidden="true">
               <p class="mockup-meta">Tu rispondi:<span class="typing-cursor" aria-hidden="true"></span></p>
               <p class="mockup-content">"L'imparzialità è un principio cardine della PA. La PA deve comportarsi in modo equo verso i cittadini, senza favorire nessuno. È un principio generale che discende dalla <em class="missed">Costituzione</em>."</p>
               <p class="mockup-meta-hint">Clicca "3. Report AI" per vedere il feedback.</p>
             </div>
 
-            <div class="mockup-panel hidden" role="tabpanel" aria-labelledby="tab-report" id="panel-report" data-panel="report">
+            <div class="mockup-panel hidden" hidden role="tabpanel" aria-labelledby="tab-report" id="panel-report" data-panel="report" aria-hidden="true">
               <p class="mockup-meta">Punteggio di esempio (il tuo dipende dalle risposte):</p>
               <div class="mockup-score-row">
                 <div class="mockup-score-circle" aria-label="Punteggio 78 su 100">
@@ -1127,14 +998,6 @@ footer {
                 </div>
               </div>
 
-              <div class="mockup-progression" role="figure" aria-label="Progressione tipica di una simulazione">
-                <span class="mockup-progression-label">Tipico percorso di pratica sulla stessa materia:</span>
-                <span class="prog-step" aria-label="Primo punteggio di esempio: 42 su 100">42<small>/100</small></span>
-                <span class="prog-arrow" aria-hidden="true">&rarr;</span>
-                <span class="prog-step" aria-label="Punteggio dopo pratica: 88 su 100">88<small>/100</small></span>
-                <span class="mockup-progression-note">Dopo 6-8 simulazioni con feedback mirato: punteggio stabilmente sopra 80.</span>
-              </div>
-
               <ul class="mockup-feedback">
                 <li class="report-good">
                   <span class="report-icon" aria-hidden="true">+</span>
@@ -1142,14 +1005,14 @@ footer {
                 </li>
                 <li class="report-good">
                   <span class="report-icon" aria-hidden="true">+</span>
-                  <span>Linguaggio istituzionale appropriato per la commissione</span>
+                  <span>Risposta chiara e pertinente</span>
                 </li>
                 <li class="report-work">
                   <span class="report-icon" aria-hidden="true">&#8599;</span>
                   <span>Mancava il riferimento all'art. 3 della Legge 241/1990 e al principio di buon andamento ex art. 97 Cost.</span>
                 </li>
               </ul>
-              <p class="mockup-extra">Tutto questo entra nel tuo profilo, con storico per materia e progressi settimana dopo settimana.</p>
+              <p class="mockup-extra">Esci dalla sessione con un punto preciso da ripassare.</p>
             </div>
           </div>
         </div>
@@ -1163,7 +1026,7 @@ footer {
   <div class="container">
     <div class="section-heading fade-in">
       <h2>Come funziona.</h2>
-      <p class="section-subtitle">Tre passaggi dal bando all'orale pronto.</p>
+      <p class="section-subtitle">Tre passaggi dal materiale al prossimo ripasso.</p>
     </div>
     <div class="steps-grid">
       <article class="step-card fade-in">
@@ -1187,7 +1050,7 @@ footer {
           </svg>
         </div>
         <h3>2. Simula con l'AI.</h3>
-        <p>Ti fa le domande come un commissario vero, con timer e follow-up. Tu rispondi. Lei ti corregge subito, così impari sul momento senza aspettare.</p>
+        <p>Simula il formato di un colloquio, con timer e follow-up. Tu rispondi e ricevi un primo feedback subito, così puoi correggerti mentre studi.</p>
       </article>
       <article class="step-card fade-in">
         <div class="step-icon">
@@ -1197,11 +1060,11 @@ footer {
           </svg>
         </div>
         <h3>3. Scopri cosa sbagli.</h3>
-        <p>L'AI ti dice esattamente dove sei debole, così non perdi tempo su quello che già sai. Ripassa prima dell'esame.</p>
+        <p>L'AI segnala le aree da approfondire, così non perdi tempo su quello che già sai. Ripassa prima dell'esame.</p>
       </article>
     </div>
 
-    <div class="cf-band fade-in" role="note" aria-label="Garanzia e accesso per PA">
+    <div class="cf-band fade-in" role="note" aria-label="Dati e accesso">
       <div class="cf-band-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z" />
@@ -1209,8 +1072,8 @@ footer {
         </svg>
       </div>
       <div class="cf-band-body">
-        <span class="cf-band-label">Sicuro e conforme</span>
-        <span class="cf-band-text">Server in Unione Europea (GDPR). Account solo email, niente telefono.</span>
+        <span class="cf-band-label">Accesso essenziale</span>
+        <span class="cf-band-text">Account senza numero di telefono. Leggi come trattiamo i tuoi dati nella privacy policy.</span>
       </div>
     </div>
   </div>
@@ -1221,35 +1084,32 @@ footer {
   <div class="container">
     <div class="section-heading fade-in">
       <h2>Free per provare. Pro per passare.</h2>
-      <p class="section-subtitle">Paghi solo quando il prodotto ti convince.</p>
+      <p class="section-subtitle">Inizia gratis. Scopri Pro quando vuoi allenarti con più continuità.</p>
     </div>
     <div class="tier-grid">
       <article class="tier-col fade-in">
         <div class="tier-col-name">Free</div>
         <div class="tier-col-price">€0</div>
         <ul class="tier-features">
-          <li>3 simulazioni al mese. Per provare senza impegno.</li>
+          <li>3 simulazioni gratis al mese. Per provare senza impegno.</li>
           <li>Vedi il tuo primo punteggio, su cosa è andato bene e cosa no.</li>
-          <li>Domande vere della commissione, non inventate.</li>
+          <li>Domande costruite sul tuo programma, non quiz generici.</li>
         </ul>
         <a href="auth.html?mode=register" class="tier-cta free">Inizia gratis</a>
       </article>
-      <article class="tier-col recommended fade-in">
-        <span class="consigliato-badge">Consigliato</span>
-        <div class="tier-col-name">Pro</div>
+      <article class="tier-col recommended fade-in">        <div class="tier-col-name">Pro</div>
         <div class="tier-col-price">14,99€ <span class="unit">/ mese</span></div>
-        <p class="tier-outcome">Passa l'orale. Prima.</p>
+        <p class="tier-outcome">Allenati con continuità prima dell'orale.</p>
         <ul class="tier-features">
           <li>Quante ne vuoi. Anche tutti i giorni prima dell'esame.</li>
-          <li>Saprai cosa dire. E cosa NON dire alla commissione.</li>
-          <li>Domande sempre più vicine all'orale vero, non standard.</li>
+          <li>Capisci cosa aggiungere alla risposta e cosa ripassare.</li>
+          <li>Più sessioni per allenarti sul tuo programma.</li>
           <li>Vedi i tuoi progressi. Settimana dopo settimana.</li>
         </ul>
-        <a href="auth.html?mode=register&amp;plan=pro" class="tier-cta pro">Passa al Pro</a>
+        <a href="auth.html?mode=register" class="tier-cta pro">Inizia gratis · Pro in arrivo</a>
       </article>
     </div>
-    <!-- footnote pricing rewrite round 17: anchor vs reali (delete endpoint non wired) -->
-    <p class="tier-footnote">Meno del costo di un manuale. Puoi disdire quando vuoi dalla pagina del profilo.</p>
+    <p class="tier-footnote">Prezzo indicativo. Il piano Pro sarà attivabile quando i pagamenti saranno disponibili.</p>
   </div>
 </section>
 
@@ -1257,15 +1117,16 @@ footer {
 <section id="fiducia" class="content-section bg-alt">
   <div class="container">
     <div class="fiducia-content fade-in">
-      <p class="fiducia-lead">Siamo appena partiti. Preferiamo darti una garanzia totale invece di mostrarti recensioni che ancora non abbiamo.</p>
-      <h2>Una garanzia vera. Perché siamo onesti, non perfetti.</h2>
-      <p class="fiducia-copy">Se il prodotto non è buono, ti rimborsiamo il 100% in 5 minuti. Senza storie. Non c'è niente da perdere.</p>
-      <div class="guarantee-icon" aria-hidden="true">
+      <p class="fiducia-lead">Niente recensioni inventate. Preferiamo mostrarti come funziona.</p>
+      <h2>Provalo con il programma del tuo concorso.</h2>
+      <p class="fiducia-copy">Hai 3 simulazioni gratuite ogni mese. Nessuna carta e nessun vincolo: carica il materiale, prova una sessione e decidi dopo.</p>
+      <div class="free-trial-icon" aria-hidden="true">
         <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M32 6L12 13v12c0 13.5 9.3 26.2 20 29 10.7-2.8 20-15.5 20-29V13L32 6z"
-                stroke="#1A73E8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <text x="32" y="40" text-anchor="middle"
-                fill="#1A73E8" font-size="13" font-weight="900" font-family="system-ui">100%</text>
+          <circle cx="32" cy="32" r="24" stroke="#1A73E8" stroke-width="3.5"/>
+          <text x="32" y="36" text-anchor="middle"
+                fill="#1A73E8" font-size="22" font-weight="900" font-family="system-ui">3</text>
+          <text x="32" y="47" text-anchor="middle"
+                fill="#1A73E8" font-size="7" font-weight="700" font-family="system-ui">GRATIS</text>
         </svg>
       </div>
     </div>
@@ -1279,7 +1140,7 @@ footer {
   <div class="container footer-inner">
     <div>
       <p class="footer-brand-name">ConcorsoAI</p>
-      <p class="footer-trust">Made in Italy · Server UE (GDPR) · Nessuna carta richiesta</p>
+      <p class="footer-trust">Made in Italy · Nessuna carta richiesta</p>
     </div>
     <ul class="footer-links">
       <li><a href="terms.html">Termini</a></li>
@@ -1332,6 +1193,17 @@ footer {
         panel.setAttribute('hidden', '');
       }
     });
+
+    /* Sidebar e tab devono descrivere lo stesso stato del mockup. */
+    if (navItems && navItems.length) {
+      var activeNavIndex = targetKey === 'report' ? 1 : 0;
+      navItems.forEach(function (item, idx) {
+        var isActive = idx === activeNavIndex;
+        item.classList.toggle('is-active', isActive);
+        if (isActive) item.setAttribute('aria-current', 'page');
+        else item.removeAttribute('aria-current');
+      });
+    }
   }
 
   tabs.forEach(function (tab) {
@@ -1355,8 +1227,6 @@ footer {
   if (navItems.length) {
     navItems.forEach(function (item, idx) {
       item.addEventListener('click', function () {
-        navItems.forEach(function (n) { n.classList.remove('is-active'); });
-        item.classList.add('is-active');
         /* Item 0 = simulazione (default), 1 = report (tab 3), 2 = storico (no-op), 3 = impostazioni (no-op) */
         if (idx === 1) activate('report');
         else if (idx === 0) activate('question');
