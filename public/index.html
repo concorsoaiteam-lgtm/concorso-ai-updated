@@ -3,2009 +3,218 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#FFFFFF" />
+<meta name="theme-color" content="#FAFAF7" />
 <title>ConcorsoAI — Simula l'orale sul tuo bando, prima dell'orale.</title>
-<meta name="description" content="Un commissario AI che legge il tuo bando e ti interroga come davanti alla commissione. 3 simulazioni gratis al mese, senza carta, senza registrazione. Made in Italy." />
+<meta name="description" content="Carica il PDF del tuo bando. Il commissario AI ti interroga solo sugli argomenti del concorso, ti corregge su chiarezza, struttura e contenuto, e ti dice cosa ripassare. Server UE. Made in Italy." />
 <link rel="canonical" href="https://concorso-ai.vercel.app/" />
-
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230F4C81'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='system-ui' font-weight='800'%3EC%3C/text%3E%3C/svg%3E" />
-
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230F4C81'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-family='system-ui'%3EC%3C/text%3E%3C/svg%3E" />
 <meta property="og:title" content="ConcorsoAI — Simula l'orale sul tuo bando, prima dell'orale." />
-<meta property="og:description" content="Il commissario AI legge il tuo bando e ti interroga come davanti alla commissione. Prova gratis. Made in Italy." />
+<meta property="og:description" content="Il commissario AI legge il tuo bando e ti interroga come davanti alla commissione. Prova gratis, senza carta." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://concorso-ai.vercel.app/" />
 <meta property="og:locale" content="it_IT" />
 <meta property="og:site_name" content="ConcorsoAI" />
 <meta name="twitter:card" content="summary_large_image" />
-
 <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
-<link rel="preload" as="font" type="font/woff2" href="https://fonts.bunny.net/files/inter-latin-700-normal.woff2" crossorigin />
-<link rel="preload" as="font" type="font/woff2" href="https://fonts.bunny.net/files/inter-latin-400-normal.woff2" crossorigin />
-<link rel="preload" as="font" type="font/woff2" href="https://fonts.bunny.net/files/inter-latin-500-normal.woff2" crossorigin />
-<link rel="preload" as="font" type="font/woff2" href="https://fonts.bunny.net/files/jetbrains-mono-latin-600-normal.woff2" crossorigin />
-<link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600,700&family=jetbrains-mono:500,600&display=swap" media="print" onload="this.media='all'" />
+<link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600&display=swap" />
+<link rel="stylesheet" href="css/landing.css" />
 
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "SoftwareApplication",
-      "name": "ConcorsoAI",
-      "applicationCategory": "EducationalApplication",
-      "operatingSystem": "Web",
-      "description": "Simulatore orale AI per concorsi pubblici italiani. Carica il bando, il commissario AI fa domande sugli argomenti del tuo programma.",
-      "url": "https://concorso-ai.vercel.app/",
-      "offers": [
-        { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "EUR", "description": "3 simulazioni al mese, gratis, senza carta." },
-        { "@type": "Offer", "name": "Pro", "price": "14.99", "priceCurrency": "EUR", "description": "Illimitato, ogni materia, ogni tipo di bando." }
-      ],
-      "creator": {
-        "@type": "Organization",
-        "name": "ConcorsoAI",
-        "address": { "@type": "PostalAddress", "addressLocality": "Milano", "addressCountry": "IT" }
-      }
-    },
-    {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {"@type": "Question", "name": "Le domande sono davvero basate sul mio bando?", "acceptedAnswer": {"@type": "Answer", "text": "Sì. Carichi il PDF del bando o il testo, e l'AI estrae gli argomenti. Ogni domanda nasce da lì. Se il tuo bando è appena uscito, vale lo stesso: parti dai contenuti che hai caricato."}},
-        {"@type": "Question", "name": "L'AI può sbagliare su una citazione normativa?", "acceptedAnswer": {"@type": "Answer", "text": "Può succedere. Per questo ogni simulazione ti dice sempre di verificare sul bando ufficiale. L'AI è un allenatore, non un sostituto dello studio."}},
-        {"@type": "Question", "name": "I miei dati sono al sicuro?", "acceptedAnswer": {"@type": "Answer", "text": "Sì. I bandi sono salvati cifrati su Supabase, datacenter in Europa. Nessun dato è condiviso con LLM extra-UE. Puoi cancellare tutto dalla dashboard quando vuoi."}},
-        {"@type": "Question", "name": "Posso rispondere a voce o solo per iscritto?", "acceptedAnswer": {"@type": "Answer", "text": "Entrambe. C'è un pulsante microfono (riconoscimento vocale del browser) e il campo di testo. Il commissario capisce entrambi."}},
-        {"@type": "Question", "name": "E se non sto preparando un concorso specifico?", "acceptedAnswer": {"@type": "Answer", "text": "Ci sono materie standard già pronte: Diritto Amministrativo, Costituzionale, Contabilità Pubblica, Diritto Penale. Puoi esercitarti anche senza bando caricato."}}
-      ]
-    }
+  "@type": "SoftwareApplication",
+  "name": "ConcorsoAI",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Web",
+  "description": "Simulatore orale AI per concorsi pubblici italiani.",
+  "url": "https://concorso-ai.vercel.app/",
+  "offers": [
+    { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "EUR" },
+    { "@type": "Offer", "name": "Pro", "price": "14.99", "priceCurrency": "EUR" }
   ]
 }
 </script>
-
-<style>
-/* ==========================================================================
-   ConcorsoAI — v22. Master rebuild.
-   Mindset: editorial minimal, JTBD-first, trust-by-compliance, no-slop.
-   7-section landing: Hero → Trust → Confronto → Metodo → Pricing → FAQ → Closing.
-   Pricing: 2 tier (Free €0 + Pro €14,99), nessun Coaching.
-   ========================================================================== */
-
-*, *::before, *::after { box-sizing: border-box; }
-
-:root {
-  --bg:           #FFFFFF;
-  --bg-alt:       #FAFAFA;
-  --bg-tint:      #F4F7FB;
-  --surface:      #FFFFFF;
-  --surface-raised:#F7FAFD;
-
-  --text-primary:   #0A1628;
-  --text-secondary: #475569;
-  --text-tertiary:  #6B7585;
-  --text-muted:     #94A3B8;
-
-  --accent:        #0F4C81;
-  --accent-hover:  #0B3A63;
-  --accent-deep:   #071D33;
-  --accent-light:  #EFF6FF;
-  --accent-border: #BFDBFE;
-  --accent-ring:   rgba(15, 76, 129, .20);
-
-  --success:       #16A34A;
-  --success-deep:  #0F766E;
-  --success-bg:    #ECFDF5;
-  --warning:       #B45309;
-  --warning-bg:    #FFFBEB;
-  --error:         #DC2626;
-  --error-bg:      #FEF2F2;
-
-  --border:        #E5E7EB;
-  --border-light:  #EFF1F4;
-  --border-strong: #CBD5E1;
-
-  --space-1:  4px;
-  --space-2:  8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10:40px;
-  --space-12:48px;
-  --space-16:64px;
-  --space-20:80px;
-  --space-24:96px;
-  --space-32:128px;
-
-  --radius-sm:  6px;
-  --radius:    10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
-
-  --shadow-1: 0 1px 2px rgba(15, 76, 129, .05), 0 4px 14px rgba(15, 76, 129, .08);
-  --shadow-2: 0 4px 14px rgba(15, 76, 129, .06), 0 14px 32px rgba(15, 76, 129, .10);
-  --shadow-3: 0 8px 24px rgba(15, 76, 129, .10), 0 24px 48px rgba(15, 76, 129, .14);
-
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, 'Cascadia Code', Menlo, Monaco, Consolas, monospace;
-
-  --container-max: 1120px;
-}
-
-html {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-}
-
-body {
-  margin: 0;
-  font-family: var(--font-sans);
-  font-size: 17px;
-  line-height: 1.55;
-  color: var(--text-primary);
-  background: var(--bg);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  font-feature-settings: "ss01" on, "cv11" on;
-}
-
-::selection { background: var(--accent-light); color: var(--text-primary); }
-
-h1, h2, h3, h4 {
-  font-family: var(--font-sans);
-  font-weight: 700;
-  line-height: 1.12;
-  letter-spacing: -0.025em;
-  margin: 0;
-  color: var(--text-primary);
-}
-
-h1 {
-  font-size: clamp(2.5rem, 4.8vw + 0.4rem, 4rem);
-  letter-spacing: -0.045em;
-  font-weight: 700;
-}
-h2 {
-  font-size: clamp(1.75rem, 2.2vw + 1rem, 2.4rem);
-  letter-spacing: -0.03em;
-}
-h3 {
-  font-size: 1.1875rem;
-  letter-spacing: -0.015em;
-  font-weight: 600;
-}
-h4 {
-  font-size: 1rem;
-  letter-spacing: -0.01em;
-  font-weight: 600;
-}
-p { margin: 0; }
-a { color: inherit; text-decoration: none; }
-ul, ol { list-style: none; padding: 0; margin: 0; }
-button { font-family: inherit; }
-.hidden { display: none !important; }
-
-.container {
-  max-width: var(--container-max);
-  margin: 0 auto;
-  padding: 0 20px;
-}
-@media (min-width: 768px) {
-  .container { padding: 0 32px; }
-}
-
-.skip-link {
-  position: fixed;
-  top: 8px;
-  left: 8px;
-  background: var(--accent-deep);
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  font-size: 14px;
-  z-index: 200;
-  transform: translateY(-200%);
-  transition: transform .15s ease;
-}
-.skip-link:focus { transform: translateY(0); }
-
-/* ==========================================================================
-   NAVBAR — minimal, sticky, single CTA
-   ========================================================================== */
-
-.navbar {
-  border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, .82);
-  backdrop-filter: saturate(180%) blur(12px);
-  -webkit-backdrop-filter: saturate(180%) blur(12px);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-.navbar-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 64px;
-}
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: -0.025em;
-  color: var(--text-primary);
-}
-.brand-mark {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  background: var(--accent);
-  color: #fff;
-  font-family: var(--font-mono);
-  font-weight: 700;
-  font-size: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  letter-spacing: -0.02em;
-}
-.brand-name { color: var(--text-primary); }
-
-.nav-actions { display: flex; align-items: center; gap: 8px; }
-.nav-link {
-  font-size: 14.5px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  transition: color .15s ease;
-}
-.nav-link:hover { color: var(--accent); }
-
-.btn-primary,
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-weight: 600;
-  font-size: 14.5px;
-  min-height: 44px;
-  padding: 11px 18px;
-  border-radius: var(--radius);
-  border: 1px solid;
-  cursor: pointer;
-  letter-spacing: -0.005em;
-  transition: background .18s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .15);
-}
-.btn-primary:hover {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, .10);
-}
-.btn-primary:active {
-  background: var(--accent-deep);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, .14);
-}
-.btn-primary:focus-visible {
-  outline: 2px solid var(--accent-deep);
-  outline-offset: 3px;
-}
-.btn-primary svg { flex-shrink: 0; transition: transform .15s ease; }
-.btn-primary:hover svg { transform: translateX(2px); }
-
-.btn-secondary {
-  background: var(--bg);
-  color: var(--accent);
-  border-color: var(--accent);
-}
-.btn-secondary:hover {
-  background: var(--accent-light);
-  border-color: var(--accent-hover);
-}
-.btn-secondary:focus-visible {
-  outline: 2px solid var(--accent-deep);
-  outline-offset: 3px;
-}
-
-.btn-large {
-  min-height: 52px;
-  padding: 15px 26px;
-  font-size: 15.5px;
-}
-
-/* ==========================================================================
-   TIER — generic section spacing + base components
-   ========================================================================== */
-
-.section {
-  padding: clamp(64px, 8vw, 96px) 0;
-}
-.section-tight {
-  padding: clamp(48px, 6vw, 72px) 0;
-}
-.section--alt { background: var(--bg-alt); }
-.section--accentBg { background: var(--accent-light); }
-
-.section-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--accent);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-.section-eyebrow::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--accent);
-  border-radius: 50%;
-  display: inline-block;
-}
-.section-heading {
-  max-width: 640px;
-  margin-bottom: clamp(40px, 6vw, 56px);
-}
-.section-heading--center {
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-}
-.section-heading h2 { margin-bottom: 14px; }
-.section-heading p {
-  color: var(--text-secondary);
-  font-size: 1.0625rem;
-  line-height: 1.6;
-  max-width: 580px;
-}
-.section-heading--center p { margin: 0 auto; }
-
-/* ==========================================================================
-   1. HERO — JTBD-first, asymmetric split, real mockup
-   ========================================================================== */
-
-.hero {
-  padding: clamp(72px, 10vw, 112px) 0 clamp(56px, 8vw, 80px);
-  background: var(--bg);
-}
-.hero-grid {
-  display: grid;
-  gap: clamp(40px, 6vw, 64px);
-  align-items: center;
-}
-@media (min-width: 960px) {
-  .hero-grid {
-    grid-template-columns: 0.95fr 1.05fr;
-    gap: 64px;
-  }
-}
-
-.hero-text {
-  max-width: 560px;
-  text-align: left;
-}
-.hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: .04em;
-  color: var(--accent-deep);
-  background: var(--accent-light);
-  border: 1px solid var(--accent-border);
-  padding: 6px 12px;
-  border-radius: 9999px;
-  margin-bottom: 22px;
-}
-.hero-eyebrow .pulse-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--success);
-  flex-shrink: 0;
-}
-@keyframes pulseDot {
-  0%, 80%, 100% { transform: scale(1); opacity: 1; }
-  90% { transform: scale(1.6); opacity: 0.55; }
-}
-
-.hero h1 {
-  margin-bottom: 20px;
-}
-.hero h1 .fade-line {
-  display: inline-block;
-  opacity: 0;
-  animation: fadeLine .55s cubic-bezier(.2, .8, .2, 1) forwards;
-}
-@keyframes fadeLine {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.hero h1 .fade-line.d2 { animation-delay: .10s; }
-.hero h1 .fade-line.d3 { animation-delay: .20s; }
-.hero h1 .fade-line.d4 { animation-delay: .30s; }
-.hero h1 .fade-line.d5 { animation-delay: .40s; }
-.hero h1 .fade-line.d6 { animation-delay: .50s; }
-
-.hero h1 .accent-word {
-  color: var(--accent);
-  font-style: italic;
-  font-weight: 700;
-}
-
-.hero-subtitle {
-  font-size: 1.0625rem;
-  line-height: 1.6;
-  color: var(--text-secondary);
-  margin-bottom: 28px;
-  max-width: 520px;
-}
-@media (min-width: 768px) {
-  .hero-subtitle { font-size: 1.125rem; }
-}
-.hero-subtitle strong {
-  color: var(--text-primary);
-  font-weight: 600;
-}
-.hero-subtitle .em-dash { color: var(--text-tertiary); margin: 0 .35em; }
-
-.hero-cta-row {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  align-items: flex-start;
-  margin-bottom: 24px;
-}
-@media (min-width: 480px) {
-  .hero-cta-row {
-    flex-direction: row;
-    align-items: center;
-    gap: 18px;
-  }
-}
-.hero-trust-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  font-size: 12.5px;
-  color: var(--text-tertiary);
-}
-.hero-trust-pills span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 500;
-}
-.hero-trust-pills svg {
-  width: 13px;
-  height: 13px;
-  color: var(--success);
-}
-.hero-trust-pills .pill-sep {
-  width: 3px;
-  height: 3px;
-  background: var(--text-muted);
-  border-radius: 50%;
-}
-
-/* ----- Hero mockup (the actual product state, not a fake render) ----- */
-
-.mockup {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-1);
-  max-width: 620px;
-  width: 100%;
-  margin: 0 auto;
-  transition: box-shadow .3s ease;
-}
-.mockup:hover { box-shadow: var(--shadow-2); }
-
-.mockup-chrome {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: var(--bg-alt);
-  border-bottom: 1px solid var(--border);
-  gap: 12px;
-  font-size: 12px;
-}
-.mockup-chrome-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-  flex: 1;
-}
-.mockup-chrome-mark {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--text-primary);
-  font-weight: 700;
-}
-.mockup-chrome-mark::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-  display: inline-block;
-}
-.mockup-chrome-path {
-  color: var(--text-tertiary);
-  font-family: var(--font-mono);
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
-.mockup-chrome-avatar {
-  width: 28px;
-  height: 28px;
-  background: var(--accent);
-  color: #fff;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 700;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.mockup-status {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px;
-  padding: 10px 16px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border-light);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-.mockup-status-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.mockup-status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--success);
-  flex-shrink: 0;
-  animation: pulseDot 2.6s ease-in-out infinite;
-}
-.mockup-status-timer {
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
-}
-.mockup-status-timer .timer-num { color: var(--accent); }
-
-.mockup-tabs {
-  display: flex;
-  background: var(--bg-tint);
-  padding: 4px;
-  gap: 2px;
-  margin: 16px 16px 0;
-  border-radius: 10px;
-}
-.mockup-tab {
-  flex: 1;
-  background: transparent;
-  border: none;
-  padding: 10px 8px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-tertiary);
-  border-radius: 8px;
-  cursor: pointer;
-  font-family: inherit;
-  min-height: 40px;
-  letter-spacing: -0.005em;
-  transition: background .15s ease, color .15s ease;
-}
-.mockup-tab:hover { color: var(--text-primary); }
-.mockup-tab.is-active {
-  background: var(--surface);
-  color: var(--accent);
-  box-shadow: 0 1px 2px rgba(15, 76, 129, .08);
-}
-.mockup-tab:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.mockup-body { padding: 18px 20px 20px; }
-
-.mockup-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  color: var(--text-tertiary);
-  margin-bottom: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.mockup-eyebrow-mark {
-  width: 6px;
-  height: 6px;
-  background: var(--accent);
-  border-radius: 50%;
-}
-
-.mockup-quote {
-  font-size: 15px;
-  line-height: 1.55;
-  color: var(--text-primary);
-  font-weight: 500;
-  margin: 0 0 14px;
-  letter-spacing: -0.005em;
-}
-
-.mockup-hint {
-  font-size: 12.5px;
-  color: var(--text-tertiary);
-  font-style: italic;
-  margin-top: 10px;
-}
-
-.mockup-answer {
-  font-size: 14.5px;
-  line-height: 1.6;
-  color: var(--text-secondary);
-}
-.mockup-answer .missed-cite {
-  background: var(--warning-bg);
-  color: var(--warning);
-  font-weight: 600;
-  text-decoration: line-through wavy var(--warning);
-  text-decoration-thickness: 1.5px;
-  padding: 0 4px;
-  border-radius: 3px;
-}
-.typing-cursor {
-  display: inline-block;
-  width: 8px;
-  height: .9em;
-  background: var(--accent);
-  margin-left: 6px;
-  vertical-align: text-bottom;
-  animation: typingBlink 1.05s steps(2, end) infinite;
-  border-radius: 1.5px;
-}
-@keyframes typingBlink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
-}
-
-.mockup-report { padding: 4px 0 0; }
-
-.mockup-grade-row {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding-bottom: 14px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid var(--border-light);
-}
-.mockup-grade-circle {
-  width: 84px;
-  height: 84px;
-  flex-shrink: 0;
-  border: 3px solid var(--accent);
-  background: var(--bg-tint);
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  line-height: 1;
-}
-.mockup-grade-num { font-size: 28px; font-weight: 700; color: var(--text-primary); }
-.mockup-grade-of { font-size: 10.5px; color: var(--text-tertiary); margin-top: 3px; font-weight: 700; }
-.mockup-grade-text { flex: 1; }
-.mockup-grade-label { font-size: 14.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
-.mockup-grade-note { font-size: 12.5px; color: var(--text-tertiary); line-height: 1.5; }
-
-.mockup-feedback {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-.mockup-feedback li {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  line-height: 1.5;
-}
-.mockup-feedback .good { background: var(--success-bg); color: var(--text-primary); }
-.mockup-feedback .work { background: var(--warning-bg); color: var(--text-primary); }
-.mockup-feedback .ico {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  color: #fff;
-  font-family: var(--font-mono);
-  font-weight: 700;
-  font-size: 11px;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-.mockup-feedback .good .ico { background: var(--success-deep); }
-.mockup-feedback .work .ico { background: var(--warning); }
-
-.mockup-tag {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--accent-deep);
-  background: var(--accent-light);
-  padding: 6px 10px;
-  border-radius: 6px;
-  display: inline-block;
-  margin-top: 4px;
-}
-
-/* ==========================================================================
-   2. TRUST BAND — own section so it shows above the fold on mobile
-   ========================================================================== */
-
-.trust-band {
-  background: var(--bg-alt);
-  border-top: 1px solid var(--border-light);
-  border-bottom: 1px solid var(--border-light);
-  padding: clamp(20px, 3vw, 28px) 0;
-}
-.trust-band-inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 10px 20px;
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-.trust-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 500;
-  letter-spacing: -0.005em;
-}
-.trust-pill svg {
-  width: 14px;
-  height: 14px;
-  color: var(--accent);
-  flex-shrink: 0;
-}
-.trust-pill-sep {
-  width: 3px;
-  height: 3px;
-  background: var(--text-muted);
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-/* ==========================================================================
-   3. CONFRONTO — kills the "why not ChatGPT?" objection (hero problem)
-   ========================================================================== */
-
-.confronto-stack {
-  display: grid;
-  gap: 14px;
-  max-width: 980px;
-  margin: 0 auto;
-}
-@media (min-width: 820px) {
-  .confronto-stack {
-    grid-template-columns: 1.55fr 1fr 1fr;
-    gap: 14px;
-  }
-}
-.confronto-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 28px 26px 24px;
-  transition: border-color .15s ease, box-shadow .25s ease, transform .25s ease;
-  position: relative;
-}
-.confronto-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-1);
-}
-.confronto-card.us {
-  background: var(--accent-light);
-  border: 2px solid var(--accent);
-  padding: 32px 28px 28px;
-}
-.confronto-card.us:hover {
-  box-shadow: 0 14px 32px rgba(15, 76, 129, .14);
-}
-.confronto-tag {
-  display: inline-block;
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: #fff;
-  margin-bottom: 12px;
-}
-.confronto-card.alt .confronto-tag {
-  background: transparent;
-  border: 1px solid var(--border-strong);
-  color: var(--text-tertiary);
-}
-.confronto-card h3 {
-  font-size: 1.25rem;
-  margin-bottom: 8px;
-  line-height: 1.25;
-}
-.confronto-card.us h3 {
-  font-size: 1.375rem;
-  color: var(--accent-deep);
-}
-.confronto-card .confronto-sub {
-  color: var(--text-secondary);
-  font-size: .9375rem;
-  line-height: 1.55;
-  margin-bottom: 20px;
-}
-.confronto-card .confronto-rows {
-  display: grid;
-  gap: 10px;
-}
-.confronto-row {
-  display: grid;
-  grid-template-columns: 132px 1fr;
-  gap: 12px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--border-light);
-  align-items: baseline;
-}
-.confronto-row:last-child { border-bottom: none; }
-@media (max-width: 520px) {
-  .confronto-row { grid-template-columns: 1fr; gap: 2px; padding: 8px 0; }
-}
-.confronto-row-key {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  font-weight: 700;
-  color: var(--text-tertiary);
-  letter-spacing: .04em;
-  text-transform: uppercase;
-}
-.confronto-card.us .confronto-row-key {
-  color: var(--accent);
-}
-.confronto-row-val {
-  font-size: 13.5px;
-  line-height: 1.5;
-  color: var(--text-secondary);
-}
-.confronto-card.us .confronto-row-val { color: var(--text-primary); font-weight: 500; }
-
-/* ==========================================================================
-   4. METODO — bento mosaic con cite reali
-   ========================================================================== */
-
-.metodo-bento {
-  max-width: 1100px;
-  margin: 0 auto;
-  display: grid;
-  gap: 14px;
-}
-@media (min-width: 760px) {
-  .metodo-bento {
-    grid-template-columns: 1.4fr 1fr;
-    grid-template-rows: auto auto auto;
-    grid-template-areas:
-      "main t1"
-      "main t2"
-      "t3   t3";
-    gap: 14px;
-  }
-  .metodo-tile--main { grid-area: main; }
-  .metodo-tile--t1   { grid-area: t1; }
-  .metodo-tile--t2   { grid-area: t2; }
-  .metodo-tile--t3   { grid-area: t3; }
-}
-.metodo-tile {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 26px 24px;
-  display: flex;
-  flex-direction: column;
-  transition: transform .2s ease, box-shadow .25s ease, border-color .15s ease;
-}
-.metodo-tile:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-1);
-}
-.metodo-tile--main {
-  background: var(--accent-light);
-  border: 2px solid var(--accent);
-  padding: 32px 28px;
-}
-.metodo-tile-tag {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  color: var(--accent);
-  background: var(--surface);
-  border: 1px solid var(--accent-border);
-  padding: 4px 9px;
-  border-radius: var(--radius-sm);
-  align-self: flex-start;
-  margin-bottom: 12px;
-}
-.metodo-tile--main .metodo-tile-tag {
-  font-size: 11.5px;
-  padding: 5px 11px;
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-}
-.metodo-tile h3 {
-  font-size: 1.125rem;
-  margin-bottom: 8px;
-  letter-spacing: -0.015em;
-}
-.metodo-tile--main h3 {
-  font-size: 1.375rem;
-  color: var(--accent-deep);
-  margin-bottom: 12px;
-}
-.metodo-tile p {
-  color: var(--text-secondary);
-  font-size: .9375rem;
-  line-height: 1.6;
-}
-.metodo-tile--main p { font-size: 1rem; color: var(--text-primary); }
-.metodo-cite {
-  display: inline-block;
-  margin-top: 14px;
-  padding: 10px 14px;
-  background: var(--surface);
-  border: 1px solid var(--accent-border);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--accent-deep);
-  letter-spacing: -0.005em;
-  font-variant-numeric: tabular-nums;
-  align-self: flex-start;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-
-/* ==========================================================================
-   5. PRICING — 2 tier (NO Coaching) con reciprocity + anchoring
-   ========================================================================== */
-
-.pricing-stack {
-  display: grid;
-  gap: 14px;
-  max-width: 980px;
-  margin: 0 auto;
-}
-@media (min-width: 820px) {
-  .pricing-stack {
-    grid-template-columns: 1fr 1.5fr;
-    gap: 18px;
-  }
-}
-.tier {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 32px 28px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  transition: transform .2s ease, box-shadow .25s ease;
-}
-.tier:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-1);
-}
-.tier--pro {
-  background: linear-gradient(180deg, var(--accent-light) 0%, var(--surface) 100%);
-  border: 2px solid var(--accent);
-  padding: 36px 32px;
-}
-.tier-badge {
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--accent);
-  color: #fff;
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  padding: 5px 12px;
-  border-radius: 9999px;
-  white-space: nowrap;
-}
-.tier-name {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 8px;
-}
-.tier-title {
-  font-size: 1.5rem;
-  margin-bottom: 6px;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-}
-.tier-desc {
-  color: var(--text-secondary);
-  font-size: .9375rem;
-  line-height: 1.5;
-  margin-bottom: 18px;
-}
-.tier-price-row {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  margin-bottom: 4px;
-}
-.tier-price-amount {
-  font-family: var(--font-mono);
-  font-size: 2.5rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-.tier-price-period {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  font-weight: 500;
-}
-.tier-price-sub {
-  color: var(--text-secondary);
-  font-size: 13px;
-  margin-bottom: 18px;
-  font-weight: 500;
-}
-.tier-price-sub strong { color: var(--accent-deep); font-weight: 600; }
-.tier-features {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 24px;
-  flex: 1;
-}
-.tier-features li {
-  font-size: 13.5px;
-  line-height: 1.5;
-  color: var(--text-primary);
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  padding-left: 0;
-}
-.tier-features li::before {
-  content: '✓';
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  margin-top: 2px;
-  background: var(--accent);
-  color: #fff;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.tier-cta { margin-top: auto; }
-.tier-meta {
-  margin-top: 14px;
-  font-size: 12.5px;
-  color: var(--text-tertiary);
-  line-height: 1.5;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.tier-meta strong { color: var(--text-secondary); font-weight: 600; }
-
-.pricing-secondary-line {
-  margin-top: 32px;
-  text-align: center;
-  font-size: 13.5px;
-  color: var(--text-secondary);
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.pricing-secondary-line a {
-  color: var(--accent);
-  border-bottom: 1px dotted var(--accent-border);
-}
-.pricing-secondary-line a:hover { border-bottom-color: var(--accent); }
-
-/* ==========================================================================
-   6. FAQ — 4 reali dubbi dei candidati PA
-   ========================================================================== */
-
-.faq {
-  max-width: 720px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.faq-item {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px 22px;
-  transition: background .15s ease, border-color .15s ease;
-}
-.faq-item:hover {
-  border-color: var(--border-strong);
-  background: var(--bg-alt);
-}
-.faq-item summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  cursor: pointer;
-  list-style: none;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.005em;
-  line-height: 1.4;
-}
-.faq-item summary::-webkit-details-marker { display: none; }
-.faq-item summary::marker { display: none; content: ''; }
-.faq-chevron {
-  flex-shrink: 0;
-  color: var(--text-tertiary);
-  font-family: var(--font-mono);
-  font-weight: 700;
-  font-size: 14px;
-  transition: transform .25s cubic-bezier(.16, 1, .3, 1), color .15s ease;
-}
-.faq-item[open] .faq-chevron {
-  transform: rotate(45deg);
-  color: var(--accent);
-}
-.faq-answer {
-  margin-top: 12px;
-  font-size: 14.5px;
-  color: var(--text-secondary);
-  line-height: 1.65;
-  max-width: 640px;
-}
-
-/* ==========================================================================
-   7. CHIUSURA + FOOTER — Peak-End finale, founder marker onesty
-   ========================================================================== */
-
-.closing {
-  background: var(--accent-light);
-  border-top: 1px solid var(--accent-border);
-  padding: clamp(72px, 8vw, 96px) 0 clamp(48px, 6vw, 64px);
-}
-.closing-text {
-  max-width: 600px;
-  margin: 0 auto 28px;
-  text-align: left;
-}
-.closing-text--center { text-align: center; }
-.closing-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--accent-deep);
-  background: var(--surface);
-  border: 1px solid var(--accent-border);
-  padding: 5px 11px;
-  border-radius: 9999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 18px;
-}
-.closing-eyebrow .pulse-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--success);
-}
-.closing-text h2 {
-  font-size: clamp(1.625rem, 2vw + 1rem, 2.125rem);
-  letter-spacing: -0.03em;
-  margin-bottom: 18px;
-}
-.closing-text p {
-  color: var(--text-primary);
-  font-size: 1.0625rem;
-  line-height: 1.65;
-}
-.closing-text p + p { margin-top: 14px; }
-.closing-text .em-dash { color: var(--text-tertiary); margin: 0 .25em; }
-
-.closing-disclaimer {
-  max-width: 600px;
-  margin: 32px auto 0;
-  font-size: 12.5px;
-  color: var(--text-tertiary);
-  line-height: 1.5;
-  text-align: left;
-  padding-left: 16px;
-  border-left: 3px solid var(--accent-border);
-}
-.closing-disclaimer strong { color: var(--text-secondary); font-weight: 600; }
-
-footer {
-  border-top: 1px solid var(--border);
-  background: var(--bg);
-  padding: clamp(40px, 5vw, 56px) 0 clamp(32px, 4vw, 40px);
-}
-.footer-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  align-items: flex-start;
-}
-@media (min-width: 768px) {
-  .footer-stack {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 48px;
-  }
-}
-.footer-brand-row {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  max-width: 460px;
-}
-.footer-brand-row .brand { color: var(--text-primary); }
-.footer-founder {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  font-weight: 500;
-}
-.footer-founder-mark {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--accent-deep);
-  background: var(--accent-light);
-  border: 1px solid var(--accent-border);
-  padding: 3px 9px;
-  border-radius: 9999px;
-  display: inline-block;
-  margin-right: 8px;
-  vertical-align: 1px;
-}
-.footer-trust-row {
-  font-size: 12.5px;
-  color: var(--text-tertiary);
-  line-height: 1.55;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-}
-.footer-trust-row span { display: inline-flex; align-items: center; gap: 6px; }
-.footer-trust-row svg {
-  width: 13px;
-  height: 13px;
-  color: var(--accent);
-  flex-shrink: 0;
-}
-.footer-links-cols {
-  display: grid;
-  gap: 14px 36px;
-  grid-template-columns: 1fr;
-  font-size: 13.5px;
-}
-@media (min-width: 520px) {
-  .footer-links-cols {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-.footer-col-label {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  margin-bottom: 8px;
-}
-.footer-links-cols a {
-  display: block;
-  color: var(--text-secondary);
-  font-weight: 500;
-  padding: 4px 0;
-  transition: color .15s ease;
-}
-.footer-links-cols a:hover { color: var(--accent); }
-
-.footer-legal {
-  margin-top: 28px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border-light);
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 12px 24px;
-  font-size: 12px;
-  color: var(--text-tertiary);
-  line-height: 1.5;
-}
-.footer-legal-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-}
-.footer-legal-links a {
-  color: var(--text-secondary);
-  font-weight: 500;
-  transition: color .15s ease;
-}
-.footer-legal-links a:hover { color: var(--accent); }
-
-/* ==========================================================================
-   Micro-interactions: hero rise (only entry animation)
-   ========================================================================== */
-
-.hero-rise > * {
-  opacity: 0;
-  animation: hero-rise-anim .55s cubic-bezier(.2, .8, .2, 1) forwards;
-}
-.hero-rise > *:nth-child(1) { animation-delay: 30ms; }
-.hero-rise > *:nth-child(2) { animation-delay: 130ms; }
-.hero-rise > *:nth-child(3) { animation-delay: 220ms; }
-@keyframes hero-rise-anim {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ==========================================================================
-   Mobile penyusutan
-   ========================================================================== */
-
-@media (max-width: 720px) {
-  .container { padding: 0 20px; }
-  .hero { padding: 56px 0 40px; }
-  .section { padding: 56px 0; }
-  .confronto-card { padding: 24px 22px; }
-  .metodo-tile { padding: 22px 20px; }
-  .tier { padding: 26px 22px; }
-  .tier--pro { padding: 30px 24px; }
-  .faq-item { padding: 16px 18px; }
-  .footer-stack { align-items: center; text-align: center; }
-  .footer-brand-row { align-items: center; }
-  .nav-actions { gap: 4px; }
-  .nav-link { display: none; }
-}
-
-/* ==========================================================================
-   Reduced motion: kill animations, keep layout intact
-   ========================================================================== */
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .001ms !important;
-    scroll-behavior: auto !important;
-  }
-  .hero-rise > *,
-  .hero h1 .fade-line {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  .mockup-status-dot,
-  .pulse-dot {
-    animation: none !important;
-  }
-}
-
-/* ==========================================================================
-   Print: clean
-   ========================================================================== */
-
-@media print {
-  .navbar, .sticky-mobile-cta, footer .footer-legal { display: none; }
-}
-</style>
 </head>
-
 <body>
 
-<a href="#hero" class="skip-link">Salta al contenuto</a>
-
-<header class="navbar" role="banner">
-  <div class="container navbar-inner">
-    <a href="/" class="brand" aria-label="ConcorsoAI — home">
-      <span class="brand-mark" aria-hidden="true">CA</span>
-      <span class="brand-name">ConcorsoAI</span>
-    </a>
-    <nav class="nav-actions" aria-label="Navigazione principale">
-      <a href="#confronto" class="nav-link">Perché non ChatGPT</a>
-      <a href="#pricing" class="nav-link">Prezzi</a>
-      <a href="#faq" class="nav-link">FAQ</a>
-      <a href="auth.html?mode=register" class="btn-primary" aria-label="Inizia la prima simulazione gratuita">
-        Inizia gratis
-      </a>
+<header class="nav" role="banner">
+  <div class="container nav-inner">
+    <a href="/" class="brand">ConcorsoAI</a>
+    <nav class="nav-links" aria-label="Navigazione">
+      <a href="#pricing">Prezzi</a>
+      <a href="#faq">FAQ</a>
     </nav>
+    <a href="auth.html?mode=register" class="btn-primary" aria-label="Inizia gratis">
+      Inizia gratis →
+    </a>
   </div>
 </header>
 
-<main id="hero">
+<main>
 
-  <!-- ===========================================================
-       1) HERO — JTBD-first, asymmetric split, real mockup
-       =========================================================== -->
-  <section class="hero" aria-labelledby="hero-h1">
-    <div class="container">
-      <div class="hero-grid">
-        <div class="hero-text hero-rise">
-          <span class="hero-eyebrow">
-            <span class="pulse-dot" aria-hidden="true"></span>
-            Beta aperta · 3 simulazioni gratis al mese · Senza carta
-          </span>
-
-          <h1 id="hero-h1">
-            <span class="fade-line d1">Simula l'</span><span class="fade-line d2 accent-word">orale</span><span class="fade-line d3"> sul</span><span class="fade-line d4"> </span><span class="fade-line d5">tuo</span><span class="fade-line d6"> bando,</span>
-            <br />
-            <span class="fade-line d4">prima dell'</span><span class="fade-line d5">orale.</span>
-          </h1>
-
-          <p class="hero-subtitle">
-            Carica il bando. <strong>Il commissario AI lo legge</strong> e ti interroga solo sugli argomenti del tuo concorso — non su tutto, in generale, come fa ChatGPT.
-            <span class="em-dash">·</span>
-            Ogni risposta ti dice cosa hai sbagliato, cosa hai dimenticato, e dove ti sei arenato.
-          </p>
-
-          <div class="hero-cta-row">
-            <a href="auth.html?mode=register" class="btn-primary btn-large" aria-label="Inizia la tua prima simulazione orale gratuita">
-              Inizia la tua prima simulazione
-              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true">
-                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
-              </svg>
-            </a>
-            <a href="#demo" class="cta-link">
-              Guarda un esempio reale ↓
-            </a>
-          </div>
-
-          <div class="hero-trust-pills" aria-label="Garanzie di base">
-            <span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-              Server UE
-            </span>
-            <span class="pill-sep" aria-hidden="true"></span>
-            <span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-              Dati cifrati
-            </span>
-            <span class="pill-sep" aria-hidden="true"></span>
-            <span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-              Mai dati a LLM USA
-            </span>
-          </div>
-        </div>
-
-        <div class="mockup hero-rise" role="region" aria-label="Esempio di una sessione simulata in diritto amministrativo">
-          <div class="mockup-chrome">
-            <div class="mockup-chrome-meta">
-              <span class="mockup-chrome-mark">ConcorsoAI</span>
-              <span class="mockup-chrome-path">/ Comune di Milano 2026 / Diritto Amm.</span>
-            </div>
-            <span class="mockup-chrome-avatar" aria-label="Profilo utente">MR</span>
-          </div>
-
-          <div class="mockup-status" aria-label="Stato della sessione">
-            <span class="mockup-status-item">
-              <span class="mockup-status-dot" aria-hidden="true"></span>
-              Commissario attivo
-            </span>
-            <span class="mockup-status-item" aria-label="Tempo trascorso">
-              <span class="mockup-status-timer"><span class="timer-num">01:23</span> / 05:00</span>
-            </span>
-            <span class="mockup-status-item">Domanda 4 / 12</span>
-          </div>
-
-          <div class="mockup-tabs" role="tablist" aria-label="Stati di una sessione">
-            <button class="mockup-tab is-active" role="tab" aria-selected="true" data-tab="question" id="t-q" aria-controls="p-q">Domanda</button>
-            <button class="mockup-tab" role="tab" aria-selected="false" data-tab="answer" id="t-a" aria-controls="p-a">La tua risposta</button>
-            <button class="mockup-tab" role="tab" aria-selected="false" data-tab="report" id="t-r" aria-controls="p-r">Report</button>
-          </div>
-
-          <div class="mockup-body">
-            <div class="mockup-panel" id="p-q" role="tabpanel" aria-labelledby="t-q" data-panel="question">
-              <p class="mockup-eyebrow"><span class="mockup-eyebrow-mark"></span> Domanda · 5ª materia</p>
-              <blockquote class="mockup-quote">«Mi parli del principio di imparzialità della Pubblica Amministrazione. A quale norma si riferisce?»</blockquote>
-              <p class="mockup-hint">Domanda generata leggendo il PDF del bando che hai appena caricato.</p>
-            </div>
-
-            <div class="mockup-panel hidden" id="p-a" role="tabpanel" aria-labelledby="t-a" data-panel="answer">
-              <p class="mockup-eyebrow"><span class="mockup-eyebrow-mark"></span> La tua risposta</p>
-              <p class="mockup-answer">«L'imparzialità è un principio cardine della PA. La PA deve comportarsi in modo equo verso i cittadini, senza favorire nessuno. È un principio generale che discende dalla <span class="missed-cite">Costituzione</span>.»<span class="typing-cursor" aria-hidden="true"></span></p>
-              <p class="mockup-hint">Hai tralasciato il riferimento normativo specifico. Vedi il Report.</p>
-            </div>
-
-            <div class="mockup-panel hidden" id="p-r" role="tabpanel" aria-labelledby="t-r" data-panel="report">
-              <p class="mockup-eyebrow"><span class="mockup-eyebrow-mark"></span> Report della sessione</p>
-              <div class="mockup-report">
-                <div class="mockup-grade-row">
-                  <div class="mockup-grade-circle" aria-label="Punteggio 78 su 100">
-                    <div class="mockup-grade-num">78</div>
-                    <div class="mockup-grade-of">/ 100</div>
-                  </div>
-                  <div class="mockup-grade-text">
-                    <p class="mockup-grade-label">Corretta ma incompleta.</p>
-                    <p class="mockup-grade-note">La risposta è pertinente, ma manca il riferimento normativo specifico che la commissione si aspetta.</p>
-                  </div>
-                </div>
-
-                <ul class="mockup-feedback">
-                  <li class="good">
-                    <span class="ico" aria-hidden="true">+</span>
-                    Hai spiegato bene cosa significa imparzialità, senza uscire dal tema.
-                  </li>
-                  <li class="good">
-                    <span class="ico" aria-hidden="true">+</span>
-                    Risposta chiara, ritmo sicuro, niente giri di parole.
-                  </li>
-                  <li class="work">
-                    <span class="ico" aria-hidden="true">!</span>
-                    Per chiudere bene, collega il principio all'art. 97 della Costituzione e all'art. 1 della L. 241/1990.
-                  </li>
-                </ul>
-
-                <p class="mockup-tag">Da ripassare → art. 97 Cost. · L. 241/1990, art. 1</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+<!-- HERO -->
+<section class="hero" aria-labelledby="hero-h1">
+  <div class="container hero-inner">
+    <span class="eyebrow">Beta aperta</span>
+    <h1 id="hero-h1" class="h1">
+      Simula l'orale sul tuo bando,<br /> prima dell'orale.
+    </h1>
+    <p class="sub">
+      Carica il PDF del tuo bando. Il commissario AI lo legge e ti interroga
+      solo sugli argomenti del concorso, non su tutto in generale come fa ChatGPT.
+      Ogni risposta ti dice cosa hai sbagliato, cosa hai dimenticato e cosa ripassare stasera.
+    </p>
+    <div class="cta-row">
+      <a href="auth.html?mode=register" class="btn-primary">
+        Inizia gratis
+      </a>
     </div>
-  </section>
+    <p class="trust-row">
+      Senza carta · 3 simulazioni gratis al mese · Cancellazione immediata dalla dashboard.
+    </p>
+  </div>
+</section>
 
-  <!-- ===========================================================
-       2) TRUST BAND — own section
-       =========================================================== -->
-  <div class="trust-band" aria-label="Garanzie di privacy e accesso">
-    <div class="container">
-      <div class="trust-band-inner">
-        <span class="trust-pill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg>
-          Dati cifrati, server UE
-        </span>
-        <span class="trust-pill-sep" aria-hidden="true"></span>
-        <span class="trust-pill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Nessuna carta di credito per iniziare
-        </span>
-        <span class="trust-pill-sep" aria-hidden="true"></span>
-        <span class="trust-pill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
-          Mai dati condivisi con LLM extra-UE
-        </span>
-        <span class="trust-pill-sep" aria-hidden="true"></span>
-        <span class="trust-pill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          Disdici quando vuoi, senza vincoli
-        </span>
-      </div>
+<!-- COMPLIANCE -->
+<section class="section" id="come-funziona" aria-labelledby="compliance-h2">
+  <div class="container">
+    <span class="eyebrow">Conformità</span>
+    <h2 id="compliance-h2" class="h2">
+      Tarato sulla prassi delle commissioni italiane.
+    </h2>
+    <p>
+      ConcorsoAI cita i riferimenti normativi che la commissione del tuo concorso usa davvero,
+      e li mette in cima a ogni correzione. Non devi cercarli tu.
+    </p>
+    <p class="cite-row">
+      art. 97 Cost. · L. 241/1990 · DPR 487/1994 · D.Lgs. 33/2013
+    </p>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing" aria-labelledby="pricing-h2">
+  <div class="container">
+    <span class="eyebrow">Prezzi</span>
+    <h2 id="pricing-h2" class="h2">Piani e costi.</h2>
+    <p>
+      La versione Free è gratuita per sempre, senza traversie. Pro sblocca tutto quando decidi che è il momento.
+    </p>
+
+    <div class="pricing-grid">
+
+      <article class="tier" aria-labelledby="t-free-h">
+        <p class="tier-name">Free</p>
+        <h3 id="t-free-h" class="tier-h">Per iniziare.</h3>
+        <p class="tier-price"><span>€0</span></p>
+        <p class="tier-price-detail">Sempre gratis. Senza carta, senza vincoli.</p>
+        <ul class="tier-features">
+          <li>3 simulazioni al mese, complete</li>
+          <li>Materie standard: amministrativo, costituzionale, contabilità, penale</li>
+          <li>Feedback su chiarezza, struttura, contenuto</li>
+          <li>Riconoscimento vocale</li>
+          <li>Storico degli ultimi 30 giorni</li>
+        </ul>
+        <a href="auth.html?mode=register" class="btn-secondary">Inizia gratis</a>
+      </article>
+
+      <article class="tier tier--pro" aria-labelledby="t-pro-h">
+        <p class="tier-name">Pro</p>
+        <h3 id="t-pro-h" class="tier-h">Per chi ha l'orale vicino.</h3>
+        <p class="tier-price">€14,99 <span class="tier-price-period">/ mese</span></p>
+        <p class="tier-price-detail">
+          O €119 all'anno — €0,50 al giorno, risparmi €60,88.
+        </p>
+        <ul class="tier-features">
+          <li>Simulazioni illimitate, ogni materia</li>
+          <li>Bandi di enti locali, amministrazioni, ministeri</li>
+          <li>Materie avanzate: tributario, lavoro, europeo, civile</li>
+          <li>Storico completo, grafici di evoluzione</li>
+          <li>Report PDF scaricabile dopo ogni sessione</li>
+          <li>Priorità di banda in questo momento di picco</li>
+        </ul>
+        <a href="auth.html?mode=register&plan=pro" class="btn-primary">Attiva Pro</a>
+      </article>
+
     </div>
   </div>
+</section>
 
-  <!-- ===========================================================
-       3) CONFRONTO — kills "why not ChatGPT?"
-       =========================================================== -->
-  <section class="section section--alt" id="confronto" aria-labelledby="confronto-h2">
-    <div class="container">
-      <div class="section-heading">
-        <span class="section-eyebrow">Perché non basta ChatGPT</span>
-        <h2 id="confronto-h2">ChatGPT non legge il tuo bando. ConcorsoAI sì.</h2>
-        <p>Lo sappiamo: l'hai già provato. «Fammi domande sul DPR 487.» E riparte ogni volta da zero. E non conosce gli argomenti specifici che la commissione del <em>tuo</em> concorso ti chiederà.</p>
-      </div>
+<!-- FAQ -->
+<section class="section" id="faq" aria-labelledby="faq-h2">
+  <div class="container">
+    <span class="eyebrow">Domande frequenti</span>
+    <h2 id="faq-h2" class="h2">Dubbi prima di iniziare.</h2>
 
-      <div class="confronto-stack">
-        <article class="confronto-card us" aria-labelledby="conf-us-h">
-          <span class="confronto-tag">ConcorsoAI</span>
-          <h3 id="conf-us-h">Costruito sul tuo bando, simulazione dopo simulazione.</h3>
-          <p class="confronto-sub">Carichi il bando. Il commissario AI legge, estrae gli argomenti e ti interroga su quelli, non su tutto. Ricorda cosa hai detto nelle sessioni precedenti.</p>
-          <div class="confronto-rows">
-            <div class="confronto-row"><span class="confronto-row-key">Bando</span><span class="confronto-row-val">Legge il PDF che hai caricato. Lavora solo sui tuoi argomenti.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Materie</span><span class="confronto-row-val">Ogni materia del bando, nelle giuste proporzioni di peso.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Memoria</span><span class="confronto-row-val">Tra una simulazione e l'altra ricorda cosa hai sbagliato.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Feedback</span><span class="confronto-row-val">Chiarezza, struttura, contenuto. Con norma di riferimento.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Voce</span><span class="confronto-row-val">Riconoscimento vocale del browser. Rispondi come davanti alla commissione.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Costo</span><span class="confronto-row-val">3 simulazioni gratis al mese. Poi €14,99 al mese o €119 all'anno.</span></div>
-          </div>
-        </article>
-
-        <article class="confronto-card alt" aria-labelledby="conf-cgpt-h">
-          <span class="confronto-tag">ChatGPT</span>
-          <h3 id="conf-cgpt-h">Generico. Non conosce il tuo concorso.</h3>
-          <p class="confronto-sub">Devi scrivere ogni volta il prompt, reincollare il bando, ricordare la chat precedente. È un tool, non un allenatore.</p>
-          <div class="confronto-rows">
-            <div class="confronto-row"><span class="confronto-row-key">Bando</span><span class="confronto-row-val">Lo reincolli tu, ogni sessione. Se lo dimentichi, riparte da zero.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Materie</span><span class="confronto-row-val">Quelle che gli chiedi. Non quelle del bando.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Memoria</span><span class="confronto-row-val">Solo nella chat corrente. Domani è un altro dialogo.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Feedback</span><span class="confronto-row-val">Testuale, generico. Non distingue chiarezza da struttura.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Voce</span><span class="confronto-row-val">Solo testo. L'orale è un'altra cosa.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Costo</span><span class="confronto-row-val">€20/mese per la versione utile.</span></div>
-          </div>
-        </article>
-
-        <article class="confronto-card alt" aria-labelledby="conf-solo-h">
-          <span class="confronto-tag">Da solo</span>
-          <h3 id="conf-solo-h">Sai cosa studi. Non sai se sei pronto.</h3>
-          <p class="confronto-sub">Libri, manuali, schemi. Studiare è facile, è lo stesso da sempre. Quello che manca è sapere se sei <em>davvero</em> pronto per le domande che ti farà la commissione.</p>
-          <div class="confronto-rows">
-            <div class="confronto-row"><span class="confronto-row-key">Bando</span><span class="confronto-row-val">Lo stampi e lo leggi passivamente.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Materie</span><span class="confronto-row-val">Rileggi tutto, anche quello che sai già.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Memoria</span><span class="confronto-row-val">Tutto nella tua testa, senza misurazione.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Feedback</span><span class="confronto-row-val">Nessuno. Lo capisci solo davanti alla commissione.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Voce</span><span class="confronto-row-val">Parli da solo. Nessuno ti corregge.</span></div>
-            <div class="confronto-row"><span class="confronto-row-key">Costo</span><span class="confronto-row-val">€200–500 di manuali. Mesi di studio.</span></div>
-          </div>
-        </article>
-      </div>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary class="faq-q">Il mio bando è specifico di un ente. Funziona anche con quello?</summary>
+        <p class="faq-a">
+          Sì. Nella versione Pro carichi qualsiasi PDF di bando (comune, regione, ministero, agenzia).
+          L'AI estrae le materie specifiche e ti interroga solo su quelle.
+        </p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Perché non posso usare ChatGPT direttamente?</summary>
+        <p class="faq-a">
+          ChatGPT non conosce gli argomenti del <em>tuo</em> bando e riparte da zero a ogni domanda.
+          ConcorsoAI legge il bando che carichi, cita le fonti normative in cui ti sei arenato
+          e tiene il punteggio live mentre rispondi.
+        </p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Dove finiscono i miei dati?</summary>
+        <p class="faq-a">
+          Server UE, cifrati a riposo. Mai condivisi con LLM extra-UE.
+          Puoi cancellare tutto con un click dalla dashboard.
+        </p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Posso disdire quando voglio?</summary>
+        <p class="faq-a">
+          Sì. Un click dalla dashboard, senza vincoli, senza call al call center.
+          A regime, 30 giorni soddisfatto o rimborsato.
+        </p>
+      </details>
     </div>
-  </section>
-
-  <!-- ===========================================================
-       4) METODO — bento 4 tile, cite reali
-       =========================================================== -->
-  <section class="section" id="metodo" aria-labelledby="metodo-h2">
-    <div class="container">
-      <div class="section-heading section-heading--center">
-        <span class="section-eyebrow">Come funziona</span>
-        <h2 id="metodo-h2">Quattro passaggi. Nessun manuale da leggere.</h2>
-        <p style="margin: 0 auto;">Dalla prima volta che apri la pagina alla tua prima simulazione completa, passano meno di cinque minuti. Tutto qui sotto.</p>
-      </div>
-
-      <div class="metodo-bento">
-        <article class="metodo-tile metodo-tile--main" aria-labelledby="m-main-h">
-          <span class="metodo-tile-tag">1 · Carica</span>
-          <h3 id="m-main-h">Carica il bando o scegli una materia standard.</h3>
-          <p>Trascini il PDF del bando sul browser e l'AI estrae gli argomenti. Oppure scegli una materia pronta (Diritto Amministrativo, Costituzionale, Contabilità Pubblica, Penale) per esercitarti senza bando. In entrambi i casi, la prima simulazione è pronta in meno di cinque minuti.</p>
-          <span class="metodo-cite">Riferimenti normativi usati: DPR 487/1994 · art. 97 Cost. · L. 241/1990 · D.Lgs. 33/2013</span>
-        </article>
-
-        <article class="metodo-tile metodo-tile--t1" aria-labelledby="m-t1-h">
-          <span class="metodo-tile-tag">2 · Configura</span>
-          <h3 id="m-t1-h">Scegli difficoltà e durata.</h3>
-          <p>Facile, Realistico, Difficile. Durata 10, 20 o 30 minuti. La simulazione si adatta al tempo che hai stasera, non a un programma fisso.</p>
-        </article>
-
-        <article class="metodo-tile metodo-tile--t2" aria-labelledby="m-t2-h">
-          <span class="metodo-tile-tag">3 · Rispondi</span>
-          <h3 id="m-t2-h">A voce o scrivendo, come davanti alla commissione.</h3>
-          <p>Il commissario AI fa la domanda. Tu rispondi. Se non sei d'accordo con la correzione, glielo dici. Il sistema tiene il punteggio live mentre parli.</p>
-        </article>
-
-        <article class="metodo-tile metodo-tile--t3" aria-labelledby="m-t3-h">
-          <span class="metodo-tile-tag">4 · Ricevi</span>
-          <h3 id="m-t3-h">Report finale con un punto preciso da ripassare.</h3>
-          <p>Chiarezza, struttura, contenuto. Ogni sessione ti dice esattamente su quale articolo tornare stasera. Senza doverti rileggere tutto il bando.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===========================================================
-       5) PRICING — 2 tier (Free + Pro), no Coaching
-       =========================================================== -->
-  <section class="section section--alt" id="pricing" aria-labelledby="pricing-h2">
-    <div class="container">
-      <div class="section-heading section-heading--center">
-        <span class="section-eyebrow">Quanto costa</span>
-        <h2 id="pricing-h2">Prova gratis. Poi decidi.</h2>
-        <p style="margin: 0 auto;">Tre simulazioni al mese senza mai mettere la carta. Quando vuoi di più, Pro sblocca tutto — senza clausole nascoste, senza finti sconti a tempo, senza bundle che non ti servono.</p>
-      </div>
-
-      <div class="pricing-stack">
-        <article class="tier" aria-labelledby="p-free-h">
-          <p class="tier-name">Free</p>
-          <h3 id="p-free-h" class="tier-title">Per iniziare.</h3>
-          <p class="tier-desc">Tre simulazioni al mese, senza registrazione prima. Per chi vuole solo capire come funziona.</p>
-          <div class="tier-price-row">
-            <span class="tier-price-amount">€0</span>
-          </div>
-          <p class="tier-price-sub"><strong>Sempre gratis.</strong> Senza carta, senza vincoli.</p>
-          <ul class="tier-features" aria-label="Cosa è incluso nel piano Free">
-            <li>3 simulazioni al mese, complete</li>
-            <li>Materie standard (Amm., Cost., Cont., Penale)</li>
-            <li>Feedback su chiarezza, struttura, contenuto</li>
-            <li>Riconoscimento vocale</li>
-            <li>Tutte le risposte salvate sulla dashboard</li>
-          </ul>
-          <div class="tier-cta">
-            <a href="auth.html?mode=register" class="btn-secondary btn-large" aria-label="Inizia gratis, tier Free">
-              Inizia gratis
-            </a>
-          </div>
-          <p class="tier-meta">
-            <strong>Cosa non è incluso</strong>: simulazioni illimitate, materie avanzate non-standard, storico oltre 30 giorni, priorità di banda.
-          </p>
-        </article>
-
-        <article class="tier tier--pro" aria-labelledby="p-pro-h">
-          <span class="tier-badge">Consigliato</span>
-          <p class="tier-name">Pro</p>
-          <h3 id="p-pro-h" class="tier-title">Per chi ha l'orale vicino.</h3>
-          <p class="tier-desc">Illimitato, ogni materia, ogni tipo di bando. Per chi fa sul serio.</p>
-          <div class="tier-price-row">
-            <span class="tier-price-amount">€14,99</span>
-            <span class="tier-price-period">/ mese</span>
-          </div>
-          <p class="tier-price-sub">O <strong>€119 all'anno</strong> (€9,91/mese · risparmi €60,88).<br />Costo giornaliero: <strong>€0,50</strong> — meno di mezzo caffè.</p>
-          <ul class="tier-features" aria-label="Cosa è incluso nel piano Pro">
-            <li>Simulazioni illimitate, ogni materia</li>
-            <li>Carica qualsiasi bando: concorsi, ami, enti locali</li>
-            <li>Materie avanzate (Tributario, Lavoro, Europeo, Civile)</li>
-            <li>Storico completo, grafici di evoluzione</li>
-            <li>Priorità di banda in questo momento di picco</li>
-            <li>Report PDF scaricabile dopo ogni sessione</li>
-          </ul>
-          <div class="tier-cta">
-            <a href="auth.html?mode=register&plan=pro" class="btn-primary btn-large"               aria-label="Inizia il piano Pro a 14 euro e 99 al mese">
-              Inizia Pro
-              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true">
-                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
-              </svg>
-            </a>
-          </div>
-          <p class="tier-meta">
-            <strong>Disdici quando vuoi</strong>, un click dalla dashboard.<br />
-            Quando Stripe sarà attivo, <strong>30 giorni soddisfatto o rimborsato</strong>.
-          </p>
-        </article>
-      </div>
-
-      <p class="pricing-secondary-line">
-        Vuoi il piano per una scuola di formazione o un team di studio? Scrivici a <a href="mailto:team@concorso-ai.it">team@concorso-ai.it</a> e prepariamo un piano dedicato.
-      </p>
-    </div>
-  </section>
-
-  <!-- ===========================================================
-       6) FAQ — 4 reali dubbi dei candidati PA
-       =========================================================== -->
-  <section class="section" id="faq" aria-labelledby="faq-h2">
-    <div class="container">
-      <div class="section-heading section-heading--center">
-        <span class="section-eyebrow">Dubbi prima di iniziare</span>
-        <h2 id="faq-h2">Le domande che ogni candidato si fa, in ordine.</h2>
-        <p style="margin: 0 auto;">Quattro dubbi. Non dodici. Le risposte sono oneste, anche quando dicono che il tool non è per tutti.</p>
-      </div>
-
-      <div class="faq">
-        <details class="faq-item">
-          <summary>
-            Le domande sono davvero basate sul mio bando?
-            <span class="faq-chevron" aria-hidden="true">+</span>
-          </summary>
-          <p class="faq-answer">Sì. Carichi il PDF del bando o il testo, e l'AI estrae gli argomenti. Ogni domanda nasce da lì. Se il tuo bando è uscito due settimane fa, vale lo stesso: parti dai contenuti del PDF che hai. Se non hai ancora un bando, scegli una materia standard e ti alleni su quella.</p>
-        </details>
-        <details class="faq-item">
-          <summary>
-            L'AI può sbagliare su una citazione normativa?
-            <span class="faq-chevron" aria-hidden="true">+</span>
-          </summary>
-          <p class="faq-answer">Può succedere. Per questo ogni report ti dice di verificare sul bando ufficiale. L'AI è un allenatore, non un sostituto dello studio. Se noti qualcosa di strano su una norma, clicca «Non sono d'accordo, correggi» e il sistema si corregge in quel punto.</p>
-        </details>
-        <details class="faq-item">
-          <summary>
-            I miei dati sono al sicuro?
-            <span class="faq-chevron" aria-hidden="true">+</span>
-          </summary>
-          <p class="faq-answer">Sì. I bandi e le risposte sono salvati cifrati su Supabase, datacenter in Europa. Nessun dato è condiviso con LLM extra-UE. Puoi cancellare tutto dalla dashboard quando vuoi, senza doverci scrivere.</p>
-        </details>
-        <details class="faq-item">
-          <summary>
-            Posso rispondere a voce o solo per iscritto?
-            <span class="faq-chevron" aria-hidden="true">+</span>
-          </summary>
-          <p class="faq-answer">Entrambe. C'è un pulsante microfono (riconoscimento vocale del browser, gratuito, funziona su Chrome e Safari recenti) e il campo di testo normale. Il commissario capisce entrambi. Il riconoscimento vocale è il più utile: ti alleni a parlare davvero come davanti alla commissione.</p>
-        </details>
-        <details class="faq-item">
-          <summary>
-            Funziona anche se non sto ancora preparando un concorso?
-            <span class="faq-chevron" aria-hidden="true">+</span>
-          </summary>
-          <p class="faq-answer">Sì. Puoi scegliere una materia standard (Diritto Amministrativo, Costituzionale, Contabilità Pubblica, Penale) ed esercitarti senza bando. È utile per testare il tool prima di avere un bando reale, o per tenersi in allenamento tra un concorso e l'altro.</p>
-        </details>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===========================================================
-       7) CHIUSURA ONESTY — Peak-End finale
-       =========================================================== -->
-  <section class="closing" aria-labelledby="closing-h2">
-    <div class="container">
-      <div class="closing-text closing-text--center">
-        <span class="closing-eyebrow">
-          <span class="pulse-dot" aria-hidden="true"></span>
-          Una cosa da dire, prima di chiudere la pagina
-        </span>
-        <h2 id="closing-h2">L'orale non si vince studiando di più. Si vince allenandosi meglio.</h2>
-        <p>ConcorsoAI è fatto da <strong>due persone che hanno passato l'orale</strong>. Non da un'agenzia, non da una startup che ha letto male il problema. L'abbiamo costruito perché ce l'avremmo voluto avere noi, quando ci siamo trovati davanti alla commissione senza aver mai simulato una domanda seria.</p>
-        <p>Tre simulazioni gratis sono <strong>il modo migliore per capire se ti serve</strong>. Se non ti serve, le hai perse. Se ti serve, hai trovato lo strumento che ti avrebbe fatto vincere due settimane di tempo. <span class="em-dash">·</span> La scelta è tua, ma falla con cognizione.</p>
-        <div class="closing-disclaimer">
-          <strong>Trasparenza:</strong> l'AI può commettere errori su citazioni specifiche di articoli. Verifica sempre sul bando ufficiale. Quando avremo i primi 100 candidati veri, pubblicheremo i dati reali in questa pagina — non prima.
-        </div>
-      </div>
-    </div>
-  </section>
+  </div>
+</section>
 
 </main>
 
-<footer role="contentinfo">
-  <div class="container footer-stack">
-    <div class="footer-brand-row">
-      <a href="/" class="brand" aria-label="ConcorsoAI — home">
-        <span class="brand-mark" aria-hidden="true">CA</span>
-        <span class="brand-name">ConcorsoAI</span>
-      </a>
-      <p class="footer-founder">
-        <span class="footer-founder-mark">Made in Italy</span>
-        Costruito a Milano da 2 persone che hanno passato l'orale. Made in Italy. Beta aperta · Luglio 2026.
-      </p>
-      <p class="footer-trust-row" aria-label="Garanzie di privacy e cancellazione">
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z"/><polyline points="9 12 11 14 16 9"/></svg> Server UE · dati cifrati</span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg> Mai dati a LLM extra-UE</span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Cancellazione immediata</span>
-      </p>
-    </div>
-
-    <nav class="footer-links-cols" aria-label="Link del footer">
-      <div>
-        <p class="footer-col-label">Prodotto</p>
-        <a href="#confronto">Confronto con ChatGPT</a>
-        <a href="#metodo">Come funziona</a>
-        <a href="#pricing">Prezzi</a>
-        <a href="#faq">FAQ</a>
-      </div>
-      <div>
-        <p class="footer-col-label">Legale</p>
-        <a href="terms.html">Termini di servizio</a>
-        <a href="privacy.html">Privacy policy</a>
-        <a href="privacy.html#cookies">Cookie policy</a>
-        <a href="privacy.html#recesso">Diritto di recesso (Art. 49 Cod. Consumo)</a>
-        <a href="mailto:supporto@concorso-ai.it">supporto@concorso-ai.it</a>
-      </div>
-    </nav>
-  </div>
-
+<footer class="footer" role="contentinfo">
   <div class="container">
-    <div class="footer-legal">
-      <span>© 2026 ConcorsoAI · Tutti i diritti riservati.</span>
-      <div class="footer-legal-links">
-        <a href="terms.html">Termini</a>
-        <a href="privacy.html">Privacy</a>
-        <a href="privacy.html#cookies">Cookie</a>
-        <a href="mailto:supporto@concorso-ai.it">Contatti</a>
+    <div class="footer-grid">
+      <div>
+        <p class="brand footer-brand">ConcorsoAI</p>
+        <p class="footer-tag">
+          Commissario AI per l'orale dei concorsi pubblici italiani. Carica il bando, ti interroghiamo, ti correggiamo.
+        </p>
       </div>
+      <nav aria-label="Prodotto">
+        <p class="footer-col-label">Prodotto</p>
+        <ul class="footer-links">
+          <li><a href="#pricing">Prezzi</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Legale">
+        <p class="footer-col-label">Legale</p>
+        <ul class="footer-links">
+          <li><a href="terms.html">Termini</a></li>
+          <li><a href="privacy.html">Privacy</a></li>
+          <li><a href="privacy.html#cookies">Cookie</a></li>
+          <li><a href="privacy.html#recesso">Recesso</a></li>
+          <li><a href="mailto:supporto@concorso-ai.it">supporto@concorso-ai.it</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="footer-legal">
+      <span>© 2026 ConcorsoAI · Costruito a Milano.</span>
+      <span>Made in Italy. Beta aperta.</span>
     </div>
   </div>
 </footer>
-
-<script>
-/* Vanilla JS: tab switching inside hero mockup only.
-   No build, no deps, no analytics, no surveillance. */
-(function () {
-  var tabs = document.querySelectorAll('.mockup-tab');
-  var panels = document.querySelectorAll('.mockup-panel');
-  if (!tabs.length) return;
-
-  tabs.forEach(function (tab) {
-    tab.addEventListener('click', function () {
-      var key = tab.getAttribute('data-tab');
-      tabs.forEach(function (t) {
-        var active = t === tab;
-        t.classList.toggle('is-active', active);
-        t.setAttribute('aria-selected', active ? 'true' : 'false');
-        t.setAttribute('tabindex', active ? '0' : '-1');
-      });
-      panels.forEach(function (p) {
-        var match = p.getAttribute('data-panel') === key;
-        p.classList.toggle('hidden', !match);
-        if (match) {
-          p.removeAttribute('hidden');
-          p.setAttribute('aria-hidden', 'false');
-        } else {
-          p.setAttribute('hidden', '');
-          p.setAttribute('aria-hidden', 'true');
-        }
-      });
-    });
-    tab.addEventListener('keydown', function (e) {
-      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-      var idx = Array.prototype.indexOf.call(tabs, tab);
-      var next = e.key === 'ArrowRight'
-        ? tabs[(idx + 1) % tabs.length]
-        : tabs[(idx - 1 + tabs.length) % tabs.length];
-      next.focus();
-      next.click();
-    });
-  });
-})();
-</script>
 
 </body>
 </html>
