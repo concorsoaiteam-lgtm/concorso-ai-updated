@@ -15,10 +15,16 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://concorso-ai.vercel.app/" />
 <meta property="og:locale" content="it_IT" />
-<meta property="og:image" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 630'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230B2A4A'/%3E%3Cstop offset='100%25' stop-color='%231A73E8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='630' fill='url(%23g)'/%3E%3Ctext x='600' y='280' text-anchor='middle' fill='white' font-family='system-ui' font-weight='900' font-size='72'%3EConcorsoAI%3C/text%3E%3Ctext x='600' y='360' text-anchor='middle' fill='rgba(255,255,255,0.85)' font-family='system-ui' font-weight='700' font-size='28'%3ESimula l'orale sul tuo programma%3C/text%3E%3Ctext x='600' y='420' text-anchor='middle' fill='rgba(255,255,255,0.6)' font-family='system-ui' font-weight='500' font-size='20'%3E3 simulazioni gratis al mese, nessuna carta richiesta%3C/text%3E%3C/svg%3E" />
+<meta property="og:image" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 630'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230B2A4A'/%3E%3Cstop offset='100%25' stop-color='%231A73E8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='630' fill='url(%23g)'/%3E%3Ctext x='600' y='280' text-anchor='middle' fill='white' font-family='system-ui' font-weight='800' font-size='74'%3EConcorsoAI%3C/text%3E%3Ctext x='600' y='370' text-anchor='middle' fill='rgba(255,255,255,0.85)' font-family='system-ui' font-weight='600' font-size='28'%3ESimula l'orale sul tuo programma%3C/text%3E%3Ctext x='600' y='430' text-anchor='middle' fill='rgba(255,255,255,0.62)' font-family='system-ui' font-weight='500' font-size='20'%3E3 simulazioni gratis al mese, nessuna carta richiesta%3C/text%3E%3C/svg%3E" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
+
+<!-- PIVOT 1: Self-hosted Inter (GDPR-friendly bunny.net, no Google Fonts CDN) -->
+<link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.bunny.net/files/inter-latin-700-normal.woff2" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.bunny.net/files/inter-latin-400-normal.woff2" crossorigin />
+<link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" media="print" onload="this.media='all'" />
 
 <!-- Schema.org: FAQPage + SoftwareApplication (no fake data, all verifiable state) -->
 <script type="application/ld+json">
@@ -38,7 +44,16 @@
         "priceCurrency": "EUR",
         "availability": "https://schema.org/InStock"
       },
-      "applicationSubCategory": "Exam preparation"
+      "applicationSubCategory": "Exam preparation",
+      "creator": {
+        "@type": "Organization",
+        "name": "ConcorsoAI",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Milano",
+          "addressCountry": "IT"
+        }
+      }
     },
     {
       "@type": "FAQPage",
@@ -56,26 +71,36 @@
 
 <style>
 /* ==========================================================================
-   ConcorsoAI Landing v19 — composition valida post-ricerca
-   7 sezioni (+ footer). Drop di Pain / CTA-chiusura / Come-funziona / Garanzia-separata.
-   Anti-AI-slop concreto: spacing 96-160px, no Memphis, palette ristretta, Geist Mono via system fallback.
-   Zero dipendenze esterne: niente Tailwind, GSAP, Google Fonts. Vanilla CSS + JS.
+   ConcorsoAI Landing v20 — 12 slop pivot, anti-AI-slop, vibe-coded
+   Pivot 1: Inter self-hosted from bunny.net (no Google Fonts)
+   Pivot 2: Hero density = H1 + 1 sub + 1 CTA + mockup (trust pills OUT)
+   Pivot 3: NO fade-in IntersectionObserver (only hero-rise micro-stagger)
+   Pivot 4: Hero text-align left (kill centered symmetry)
+   Pivot 5: CTA hover = scale(0.98) + darken + shadow invert (physical pressure)
+   Pivot 6: Hero bg = pure white (kill radial gradients)
+   Pivot 7: Compare = solid bg winner, solid bg alt (no gradient)
+   Pivot 8: Quiz-pill active = solid bg + scale 1.0 (no gradient)
+   Pivot 9: Bento tile-large = real law cite visible "art. 97 Cost."
+   Pivot 10: Founder marker "Sviluppato a Milano" in footer
+   Pivot 11: @property CSS for gradient text reveal + spacing transitions
+   Pivot 12: @container queries for trust-pills re-flow
    ========================================================================== */
 
 * { box-sizing: border-box; }
 
 :root {
   --bg: #FFFFFF;
-  --bg-alt: #F8F9FA;
-  --bg-alt-soft: #FBFCFE;
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-tertiary: #6B7280;
+  --bg-alt: #FAFAFA;
+  --bg-tint: #F5F8FC;
+  --text-primary: #0A1628;
+  --text-secondary: #3D4A5C;
+  --text-tertiary: #6B7585;
   --accent: #1A73E8;
   --accent-dark: #1457B0;
   --accent-deep: #0B2A4A;
   --cta: #1A73E8;
   --cta-hover: #1457B0;
+  --cta-deep: #0B3A63;
   --border: #E5E7EB;
   --border-light: #EFF1F4;
   --border-strong: #CBD5E1;
@@ -92,40 +117,36 @@
   --info-border: #BFDBFE;
   --info-text: #1457B0;
 
-  --bento-bg-soft: #F7FBFF;
-  --shadow-card: 0 12px 32px rgba(15,76,129,.08), 0 2px 6px rgba(15,76,129,.04);
-  --shadow-card-hover: 0 22px 56px rgba(15,76,129,.12), 0 4px 10px rgba(15,76,129,.06);
-
-  /* Geist Mono via system fallback (no CDN, zero deps). Fallback chain
-     is critical: GBM-only machines → ui-monospace → system mono. */
-  --font-mono: 'Geist Mono', 'JetBrains Mono', 'SF Mono', ui-monospace, 'Cascadia Code', Menlo, Monaco, Consolas, monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, 'Cascadia Code', Menlo, Monaco, Consolas, monospace;
 }
 
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-sans);
   font-size: 17px;
-  line-height: 1.6;
+  line-height: 1.55;
   color: var(--text-primary);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01" on, "cv11" on;
 }
 
-h1, h2, h3, h4 { font-weight: 800; line-height: 1.15; letter-spacing: -0.025em; margin: 0; color: var(--text-primary); }
-h1 { font-size: clamp(2.4rem, 5vw + 0.5rem, 4rem); letter-spacing: -0.04em; }
-h2 { font-size: clamp(1.875rem, 2.5vw + 1rem, 2.6rem); }
-h3 { font-size: 1.25rem; letter-spacing: -0.015em; }
-h4 { font-size: 1.0625rem; }
+h1, h2, h3, h4 { font-weight: 700; line-height: 1.12; letter-spacing: -0.025em; margin: 0; color: var(--text-primary); font-family: var(--font-sans); }
+h1 { font-size: clamp(2.6rem, 5.5vw + 0.5rem, 4.25rem); letter-spacing: -0.045em; font-weight: 800; }
+h2 { font-size: clamp(1.875rem, 2.5vw + 1rem, 2.5rem); }
+h3 { font-size: 1.25rem; letter-spacing: -0.01em; font-weight: 700; }
+h4 { font-size: 1.0625rem; font-weight: 600; }
 p { margin: 0; }
 a { color: inherit; text-decoration: none; }
 ul { list-style: none; padding: 0; margin: 0; }
 .hidden { display: none !important; }
 
-.container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+.container { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
 @media (min-width: 768px) { .container { padding: 0 32px; } }
 
 ::selection { background: #EFF6FF; color: var(--text-primary); }
@@ -133,16 +154,16 @@ ul { list-style: none; padding: 0; margin: 0; }
 .skip-link {
   position: fixed; top: 8px; left: 8px;
   background: var(--text-primary); color: #fff;
-  padding: 10px 14px; border-radius: 6px; font-weight: 700; font-size: 14px;
+  padding: 10px 14px; border-radius: 6px; font-weight: 600; font-size: 14px;
   z-index: 100; transform: translateY(-200%);
   transition: transform .15s ease;
 }
 .skip-link:focus { transform: translateY(0); }
 
-/* ---------- Navbar ---------- */
+/* ---------- Navbar (minimal, sticky) ---------- */
 .navbar {
   border-bottom: 1px solid var(--border);
-  background: rgba(255,255,255,.85);
+  background: rgba(255,255,255,.78);
   backdrop-filter: saturate(180%) blur(12px);
   -webkit-backdrop-filter: saturate(180%) blur(12px);
   position: sticky; top: 0; z-index: 50;
@@ -151,33 +172,37 @@ ul { list-style: none; padding: 0; margin: 0; }
   display: flex; align-items: center; justify-content: space-between;
   height: 64px;
 }
-.logo { font-size: 1.125rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-primary); }
-.logo span { color: var(--cta); }
+.logo { font-size: 1.0625rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text-primary); display: inline-flex; align-items: center; gap: 8px; }
+.logo-mark { width: 24px; height: 24px; border-radius: 6px; background: var(--cta); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #fff; font-family: var(--font-mono); }
+.logo-text { color: var(--text-primary); }
+.logo-text span { color: var(--cta); }
 
 .nav-cta {
   background: var(--cta);
   color: #fff;
-  padding: 12px 20px;
+  padding: 11px 18px;
   border-radius: 8px;
-  font-weight: 700;
-  font-size: 15px;
-  min-height: 48px;
+  font-weight: 600;
+  font-size: 14.5px;
+  min-height: 44px;
   display: inline-flex; align-items: center; justify-content: center;
-  transition: transform .15s ease, background .15s ease;
+  border: 1px solid var(--cta);
+  transition: background .15s ease, transform .12s ease, box-shadow .15s ease;
 }
-.nav-cta:hover { background: var(--cta-hover); transform: scale(1.02); }
+.nav-cta:hover { background: var(--cta-hover); transform: scale(0.985); box-shadow: 0 6px 14px rgba(26,115,232,.25), inset 0 1px 0 rgba(255,255,255,.18); }
+.nav-cta:active { background: var(--cta-deep); transform: scale(1); box-shadow: inset 0 2px 4px rgba(0,0,0,.12); }
 .nav-cta:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
 
-/* ---------- Sezioni: spacing generoso "vibe-coded" ---------- */
+/* ---------- Section base ---------- */
 .section { padding: 96px 0; }
-@media (min-width: 768px) { .section { padding: 144px 0; } }
-.section.section-tight { padding: 80px 0; }
-@media (min-width: 768px) { .section-tight { padding: 112px 0; } }
+@media (min-width: 768px) { .section { padding: 128px 0; } }
+.section-tight { padding: 72px 0; }
+@media (min-width: 768px) { .section-tight { padding: 96px 0; } }
 .section.bg-alt { background: var(--bg-alt); }
 
-.section-heading { text-align: center; max-width: 680px; margin: 0 auto 56px; }
+.section-heading { text-align: left; max-width: 640px; margin: 0 0 56px; }
+.section-heading.center { text-align: center; margin-left: auto; margin-right: auto; }
 .section-eyebrow {
-  display: inline-block;
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
@@ -185,157 +210,147 @@ ul { list-style: none; padding: 0; margin: 0; }
   color: var(--accent);
   text-transform: uppercase;
   margin-bottom: 10px;
+  display: inline-block;
 }
-.section-heading h2 { margin-bottom: 16px; }
+.section-heading h2 { margin-bottom: 14px; }
 .section-heading p {
   color: var(--text-secondary);
   font-size: 1.0625rem;
-  line-height: 1.65;
+  line-height: 1.6;
   max-width: 580px;
-  margin: 0 auto;
 }
+.section-heading.center p { margin-left: auto; margin-right: auto; }
 
-/* ---------- Hero ---------- */
+/* ============================================
+   1. HERO — pivot 2 (density), pivot 4 (left-align), pivot 6 (pure white bg)
+   ============================================ */
 .hero {
-  padding: 96px 0 64px;
-  background:
-    radial-gradient(1100px 600px at 80% -10%, rgba(26,115,232,.06), transparent 60%),
-    radial-gradient(900px 500px at -10% 30%, rgba(20,87,176,.05), transparent 55%);
+  padding: 88px 0 64px;
+  background: var(--bg);
 }
-@media (min-width: 768px) { .hero { padding: 128px 0 80px; } }
+@media (min-width: 768px) { .hero { padding: 124px 0 80px; } }
 
 .hero-grid {
   display: grid;
-  gap: 48px;
+  gap: 56px;
   align-items: center;
 }
 @media (min-width: 900px) {
-  .hero-grid { grid-template-columns: 0.95fr 1.05fr; gap: 56px; }
+  .hero-grid { grid-template-columns: 0.95fr 1.05fr; gap: 64px; }
 }
 
-.hero-text { max-width: 560px; }
-.hero-offer {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+.hero-text { max-width: 560px; text-align: left; }
+
+.hero-eyebrow {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: .04em;
-  color: var(--info-text);
-  padding: 6px 14px;
-  background: rgba(239,246,255,.6);
+  letter-spacing: .08em;
+  color: var(--accent-dark);
+  text-transform: uppercase;
+  margin-bottom: 22px;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  background: var(--info-bg);
   border: 1px solid var(--info-border);
   border-radius: 9999px;
-  margin-bottom: 24px;
 }
-.hero-offer .dot {
+.hero-eyebrow .dot {
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--success);
-  display: inline-block;
-  animation: heroDotPulse 2.6s ease-in-out infinite;
+  animation: dotPulse 2.6s ease-in-out infinite;
 }
-@keyframes heroDotPulse {
+@keyframes dotPulse {
   0%, 80%, 100% { transform: scale(1); opacity: 1; }
-  90% { transform: scale(1.6); opacity: 0.6; }
+  90% { transform: scale(1.6); opacity: 0.55; }
 }
 
 .hero h1 { margin-bottom: 18px; }
-.hero-tagline {
-  font-size: 1.1875rem;
-  color: var(--text-secondary);
-  font-weight: 700;
-  margin-bottom: 16px;
-  line-height: 1.35;
-  max-width: 540px;
+.hero h1 .accent {
+  background: linear-gradient(120deg, var(--accent) 0%, var(--accent-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% 100%;
+  animation: gradFlow 12s ease-in-out infinite;
 }
+@keyframes gradFlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
 .hero-subtitle {
   font-size: 1.0625rem;
   color: var(--text-secondary);
   max-width: 540px;
-  margin-bottom: 36px;
-  line-height: 1.65;
+  margin-bottom: 32px;
+  line-height: 1.6;
 }
 @media (min-width: 768px) { .hero-subtitle { font-size: 1.125rem; } }
 
-.hero-cta-group {
-  display: flex; flex-direction: column; gap: 16px; align-items: flex-start;
+.hero-cta-row {
+  display: flex; flex-direction: column; gap: 14px; align-items: flex-start;
 }
 @media (min-width: 480px) {
-  .hero-cta-group { flex-direction: row; align-items: center; gap: 24px; }
+  .hero-cta-row { flex-direction: row; align-items: center; gap: 18px; }
 }
 
+/* ---------- Primary CTA: physical pressure ---------- */
 .cta-primary {
   background: var(--cta);
   color: #fff;
-  padding: 18px 32px;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 1.0625rem;
-  min-height: 56px;
-  display: inline-flex; align-items: center; justify-content: center;
-  transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
-  box-shadow: 0 4px 14px rgba(26,115,232,.22);
+  padding: 16px 26px;
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 15.5px;
+  min-height: 52px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 1px solid var(--cta);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s ease, transform .12s ease, box-shadow .15s ease;
+  box-shadow: 0 1px 0 rgba(0,0,0,.06), inset 0 1px 0 rgba(255,255,255,.18);
 }
-@media (min-width: 768px) { .cta-primary { font-size: 1.125rem; padding: 19px 34px; } }
-.cta-primary:hover { background: var(--cta-hover); transform: translateY(-1px); box-shadow: 0 10px 28px rgba(26,115,232,.30); }
-.cta-primary:active { transform: translateY(0); }
+.cta-primary:hover { background: var(--cta-hover); transform: scale(0.985); box-shadow: 0 6px 14px rgba(26,115,232,.25), inset 0 1px 0 rgba(255,255,255,.20); }
+.cta-primary:active { background: var(--cta-deep); transform: scale(1); box-shadow: inset 0 2px 4px rgba(0,0,0,.14); }
 .cta-primary:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
+.cta-primary svg { transition: transform .12s ease; }
+.cta-primary:hover svg { transform: translateX(2px); }
 
 .cta-link {
   color: var(--accent);
-  font-weight: 700;
-  font-size: 1rem;
+  font-weight: 600;
+  font-size: 14.5px;
   text-decoration: underline;
   text-underline-offset: 4px;
   padding: 10px 4px;
-  min-height: 48px;
-  display: inline-flex; align-items: center; gap: 4px;
+  display: inline-flex; align-items: center; gap: 6px;
   transition: color .15s ease;
 }
 .cta-link:hover { color: var(--accent-dark); }
 .cta-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 
-/* Trust micro-badges — 4 pill orizzontali, vibe-coded clean */
-.trust-pills {
-  display: flex; flex-wrap: wrap;
-  gap: 10px 14px;
-  margin: 56px auto 0;
-  justify-content: center;
-}
-.trust-pill {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 8px 14px;
-  border: 1px solid var(--border);
-  border-radius: 9999px;
-  background: var(--bg);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  transition: border-color .15s ease, transform .15s ease;
-}
-.trust-pill:hover { border-color: var(--info-border); transform: translateY(-1px); }
-.trust-pill svg { width: 14px; height: 14px; color: var(--accent); }
-
-/* ---------- Mockup hero (kept as-a-thing) ---------- */
+/* ============================================
+   Mockup (3-tab real product state, unchanged strong)
+   ============================================ */
 .mockup-card {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 1.6rem;
+  border-radius: 14px;
   max-width: 660px;
   width: 100%;
   margin: 0 auto;
   overflow: hidden;
   position: relative;
-  box-shadow: var(--shadow-card);
-  transition: box-shadow .25s ease;
+  box-shadow: 0 1px 0 rgba(15,76,129,.04), 0 14px 40px rgba(15,76,129,.10);
+  transition: box-shadow .25s ease, transform .25s ease;
 }
-.mockup-card:hover { box-shadow: var(--shadow-card-hover); }
+.mockup-card:hover { box-shadow: 0 1px 0 rgba(15,76,129,.04), 0 20px 56px rgba(15,76,129,.14); transform: translateY(-2px); }
 
 .mockup-chrome {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 16px;
-  background: var(--bg-alt-soft);
+  background: var(--bg-alt);
   border-bottom: 1px solid var(--border);
   gap: 12px;
 }
@@ -345,7 +360,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   font-size: 12px; font-weight: 800;
   color: var(--text-primary);
   flex-shrink: 0;
-  letter-spacing: -0.01em;
+  font-family: var(--font-sans);
 }
 .mockup-chrome-dot { width: 8px; height: 8px; background: var(--cta); border-radius: 50%; flex-shrink: 0; }
 .mockup-breadcrumb {
@@ -367,7 +382,6 @@ ul { list-style: none; padding: 0; margin: 0; }
   border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  letter-spacing: .02em;
 }
 
 .mockup-body { min-height: 380px; }
@@ -376,7 +390,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 .mockup-status {
   display: flex; align-items: center; gap: 14px;
   padding: 8px 12px;
-  background: var(--bg-alt-soft);
+  background: var(--bg-alt);
   border: 1px solid var(--border);
   border-radius: 10px;
   font-size: 11px;
@@ -411,7 +425,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 
 .mockup-tabs {
   display: flex; gap: 4px;
-  background: var(--bg-alt-soft);
+  background: var(--bg-alt);
   border-radius: 10px;
   padding: 4px;
   margin-bottom: 16px;
@@ -439,6 +453,9 @@ ul { list-style: none; padding: 0; margin: 0; }
   font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700;
   color: var(--text-tertiary);
   margin-bottom: 10px;
+}
+.mockup-meta-hint {
+  font-style: italic; font-size: 12px; color: var(--text-tertiary); margin-top: 12px;
 }
 .mockup-content { font-size: 16px; line-height: 1.55; color: var(--text-primary); }
 .mockup-content em.missed {
@@ -470,7 +487,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 .mockup-score-circle {
   width: 84px; height: 84px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: var(--bg-alt-soft);
+  background: var(--bg-alt);
   border: 3px solid var(--cta);
   border-radius: 50%;
   flex-shrink: 0;
@@ -513,44 +530,80 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 
 /* ============================================
-   R1 MINI-QUIZ — 5 materie interattive (lifted)
+   2. TRUST BAND — own section (Separate from hero, container queries)
+   PIVOT 12: container queries for fine re-flow
+   ============================================ */
+.trust-band {
+  container-name: trust-row;
+  container-type: inline-size;
+  background: var(--bg-alt);
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  padding: 20px 0;
+}
+.trust-band-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 14px;
+}
+@container trust-row (max-width: 600px) {
+  .trust-band-inner { gap: 8px 10px; }
+  .trust-pill { font-size: 12px; padding: 6px 10px; }
+}
+.trust-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 13px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  letter-spacing: -0.005em;
+  transition: color .15s ease, transform .15s ease;
+}
+.trust-pill:hover { color: var(--text-primary); transform: translateY(-1px); }
+.trust-pill svg { width: 14px; height: 14px; color: var(--accent); }
+.trust-pill-dot { color: var(--text-tertiary); }
+
+/* ============================================
+   3. R1 MINI-QUIZ — solid active state (no gradient)
    ============================================ */
 .quiz-card {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 1.6rem;
-  box-shadow: var(--shadow-card);
+  border-radius: 14px;
+  box-shadow: 0 1px 0 rgba(15,76,129,.04), 0 14px 40px rgba(15,76,129,.10);
   padding: 36px 32px;
   max-width: 720px;
   margin: 0 auto;
-  transition: box-shadow .25s ease;
+  transition: box-shadow .25s ease, transform .25s ease;
 }
 @media (min-width: 768px) { .quiz-card { padding: 48px 40px; } }
-.quiz-card:hover { box-shadow: var(--shadow-card-hover); }
+.quiz-card:hover { box-shadow: 0 1px 0 rgba(15,76,129,.04), 0 20px 56px rgba(15,76,129,.14); transform: translateY(-2px); }
 
 .quiz-pills {
   display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
 }
 .quiz-pill {
   font-family: inherit;
-  font-size: 14px; font-weight: 700;
-  padding: 11px 18px;
+  font-size: 14px; font-weight: 600;
+  padding: 10px 18px;
   border-radius: 9999px;
   background: var(--bg);
   border: 1.5px solid var(--border-strong);
   color: var(--accent-dark);
   cursor: pointer;
   min-height: 44px;
-  transition: background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .15s ease;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
 }
-.quiz-pill:hover:not(.is-active) { background: var(--bg-alt-soft); border-color: var(--info-border); transform: translateY(-1px); }
+.quiz-pill:hover:not(.is-active) { background: var(--bg-alt); border-color: var(--info-border); }
 .quiz-pill:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .quiz-pill.is-active {
-  background: linear-gradient(135deg, var(--cta), var(--accent-dark));
-  border-color: transparent;
+  background: var(--cta);
+  border-color: var(--cta);
   color: #fff;
-  box-shadow: 0 10px 28px rgba(26,115,232,.32);
-  transform: scale(1.02);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.10), 0 1px 0 rgba(255,255,255,.18);
 }
 
 .quiz-divider {
@@ -562,13 +615,8 @@ ul { list-style: none; padding: 0; margin: 0; }
 
 .quiz-panel {
   display: none;
-  animation: quizFadeIn .35s ease-out;
 }
 .quiz-panel.is-active { display: block; }
-@keyframes quizFadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
 
 .quiz-eyebrow {
   font-family: var(--font-mono);
@@ -578,18 +626,26 @@ ul { list-style: none; padding: 0; margin: 0; }
   text-transform: uppercase;
   color: var(--success-deep);
   margin-bottom: 12px;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.quiz-eyebrow::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--success);
+  border-radius: 50%;
 }
 .quiz-question {
-  font-size: 1.125rem;
-  font-weight: 700;
+  font-size: 1.0625rem;
+  font-weight: 600;
   line-height: 1.45;
   color: var(--text-primary);
   margin-bottom: 18px;
   font-style: italic;
+  letter-spacing: -0.01em;
 }
 .quiz-answer-label {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--accent-dark);
   letter-spacing: .04em;
@@ -598,7 +654,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 .quiz-answer-body {
   font-size: 1rem;
-  line-height: 1.7;
+  line-height: 1.65;
   color: var(--text-secondary);
 }
 
@@ -611,19 +667,19 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 
 /* ============================================
-   CONFRONTO CRUDO — asymmetric card stack (Raycast pattern)
-   1 winner card full-width + 2 alt cards side-by-side
+   4. CONFRONTO CRUDO — solid bg cards, no gradient
    ============================================ */
 .compare-stack {
   max-width: 980px;
   margin: 0 auto;
   display: grid;
-  gap: 16px;
+  gap: 14px;
 }
 .compare-grid {
   display: grid;
-  gap: 16px;
+  gap: 14px;
   grid-template-columns: 1fr;
+  align-items: stretch;
 }
 @media (min-width: 820px) {
   .compare-grid { grid-template-columns: 1fr 1fr; }
@@ -632,41 +688,42 @@ ul { list-style: none; padding: 0; margin: 0; }
 .compare-card {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 1.4rem;
+  border-radius: 14px;
   padding: 28px 28px 24px;
   position: relative;
   transition: box-shadow .2s ease, transform .2s ease, border-color .15s ease;
 }
-.compare-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card-hover); }
+.compare-card:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(15,76,129,.12), 0 2px 6px rgba(15,76,129,.06); }
 
 .compare-card.us {
-  background: linear-gradient(180deg, var(--info-bg) 0%, var(--bg) 70%);
+  background: var(--info-bg);
   border-color: var(--info-border);
   padding: 36px 32px 32px;
+  border-width: 2px;
 }
-.compare-card-tag {
+.compare-tag {
   display: inline-block;
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
-  padding: 5px 12px;
-  border-radius: 9999px;
+  padding: 4px 11px;
+  border-radius: 6px;
   background: var(--cta);
   color: #fff;
   margin-bottom: 14px;
 }
-.compare-card.alt .compare-card-tag {
+.compare-card.alt .compare-tag {
   background: transparent;
   border: 1px solid var(--border-strong);
   color: var(--text-tertiary);
 }
 
-.compare-card h3 { font-size: 1.375rem; margin-bottom: 8px; line-height: 1.25; }
+.compare-card h3 { font-size: 1.3125rem; margin-bottom: 8px; line-height: 1.25; }
 .compare-card-sub {
   color: var(--text-secondary);
-  font-size: .975rem;
+  font-size: .9375rem;
   line-height: 1.55;
   margin-bottom: 22px;
   max-width: 540px;
@@ -679,7 +736,7 @@ ul { list-style: none; padding: 0; margin: 0; }
   gap: 14px;
   align-items: baseline;
   padding: 8px 0;
-  border-bottom: 1px dashed var(--border-light);
+  border-bottom: 1px solid var(--border-light);
 }
 .compare-row:last-child { border-bottom: none; }
 @media (max-width: 560px) {
@@ -687,7 +744,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 .compare-row-name {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--text-tertiary);
   text-transform: uppercase;
@@ -702,17 +759,16 @@ ul { list-style: none; padding: 0; margin: 0; }
 
 .compare-footnote {
   margin-top: 28px;
-  text-align: center;
+  text-align: left;
   font-size: 13px;
   color: var(--text-tertiary);
   line-height: 1.6;
   max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 /* ============================================
-   METODO — bento mosaic (1 large + 3 smaller)
+   5. METODO — bento mosaic with real law cite in tile-large
+   PIVOT 9: visual weight via real text snippet
    ============================================ */
 .metodo-bento {
   max-width: 1100px;
@@ -722,12 +778,6 @@ ul { list-style: none; padding: 0; margin: 0; }
   grid-template-columns: 1fr;
 }
 @media (min-width: 720px) {
-  .metodo-bento {
-    grid-template-columns: 1.4fr 1fr;
-    grid-auto-rows: minmax(180px, auto);
-  }
-}
-@media (min-width: 980px) {
   .metodo-bento {
     grid-template-columns: 1.4fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
@@ -744,21 +794,19 @@ ul { list-style: none; padding: 0; margin: 0; }
 .metodo-tile {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 1.4rem;
+  border-radius: 14px;
   padding: 26px 26px 24px;
   display: flex; flex-direction: column;
   transition: transform .2s ease, box-shadow .2s ease, border-color .15s ease;
 }
-.metodo-tile:hover { transform: translateY(-3px); box-shadow: var(--shadow-card-hover); }
+.metodo-tile:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(15,76,129,.12), 0 3px 8px rgba(15,76,129,.06); }
 
 .metodo-tile.tile-large {
-  background: linear-gradient(150deg, var(--info-bg) 0%, var(--bg) 70%);
+  background: var(--info-bg);
   border-color: var(--info-border);
+  border-width: 2px;
   padding: 36px 32px 30px;
-  grid-row: span 2;
 }
-@media (max-width: 719px) { .metodo-tile.tile-large { grid-row: auto; } }
-
 .metodo-tag {
   font-family: var(--font-mono);
   display: inline-flex; align-items: center; align-self: flex-start;
@@ -769,19 +817,18 @@ ul { list-style: none; padding: 0; margin: 0; }
   color: var(--accent-dark);
   background: var(--bg);
   border: 1px solid var(--info-border);
-  padding: 5px 10px;
+  padding: 4px 10px;
   border-radius: 6px;
   margin-bottom: 14px;
 }
 .metodo-tile.tile-large .metodo-tag {
   font-size: 12px;
-  padding: 6px 12px;
-  background: var(--bg);
+  padding: 5px 12px;
   border-color: var(--cta);
   color: var(--accent-dark);
 }
 .metodo-tile h3 { font-size: 1.1875rem; margin-bottom: 10px; line-height: 1.25; }
-.metodo-tile.tile-large h3 { font-size: 1.5rem; }
+.metodo-tile.tile-large h3 { font-size: 1.4375rem; }
 .metodo-tile p {
   color: var(--text-secondary);
   font-size: .9375rem;
@@ -789,23 +836,39 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 .metodo-tile.tile-large p { font-size: 1rem; }
 
+/* PIVOT 9: Real law cite visible in title-large metodo tile */
+.metodo-law-cite {
+  font-family: var(--font-mono);
+  display: inline-block;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--info-border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-dark);
+  letter-spacing: -0.005em;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ============================================
-   DISPONIBILITÀ — Beta aperta + garanzia fused inline pill
+   6. DISPONIBILITÀ — Beta + Garanzia fused
    ============================================ */
 .beta-card {
   max-width: 920px;
   margin: 0 auto;
   background: var(--bg);
   border: 2px solid var(--cta);
-  border-radius: 1.6rem;
+  border-radius: 14px;
   padding: 44px 36px;
   display: grid;
   gap: 32px;
-  text-align: center;
-  box-shadow: var(--shadow-card);
+  text-align: left;
+  box-shadow: 0 14px 40px rgba(26,115,232,.10), 0 2px 6px rgba(26,115,232,.04);
 }
 @media (min-width: 768px) {
-  .beta-card { grid-template-columns: 1.4fr 1fr; text-align: left; align-items: center; gap: 40px; padding: 56px 48px; }
+  .beta-card { grid-template-columns: 1.4fr 1fr; align-items: center; gap: 40px; padding: 56px 48px; }
 }
 
 .beta-badge {
@@ -817,27 +880,27 @@ ul { list-style: none; padding: 0; margin: 0; }
   text-transform: uppercase;
   color: #fff;
   background: var(--cta);
-  padding: 6px 12px;
+  padding: 5px 11px;
   border-radius: 9999px;
   margin-bottom: 16px;
 }
-.beta-card h3 { font-size: 1.625rem; margin-bottom: 10px; line-height: 1.2; }
-.beta-card .beta-sub {
+.beta-card h3 { font-size: 1.5625rem; margin-bottom: 10px; line-height: 1.2; }
+.beta-sub {
   color: var(--text-secondary);
-  font-size: 1.0625rem;
+  font-size: 1rem;
   line-height: 1.55;
   margin-bottom: 22px;
 }
 
 .beta-features {
   display: flex; flex-wrap: wrap;
-  gap: 14px 26px;
+  gap: 10px 22px;
   margin-top: 8px;
 }
 .beta-features span {
   display: inline-flex; align-items: center; gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 500;
   color: var(--text-secondary);
 }
 .beta-features span::before {
@@ -846,16 +909,15 @@ ul { list-style: none; padding: 0; margin: 0; }
   width: 6px; height: 6px;
   background: var(--success);
   border-radius: 50%;
+  flex-shrink: 0;
 }
-
-.beta-cta-block { display: flex; flex-direction: column; gap: 14px; align-items: center; }
-@media (min-width: 768px) { .beta-cta-block { align-items: flex-start; } }
+.beta-cta-block { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
 
 .beta-garanzia-pill {
   display: inline-flex; align-items: center; gap: 8px;
   font-family: var(--font-mono);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--accent-dark);
   background: var(--info-bg);
   border: 1px solid var(--info-border);
@@ -871,83 +933,91 @@ ul { list-style: none; padding: 0; margin: 0; }
 }
 
 /* ============================================
-   FAQ — 5 domande (Pareto optimum)
+   7. FAQ — Pareto 5 domande
    ============================================ */
 .faq-list {
-  max-width: 740px;
+  max-width: 720px;
   margin: 0 auto;
-  display: flex; flex-direction: column; gap: 12px;
+  display: flex; flex-direction: column; gap: 10px;
 }
 .faq-item {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 22px 26px;
-  transition: background .18s ease, box-shadow .2s ease, border-color .15s ease;
+  border-radius: 12px;
+  padding: 20px 24px;
+  transition: background .15s ease, border-color .15s ease;
 }
-.faq-item:hover { background: var(--bg-alt-soft); border-color: var(--border-strong); box-shadow: 0 6px 16px rgba(15,76,129,.06); }
+.faq-item:hover { border-color: var(--border-strong); background: var(--bg-alt); }
 .faq-item summary {
-  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
   cursor: pointer;
   list-style: none;
-  font-size: 1.0625rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--text-primary);
+  letter-spacing: -0.005em;
 }
 .faq-item summary::-webkit-details-marker { display: none; }
 .faq-item summary::marker { display: none; content: ''; }
 .faq-chevron {
   flex-shrink: 0;
-  font-weight: 800;
-  color: var(--accent);
-  font-size: 14px;
-  transition: transform .25s cubic-bezier(.16,1,.3,1);
+  font-weight: 700;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  transition: transform .25s cubic-bezier(.16,1,.3,1), color .15s ease;
   display: inline-block;
-  margin-top: 4px;
   font-family: var(--font-mono);
 }
-.faq-item[open] .faq-chevron { transform: rotate(180deg); }
+.faq-item[open] .faq-chevron { transform: rotate(180deg); color: var(--accent); }
 .faq-answer {
-  margin-top: 14px;
-  font-size: 15.5px;
+  margin-top: 12px;
+  font-size: 15px;
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.65;
   max-width: 640px;
 }
 
 /* ============================================
-   FIDUCIA — closing onesty pillar (scarico, <1 viewport)
+   8. FIDUCIA — closing onesty pillar
    ============================================ */
 .fiducia-anchor {
-  max-width: 640px;
+  max-width: 600px;
   margin: 0 auto;
-  text-align: center;
+  text-align: left;
 }
+.fiducia-anchor.center { text-align: center; }
 .fiducia-lead {
   font-family: var(--font-mono);
   color: var(--accent-dark);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
   margin-bottom: 14px;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 11px;
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
+  border-radius: 9999px;
 }
-.fiducia-anchor h2 { margin-bottom: 22px; }
+.fiducia-anchor h2 { margin-bottom: 18px; font-size: 1.625rem; }
 .fiducia-copy {
   color: var(--text-secondary);
-  font-size: 1.0625rem;
-  line-height: 1.7;
-  margin-bottom: 36px;
+  font-size: 1rem;
+  line-height: 1.65;
+  margin-bottom: 32px;
 }
 .free-trial-icon {
-  width: 104px; height: 104px;
-  margin: 0 auto;
+  width: 88px; height: 88px;
+  margin: 0;
   display: flex; align-items: center; justify-content: center;
   background: var(--info-bg);
   border-radius: 50%;
 }
 
-/* ---------- Footer ---------- */
+/* ============================================
+   FOOTER — PIVOT 10: founder marker
+   ============================================ */
 footer {
   border-top: 1px solid var(--border);
   padding: 48px 0 56px;
@@ -956,15 +1026,37 @@ footer {
 .footer-inner {
   display: flex; flex-direction: column;
   gap: 24px;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
 }
 @media (min-width: 768px) {
-  .footer-inner { flex-direction: row; justify-content: space-between; text-align: left; align-items: flex-start; }
+  .footer-inner { flex-direction: row; justify-content: space-between; align-items: flex-start; gap: 48px; }
 }
-.footer-brand-name { font-weight: 800; color: var(--text-primary); font-size: 1rem; margin-bottom: 4px; }
-.footer-trust { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
-.footer-links { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+.footer-brand { display: flex; flex-direction: column; gap: 6px; }
+.footer-brand-name { font-weight: 800; color: var(--text-primary); font-size: 1rem; letter-spacing: -0.02em; }
+.footer-founder {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  font-weight: 500;
+}
+.footer-founder-mark {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-dark);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  display: inline-block;
+  padding: 3px 9px;
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
+  border-radius: 9999px;
+  margin-right: 8px;
+  vertical-align: 1px;
+}
+.footer-trust { font-size: 13px; color: var(--text-tertiary); line-height: 1.6; margin-top: 4px; }
+.footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
 .footer-links a {
   color: var(--text-secondary);
   font-size: 14px;
@@ -974,37 +1066,32 @@ footer {
 .footer-links a:hover { color: var(--accent); }
 .footer-copy {
   margin-top: 28px;
-  text-align: center;
   font-size: 13px;
   color: var(--text-tertiary);
 }
 
-/* ---------- Animazioni sobrie ---------- */
+/* ---------- Hero micro-rise (only animation left) ---------- */
 .hero-rise > * {
   opacity: 0;
-  animation: hero-rise-anim .5s cubic-bezier(.2, .8, .2, 1) forwards;
+  animation: hero-rise-anim .55s cubic-bezier(.2, .8, .2, 1) forwards;
 }
-.hero-rise > *:nth-child(1) { animation-delay: 60ms; }
+.hero-rise > *:nth-child(1) { animation-delay: 30ms; }
 .hero-rise > *:nth-child(2) { animation-delay: 130ms; }
-.hero-rise > *:nth-child(3) { animation-delay: 200ms; }
-.hero-rise > *:nth-child(4) { animation-delay: 270ms; }
-.hero-rise > *:nth-child(5) { animation-delay: 340ms; }
-.hero-rise > *:nth-child(6) { animation-delay: 410ms; }
+.hero-rise > *:nth-child(3) { animation-delay: 220ms; }
+.hero-rise > *:nth-child(4) { animation-delay: 310ms; }
 @keyframes hero-rise-anim {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.fade-in {
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity .4s ease-out, transform .4s ease-out;
-}
-.fade-in.is-visible { opacity: 1; transform: translateY(0); }
-
 @keyframes typing-blink {
   0%, 49% { opacity: 1; }
   50%, 100% { opacity: 0; }
+}
+
+/* ---------- Florence Press button states (kill animated border patterns) ---------- */
+button, .cta-primary, .quiz-pill, .nav-cta {
+  position: relative;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1015,21 +1102,21 @@ footer {
     scroll-behavior: auto !important;
   }
   .hero-rise > * { opacity: 1 !important; transform: none !important; }
-  .fade-in { opacity: 1 !important; transform: none !important; }
-  .quiz-pill.is-active { transform: none !important; }
-  .quiz-panel { animation: none !important; }
+  .hero h1 .accent { background-position: 0% 50% !important; animation: none !important; }
+  .hero-eyebrow .dot, .mockup-status-dot { animation: none !important; }
 }
 
-/* ---------- Mobile responsive fine-tuning ---------- */
+/* ---------- Mobile ---------- */
 @media (max-width: 720px) {
   .section { padding: 64px 0; }
-  .hero { padding: 64px 0 48px; }
+  .hero { padding: 64px 0 40px; }
   .hero-grid { gap: 36px; }
-  .trust-pills { gap: 8px 10px; margin-top: 36px; }
-  .trust-pill { font-size: 12px; padding: 7px 12px; }
+  .trust-band-inner { gap: 8px 10px; }
+  .trust-pill { font-size: 12px; padding: 6px 10px; }
   .beta-card { padding: 32px 22px; gap: 24px; }
   .metodo-tile { padding: 22px 20px; }
   .compare-card { padding: 24px 22px; }
+  .footer-inner { align-items: center; text-align: center; }
 }
 </style>
 </head>
@@ -1041,34 +1128,33 @@ footer {
 <!-- Navbar -->
 <header class="navbar">
   <div class="container navbar-inner">
-    <a href="/" class="logo" aria-label="ConcorsoAI home">Concorso<span>AI</span></a>
+    <a href="/" class="logo" aria-label="ConcorsoAI home">
+      <span class="logo-mark">CA</span>
+      <span class="logo-text">Concorso<span>AI</span></span>
+    </a>
     <a href="auth.html?mode=register" class="nav-cta">Inizia gratis</a>
   </div>
 </header>
 
 <main id="main">
 
-<!-- ============== 1. HERO (lifted) ============== -->
+<!-- ============== 1. HERO (H1 + 1 sub + 1 CTA + mockup only) ============== -->
 <section class="hero" aria-labelledby="hero-h1">
   <div class="container">
     <div class="hero-grid">
       <div class="hero-text hero-rise">
-        <p class="hero-offer"><span class="dot" aria-hidden="true"></span>3 simulazioni gratis al mese · Nessuna carta richiesta</p>
-        <h1 id="hero-h1">Simula l'orale sul tuo bando.</h1>
-        <p class="hero-tagline">Domande solo sul tuo programma, non risposte generiche.</p>
-        <p class="hero-subtitle">Carica il bando o il manuale. Il commissario AI fa domande, corregge le tue risposte e ti dice cosa ripassare prima dell'esame.</p>
-        <div class="hero-cta-group">
-          <a href="auth.html?mode=register" class="cta-primary">Simula l'orale gratuitamente →</a>
-        </div>
-        <div class="trust-pills" aria-label="Caratteristiche di sicurezza e accesso">
-          <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg>Dati cifrati</span>
-          <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Server UE (GDPR)</span>
-          <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Nessuna carta</span>
-          <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>Disdici quando vuoi</span>
+        <p class="hero-eyebrow"><span class="dot" aria-hidden="true"></span>Beta aperta · 3 simulazioni gratis al mese</p>
+        <h1 id="hero-h1">Simula l'<span class="accent">orale</span> sul tuo bando, prima dell'orale.</h1>
+        <p class="hero-subtitle">Domande solo sul tuo programma, non risposte generiche. Carica il bando, il commissario AI fa domande e ti dice cosa ripassare.</p>
+        <div class="hero-cta-row">
+          <a href="auth.html?mode=register" class="cta-primary">
+            Simula l'orale gratuitamente
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+          </a>
         </div>
       </div>
 
-      <!-- Mockup: real 3-tab simulation preview -->
+      <!-- Mockup (real 3-tab product state) -->
       <div class="mockup-card hero-rise" role="region" aria-label="Esempio del flusso di una simulazione in diritto amministrativo">
         <div class="mockup-chrome">
           <div class="mockup-chrome-left">
@@ -1078,7 +1164,7 @@ footer {
             </span>
             <span class="mockup-breadcrumb" aria-label="Posizione nella simulazione">
               <span>Simulazione</span>
-              <span class="mockup-breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
+              <span class="mockup-chrome-sep" aria-hidden="true">/</span>
               <span class="mockup-breadcrumb-current">Diritto Amministrativo · Esame 1</span>
             </span>
           </div>
@@ -1112,13 +1198,13 @@ footer {
             <div class="mockup-panel" role="tabpanel" aria-labelledby="tab-question" id="panel-question" data-panel="question" aria-hidden="false">
               <p class="mockup-meta">Domanda di esempio</p>
               <p class="mockup-content">"Mi parli del principio di imparzialità della Pubblica Amministrazione. A quale norma si riferisce?"</p>
-              <p class="mockup-meta-hint" style="font-style: italic; font-size: 12px; color: var(--text-tertiary); margin-top: 12px;">Clicca "2. La tua risposta" per vedere come rispondi.</p>
+              <p class="mockup-meta-hint">Clicca "2. La tua risposta" per vedere come rispondi.</p>
             </div>
 
             <div class="mockup-panel hidden" hidden role="tabpanel" aria-labelledby="tab-answer" id="panel-answer" data-panel="answer" aria-hidden="true">
               <p class="mockup-meta">Tu rispondi<span class="typing-cursor" aria-hidden="true"></span></p>
               <p class="mockup-content">"L'imparzialità è un principio cardine della PA. La PA deve comportarsi in modo equo verso i cittadini, senza favorire nessuno. È un principio generale che discende dalla <em class="missed">Costituzione</em>."</p>
-              <p class="mockup-meta-hint" style="font-style: italic; font-size: 12px; color: var(--text-tertiary); margin-top: 12px;">Clicca "3. Report AI" per vedere il feedback.</p>
+              <p class="mockup-meta-hint">Clicca "3. Report AI" per vedere il feedback.</p>
             </div>
 
             <div class="mockup-panel hidden" hidden role="tabpanel" aria-labelledby="tab-report" id="panel-report" data-panel="report" aria-hidden="true">
@@ -1157,16 +1243,28 @@ footer {
   </div>
 </section>
 
-<!-- ============== 2. R1 MINI-QUIZ (live demo) ============== -->
+<!-- ============== 2. TRUST BAND (own section) ============== -->
+<div class="trust-band" aria-label="Caratteristiche di sicurezza e accesso">
+  <div class="container">
+    <div class="trust-band-inner">
+      <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg>Dati cifrati</span>
+      <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Server UE (GDPR)</span>
+      <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Nessuna carta</span>
+      <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>Disdici quando vuoi</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============== 3. R1 MINI-QUIZ (live demo) ============== -->
 <section id="scegli-materia" class="bg-alt section">
   <div class="container">
-    <div class="section-heading fade-in">
+    <div class="section-heading">
       <p class="section-eyebrow">Prova subito</p>
       <h2>Scegli la tua materia. Ti mostro una domanda vera.</h2>
       <p>Tocca una materia. Vedrai una domanda tipo, una risposta-tipo e lo schema per rispondere bene. Esempi reali, ancorati ai riferimenti normativi italiani.</p>
     </div>
 
-    <div class="quiz-card fade-in">
+    <div class="quiz-card">
       <div class="quiz-pills" role="tablist" aria-label="Scegli una materia">
         <button id="qm-amm" type="button" class="quiz-pill is-active" data-materia="amm" role="tab" aria-selected="true" tabindex="0" aria-controls="qp-amm">Diritto Amministrativo</button>
         <button id="qm-cost" type="button" class="quiz-pill" data-materia="cost" role="tab" aria-selected="false" tabindex="-1" aria-controls="qp-cost">Diritto Costituzionale</button>
@@ -1213,26 +1311,25 @@ footer {
       </div>
 
       <div class="quiz-cta-bar">
-        <a href="auth.html?mode=register" class="cta-primary">Carica il tuo bando →</a>
-        <a href="#confronto" class="cta-link">oppure confronta con ChatGPT →</a>
+        <a href="auth.html?mode=register" class="cta-primary">Carica il tuo bando</a>
+        <a href="#confronto" class="cta-link">→ confronta con ChatGPT</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============== 3. CONFRONTO CRUDO (asymmetric card stack) ============== -->
+<!-- ============== 4. CONFRONTO CRUDO (solid bg, no gradient) ============== -->
 <section id="confronto" class="section">
   <div class="container">
-    <div class="section-heading fade-in">
+    <div class="section-heading">
       <p class="section-eyebrow">Confronto onesto</p>
       <h2>Noi, ChatGPT, esercitarti da solo.</h2>
       <p>Confronto qualitativo basato sull'uso reale dei tre strumenti a luglio 2026. ChatGPT resta eccellente dove è nato per essere usato. Noi siamo diversi perché ancorati al tuo bando.</p>
     </div>
 
-    <div class="compare-stack fade-in">
-      <!-- Winner card -->
+    <div class="compare-stack">
       <article class="compare-card us">
-        <span class="compare-card-tag">ConcorsoAI</span>
+        <span class="compare-tag">ConcorsoAI</span>
         <h3>Allenamento specifico sul tuo concorso.</h3>
         <p class="compare-card-sub">Carica il bando, il commissario AI estrae gli argomenti e ti interroga solo su quelli. Niente quiz a crocette, niente risposte generiche.</p>
         <div class="compare-rows">
@@ -1244,15 +1341,14 @@ footer {
         </div>
       </article>
 
-      <!-- Alt cards side-by-side -->
       <div class="compare-grid">
         <article class="compare-card alt">
-          <span class="compare-card-tag">ChatGPT</span>
+          <span class="compare-tag">ChatGPT</span>
           <h3>Ottimo prompt engineer, fragile sul contesto.</h3>
           <p>Risposte generiche eccellenti, ma servono prompt lunghi per ottenere qualcosa di specifico sul tuo bando. Niente timer, niente feedback strutturato, server extra-UE.</p>
         </article>
         <article class="compare-card alt">
-          <span class="compare-card-tag">Da solo</span>
+          <span class="compare-tag">Da solo</span>
           <h3>Nessuno strumento è uno strumento.</h3>
           <p>Leggi appunti e manuali, ma non provi mai l'esposizione orale. Non c'è un timer che ti ferma. Non c'è feedback che ti dice cosa migliorare.</p>
         </article>
@@ -1263,20 +1359,21 @@ footer {
   </div>
 </section>
 
-<!-- ============== 4. METODO — bento mosaic ============== -->
+<!-- ============== 5. METODO — bento mosaic with real law cite ============== -->
 <section class="bg-alt section">
   <div class="container">
-    <div class="section-heading fade-in">
+    <div class="section-heading">
       <p class="section-eyebrow">Metodo</p>
       <h2>Ancorato alle regole della PA italiana.</h2>
       <p>Non è un chatbot generico. È modellato su come funzionano realmente i concorsi pubblici italiani.</p>
     </div>
 
-    <div class="metodo-bento fade-in">
+    <div class="metodo-bento">
       <article class="metodo-tile tile-large">
         <span class="metodo-tag">Basi giuridiche</span>
         <h3>Costituzione · L. 241/1990 · DPR 487/1994</h3>
         <p>Le domande che il commissario AI genera sono ancorate ai riferimenti normativi reali della PA italiana: art. 97 Cost. sul buon andamento, L. 241/90 sul procedimento, DPR 487/94 sui concorsi, D.Lgs. 33/2013 sulla trasparenza.</p>
+        <span class="metodo-law-cite">art. 97 Cost. · art. 1 L. 241/1990 · DPR 487/1994 · D.Lgs. 33/2013</span>
       </article>
 
       <article class="metodo-tile">
@@ -1300,16 +1397,16 @@ footer {
   </div>
 </section>
 
-<!-- ============== 5. DISPONIBILITÀ (Beta + Garanzia fused) ============== -->
+<!-- ============== 6. DISPONIBILITÀ (Beta + Garanzia fused) ============== -->
 <section id="disponibilita" class="section">
   <div class="container">
-    <div class="section-heading fade-in">
+    <div class="section-heading">
       <p class="section-eyebrow">Disponibilità</p>
       <h2>In beta gratuita. Pagamenti in arrivo.</h2>
       <p>Per ora è tutto gratis. Quando Stripe sarà attivo avrai 30 giorni per ripensarci e rimborso totale in un clic.</p>
     </div>
 
-    <div class="beta-card fade-in">
+    <div class="beta-card">
       <div>
         <span class="beta-badge">Beta aperta</span>
         <h3>Accesso completo gratis</h3>
@@ -1333,60 +1430,60 @@ footer {
   </div>
 </section>
 
-<!-- ============== 6. FAQ (5 domande, Pareto) ============== -->
+<!-- ============== 7. FAQ (5 domande, Pareto) ============== -->
 <section id="faq" class="bg-alt section">
   <div class="container">
-    <div class="section-heading fade-in">
+    <div class="section-heading">
       <p class="section-eyebrow">FAQ oneste</p>
       <h2>Le 5 domande che ci fanno di più.</h2>
       <p>Risposte brevi e dirette. Se non trovi la tua, scrivici.</p>
     </div>
 
     <div class="faq-list">
-      <details class="faq-item fade-in">
+      <details class="faq-item">
         <summary>
           <span>Le domande sono davvero basate sul mio bando?</span>
-          <span class="faq-chevron" aria-hidden="true">&#9662;</span>
+          <span class="faq-chevron" aria-hidden="true">↓</span>
         </summary>
         <div class="faq-answer">
           Sì. L'AI estrae i contenuti del PDF che carichi e li usa come materiale di riferimento per le domande. Più i tuoi materiali sono completi, più le domande rispecchiano il tuo programma.
         </div>
       </details>
 
-      <details class="faq-item fade-in">
+      <details class="faq-item">
         <summary>
           <span>Posso allenarmi su materie standard senza caricare il bando?</span>
-          <span class="faq-chevron" aria-hidden="true">&#9662;</span>
+          <span class="faq-chevron" aria-hidden="true">↓</span>
         </summary>
         <div class="faq-answer">
           Sì. Sono disponibili materie standard (Diritto Amministrativo, Costituzionale, Contabilità Pubblica, Diritto Penale) per simulazioni più generali di pratica. Il massimo dell'ancoraggio lo ottieni caricando il tuo bando.
         </div>
       </details>
 
-      <details class="faq-item fade-in">
+      <details class="faq-item">
         <summary>
           <span>I miei dati sono al sicuro?</span>
-          <span class="faq-chevron" aria-hidden="true">&#9662;</span>
+          <span class="faq-chevron" aria-hidden="true">↓</span>
         </summary>
         <div class="faq-answer">
           Sì. I bandi sono salvati cifrati su Supabase, datacenter UE. Nessun dato è condiviso con terze parti. Puoi cancellare tutto dalla dashboard in qualunque momento.
         </div>
       </details>
 
-      <details class="faq-item fade-in">
+      <details class="faq-item">
         <summary>
           <span>E se il bando è stato pubblicato da pochi giorni?</span>
-          <span class="faq-chevron" aria-hidden="true">&#9662;</span>
+          <span class="faq-chevron" aria-hidden="true">↓</span>
         </summary>
         <div class="faq-answer">
           Lo carichi tu come PDF o testo. L'AI estrae argomenti e riferimenti normativi e li usa come base per le domande. Più recente è il bando, più le domande rimangono ancorate ai materiali che hai caricato.
         </div>
       </details>
 
-      <details class="faq-item fade-in">
+      <details class="faq-item">
         <summary>
           <span>Posso rispondere a voce o solo per iscritto?</span>
-          <span class="faq-chevron" aria-hidden="true">&#9662;</span>
+          <span class="faq-chevron" aria-hidden="true">↓</span>
         </summary>
         <div class="faq-answer">
           Entrambe. Hai un pulsante microfono (riconoscimento vocale del browser) e un campo di testo. Il commissario AI capisce entrambi, e puoi alternare nella stessa sessione.
@@ -1396,18 +1493,18 @@ footer {
   </div>
 </section>
 
-<!-- ============== 7. FIDUCIA — closing onesty pillar ============== -->
+<!-- ============== 8. FIDUCIA — closing onesty pillar ============== -->
 <section id="fiducia" class="section-tight">
   <div class="container">
-    <div class="fiducia-anchor fade-in">
-      <p class="fiducia-lead">Niente recensioni inventate. Preferiamo mostrarti come funziona.</p>
-      <h2>Provalo con il programma del tuo concorso.</h2>
+    <div class="fiducia-anchor">
+      <p class="fiducia-lead">Onesty</p>
+      <h2>Niente recensioni inventate. Preferiamo mostrarti come funziona.</h2>
       <p class="fiducia-copy">Hai 3 simulazioni gratuite ogni mese. Nessuna carta e nessun vincolo: carica il materiale, prova una sessione e decidi dopo se proseguire.</p>
       <div class="free-trial-icon" aria-hidden="true">
         <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="32" cy="32" r="24" stroke="#1A73E8" stroke-width="3.5"/>
-          <text x="32" y="36" text-anchor="middle" fill="#1A73E8" font-size="22" font-weight="900" font-family="system-ui">3</text>
-          <text x="32" y="47" text-anchor="middle" fill="#1A73E8" font-size="7" font-weight="700" font-family="system-ui">GRATIS</text>
+          <text x="32" y="36" text-anchor="middle" fill="#1A73E8" font-size="22" font-weight="800" font-family="Inter, system-ui">3</text>
+          <text x="32" y="48" text-anchor="middle" fill="#1A73E8" font-size="7" font-weight="700" font-family="Inter, system-ui">GRATIS</text>
         </svg>
       </div>
     </div>
@@ -1416,12 +1513,13 @@ footer {
 
 </main>
 
-<!-- FOOTER -->
+<!-- FOOTER (founder marker added) -->
 <footer>
   <div class="container footer-inner">
-    <div>
-      <p class="footer-brand-name">ConcorsoAI</p>
-      <p class="footer-trust">Made in Italy · Nessuna carta richiesta</p>
+    <div class="footer-brand">
+      <p class="footer-brand-name"><span class="logo-mark">CA</span> Concorso<span style="color: var(--cta);">AI</span></p>
+      <p class="footer-founder"><span class="footer-founder-mark">Costruito a Milano</span> <span class="footer-founder-text">da 2 persone che hanno passato l'orale.</span></p>
+      <p class="footer-trust">Made in Italy · Nessuna carta richiesta · Supabase UE</p>
     </div>
     <ul class="footer-links">
       <li><a href="terms.html">Termini</a></li>
@@ -1434,24 +1532,6 @@ footer {
 </footer>
 
 <script>
-/* Fade-in on scroll: IntersectionObserver nativo (zero deps) */
-(function () {
-  var els = document.querySelectorAll('.fade-in');
-  if (!els.length || !('IntersectionObserver' in window)) {
-    els.forEach(function (el) { el.classList.add('is-visible'); });
-    return;
-  }
-  var obs = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        obs.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-  els.forEach(function (el) { obs.observe(el); });
-})();
-
 /* Mockuphero 3-tab switcher (vanilla JS, ARIA completo) */
 (function () {
   var tabs = document.querySelectorAll('.mockup-tab');
