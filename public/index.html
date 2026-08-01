@@ -4,14 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>ConcorsoAI — Simula l'orale sul tuo programma</title>
-<meta name="description" content="Simula l'orale del tuo concorso pubblico con domande basate sul programma del tuo bando e feedback sulle tue risposte. Made in Italy." />
+<meta name="description" content="Simula l'orale del tuo concorso pubblico con domande basate sul programma del tuo bando. Made in Italy." />
 <meta name="theme-color" content="#FFFFFF" />
 <link rel="canonical" href="https://concorso-ai.vercel.app/" />
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231A73E8'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='system-ui' font-weight='900'%3EC%3C/text%3E%3C/svg%3E" />
 
 <meta property="og:title" content="ConcorsoAI — Simula l'orale sul tuo programma" />
-<meta property="og:description" content="Carica il tuo bando, il commissario AI fa domande sugli argomenti del tuo concorso e ti dice cosa ripassare prima dell'orale." />
+<meta property="og:description" content="Carica il tuo bando, il commissario AI fa domande sugli argomenti del tuo concorso. Beta aperta gratuita." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://concorso-ai.vercel.app/" />
 <meta property="og:locale" content="it_IT" />
@@ -20,982 +20,7 @@
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
 
-<style>
-/* ==========================================================================
-   ConcorsoAI Landing v18 — merge ottimizzato per conversion
-   Disciplina: zero dipendenze esterne (no Tailwind, no GSAP, no Google Fonts)
-   Source: indexx.html (R1 mini-quiz, Pain, Confronto, Metodo) + public/index.html (mockup 3-tab, Garanzia, Fiducia)
-   Anti-AI-slop: zero dati falsi, zero hype "vinci", trasparenza Stripe non-attivo
-   ========================================================================== */
-
-* { box-sizing: border-box; }
-
-:root {
-  --bg: #FFFFFF;
-  --bg-alt: #F8F9FA;
-  --text-primary: #222222;
-  --text-secondary: #444444;
-  --text-tertiary: #6B7280;
-  --accent: #1A73E8;
-  --accent-dark: #1457B0;
-  --accent-deep: #0F4C81;
-  --cta: #1A73E8;
-  --cta-hover: #1457B0;
-  --border: #E5E7EB;
-  --border-light: #EFF1F4;
-  --success: #16A34A;
-  --success-deep: #0F766E;
-  --success-bg: #ECFDF5;
-  --warning: #B45309;
-  --warning-bg: #FFFBEB;
-  --error: #DC2626;
-  --error-bg: #FEF2F2;
-  --info-bg: #EFF6FF;
-  --info-border: #BFDBFE;
-}
-
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
-
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 17px;
-  line-height: 1.6;
-  color: var(--text-primary);
-  background: var(--bg);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
-
-h1, h2, h3, h4 { font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; margin: 0; color: var(--text-primary); }
-h1 { font-size: clamp(2.4rem, 5vw + 0.5rem, 4rem); }
-h2 { font-size: clamp(1.875rem, 2.5vw + 1rem, 2.6rem); }
-h3 { font-size: 1.25rem; }
-h4 { font-size: 1.0625rem; }
-p { margin: 0; }
-a { color: inherit; text-decoration: none; }
-ul { list-style: none; padding: 0; margin: 0; }
-.hidden { display: none !important; }
-
-.container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-@media (min-width: 768px) { .container { padding: 0 32px; } }
-
-::selection { background: #EFF6FF; color: var(--text-primary); }
-
-.skip-link {
-  position: fixed; top: 8px; left: 8px;
-  background: var(--text-primary); color: #fff;
-  padding: 10px 14px; border-radius: 6px; font-weight: 700; font-size: 14px;
-  z-index: 100; transform: translateY(-200%);
-  transition: transform .15s ease;
-}
-.skip-link:focus { transform: translateY(0); }
-
-/* ---------- Navbar ---------- */
-.navbar {
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
-  position: sticky; top: 0; z-index: 50;
-}
-.navbar-inner {
-  display: flex; align-items: center; justify-content: space-between;
-  height: 64px;
-}
-.logo { font-size: 1.125rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-primary); }
-.logo span { color: var(--cta); }
-
-.nav-cta {
-  background: var(--cta);
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 15px;
-  min-height: 48px;
-  display: inline-flex; align-items: center; justify-content: center;
-  transition: transform .15s ease, background .15s ease;
-}
-.nav-cta:hover { background: var(--cta-hover); transform: scale(1.02); }
-.nav-cta:active { transform: scale(1.0); }
-.nav-cta:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
-
-/* ---------- Hero ---------- */
-.hero { padding: 64px 0 36px; }
-@media (min-width: 768px) { .hero { padding: 88px 0 48px; } }
-
-.hero-grid {
-  display: grid;
-  gap: 48px;
-  align-items: center;
-}
-@media (min-width: 900px) {
-  .hero-grid { grid-template-columns: 0.9fr 1.1fr; gap: 48px; }
-}
-
-.hero-text { max-width: 560px; }
-
-.hero-offer {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #1457B0;
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-.hero h1 { margin-bottom: 14px; }
-
-.hero-tagline {
-  font-size: 1.125rem;
-  color: var(--text-secondary);
-  font-weight: 700;
-  margin-bottom: 14px;
-  line-height: 1.35;
-  max-width: 540px;
-}
-
-.hero-subtitle {
-  font-size: 1.0625rem;
-  color: var(--text-secondary);
-  max-width: 540px;
-  margin-bottom: 32px;
-  line-height: 1.6;
-}
-@media (min-width: 768px) { .hero-subtitle { font-size: 1.125rem; } }
-
-.hero-cta-group {
-  display: flex; flex-direction: column; gap: 16px; align-items: flex-start;
-}
-@media (min-width: 480px) {
-  .hero-cta-group { flex-direction: row; align-items: center; gap: 20px; }
-}
-
-.cta-primary {
-  background: var(--cta);
-  color: #fff;
-  padding: 18px 32px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 1.0625rem;
-  min-height: 56px;
-  display: inline-flex; align-items: center; justify-content: center;
-  transition: transform .15s ease, background .15s ease;
-}
-@media (min-width: 768px) { .cta-primary { font-size: 1.125rem; padding: 19px 34px; } }
-.cta-primary:hover { background: var(--cta-hover); transform: scale(1.02); }
-.cta-primary:active { transform: scale(1.0); }
-.cta-primary:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
-
-.cta-link {
-  color: var(--accent);
-  font-weight: 700;
-  font-size: 1rem;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  padding: 10px 4px;
-  min-height: 48px;
-  display: inline-flex; align-items: center; gap: 4px;
-}
-.cta-link:hover { color: var(--accent-dark); }
-.cta-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
-
-/* ---------- Trust micro-badges (orizzontale sotto hero) ---------- */
-.trust-bar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 18px 28px;
-  margin: 36px auto 0;
-  padding: 18px 24px;
-  background: var(--bg-alt);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-secondary);
-  max-width: 880px;
-}
-.trust-item { display: inline-flex; align-items: center; gap: 6px; }
-.trust-item svg { width: 16px; height: 16px; color: var(--cta); flex-shrink: 0; }
-
-/* ---------- Mockup hero: 3 tab reali ---------- */
-.mockup-card {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  max-width: 690px;
-  width: 100%;
-  margin: 0 auto;
-  overflow: hidden;
-  position: relative;
-}
-
-.mockup-chrome {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: var(--bg-alt);
-  border-bottom: 1px solid var(--border);
-  gap: 12px;
-}
-.mockup-chrome-left { display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1; }
-.mockup-chrome-logo {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12px; font-weight: 800;
-  color: var(--text-primary);
-  flex-shrink: 0;
-  letter-spacing: -0.01em;
-}
-.mockup-chrome-dot { width: 8px; height: 8px; background: var(--cta); border-radius: 50%; flex-shrink: 0; }
-.mockup-breadcrumb {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 11px;
-  color: var(--text-tertiary);
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap;
-}
-.mockup-breadcrumb-current { color: var(--text-primary); font-weight: 600; }
-.mockup-breadcrumb-sep { opacity: .5; }
-.mockup-chrome-avatar {
-  width: 28px; height: 28px;
-  background: var(--cta); color: #fff;
-  font-size: 11px; font-weight: 800;
-  border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  letter-spacing: .02em;
-}
-
-.mockup-body { min-height: 380px; }
-.mockup-main { padding: 18px; min-width: 0; }
-
-.mockup-status {
-  display: flex; align-items: center; gap: 14px;
-  padding: 7px 10px;
-  background: var(--bg-alt);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 11px;
-  color: var(--text-secondary);
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-.mockup-status-item { display: inline-flex; align-items: center; gap: 6px; }
-.mockup-status-dot {
-  width: 7px; height: 7px;
-  background: var(--success);
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.mockup-status-dot.live { animation: livePulse 2.6s ease-in-out infinite; }
-@keyframes livePulse {
-  0%, 80%, 100% { transform: scale(1); opacity: 1; }
-  90% { transform: scale(1.5); opacity: 0.5; }
-}
-.mockup-status-timer { font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
-.timer-num { color: var(--cta); }
-.timer-of { color: var(--text-tertiary); font-weight: 500; }
-
-.mockup-eyebrow {
-  font-size: 11px; text-transform: uppercase; letter-spacing: .12em; font-weight: 800;
-  color: var(--text-tertiary);
-  margin-bottom: 12px;
-  display: flex; align-items: center; gap: 6px;
-}
-.mockup-eyebrow-dot { width: 6px; height: 6px; background: var(--cta); border-radius: 50%; display: inline-block; }
-
-.mockup-tabs {
-  display: flex; gap: 4px;
-  background: var(--bg-alt);
-  border-radius: 10px;
-  padding: 4px;
-  margin-bottom: 16px;
-}
-.mockup-tab {
-  flex: 1;
-  background: transparent; border: none;
-  padding: 9px 10px;
-  border-radius: 8px;
-  font-size: 13px; font-weight: 700;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  transition: background .15s ease, color .15s ease;
-  font-family: inherit;
-  min-height: 44px;
-  text-align: center;
-}
-.mockup-tab:hover { color: var(--text-primary); }
-.mockup-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.mockup-tab.is-active { background: var(--bg); color: var(--cta); }
-
-.mockup-panel { transition: opacity .2s ease; }
-.mockup-meta {
-  font-size: 12px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700;
-  color: var(--text-tertiary);
-  margin-bottom: 10px;
-}
-.mockup-meta-hint {
-  font-size: 12px; color: var(--text-tertiary); font-style: italic; margin-top: 12px;
-}
-.mockup-content { font-size: 16px; line-height: 1.55; color: var(--text-primary); }
-.mockup-content em.missed {
-  background: var(--warning-bg);
-  color: var(--warning);
-  font-style: normal;
-  font-weight: 600;
-  padding: 0 4px;
-  border-radius: 3px;
-  text-decoration: line-through wavy var(--warning);
-  text-decoration-thickness: 1.5px;
-}
-
-.typing-cursor {
-  display: inline-block;
-  width: 8px;
-  height: 0.9em;
-  background: var(--cta);
-  margin-left: 6px;
-  vertical-align: text-bottom;
-  animation: typing-blink 1s steps(2, end) infinite;
-  border-radius: 1px;
-}
-
-.mockup-score-row {
-  display: flex; align-items: center; gap: 18px;
-  padding-bottom: 14px; margin-bottom: 14px;
-  border-bottom: 1px solid var(--border);
-}
-.mockup-score-circle {
-  width: 84px; height: 84px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: var(--bg-alt);
-  border: 3px solid var(--cta);
-  border-radius: 50%;
-  flex-shrink: 0;
-  line-height: 1;
-}
-.mockup-score-num { font-size: 28px; font-weight: 800; color: var(--text-primary); }
-.mockup-score-of { font-size: 11px; color: var(--text-tertiary); font-weight: 600; margin-top: 2px; }
-.mockup-score-detail { flex: 1; }
-.mockup-score-label { font-size: 14px; color: var(--text-primary); font-weight: 700; line-height: 1.4; margin-bottom: 4px; }
-.mockup-score-note { font-size: 12px; color: var(--text-tertiary); line-height: 1.5; }
-
-.mockup-feedback { margin: 0 0 14px 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
-.mockup-feedback li {
-  font-size: 14px; color: var(--text-primary);
-  padding: 10px 12px;
-  border-radius: 8px;
-  display: flex; align-items: flex-start; gap: 10px;
-  line-height: 1.5;
-}
-.mockup-feedback .report-good { background: var(--success-bg); }
-.mockup-feedback .report-work { background: var(--warning-bg); }
-.mockup-feedback .report-icon {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  font-weight: 800; font-size: 12px;
-  flex-shrink: 0;
-  color: #fff;
-  margin-top: 1px;
-}
-.mockup-feedback .report-good .report-icon { background: var(--success-deep); }
-.mockup-feedback .report-work .report-icon { background: var(--warning); }
-
-.mockup-extra {
-  font-size: 12px; color: var(--text-secondary);
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-  line-height: 1.5;
-}
-
-/* ---------- CF distinctive band (trust) ---------- */
-.cf-band {
-  margin-top: 36px;
-  background: var(--info-bg);
-  border: 1px solid var(--info-border);
-  border-radius: 12px;
-  padding: 16px 22px;
-  display: flex; align-items: center; justify-content: center; gap: 14px;
-  text-align: left;
-}
-.cf-band-icon {
-  width: 36px; height: 36px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--bg);
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.cf-band-icon svg { width: 22px; height: 22px; color: #1457B0; }
-.cf-band-body { flex: 1; }
-.cf-band-label {
-  font-weight: 800; color: #1457B0;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  font-size: 12px;
-  display: block;
-  margin-bottom: 2px;
-}
-.cf-band-text { font-size: 14px; color: var(--text-primary); line-height: 1.5; }
-
-/* ---------- Sectione base ---------- */
-section.content-section { padding: 72px 0; }
-@media (min-width: 768px) { section.content-section { padding: 96px 0; } }
-section.bg-alt { background: var(--bg-alt); }
-
-.section-heading { text-align: center; max-width: 680px; margin: 0 auto 48px; }
-.section-heading .section-subtitle {
-  margin-top: 16px;
-  font-size: 1.0625rem;
-  color: var(--text-secondary);
-}
-.section-eyebrow {
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: .12em;
-  color: var(--accent);
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-/* ============================================
-   R1 MINI-QUIZ — 5 materie interattive
-   Vanilla JS click handler. ARIA tablist.
-   ============================================ */
-.quiz-card {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 28px 24px;
-  max-width: 720px;
-  margin: 0 auto;
-}
-@media (min-width: 768px) { .quiz-card { padding: 36px 32px; } }
-
-.quiz-pills {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-}
-.quiz-pill {
-  font-size: 14px;
-  font-weight: 700;
-  padding: 10px 16px;
-  border-radius: 9999px;
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  color: var(--accent-dark);
-  cursor: pointer;
-  font-family: inherit;
-  transition: background .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
-  min-height: 40px;
-}
-.quiz-pill:hover:not(.is-active) { background: var(--bg-alt); border-color: var(--info-border); }
-.quiz-pill:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.quiz-pill.is-active {
-  background: var(--cta);
-  border-color: var(--cta);
-  color: #fff;
-  box-shadow: 0 6px 18px rgba(26,115,232,.28);
-}
-
-.quiz-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 22px auto;
-  max-width: 480px;
-}
-
-.quiz-panel { display: none; text-align: left; }
-.quiz-panel.is-active { display: block; }
-
-.quiz-eyebrow {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--success-deep);
-  margin-bottom: 10px;
-}
-
-.quiz-question {
-  font-size: 1.0625rem;
-  font-weight: 700;
-  line-height: 1.45;
-  color: var(--text-primary);
-  margin-bottom: 16px;
-  font-style: italic;
-}
-
-.quiz-answer-label {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--accent-dark);
-  letter-spacing: .04em;
-  margin-bottom: 6px;
-}
-
-.quiz-answer-body {
-  font-size: .975rem;
-  line-height: 1.65;
-  color: var(--text-secondary);
-}
-
-.quiz-cta-bar {
-  margin-top: 28px;
-  display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center;
-  text-align: center;
-}
-@media (min-width: 560px) {
-  .quiz-cta-bar { flex-direction: row; gap: 20px; }
-}
-
-/* ---------- IL PROBLEMA — 3 pain cards ---------- */
-.pain-grid {
-  display: grid;
-  gap: 18px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-@media (min-width: 768px) { .pain-grid { grid-template-columns: repeat(3, 1fr); gap: 22px; } }
-
-.pain-card {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 26px 22px;
-  transition: transform .2s ease, box-shadow .2s ease;
-}
-.pain-card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(15,76,129,.08); }
-.pain-icon {
-  width: 44px; height: 44px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 10px;
-  margin-bottom: 16px;
-}
-.pain-icon-rose { background: var(--error-bg); color: var(--error); }
-.pain-icon-amber { background: var(--warning-bg); color: var(--warning); }
-.pain-icon-blue { background: var(--info-bg); color: var(--accent); }
-.pain-icon svg { width: 22px; height: 22px; }
-
-.pain-card h3 { font-size: 1.0625rem; margin-bottom: 8px; }
-.pain-card p { color: var(--text-secondary); font-size: .975rem; line-height: 1.6; }
-
-/* ---------- CONFRONTO CRUDO — tabella ---------- */
-.confronto-wrap {
-  max-width: 920px;
-  margin: 0 auto;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow: hidden;
-  background: var(--bg);
-}
-.confronto-table {
-  width: 100%;
-  text-align: left;
-  font-size: 15px;
-  border-collapse: collapse;
-}
-.confronto-table thead th {
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  padding: 14px 16px;
-  background: var(--bg-alt);
-  border-bottom: 1px solid var(--border);
-  color: var(--text-secondary);
-}
-.confronto-table thead th.th-us {
-  background: var(--cta);
-  color: #fff;
-  text-align: center;
-}
-.confronto-table tbody td {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-  color: var(--text-primary);
-  vertical-align: middle;
-}
-.confronto-table tbody tr:last-child td { border-bottom: none; }
-.confronto-table tbody td:first-child {
-  font-weight: 700;
-  background: var(--bg-alt);
-  width: 32%;
-}
-.confronto-table tbody td.cell-us {
-  text-align: center;
-  background: rgba(26,115,232,.06);
-  color: var(--accent-deep);
-  font-weight: 700;
-}
-.confronto-table tbody td.cell-us::before {
-  content: '✓';
-  display: inline-block;
-  color: var(--success);
-  font-weight: 800;
-  margin-right: 6px;
-}
-.confronto-table .cell-other {
-  color: var(--text-tertiary);
-  font-size: 14px;
-}
-.confronto-table .cell-other::before {
-  content: '–';
-  display: inline-block;
-  color: var(--text-tertiary);
-  font-weight: 700;
-  margin-right: 6px;
-}
-.confronto-footnote {
-  margin-top: 18px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-tertiary);
-  line-height: 1.6;
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* ---------- METODO — 4 cards ancorate a leggi PA reali ---------- */
-.metodo-grid {
-  display: grid;
-  gap: 18px;
-  max-width: 1080px;
-  margin: 0 auto;
-}
-@media (min-width: 640px) { .metodo-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 980px) { .metodo-grid { grid-template-columns: repeat(4, 1fr); } }
-
-.metodo-card {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 22px 22px 24px;
-  transition: transform .2s ease, box-shadow .2s ease;
-}
-.metodo-card:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(15,76,129,.10); }
-
-.metodo-tag {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--accent-dark);
-  background: var(--info-bg);
-  border: 1px solid var(--info-border);
-  padding: 4px 10px;
-  border-radius: 6px;
-  margin-bottom: 12px;
-}
-.metodo-card h3 { font-size: 1.0625rem; margin-bottom: 8px; line-height: 1.3; }
-.metodo-card p {
-  color: var(--text-secondary);
-  font-size: .9375rem;
-  line-height: 1.6;
-}
-
-/* ---------- COME FUNZIONA — 3 step (kept minimal) ---------- */
-.steps-grid { display: grid; gap: 20px; }
-@media (min-width: 768px) { .steps-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; } }
-
-.step-card {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 28px 24px;
-  transition: box-shadow .2s ease, transform .2s ease;
-}
-.step-card:hover { transform: translateY(-2px); }
-.step-icon {
-  width: 48px; height: 48px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--info-bg);
-  border-radius: 12px;
-  margin-bottom: 20px;
-}
-.step-icon svg { width: 24px; height: 24px; color: var(--cta); }
-.step-card h3 { margin-bottom: 8px; }
-.step-card p { color: var(--text-secondary); font-size: .975rem; }
-.step-time {
-  display: inline-block;
-  margin-top: 14px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent-dark);
-  letter-spacing: .04em;
-}
-
-/* ---------- BETA PLAN (Sostituisce pricing tier) ---------- */
-.beta-card {
-  max-width: 880px;
-  margin: 0 auto;
-  background: var(--bg);
-  border: 2px solid var(--cta);
-  border-radius: 18px;
-  padding: 36px 32px;
-  display: grid;
-  gap: 22px;
-  text-align: center;
-}
-@media (min-width: 768px) { .beta-card { grid-template-columns: 1.4fr 1fr; text-align: left; align-items: center; gap: 32px; } }
-
-.beta-badge {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: #fff;
-  background: var(--cta);
-  padding: 5px 12px;
-  border-radius: 9999px;
-  margin-bottom: 14px;
-}
-.beta-card h3 { font-size: 1.5rem; margin-bottom: 8px; }
-.beta-card p { color: var(--text-secondary); line-height: 1.6; }
-
-.beta-cta-row { display: flex; justify-content: center; }
-@media (min-width: 768px) { .beta-cta-row { justify-content: flex-start; } }
-
-.beta-foot {
-  margin-top: 14px;
-  font-size: 13px;
-  color: var(--text-tertiary);
-  line-height: 1.5;
-}
-
-.beta-out-of {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 18px;
-  margin-top: 18px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  font-weight: 600;
-}
-.beta-out-of span { display: inline-flex; align-items: center; gap: 6px; }
-.beta-out-of span::before {
-  content: '';
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  background: var(--success);
-  border-radius: 50%;
-}
-
-/* ---------- Garanzia ---------- */
-.guarantee-section { padding-top: 24px !important; }
-.guarantee-card {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 28px 30px;
-  border: 1px solid var(--info-border);
-  border-radius: 14px;
-  display: flex; align-items: center; justify-content: space-between; gap: 24px;
-  background: var(--info-bg);
-}
-.guarantee-copy { max-width: 680px; }
-.guarantee-kicker {
-  color: var(--accent-dark);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-.guarantee-card h2 { font-size: clamp(1.5rem, 2vw, 2rem); margin-bottom: 10px; }
-.guarantee-card p { color: var(--text-secondary); }
-.guarantee-note { margin-top: 10px; font-size: 13px; color: var(--text-tertiary) !important; }
-.guarantee-mark { color: var(--accent-dark); font-size: 3rem; line-height: 1; flex-shrink: 0; }
-@media (max-width: 600px) {
-  .guarantee-card { align-items: flex-start; padding: 24px 20px; }
-  .guarantee-mark { display: none; }
-}
-
-/* ---------- FAQ (trimmed to 6) ---------- */
-.faq-list { max-width: 740px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-.faq-item {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 18px 22px;
-  transition: box-shadow .2s ease;
-}
-.faq-item:hover { box-shadow: 0 6px 16px rgba(15,76,129,.08); }
-.faq-item summary {
-  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
-  cursor: pointer;
-  list-style: none;
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-.faq-item summary::-webkit-details-marker { display: none; }
-.faq-item summary::marker { display: none; content: ''; }
-.faq-chevron {
-  flex-shrink: 0;
-  font-weight: 800;
-  color: var(--accent);
-  font-size: 14px;
-  transition: transform .25s cubic-bezier(.16,1,.3,1);
-  display: inline-block;
-  margin-top: 2px;
-}
-.faq-item[open] .faq-chevron { transform: rotate(180deg); }
-.faq-answer {
-  margin-top: 12px;
-  font-size: 15px;
-  color: var(--text-secondary);
-  line-height: 1.65;
-}
-
-/* ---------- Fiducia ---------- */
-.fiducia-content { max-width: 640px; margin: 0 auto; text-align: center; }
-.fiducia-lead {
-  color: var(--accent-dark);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-.fiducia-content h2 { margin-bottom: 24px; }
-.fiducia-copy {
-  color: var(--text-secondary);
-  font-size: 1.0625rem;
-  line-height: 1.7;
-  margin-bottom: 36px;
-}
-.free-trial-icon {
-  width: 120px; height: 120px;
-  margin: 0 auto;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--info-bg);
-  border-radius: 50%;
-}
-.free-trial-icon svg { width: 80px; height: 80px; }
-
-/* ---------- CTA chiusura (pre-footer reinforcement) ---------- */
-.cta-close {
-  text-align: center;
-  max-width: 720px;
-  margin: 0 auto;
-  background: var(--info-bg);
-  border: 1px solid var(--info-border);
-  border-radius: 18px;
-  padding: 36px 28px;
-}
-.cta-close h2 { margin-bottom: 12px; font-size: clamp(1.5rem, 2vw, 2rem); }
-.cta-close p {
-  color: var(--text-secondary);
-  margin-bottom: 28px;
-  font-size: 1.0625rem;
-  line-height: 1.55;
-}
-.cta-close-group {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  align-items: center;
-  justify-content: center;
-}
-@media (min-width: 540px) {
-  .cta-close-group { flex-direction: row; gap: 20px; }
-}
-
-/* ---------- Footer ---------- */
-footer {
-  border-top: 1px solid var(--border);
-  padding: 40px 0 48px;
-  background: var(--bg);
-}
-.footer-inner {
-  display: flex; flex-direction: column;
-  gap: 20px;
-  align-items: center;
-  text-align: center;
-}
-@media (min-width: 768px) {
-  .footer-inner { flex-direction: row; justify-content: space-between; text-align: left; align-items: flex-start; }
-}
-.footer-brand-name { font-weight: 800; color: var(--text-primary); font-size: 1rem; margin-bottom: 4px; }
-.footer-trust { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
-.footer-links { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
-.footer-links a {
-  color: var(--text-secondary);
-  font-size: 14px;
-  font-weight: 500;
-  transition: color .15s ease;
-}
-.footer-links a:hover { color: var(--accent); }
-.footer-copy {
-  margin-top: 24px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-tertiary);
-}
-
-/* ---------- Animazioni sobrie ---------- */
-.hero-rise > * {
-  opacity: 0;
-  animation: hero-rise-anim .5s cubic-bezier(.2, .8, .2, 1) forwards;
-}
-.hero-rise > *:nth-child(1) { animation-delay: 60ms; }
-.hero-rise > *:nth-child(2) { animation-delay: 130ms; }
-.hero-rise > *:nth-child(3) { animation-delay: 200ms; }
-.hero-rise > *:nth-child(4) { animation-delay: 270ms; }
-.hero-rise > *:nth-child(5) { animation-delay: 340ms; }
-.hero-rise > *:nth-child(6) { animation-delay: 410ms; }
-.hero-rise > *:nth-child(7) { animation-delay: 480ms; }
-@keyframes hero-rise-anim {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.fade-in {
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity .4s ease-out, transform .4s ease-out;
-}
-.fade-in.is-visible { opacity: 1; transform: translateY(0); }
-
-@keyframes typing-blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .001ms !important;
-    scroll-behavior: auto !important;
-  }
-  .hero-rise > * { opacity: 1 !important; transform: none !important; }
-  .fade-in { opacity: 1 !important; transform: none !important; }
-}
-
-/* ---------- Mobile responsive fine-tuning ---------- */
-@media (max-width: 720px) {
-  .hero { padding: 36px 0 24px; }
-  .hero-grid { gap: 32px; }
-  .trust-bar { gap: 12px 18px; padding: 14px 16px; font-size: 12px; }
-  .confronto-table { font-size: 14px; }
-  .confronto-table thead th { padding: 10px 12px; font-size: 11px; }
-  .confronto-table tbody td { padding: 12px 12px; }
-  .confronto-table tbody td:first-child { width: 40%; font-size: 13px; }
-  .beta-card { padding: 26px 22px; }
-}
-</style>
-<!-- Schema.org: FAQPage + SoftwareApplication (zero fake data, all preset/live info) -->
+<!-- Schema.org: FAQPage + SoftwareApplication (no fake data, all verifiable state) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -1022,14 +47,991 @@ footer {
         {"@type": "Question", "name": "Posso allenarmi su materie standard senza caricare il bando?", "acceptedAnswer": {"@type": "Answer", "text": "Sì. Sono disponibili materie standard (Diritto Amministrativo, Costituzionale, Contabilità Pubblica, Diritto Penale) per simulazioni più generali di pratica."}},
         {"@type": "Question", "name": "I miei dati sono al sicuro?", "acceptedAnswer": {"@type": "Answer", "text": "Sì. I bandi sono salvati cifrati su Supabase, datacenter UE. Nessun dato è condiviso con terze parti. Puoi cancellare tutto dalla dashboard in qualunque momento."}},
         {"@type": "Question", "name": "E se il bando è stato pubblicato da pochi giorni?", "acceptedAnswer": {"@type": "Answer", "text": "Lo carichi tu come PDF o testo. L'AI estrae argomenti e riferimenti normativi dai materiali che hai caricato."}},
-        {"@type": "Question", "name": "Posso rispondere a voce o solo per iscritto?", "acceptedAnswer": {"@type": "Answer", "text": "Entrambe. Hai un pulsante microfono (riconoscimento vocale del browser) e un campo di testo. Il commissario AI capisce entrambi."}},
-        {"@type": "Question", "name": "Quanto tempo ci vuole per vedere miglioramenti?", "acceptedAnswer": {"@type": "Answer", "text": "Una soglia realistica: dopo 5-6 simulazioni complete, il punteggio su chiarezza tende a salire. È un indicatore, non una garanzia, e la qualità del bando caricato conta molto."}}
+        {"@type": "Question", "name": "Posso rispondere a voce o solo per iscritto?", "acceptedAnswer": {"@type": "Answer", "text": "Entrambe. Hai un pulsante microfono (riconoscimento vocale del browser) e un campo di testo. Il commissario AI capisce entrambi."}}
       ]
     }
   ]
 }
 </script>
 
+<style>
+/* ==========================================================================
+   ConcorsoAI Landing v19 — composition valida post-ricerca
+   7 sezioni (+ footer). Drop di Pain / CTA-chiusura / Come-funziona / Garanzia-separata.
+   Anti-AI-slop concreto: spacing 96-160px, no Memphis, palette ristretta, Geist Mono via system fallback.
+   Zero dipendenze esterne: niente Tailwind, GSAP, Google Fonts. Vanilla CSS + JS.
+   ========================================================================== */
+
+* { box-sizing: border-box; }
+
+:root {
+  --bg: #FFFFFF;
+  --bg-alt: #F8F9FA;
+  --bg-alt-soft: #FBFCFE;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-tertiary: #6B7280;
+  --accent: #1A73E8;
+  --accent-dark: #1457B0;
+  --accent-deep: #0B2A4A;
+  --cta: #1A73E8;
+  --cta-hover: #1457B0;
+  --border: #E5E7EB;
+  --border-light: #EFF1F4;
+  --border-strong: #CBD5E1;
+
+  --success: #16A34A;
+  --success-deep: #0F766E;
+  --success-bg: #ECFDF5;
+  --warning: #B45309;
+  --warning-bg: #FFFBEB;
+  --error: #DC2626;
+  --error-bg: #FEF2F2;
+
+  --info-bg: #EFF6FF;
+  --info-border: #BFDBFE;
+  --info-text: #1457B0;
+
+  --bento-bg-soft: #F7FBFF;
+  --shadow-card: 0 12px 32px rgba(15,76,129,.08), 0 2px 6px rgba(15,76,129,.04);
+  --shadow-card-hover: 0 22px 56px rgba(15,76,129,.12), 0 4px 10px rgba(15,76,129,.06);
+
+  /* Geist Mono via system fallback (no CDN, zero deps). Fallback chain
+     is critical: GBM-only machines → ui-monospace → system mono. */
+  --font-mono: 'Geist Mono', 'JetBrains Mono', 'SF Mono', ui-monospace, 'Cascadia Code', Menlo, Monaco, Consolas, monospace;
+}
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 { font-weight: 800; line-height: 1.15; letter-spacing: -0.025em; margin: 0; color: var(--text-primary); }
+h1 { font-size: clamp(2.4rem, 5vw + 0.5rem, 4rem); letter-spacing: -0.04em; }
+h2 { font-size: clamp(1.875rem, 2.5vw + 1rem, 2.6rem); }
+h3 { font-size: 1.25rem; letter-spacing: -0.015em; }
+h4 { font-size: 1.0625rem; }
+p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; padding: 0; margin: 0; }
+.hidden { display: none !important; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+@media (min-width: 768px) { .container { padding: 0 32px; } }
+
+::selection { background: #EFF6FF; color: var(--text-primary); }
+
+.skip-link {
+  position: fixed; top: 8px; left: 8px;
+  background: var(--text-primary); color: #fff;
+  padding: 10px 14px; border-radius: 6px; font-weight: 700; font-size: 14px;
+  z-index: 100; transform: translateY(-200%);
+  transition: transform .15s ease;
+}
+.skip-link:focus { transform: translateY(0); }
+
+/* ---------- Navbar ---------- */
+.navbar {
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,.85);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  position: sticky; top: 0; z-index: 50;
+}
+.navbar-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px;
+}
+.logo { font-size: 1.125rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-primary); }
+.logo span { color: var(--cta); }
+
+.nav-cta {
+  background: var(--cta);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  min-height: 48px;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: transform .15s ease, background .15s ease;
+}
+.nav-cta:hover { background: var(--cta-hover); transform: scale(1.02); }
+.nav-cta:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
+
+/* ---------- Sezioni: spacing generoso "vibe-coded" ---------- */
+.section { padding: 96px 0; }
+@media (min-width: 768px) { .section { padding: 144px 0; } }
+.section.section-tight { padding: 80px 0; }
+@media (min-width: 768px) { .section-tight { padding: 112px 0; } }
+.section.bg-alt { background: var(--bg-alt); }
+
+.section-heading { text-align: center; max-width: 680px; margin: 0 auto 56px; }
+.section-eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.section-heading h2 { margin-bottom: 16px; }
+.section-heading p {
+  color: var(--text-secondary);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  padding: 96px 0 64px;
+  background:
+    radial-gradient(1100px 600px at 80% -10%, rgba(26,115,232,.06), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, rgba(20,87,176,.05), transparent 55%);
+}
+@media (min-width: 768px) { .hero { padding: 128px 0 80px; } }
+
+.hero-grid {
+  display: grid;
+  gap: 48px;
+  align-items: center;
+}
+@media (min-width: 900px) {
+  .hero-grid { grid-template-columns: 0.95fr 1.05fr; gap: 56px; }
+}
+
+.hero-text { max-width: 560px; }
+.hero-offer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--info-text);
+  padding: 6px 14px;
+  background: rgba(239,246,255,.6);
+  border: 1px solid var(--info-border);
+  border-radius: 9999px;
+  margin-bottom: 24px;
+}
+.hero-offer .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--success);
+  display: inline-block;
+  animation: heroDotPulse 2.6s ease-in-out infinite;
+}
+@keyframes heroDotPulse {
+  0%, 80%, 100% { transform: scale(1); opacity: 1; }
+  90% { transform: scale(1.6); opacity: 0.6; }
+}
+
+.hero h1 { margin-bottom: 18px; }
+.hero-tagline {
+  font-size: 1.1875rem;
+  color: var(--text-secondary);
+  font-weight: 700;
+  margin-bottom: 16px;
+  line-height: 1.35;
+  max-width: 540px;
+}
+.hero-subtitle {
+  font-size: 1.0625rem;
+  color: var(--text-secondary);
+  max-width: 540px;
+  margin-bottom: 36px;
+  line-height: 1.65;
+}
+@media (min-width: 768px) { .hero-subtitle { font-size: 1.125rem; } }
+
+.hero-cta-group {
+  display: flex; flex-direction: column; gap: 16px; align-items: flex-start;
+}
+@media (min-width: 480px) {
+  .hero-cta-group { flex-direction: row; align-items: center; gap: 24px; }
+}
+
+.cta-primary {
+  background: var(--cta);
+  color: #fff;
+  padding: 18px 32px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.0625rem;
+  min-height: 56px;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+  box-shadow: 0 4px 14px rgba(26,115,232,.22);
+}
+@media (min-width: 768px) { .cta-primary { font-size: 1.125rem; padding: 19px 34px; } }
+.cta-primary:hover { background: var(--cta-hover); transform: translateY(-1px); box-shadow: 0 10px 28px rgba(26,115,232,.30); }
+.cta-primary:active { transform: translateY(0); }
+.cta-primary:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
+
+.cta-link {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  padding: 10px 4px;
+  min-height: 48px;
+  display: inline-flex; align-items: center; gap: 4px;
+  transition: color .15s ease;
+}
+.cta-link:hover { color: var(--accent-dark); }
+.cta-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+/* Trust micro-badges — 4 pill orizzontali, vibe-coded clean */
+.trust-pills {
+  display: flex; flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: 56px auto 0;
+  justify-content: center;
+}
+.trust-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: var(--bg);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: border-color .15s ease, transform .15s ease;
+}
+.trust-pill:hover { border-color: var(--info-border); transform: translateY(-1px); }
+.trust-pill svg { width: 14px; height: 14px; color: var(--accent); }
+
+/* ---------- Mockup hero (kept as-a-thing) ---------- */
+.mockup-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 1.6rem;
+  max-width: 660px;
+  width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow .25s ease;
+}
+.mockup-card:hover { box-shadow: var(--shadow-card-hover); }
+
+.mockup-chrome {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--bg-alt-soft);
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+.mockup-chrome-left { display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1; }
+.mockup-chrome-logo {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 800;
+  color: var(--text-primary);
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
+}
+.mockup-chrome-dot { width: 8px; height: 8px; background: var(--cta); border-radius: 50%; flex-shrink: 0; }
+.mockup-breadcrumb {
+  font-family: var(--font-mono);
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mockup-breadcrumb-current { color: var(--text-primary); font-weight: 700; }
+.mockup-chrome-avatar {
+  width: 28px; height: 28px;
+  background: var(--cta); color: #fff;
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 800;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: .02em;
+}
+
+.mockup-body { min-height: 380px; }
+.mockup-main { padding: 18px; min-width: 0; }
+
+.mockup-status {
+  display: flex; align-items: center; gap: 14px;
+  padding: 8px 12px;
+  background: var(--bg-alt-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+}
+.mockup-status-item { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.mockup-status-dot {
+  width: 7px; height: 7px;
+  background: var(--success);
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: statusPulse 2.6s ease-in-out infinite;
+}
+@keyframes statusPulse {
+  0%, 80%, 100% { transform: scale(1); opacity: 1; }
+  90% { transform: scale(1.5); opacity: 0.55; }
+}
+.mockup-status-timer { color: var(--text-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
+.timer-num { color: var(--cta); }
+
+.mockup-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; text-transform: uppercase; letter-spacing: .12em; font-weight: 700;
+  color: var(--text-tertiary);
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.mockup-eyebrow-dot { width: 6px; height: 6px; background: var(--cta); border-radius: 50%; display: inline-block; }
+
+.mockup-tabs {
+  display: flex; gap: 4px;
+  background: var(--bg-alt-soft);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+.mockup-tab {
+  flex: 1;
+  background: transparent; border: none;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 13px; font-weight: 700;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+  font-family: inherit;
+  min-height: 44px;
+  text-align: center;
+}
+.mockup-tab:hover { color: var(--text-primary); }
+.mockup-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mockup-tab.is-active { background: var(--bg); color: var(--cta); box-shadow: 0 1px 2px rgba(15,76,129,.08); }
+
+.mockup-panel { transition: opacity .2s ease; }
+.mockup-meta {
+  font-family: var(--font-mono);
+  font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700;
+  color: var(--text-tertiary);
+  margin-bottom: 10px;
+}
+.mockup-content { font-size: 16px; line-height: 1.55; color: var(--text-primary); }
+.mockup-content em.missed {
+  background: var(--warning-bg);
+  color: var(--warning);
+  font-style: normal;
+  font-weight: 600;
+  padding: 0 4px;
+  border-radius: 3px;
+  text-decoration: line-through wavy var(--warning);
+  text-decoration-thickness: 1.5px;
+}
+.typing-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 0.9em;
+  background: var(--cta);
+  margin-left: 6px;
+  vertical-align: text-bottom;
+  animation: typing-blink 1s steps(2, end) infinite;
+  border-radius: 1px;
+}
+
+.mockup-score-row {
+  display: flex; align-items: center; gap: 18px;
+  padding-bottom: 14px; margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.mockup-score-circle {
+  width: 84px; height: 84px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--bg-alt-soft);
+  border: 3px solid var(--cta);
+  border-radius: 50%;
+  flex-shrink: 0;
+  line-height: 1;
+  font-family: var(--font-mono);
+}
+.mockup-score-num { font-size: 28px; font-weight: 800; color: var(--text-primary); }
+.mockup-score-of { font-size: 11px; color: var(--text-tertiary); font-weight: 600; margin-top: 2px; }
+.mockup-score-detail { flex: 1; }
+.mockup-score-label { font-size: 14px; color: var(--text-primary); font-weight: 700; line-height: 1.4; margin-bottom: 4px; }
+.mockup-score-note { font-size: 12px; color: var(--text-tertiary); line-height: 1.5; }
+
+.mockup-feedback { margin: 0 0 14px 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.mockup-feedback li {
+  font-size: 14px; color: var(--text-primary);
+  padding: 10px 12px;
+  border-radius: 8px;
+  display: flex; align-items: flex-start; gap: 10px;
+  line-height: 1.5;
+}
+.mockup-feedback .report-good { background: var(--success-bg); }
+.mockup-feedback .report-work { background: var(--warning-bg); }
+.mockup-feedback .report-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  font-weight: 800; font-size: 12px;
+  flex-shrink: 0;
+  color: #fff;
+  margin-top: 1px;
+  font-family: var(--font-mono);
+}
+.mockup-feedback .report-good .report-icon { background: var(--success-deep); }
+.mockup-feedback .report-work .report-icon { background: var(--warning); }
+.mockup-extra {
+  font-size: 12px; color: var(--text-secondary);
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  line-height: 1.5;
+}
+
+/* ============================================
+   R1 MINI-QUIZ — 5 materie interattive (lifted)
+   ============================================ */
+.quiz-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 1.6rem;
+  box-shadow: var(--shadow-card);
+  padding: 36px 32px;
+  max-width: 720px;
+  margin: 0 auto;
+  transition: box-shadow .25s ease;
+}
+@media (min-width: 768px) { .quiz-card { padding: 48px 40px; } }
+.quiz-card:hover { box-shadow: var(--shadow-card-hover); }
+
+.quiz-pills {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+}
+.quiz-pill {
+  font-family: inherit;
+  font-size: 14px; font-weight: 700;
+  padding: 11px 18px;
+  border-radius: 9999px;
+  background: var(--bg);
+  border: 1.5px solid var(--border-strong);
+  color: var(--accent-dark);
+  cursor: pointer;
+  min-height: 44px;
+  transition: background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .15s ease;
+}
+.quiz-pill:hover:not(.is-active) { background: var(--bg-alt-soft); border-color: var(--info-border); transform: translateY(-1px); }
+.quiz-pill:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.quiz-pill.is-active {
+  background: linear-gradient(135deg, var(--cta), var(--accent-dark));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 10px 28px rgba(26,115,232,.32);
+  transform: scale(1.02);
+}
+
+.quiz-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 28px auto;
+  max-width: 480px;
+}
+
+.quiz-panel {
+  display: none;
+  animation: quizFadeIn .35s ease-out;
+}
+.quiz-panel.is-active { display: block; }
+@keyframes quizFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.quiz-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--success-deep);
+  margin-bottom: 12px;
+}
+.quiz-question {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--text-primary);
+  margin-bottom: 18px;
+  font-style: italic;
+}
+.quiz-answer-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-dark);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.quiz-answer-body {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.quiz-cta-bar {
+  margin-top: 32px;
+  display: flex; flex-direction: column; gap: 14px; align-items: center; justify-content: center;
+}
+@media (min-width: 560px) {
+  .quiz-cta-bar { flex-direction: row; gap: 24px; }
+}
+
+/* ============================================
+   CONFRONTO CRUDO — asymmetric card stack (Raycast pattern)
+   1 winner card full-width + 2 alt cards side-by-side
+   ============================================ */
+.compare-stack {
+  max-width: 980px;
+  margin: 0 auto;
+  display: grid;
+  gap: 16px;
+}
+.compare-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 820px) {
+  .compare-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.compare-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 1.4rem;
+  padding: 28px 28px 24px;
+  position: relative;
+  transition: box-shadow .2s ease, transform .2s ease, border-color .15s ease;
+}
+.compare-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card-hover); }
+
+.compare-card.us {
+  background: linear-gradient(180deg, var(--info-bg) 0%, var(--bg) 70%);
+  border-color: var(--info-border);
+  padding: 36px 32px 32px;
+}
+.compare-card-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  background: var(--cta);
+  color: #fff;
+  margin-bottom: 14px;
+}
+.compare-card.alt .compare-card-tag {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-tertiary);
+}
+
+.compare-card h3 { font-size: 1.375rem; margin-bottom: 8px; line-height: 1.25; }
+.compare-card-sub {
+  color: var(--text-secondary);
+  font-size: .975rem;
+  line-height: 1.55;
+  margin-bottom: 22px;
+  max-width: 540px;
+}
+
+.compare-rows { display: flex; flex-direction: column; gap: 14px; }
+.compare-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 14px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border-light);
+}
+.compare-row:last-child { border-bottom: none; }
+@media (max-width: 560px) {
+  .compare-row { grid-template-columns: 1fr; gap: 4px; }
+}
+.compare-row-name {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.compare-row-val {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+.compare-card.alt .compare-row-val { color: var(--text-secondary); }
+
+.compare-footnote {
+  margin-top: 28px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  line-height: 1.6;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ============================================
+   METODO — bento mosaic (1 large + 3 smaller)
+   ============================================ */
+.metodo-bento {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 720px) {
+  .metodo-bento {
+    grid-template-columns: 1.4fr 1fr;
+    grid-auto-rows: minmax(180px, auto);
+  }
+}
+@media (min-width: 980px) {
+  .metodo-bento {
+    grid-template-columns: 1.4fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-areas:
+      "large t1"
+      "large t2"
+      "t3   t3";
+  }
+  .metodo-tile.tile-large { grid-area: large; }
+  .metodo-tile:nth-of-type(2) { grid-area: t1; }
+  .metodo-tile:nth-of-type(3) { grid-area: t2; }
+  .metodo-tile:nth-of-type(4) { grid-area: t3; }
+}
+.metodo-tile {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 1.4rem;
+  padding: 26px 26px 24px;
+  display: flex; flex-direction: column;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .15s ease;
+}
+.metodo-tile:hover { transform: translateY(-3px); box-shadow: var(--shadow-card-hover); }
+
+.metodo-tile.tile-large {
+  background: linear-gradient(150deg, var(--info-bg) 0%, var(--bg) 70%);
+  border-color: var(--info-border);
+  padding: 36px 32px 30px;
+  grid-row: span 2;
+}
+@media (max-width: 719px) { .metodo-tile.tile-large { grid-row: auto; } }
+
+.metodo-tag {
+  font-family: var(--font-mono);
+  display: inline-flex; align-items: center; align-self: flex-start;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--accent-dark);
+  background: var(--bg);
+  border: 1px solid var(--info-border);
+  padding: 5px 10px;
+  border-radius: 6px;
+  margin-bottom: 14px;
+}
+.metodo-tile.tile-large .metodo-tag {
+  font-size: 12px;
+  padding: 6px 12px;
+  background: var(--bg);
+  border-color: var(--cta);
+  color: var(--accent-dark);
+}
+.metodo-tile h3 { font-size: 1.1875rem; margin-bottom: 10px; line-height: 1.25; }
+.metodo-tile.tile-large h3 { font-size: 1.5rem; }
+.metodo-tile p {
+  color: var(--text-secondary);
+  font-size: .9375rem;
+  line-height: 1.6;
+}
+.metodo-tile.tile-large p { font-size: 1rem; }
+
+/* ============================================
+   DISPONIBILITÀ — Beta aperta + garanzia fused inline pill
+   ============================================ */
+.beta-card {
+  max-width: 920px;
+  margin: 0 auto;
+  background: var(--bg);
+  border: 2px solid var(--cta);
+  border-radius: 1.6rem;
+  padding: 44px 36px;
+  display: grid;
+  gap: 32px;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+}
+@media (min-width: 768px) {
+  .beta-card { grid-template-columns: 1.4fr 1fr; text-align: left; align-items: center; gap: 40px; padding: 56px 48px; }
+}
+
+.beta-badge {
+  display: inline-flex; align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--cta);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  margin-bottom: 16px;
+}
+.beta-card h3 { font-size: 1.625rem; margin-bottom: 10px; line-height: 1.2; }
+.beta-card .beta-sub {
+  color: var(--text-secondary);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  margin-bottom: 22px;
+}
+
+.beta-features {
+  display: flex; flex-wrap: wrap;
+  gap: 14px 26px;
+  margin-top: 8px;
+}
+.beta-features span {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.beta-features span::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+}
+
+.beta-cta-block { display: flex; flex-direction: column; gap: 14px; align-items: center; }
+@media (min-width: 768px) { .beta-cta-block { align-items: flex-start; } }
+
+.beta-garanzia-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-dark);
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
+  padding: 8px 14px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+.beta-garanzia-pill svg { width: 14px; height: 14px; }
+.beta-foot {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+
+/* ============================================
+   FAQ — 5 domande (Pareto optimum)
+   ============================================ */
+.faq-list {
+  max-width: 740px;
+  margin: 0 auto;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.faq-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 26px;
+  transition: background .18s ease, box-shadow .2s ease, border-color .15s ease;
+}
+.faq-item:hover { background: var(--bg-alt-soft); border-color: var(--border-strong); box-shadow: 0 6px 16px rgba(15,76,129,.06); }
+.faq-item summary {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::marker { display: none; content: ''; }
+.faq-chevron {
+  flex-shrink: 0;
+  font-weight: 800;
+  color: var(--accent);
+  font-size: 14px;
+  transition: transform .25s cubic-bezier(.16,1,.3,1);
+  display: inline-block;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+}
+.faq-item[open] .faq-chevron { transform: rotate(180deg); }
+.faq-answer {
+  margin-top: 14px;
+  font-size: 15.5px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 640px;
+}
+
+/* ============================================
+   FIDUCIA — closing onesty pillar (scarico, <1 viewport)
+   ============================================ */
+.fiducia-anchor {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+.fiducia-lead {
+  font-family: var(--font-mono);
+  color: var(--accent-dark);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.fiducia-anchor h2 { margin-bottom: 22px; }
+.fiducia-copy {
+  color: var(--text-secondary);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  margin-bottom: 36px;
+}
+.free-trial-icon {
+  width: 104px; height: 104px;
+  margin: 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--info-bg);
+  border-radius: 50%;
+}
+
+/* ---------- Footer ---------- */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 48px 0 56px;
+  background: var(--bg-alt);
+}
+.footer-inner {
+  display: flex; flex-direction: column;
+  gap: 24px;
+  align-items: center;
+  text-align: center;
+}
+@media (min-width: 768px) {
+  .footer-inner { flex-direction: row; justify-content: space-between; text-align: left; align-items: flex-start; }
+}
+.footer-brand-name { font-weight: 800; color: var(--text-primary); font-size: 1rem; margin-bottom: 4px; }
+.footer-trust { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+.footer-links { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+.footer-links a {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  transition: color .15s ease;
+}
+.footer-links a:hover { color: var(--accent); }
+.footer-copy {
+  margin-top: 28px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+/* ---------- Animazioni sobrie ---------- */
+.hero-rise > * {
+  opacity: 0;
+  animation: hero-rise-anim .5s cubic-bezier(.2, .8, .2, 1) forwards;
+}
+.hero-rise > *:nth-child(1) { animation-delay: 60ms; }
+.hero-rise > *:nth-child(2) { animation-delay: 130ms; }
+.hero-rise > *:nth-child(3) { animation-delay: 200ms; }
+.hero-rise > *:nth-child(4) { animation-delay: 270ms; }
+.hero-rise > *:nth-child(5) { animation-delay: 340ms; }
+.hero-rise > *:nth-child(6) { animation-delay: 410ms; }
+@keyframes hero-rise-anim {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .4s ease-out, transform .4s ease-out;
+}
+.fade-in.is-visible { opacity: 1; transform: translateY(0); }
+
+@keyframes typing-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .hero-rise > * { opacity: 1 !important; transform: none !important; }
+  .fade-in { opacity: 1 !important; transform: none !important; }
+  .quiz-pill.is-active { transform: none !important; }
+  .quiz-panel { animation: none !important; }
+}
+
+/* ---------- Mobile responsive fine-tuning ---------- */
+@media (max-width: 720px) {
+  .section { padding: 64px 0; }
+  .hero { padding: 64px 0 48px; }
+  .hero-grid { gap: 36px; }
+  .trust-pills { gap: 8px 10px; margin-top: 36px; }
+  .trust-pill { font-size: 12px; padding: 7px 12px; }
+  .beta-card { padding: 32px 22px; gap: 24px; }
+  .metodo-tile { padding: 22px 20px; }
+  .compare-card { padding: 24px 22px; }
+}
+</style>
 </head>
 
 <body>
@@ -1046,18 +1048,23 @@ footer {
 
 <main id="main">
 
-<!-- ============== HERO ============== -->
+<!-- ============== 1. HERO (lifted) ============== -->
 <section class="hero" aria-labelledby="hero-h1">
   <div class="container">
     <div class="hero-grid">
       <div class="hero-text hero-rise">
-        <p class="hero-offer">3 simulazioni gratis al mese · Nessuna carta richiesta</p>
+        <p class="hero-offer"><span class="dot" aria-hidden="true"></span>3 simulazioni gratis al mese · Nessuna carta richiesta</p>
         <h1 id="hero-h1">Simula l'orale sul tuo bando.</h1>
         <p class="hero-tagline">Domande solo sul tuo programma, non risposte generiche.</p>
         <p class="hero-subtitle">Carica il bando o il manuale. Il commissario AI fa domande, corregge le tue risposte e ti dice cosa ripassare prima dell'esame.</p>
         <div class="hero-cta-group">
-          <a href="auth.html?mode=register" class="cta-primary">Simula l'orale gratuitamente</a>
-          <a href="#scegli-materia" class="cta-link">Vedi una domanda d'esempio →</a>
+          <a href="auth.html?mode=register" class="cta-primary">Simula l'orale gratuitamente →</a>
+        </div>
+        <div class="trust-pills" aria-label="Caratteristiche di sicurezza e accesso">
+          <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg>Dati cifrati</span>
+          <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Server UE (GDPR)</span>
+          <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Nessuna carta</span>
+          <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>Disdici quando vuoi</span>
         </div>
       </div>
 
@@ -1082,23 +1089,18 @@ footer {
           <div class="mockup-main">
             <div class="mockup-eyebrow">
               <span class="mockup-eyebrow-dot" aria-hidden="true"></span>
-              Esempio di sessione · Diritto Amministrativo
+              Esempio di sessione
             </div>
 
             <div class="mockup-status" aria-label="Stato della simulazione">
               <span class="mockup-status-item">
-                <span class="mockup-status-dot live" aria-hidden="true"></span>
+                <span class="mockup-status-dot" aria-hidden="true"></span>
                 Microfono attivo
               </span>
               <span class="mockup-status-item" id="mockup-timer-status" aria-label="Timer simulazione: 01:23 di 05:00">
-                <span class="mockup-status-timer">
-                  <span class="timer-num" id="mockup-timer">01:23</span>
-                  <span class="timer-of">&nbsp;/&nbsp;05:00</span>
-                </span>
+                <span class="mockup-status-timer"><span class="timer-num" id="mockup-timer">01:23</span> / 05:00</span>
               </span>
-              <span class="mockup-status-item">
-                <span class="mockup-status-timer"><span id="mockup-progress-text">Domanda 4 / 12</span></span>
-              </span>
+              <span class="mockup-status-item">Domanda 04 / 12</span>
             </div>
 
             <div class="mockup-tabs" role="tablist" aria-label="Stati di una simulazione">
@@ -1108,19 +1110,19 @@ footer {
             </div>
 
             <div class="mockup-panel" role="tabpanel" aria-labelledby="tab-question" id="panel-question" data-panel="question" aria-hidden="false">
-              <p class="mockup-meta">Domanda di esempio:</p>
+              <p class="mockup-meta">Domanda di esempio</p>
               <p class="mockup-content">"Mi parli del principio di imparzialità della Pubblica Amministrazione. A quale norma si riferisce?"</p>
-              <p class="mockup-meta-hint">Clicca "2. La tua risposta" per vedere come rispondi.</p>
+              <p class="mockup-meta-hint" style="font-style: italic; font-size: 12px; color: var(--text-tertiary); margin-top: 12px;">Clicca "2. La tua risposta" per vedere come rispondi.</p>
             </div>
 
             <div class="mockup-panel hidden" hidden role="tabpanel" aria-labelledby="tab-answer" id="panel-answer" data-panel="answer" aria-hidden="true">
-              <p class="mockup-meta">Tu rispondi:<span class="typing-cursor" aria-hidden="true"></span></p>
+              <p class="mockup-meta">Tu rispondi<span class="typing-cursor" aria-hidden="true"></span></p>
               <p class="mockup-content">"L'imparzialità è un principio cardine della PA. La PA deve comportarsi in modo equo verso i cittadini, senza favorire nessuno. È un principio generale che discende dalla <em class="missed">Costituzione</em>."</p>
-              <p class="mockup-meta-hint">Clicca "3. Report AI" per vedere il feedback.</p>
+              <p class="mockup-meta-hint" style="font-style: italic; font-size: 12px; color: var(--text-tertiary); margin-top: 12px;">Clicca "3. Report AI" per vedere il feedback.</p>
             </div>
 
             <div class="mockup-panel hidden" hidden role="tabpanel" aria-labelledby="tab-report" id="panel-report" data-panel="report" aria-hidden="true">
-              <p class="mockup-meta">Punteggio di esempio (il tuo dipende dalle risposte):</p>
+              <p class="mockup-meta">Punteggio di esempio (il tuo dipende dalle risposte)</p>
               <div class="mockup-score-row">
                 <div class="mockup-score-circle" aria-label="Punteggio 78 su 100">
                   <div class="mockup-score-num">78</div>
@@ -1152,24 +1154,16 @@ footer {
         </div>
       </div>
     </div>
-
-    <!-- Trust micro-badges: orizzontal collapse sotto hero -->
-    <ul class="trust-bar" aria-label="Caratteristiche di sicurezza e accesso">
-      <li class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg>Dati cifrati</li>
-      <li class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Server UE (GDPR)</li>
-      <li class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Nessuna carta</li>
-      <li class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>Disdici quando vuoi</li>
-    </ul>
   </div>
 </section>
 
-<!-- ============== R1 MINI-QUIZ (migrated from indexx) ============== -->
-<section id="scegli-materia" class="bg-alt content-section">
+<!-- ============== 2. R1 MINI-QUIZ (live demo) ============== -->
+<section id="scegli-materia" class="bg-alt section">
   <div class="container">
     <div class="section-heading fade-in">
       <p class="section-eyebrow">Prova subito</p>
       <h2>Scegli la tua materia. Ti mostro una domanda vera.</h2>
-      <p class="section-subtitle">Tocca una materia. Vedrai una domanda tipo, una risposta-tipo e lo schema per rispondere bene. È un esempio reale, basato sui riferimenti normativi italiani.</p>
+      <p>Tocca una materia. Vedrai una domanda tipo, una risposta-tipo e lo schema per rispondere bene. Esempi reali, ancorati ai riferimenti normativi italiani.</p>
     </div>
 
     <div class="quiz-card fade-in">
@@ -1186,296 +1180,166 @@ footer {
       <div id="qp-amm" class="quiz-panel is-active" role="tabpanel" aria-labelledby="qm-amm" data-materia="amm" tabindex="0">
         <p class="quiz-eyebrow">Domanda d'esempio · Commissario AI</p>
         <p class="quiz-question">"Ci parli del principio di trasparenza nella Pubblica Amministrazione. A quale norma si riferisce?"</p>
-        <p class="quiz-answer-label">Schema di risposta:</p>
+        <p class="quiz-answer-label">Schema di risposta</p>
         <p class="quiz-answer-body">L'art. 1 della L. 241/1990 lo sancisce. Si applica a: accesso agli atti, motivazione dei provvedimenti, pubblicità sui siti istituzionali. Esempio pratico: richiesta di accesso civico generalizzato, ex D.Lgs. 33/2013.</p>
       </div>
 
       <div id="qp-cost" class="quiz-panel" role="tabpanel" aria-labelledby="qm-cost" data-materia="cost" tabindex="0" hidden>
         <p class="quiz-eyebrow">Domanda d'esempio · Commissario AI</p>
         <p class="quiz-question">"Quale articolo della Costituzione italiana sancisce il principio di uguaglianza? Mi faccia un esempio in materia di pubblico impiego."</p>
-        <p class="quiz-answer-label">Schema di risposta:</p>
+        <p class="quiz-answer-label">Schema di risposta</p>
         <p class="quiz-answer-body">L'art. 3 della Costituzione, in particolare il comma 2 sull'uguaglianza sostanziale. In materia di pubblico impiego: divieto di discriminazione nell'accesso, art. 97 Cost., DPR 487/1994 e giurisprudenza costituzionale.</p>
       </div>
 
       <div id="qp-cont" class="quiz-panel" role="tabpanel" aria-labelledby="qm-cont" data-materia="cont" tabindex="0" hidden>
         <p class="quiz-eyebrow">Domanda d'esempio · Commissario AI</p>
         <p class="quiz-question">"Quali sono i principi del bilancio dello Stato? In quali circostanze la Corte Costituzionale ammette scostamenti dal pareggio?"</p>
-        <p class="quiz-answer-label">Schema di risposta:</p>
+        <p class="quiz-answer-label">Schema di risposta</p>
         <p class="quiz-answer-body">Universalità, unità, integrità, specializzazione, annualità e equilibrio (L. 196/2009). La Corte Costituzionale n. 88/2014 qualifica l'equilibrio come principio flessibile in contesti eccezionali, non come regola assoluta.</p>
       </div>
 
       <div id="qp-pen" class="quiz-panel" role="tabpanel" aria-labelledby="qm-pen" data-materia="pen" tabindex="0" hidden>
         <p class="quiz-eyebrow">Domanda d'esempio · Commissario AI</p>
         <p class="quiz-question">"Mi spieghi la differenza tra dolo eventuale e colpa cosciente. Quando si configura il primo?"</p>
-        <p class="quiz-answer-label">Schema di risposta:</p>
+        <p class="quiz-answer-label">Schema di risposta</p>
         <p class="quiz-answer-body">Entrambi presuppongono la rappresentazione anticipata dell'evento. Nel dolo eventuale l'agente accetta il rischio; nella colpa cosciente lo esclude per sé. Cass. Pen. SS.UU. 2014, n. 38343: criterio dell'accettazione del rischio.</p>
       </div>
 
       <div id="qp-altro" class="quiz-panel" role="tabpanel" aria-labelledby="qm-altro" data-materia="altro" tabindex="0" hidden>
         <p class="quiz-eyebrow">Domanda d'esempio · Commissario AI</p>
         <p class="quiz-question">"Mi descriva un caso reale dove ha applicato il principio di buon andamento della Pubblica Amministrazione."</p>
-        <p class="quiz-answer-label">Schema di risposta:</p>
+        <p class="quiz-answer-label">Schema di risposta</p>
         <p class="quiz-answer-body">L'art. 97 della Costituzione enuncia buon andamento e imparzialità. Esempio concreto: riorganizzazione di un ufficio con tempi di evasione calati su pratiche standardizzate. Meglio se hai numeri reali mostrabili.</p>
       </div>
 
       <div class="quiz-cta-bar">
         <a href="auth.html?mode=register" class="cta-primary">Carica il tuo bando →</a>
-        <a href="#confronto" class="cta-link">Vedi il confronto onesto →</a>
+        <a href="#confronto" class="cta-link">oppure confronta con ChatGPT →</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============== IL PROBLEMA (migrated from indexx) ============== -->
-<section class="content-section">
+<!-- ============== 3. CONFRONTO CRUDO (asymmetric card stack) ============== -->
+<section id="confronto" class="section">
   <div class="container">
     <div class="section-heading fade-in">
-      <p class="section-eyebrow">Il problema</p>
-      <h2>Hai studiato tutto. Poi arriva l'orale.</h2>
-      <p class="section-subtitle">La prova scritta è andata. Ma il pensiero di sederti davanti alla commissione ti blocca. Non sei solo.</p>
-    </div>
-
-    <div class="pain-grid">
-      <article class="pain-card fade-in">
-        <div class="pain-icon pain-icon-rose" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h3l2-6 4 12 3-9 2 3h4"/></svg>
-        </div>
-        <h3>Ansia da prestazione</h3>
-        <p>Ti trema la voce, dimentichi cose che sapevi. La pressione della commissione è reale.</p>
-      </article>
-      <article class="pain-card fade-in">
-        <div class="pain-icon pain-icon-amber" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.8 2.8 0 1 1 4.3 2.36c-.93.57-1.8 1.26-1.8 2.64M12 18h.01"/></svg>
-        </div>
-        <h3>Paura dell'imprevisto</h3>
-        <p>Le domande che non ti aspetti. L'argomento che hai ripassato meno. Il vuoto. E se capitasse a te?</p>
-      </article>
-      <article class="pain-card fade-in">
-        <div class="pain-icon pain-icon-blue" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM5 21a7 7 0 0 1 14 0"/></svg>
-        </div>
-        <h3>Nessuno con cui esercitarti</h3>
-        <p>Amici e parenti non conoscono la materia. Ti alleni da solo, davanti allo specchio.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ============== CONFRONTO CRUDO (migrated, "vinciamo" → onesto) ============== -->
-<section id="confronto" class="bg-alt content-section">
-  <div class="container">
-    <div class="section-heading fade-in">
-      <p class="section-eyebrow">Confronto</p>
+      <p class="section-eyebrow">Confronto onesto</p>
       <h2>Noi, ChatGPT, esercitarti da solo.</h2>
-      <p class="section-subtitle">Confronto qualitativo, basato su funzioni disponibili a luglio 2026. ChatGPT resta eccellente dove è nato per essere usato. Noi siamo diversi perché ancorati al tuo bando.</p>
+      <p>Confronto qualitativo basato sull'uso reale dei tre strumenti a luglio 2026. ChatGPT resta eccellente dove è nato per essere usato. Noi siamo diversi perché ancorati al tuo bando.</p>
     </div>
 
-    <div class="confronto-wrap fade-in">
-      <table class="confronto-table">
-        <thead>
-          <tr>
-            <th scope="col">Come si allena</th>
-            <th scope="col" class="th-us">ConcorsoAI</th>
-            <th scope="col">ChatGPT</th>
-            <th scope="col">Da solo</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Domande basate sul tuo bando</td>
-            <td class="cell-us">Estrae dal PDF</td>
-            <td class="cell-other">Solo incollando i testi</td>
-            <td class="cell-other">Solo sui tuoi appunti</td>
-          </tr>
-          <tr>
-            <td>Simulazione orale con timer</td>
-            <td class="cell-us">Voce o testo, timer realistico</td>
-            <td class="cell-other">Solo testo</td>
-            <td class="cell-other">Nessuno</td>
-          </tr>
-          <tr>
-            <td>Feedback 3 metriche live</td>
-            <td class="cell-us">Chiarezza, struttura, contenuto</td>
-            <td class="cell-other">Risposte generiche</td>
-            <td class="cell-other">Nessuno</td>
-          </tr>
-          <tr>
-            <td>Disponibilità</td>
-            <td class="cell-us">24/7</td>
-            <td class="cell-other">24/7</td>
-            <td class="cell-other">Quando vuoi</td>
-          </tr>
-          <tr>
-            <td>Ancoraggio a leggi italiane</td>
-            <td class="cell-us">Sì, riferimenti puntuali</td>
-            <td class="cell-other">No, serve prompt accurato</td>
-            <td class="cell-other">Manuale in mano</td>
-          </tr>
-          <tr>
-            <td>Privacy: server UE cifrato</td>
-            <td class="cell-us">Sì</td>
-            <td class="cell-other">Server extra-UE</td>
-            <td class="cell-other">Locale</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="compare-stack fade-in">
+      <!-- Winner card -->
+      <article class="compare-card us">
+        <span class="compare-card-tag">ConcorsoAI</span>
+        <h3>Allenamento specifico sul tuo concorso.</h3>
+        <p class="compare-card-sub">Carica il bando, il commissario AI estrae gli argomenti e ti interroga solo su quelli. Niente quiz a crocette, niente risposte generiche.</p>
+        <div class="compare-rows">
+          <div class="compare-row"><span class="compare-row-name">Domande sul tuo bando</span><span class="compare-row-val">Estrae i contenuti dal PDF automaticamente</span></div>
+          <div class="compare-row"><span class="compare-row-name">Simulazione orale con timer</span><span class="compare-row-val">Voce o testo, timer realistico di 5 minuti</span></div>
+          <div class="compare-row"><span class="compare-row-name">Feedback 3 metriche live</span><span class="compare-row-val">Chiarezza, struttura, contenuto</span></div>
+          <div class="compare-row"><span class="compare-row-name">Ancoraggio a leggi italiane</span><span class="compare-row-val">Sì, riferimenti puntuali (Costituzione, L. 241/1990, DPR 487/1994)</span></div>
+          <div class="compare-row"><span class="compare-row-name">Server UE cifrato</span><span class="compare-row-val">Sì, Supabase su datacenter UE</span></div>
+        </div>
+      </article>
+
+      <!-- Alt cards side-by-side -->
+      <div class="compare-grid">
+        <article class="compare-card alt">
+          <span class="compare-card-tag">ChatGPT</span>
+          <h3>Ottimo prompt engineer, fragile sul contesto.</h3>
+          <p>Risposte generiche eccellenti, ma servono prompt lunghi per ottenere qualcosa di specifico sul tuo bando. Niente timer, niente feedback strutturato, server extra-UE.</p>
+        </article>
+        <article class="compare-card alt">
+          <span class="compare-card-tag">Da solo</span>
+          <h3>Nessuno strumento è uno strumento.</h3>
+          <p>Leggi appunti e manuali, ma non provi mai l'esposizione orale. Non c'è un timer che ti ferma. Non c'è feedback che ti dice cosa migliorare.</p>
+        </article>
+      </div>
     </div>
 
-    <p class="confronto-footnote">Confronto qualitativo basato sull'uso reale dei tre strumenti a luglio 2026. Nessuna delle righe è una promessa di punteggio: è una descrizione di cosa fa o non fa ciascuno strumento.</p>
+    <p class="compare-footnote">Nessuna riga è una promessa di punteggio. È una descrizione di cosa fa o non fa ciascuno strumento, basata sull'uso reale a luglio 2026.</p>
   </div>
 </section>
 
-<!-- ============== METODO / AUTHORITY (migrated from indexx) ============== -->
-<section class="content-section">
+<!-- ============== 4. METODO — bento mosaic ============== -->
+<section class="bg-alt section">
   <div class="container">
     <div class="section-heading fade-in">
       <p class="section-eyebrow">Metodo</p>
       <h2>Ancorato alle regole della PA italiana.</h2>
-      <p class="section-subtitle">Non è un chatbot generico. È modellato su come funzionano realmente i concorsi pubblici italiani.</p>
+      <p>Non è un chatbot generico. È modellato su come funzionano realmente i concorsi pubblici italiani.</p>
     </div>
 
-    <div class="metodo-grid">
-      <article class="metodo-card fade-in">
-        <span class="metodo-tag">Costituzione + L. 241/1990</span>
-        <h3>Basi giuridiche reali</h3>
-        <p>Domande ancorate a Costituzione, L. 241/1990, DPR 487/1994 e D.Lgs. 33/2013. Non solo "diritto amministrativo generico".</p>
+    <div class="metodo-bento fade-in">
+      <article class="metodo-tile tile-large">
+        <span class="metodo-tag">Basi giuridiche</span>
+        <h3>Costituzione · L. 241/1990 · DPR 487/1994</h3>
+        <p>Le domande che il commissario AI genera sono ancorate ai riferimenti normativi reali della PA italiana: art. 97 Cost. sul buon andamento, L. 241/90 sul procedimento, DPR 487/94 sui concorsi, D.Lgs. 33/2013 sulla trasparenza.</p>
       </article>
 
-      <article class="metodo-card fade-in">
-        <span class="metodo-tag">Metodo commissioni</span>
-        <h3>Come funziona una commissione</h3>
-        <p>Domanda iniziale, approfondimento, follow-up. Lo schema di un orale PA reale, non un quiz a crocette.</p>
+      <article class="metodo-tile">
+        <span class="metodo-tag">Commissioni</span>
+        <h3>Come una commissione vera.</h3>
+        <p>Domanda iniziale, approfondimento, follow-up. Lo schema reale di un orale PA, non un quiz a crocette.</p>
       </article>
 
-      <article class="metodo-card fade-in">
-        <span class="metodo-tag">GDPR + Supabase UE</span>
-        <h3>Privacy by design</h3>
-        <p>Bandi salvati cifrati su Supabase, datacenter UE. Nessun dato condiviso con terze parti. Cancellazione dal profilo in qualunque momento.</p>
+      <article class="metodo-tile">
+        <span class="metodo-tag">Privacy by design</span>
+        <h3>GDPR · Supabase UE.</h3>
+        <p>Bandi cifrati, datacenter UE. Nessun dato condiviso con terze parti. Cancellazione dal profilo in qualunque momento.</p>
       </article>
 
-      <article class="metodo-card fade-in">
-        <span class="metodo-tag">Onesty</span>
-        <h3>Zero promesse inventate</h3>
-        <p>Niente abbonamenti automatici, niente statistiche finte. Quando Stripe si attiva (Q3 2026), rimborso totale in un clic.</p>
+      <article class="metodo-tile">
+        <span class="metodo-tag">Onesty · Q3 2026</span>
+        <h3>Zero promesse inventate.</h3>
+        <p>Niente abbonamenti automatici, niente statistiche finte. Quando Stripe si attiva, rimborso totale in un clic e 30 giorni per cambiare idea.</p>
       </article>
-    </div>
-  </div>
-</section>
-
-<!-- ============== COME FUNZIONA (kept minimal + CF band) ============== -->
-<section id="come-funziona" class="bg-alt content-section">
-  <div class="container">
-    <div class="section-heading fade-in">
-      <p class="section-eyebrow">Come funziona</p>
-      <h2>Tre passaggi. Timer realistico.</h2>
-      <p class="section-subtitle">Dal caricamento del bando al prossimo ripasso, senza setup tecnico.</p>
-    </div>
-
-    <div class="steps-grid">
-      <article class="step-card fade-in">
-        <div class="step-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="9" y1="13" x2="15" y2="13"/>
-            <line x1="9" y1="17" x2="15" y2="17"/>
-          </svg>
-        </div>
-        <h3>1. Carica il materiale.</h3>
-        <p>PDF, foto o copia-incolla del manuale. L'AI estrae gli argomenti del tuo programma e ti fa domande mirate.</p>
-        <span class="step-time">Setup: 2 minuti</span>
-      </article>
-      <article class="step-card fade-in">
-        <div class="step-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            <line x1="8" y1="10" x2="16" y2="10"/>
-            <line x1="8" y1="13" x2="14" y2="13"/>
-          </svg>
-        </div>
-        <h3>2. Simula con l'AI.</h3>
-        <p>Simula il formato di un colloquio con timer realistico. Rispondi a voce o per iscritto, decidi tu in ogni sessione.</p>
-      </article>
-      <article class="step-card fade-in">
-        <div class="step-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M3 3v18h18"/>
-            <path d="M7 14l4-4 4 4 5-6"/>
-          </svg>
-        </div>
-        <h3>3. Scopri cosa sbagli.</h3>
-        <p>L'AI segnala le aree da approfondire, così non perdi tempo su quello che già sai. Esci con un punto preciso da ripassare.</p>
-      </article>
-    </div>
-
-    <div class="cf-band fade-in" role="note" aria-label="Dati e accesso">
-      <div class="cf-band-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z"/>
-          <path d="M9 12l2 2 4-4"/>
-        </svg>
-      </div>
-      <div class="cf-band-body">
-        <span class="cf-band-label">Accesso essenziale</span>
-        <span class="cf-band-text">Account senza numero di telefono. I bandi che carichi restano tuoi: li cancelli dalla dashboard quando vuoi.</span>
-      </div>
     </div>
   </div>
 </section>
 
-<!-- ============== BETA PLAN (sostituisce pricing tier — Stripe Q3 2026) ============== -->
-<section id="disponibilita" class="content-section">
+<!-- ============== 5. DISPONIBILITÀ (Beta + Garanzia fused) ============== -->
+<section id="disponibilita" class="section">
   <div class="container">
     <div class="section-heading fade-in">
       <p class="section-eyebrow">Disponibilità</p>
       <h2>In beta gratuita. Pagamenti in arrivo.</h2>
-      <p class="section-subtitle">Per ora è tutto gratis. Quando Stripe sarà attivo avrai 30 giorni per ripensarci e rimborso totale in un clic.</p>
+      <p>Per ora è tutto gratis. Quando Stripe sarà attivo avrai 30 giorni per ripensarci e rimborso totale in un clic.</p>
     </div>
 
     <div class="beta-card fade-in">
       <div>
         <span class="beta-badge">Beta aperta</span>
         <h3>Accesso completo gratis</h3>
-        <p>3 simulazioni al mese, tutte le materie standard, 3 livelli di difficoltà (Facile, Realistico, Difficile), feedback live su 3 metriche. Niente carta, niente vincoli.</p>
-        <ul class="beta-out-of">
-          <li>3 simulazioni gratis al mese</li>
-          <li>Tutte le materie standard</li>
-          <li>3 livelli di difficoltà</li>
-          <li>Feedback su 3 metriche</li>
+        <p class="beta-sub">3 simulazioni al mese, tutte le materie standard, 3 livelli di difficoltà (Facile, Realistico, Difficile), feedback live su 3 metriche. Niente carta, niente vincoli.</p>
+        <ul class="beta-features" aria-label="Cosa include il piano beta">
+          <li><span>3 simulazioni gratis al mese</span></li>
+          <li><span>Tutte le materie standard</span></li>
+          <li><span>3 livelli di difficoltà</span></li>
+          <li><span>Feedback su 3 metriche</span></li>
         </ul>
       </div>
-      <div>
-        <div class="beta-cta-row">
-          <a href="auth.html?mode=register" class="cta-primary">Inizia gratis</a>
-        </div>
-        <p class="beta-foot">Pagamenti via Stripe attivi dal Q3 2026. Quando sarà attivo: rimborso totale in un clic, 30 giorni per cambiare idea.</p>
+      <div class="beta-cta-block">
+        <a href="auth.html?mode=register" class="cta-primary">Inizia gratis</a>
+        <span class="beta-garanzia-pill" title="Quando il piano Pro sarà attivo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7v6h6M21 17a9 9 0 1 1-9-9 9 9 0 0 1 9 9z"/></svg>
+          Rimborso totale in un clic · 30 giorni
+        </span>
+        <p class="beta-foot">Pagamenti via Stripe attivi dal Q3 2026. La garanzia è operativa dal giorno del lancio.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============== GARANZIA (kept concrete) ============== -->
-<section id="garanzia" class="content-section guarantee-section bg-alt">
-  <div class="container">
-    <div class="guarantee-card fade-in">
-      <div class="guarantee-copy">
-        <p class="guarantee-kicker">Pagamenti in arrivo</p>
-        <h2>Rimborso totale in un clic, zero domande.</h2>
-        <p>Quando il piano Pro sarà attivo (Q3 2026), avrai 30 giorni per provare il simulatore. Se non ti convince, clicchi su un pulsante e riottieni l'intero importo. Nessun modulo e nessuna condizione nascosta.</p>
-        <p class="guarantee-note">La garanzia sarà operativa dal giorno del lancio dei pagamenti.</p>
-      </div>
-      <div class="guarantee-mark" aria-hidden="true">&#8629;</div>
-    </div>
-  </div>
-</section>
-
-<!-- ============== FAQ (trimmed to 6 concrete objections) ============== -->
-<section id="faq" class="content-section">
+<!-- ============== 6. FAQ (5 domande, Pareto) ============== -->
+<section id="faq" class="bg-alt section">
   <div class="container">
     <div class="section-heading fade-in">
       <p class="section-eyebrow">FAQ oneste</p>
-      <h2>Le 6 domande che ci fanno di più.</h2>
-      <p class="section-subtitle">Risposte brevi e dirette. Se non trovi la tua, scrivici: supporto@concorso-ai.it.</p>
+      <h2>Le 5 domande che ci fanno di più.</h2>
+      <p>Risposte brevi e dirette. Se non trovi la tua, scrivici.</p>
     </div>
 
     <div class="faq-list">
@@ -1495,7 +1359,7 @@ footer {
           <span class="faq-chevron" aria-hidden="true">&#9662;</span>
         </summary>
         <div class="faq-answer">
-          Sì. Sono disponibili materie standard (Diritto Amministrativo, Costituzionale, Contabilità Pubblica, Diritto Penale) per simulazioni più generali di pratica. Ma il massimo dell'ancoraggio lo ottieni caricando il tuo bando.
+          Sì. Sono disponibili materie standard (Diritto Amministrativo, Costituzionale, Contabilità Pubblica, Diritto Penale) per simulazioni più generali di pratica. Il massimo dell'ancoraggio lo ottieni caricando il tuo bando.
         </div>
       </details>
 
@@ -1528,24 +1392,14 @@ footer {
           Entrambe. Hai un pulsante microfono (riconoscimento vocale del browser) e un campo di testo. Il commissario AI capisce entrambi, e puoi alternare nella stessa sessione.
         </div>
       </details>
-
-      <details class="faq-item fade-in">
-        <summary>
-          <span>Quanto tempo ci vuole per vedere miglioramenti?</span>
-          <span class="faq-chevron" aria-hidden="true">&#9662;</span>
-        </summary>
-        <div class="faq-answer">
-          Dipende dalla materia e dalla costanza. Una soglia realistica: dopo 5-6 simulazioni complete (60-90 minuti totali), il punteggio su chiarezza tende a salire. È un indicatore, non una garanzia, e la qualità del bando caricato conta molto.
-        </div>
-      </details>
     </div>
   </div>
 </section>
 
-<!-- ============== FIDUCIA (kept strong honesty stance) ============== -->
-<section id="fiducia" class="bg-alt content-section">
+<!-- ============== 7. FIDUCIA — closing onesty pillar ============== -->
+<section id="fiducia" class="section-tight">
   <div class="container">
-    <div class="fiducia-content fade-in">
+    <div class="fiducia-anchor fade-in">
       <p class="fiducia-lead">Niente recensioni inventate. Preferiamo mostrarti come funziona.</p>
       <h2>Provalo con il programma del tuo concorso.</h2>
       <p class="fiducia-copy">Hai 3 simulazioni gratuite ogni mese. Nessuna carta e nessun vincolo: carica il materiale, prova una sessione e decidi dopo se proseguire.</p>
@@ -1555,20 +1409,6 @@ footer {
           <text x="32" y="36" text-anchor="middle" fill="#1A73E8" font-size="22" font-weight="900" font-family="system-ui">3</text>
           <text x="32" y="47" text-anchor="middle" fill="#1A73E8" font-size="7" font-weight="700" font-family="system-ui">GRATIS</text>
         </svg>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============== CTA CHIUSURA (pre-footer, slim reinforcement) ============== -->
-<section class="content-section bg-alt">
-  <div class="container">
-    <div class="cta-close fade-in">
-      <h2>Hai ancora dubbi sul prodotto?</h2>
-      <p>3 simulazioni gratuite al mese, nessuna carta. Prova una sessione reale e decidi dopo se proseguire.</p>
-      <div class="cta-close-group">
-        <a href="auth.html?mode=register" class="cta-primary">Inizia gratis</a>
-        <a href="#faq" class="cta-link">oppure leggi le FAQ →</a>
       </div>
     </div>
   </div>
@@ -1586,7 +1426,7 @@ footer {
     <ul class="footer-links">
       <li><a href="terms.html">Termini</a></li>
       <li><a href="privacy.html">Privacy</a></li>
-      <li><a href="mailto:supporto@concorso-ai.it">Contatti</a></li>
+      <li><a href="#faq">FAQ</a></li>
       <li><a href="auth.html">Accedi</a></li>
     </ul>
   </div>
