@@ -2,31 +2,29 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ConcorsoAI — Simula l'orale sul tuo programma</title>
-<meta name="description" content="Simula l'orale del tuo concorso pubblico con domande basate sul programma del tuo bando. Made in Italy." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#FFFFFF" />
+<title>ConcorsoAI — Simula l'orale sul tuo bando, prima dell'orale.</title>
+<meta name="description" content="Un commissario AI che legge il tuo bando e ti interroga come davanti alla commissione. 3 simulazioni gratis al mese, senza carta, senza registrazione. Made in Italy." />
 <link rel="canonical" href="https://concorso-ai.vercel.app/" />
 
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231A73E8'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='system-ui' font-weight='900'%3EC%3C/text%3E%3C/svg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230F4C81'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='system-ui' font-weight='800'%3EC%3C/text%3E%3C/svg%3E" />
 
-<meta property="og:title" content="ConcorsoAI — Simula l'orale sul tuo programma" />
-<meta property="og:description" content="Carica il tuo bando, il commissario AI fa domande sugli argomenti del tuo concorso. Beta aperta gratuita." />
+<meta property="og:title" content="ConcorsoAI — Simula l'orale sul tuo bando, prima dell'orale." />
+<meta property="og:description" content="Il commissario AI legge il tuo bando e ti interroga come davanti alla commissione. Prova gratis. Made in Italy." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://concorso-ai.vercel.app/" />
 <meta property="og:locale" content="it_IT" />
-<meta property="og:image" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 630'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230B2A4A'/%3E%3Cstop offset='100%25' stop-color='%231A73E8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='630' fill='url(%23g)'/%3E%3Ctext x='600' y='280' text-anchor='middle' fill='white' font-family='system-ui' font-weight='800' font-size='74'%3EConcorsoAI%3C/text%3E%3Ctext x='600' y='370' text-anchor='middle' fill='rgba(255,255,255,0.85)' font-family='system-ui' font-weight='600' font-size='28'%3ESimula l'orale sul tuo programma%3C/text%3E%3Ctext x='600' y='430' text-anchor='middle' fill='rgba(255,255,255,0.62)' font-family='system-ui' font-weight='500' font-size='20'%3E3 simulazioni gratis al mese, nessuna carta richiesta%3C/text%3E%3C/svg%3E" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
+<meta property="og:site_name" content="ConcorsoAI" />
 <meta name="twitter:card" content="summary_large_image" />
 
-<!-- PIVOT 1: Self-hosted Inter (GDPR-friendly bunny.net, no Google Fonts CDN) -->
 <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.bunny.net/files/inter-latin-700-normal.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.bunny.net/files/inter-latin-400-normal.woff2" crossorigin />
-<link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" media="print" onload="this.media='all'" />
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.bunny.net/files/inter-latin-500-normal.woff2" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.bunny.net/files/jetbrains-mono-latin-600-normal.woff2" crossorigin />
+<link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600,700&family=jetbrains-mono:500,600&display=swap" media="print" onload="this.media='all'" />
 
-<!-- Schema.org: FAQPage + SoftwareApplication (no fake data, all verifiable state) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -36,33 +34,26 @@
       "name": "ConcorsoAI",
       "applicationCategory": "EducationalApplication",
       "operatingSystem": "Web",
-      "description": "Simulatore orale AI per concorsi pubblici italiani: carica il bando, il commissario AI fa domande sugli argomenti del tuo programma.",
+      "description": "Simulatore orale AI per concorsi pubblici italiani. Carica il bando, il commissario AI fa domande sugli argomenti del tuo programma.",
       "url": "https://concorso-ai.vercel.app/",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "EUR",
-        "availability": "https://schema.org/InStock"
-      },
-      "applicationSubCategory": "Exam preparation",
+      "offers": [
+        { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "EUR", "description": "3 simulazioni al mese, gratis, senza carta." },
+        { "@type": "Offer", "name": "Pro", "price": "14.99", "priceCurrency": "EUR", "description": "Illimitato, ogni materia, ogni tipo di bando." }
+      ],
       "creator": {
         "@type": "Organization",
         "name": "ConcorsoAI",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Milano",
-          "addressCountry": "IT"
-        }
+        "address": { "@type": "PostalAddress", "addressLocality": "Milano", "addressCountry": "IT" }
       }
     },
     {
       "@type": "FAQPage",
       "mainEntity": [
-        {"@type": "Question", "name": "Le domande sono davvero basate sul mio bando?", "acceptedAnswer": {"@type": "Answer", "text": "Sì. L'AI estrae i contenuti del PDF che carichi e li usa come materiale di riferimento per le domande. Più i tuoi materiali sono completi, più le domande rispecchiano il tuo programma."}},
-        {"@type": "Question", "name": "Posso allenarmi su materie standard senza caricare il bando?", "acceptedAnswer": {"@type": "Answer", "text": "Sì. Sono disponibili materie standard (Diritto Amministrativo, Costituzionale, Contabilità Pubblica, Diritto Penale) per simulazioni più generali di pratica."}},
-        {"@type": "Question", "name": "I miei dati sono al sicuro?", "acceptedAnswer": {"@type": "Answer", "text": "Sì. I bandi sono salvati cifrati su Supabase, datacenter UE. Nessun dato è condiviso con terze parti. Puoi cancellare tutto dalla dashboard in qualunque momento."}},
-        {"@type": "Question", "name": "E se il bando è stato pubblicato da pochi giorni?", "acceptedAnswer": {"@type": "Answer", "text": "Lo carichi tu come PDF o testo. L'AI estrae argomenti e riferimenti normativi dai materiali che hai caricato."}},
-        {"@type": "Question", "name": "Posso rispondere a voce o solo per iscritto?", "acceptedAnswer": {"@type": "Answer", "text": "Entrambe. Hai un pulsante microfono (riconoscimento vocale del browser) e un campo di testo. Il commissario AI capisce entrambi."}}
+        {"@type": "Question", "name": "Le domande sono davvero basate sul mio bando?", "acceptedAnswer": {"@type": "Answer", "text": "Sì. Carichi il PDF del bando o il testo, e l'AI estrae gli argomenti. Ogni domanda nasce da lì. Se il tuo bando è appena uscito, vale lo stesso: parti dai contenuti che hai caricato."}},
+        {"@type": "Question", "name": "L'AI può sbagliare su una citazione normativa?", "acceptedAnswer": {"@type": "Answer", "text": "Può succedere. Per questo ogni simulazione ti dice sempre di verificare sul bando ufficiale. L'AI è un allenatore, non un sostituto dello studio."}},
+        {"@type": "Question", "name": "I miei dati sono al sicuro?", "acceptedAnswer": {"@type": "Answer", "text": "Sì. I bandi sono salvati cifrati su Supabase, datacenter in Europa. Nessun dato è condiviso con LLM extra-UE. Puoi cancellare tutto dalla dashboard quando vuoi."}},
+        {"@type": "Question", "name": "Posso rispondere a voce o solo per iscritto?", "acceptedAnswer": {"@type": "Answer", "text": "Entrambe. C'è un pulsante microfono (riconoscimento vocale del browser) e il campo di testo. Il commissario capisce entrambi."}},
+        {"@type": "Question", "name": "E se non sto preparando un concorso specifico?", "acceptedAnswer": {"@type": "Answer", "text": "Ci sono materie standard già pronte: Diritto Amministrativo, Costituzionale, Contabilità Pubblica, Diritto Penale. Puoi esercitarti anche senza bando caricato."}}
       ]
     }
   ]
@@ -71,57 +62,79 @@
 
 <style>
 /* ==========================================================================
-   ConcorsoAI Landing v20 — 12 slop pivot, anti-AI-slop, vibe-coded
-   Pivot 1: Inter self-hosted from bunny.net (no Google Fonts)
-   Pivot 2: Hero density = H1 + 1 sub + 1 CTA + mockup (trust pills OUT)
-   Pivot 3: NO fade-in IntersectionObserver (only hero-rise micro-stagger)
-   Pivot 4: Hero text-align left (kill centered symmetry)
-   Pivot 5: CTA hover = scale(0.98) + darken + shadow invert (physical pressure)
-   Pivot 6: Hero bg = pure white (kill radial gradients)
-   Pivot 7: Compare = solid bg winner, solid bg alt (no gradient)
-   Pivot 8: Quiz-pill active = solid bg + scale 1.0 (no gradient)
-   Pivot 9: Bento tile-large = real law cite visible "art. 97 Cost."
-   Pivot 10: Founder marker "Sviluppato a Milano" in footer
-   Pivot 11: @property CSS for gradient text reveal + spacing transitions
-   Pivot 12: @container queries for trust-pills re-flow
+   ConcorsoAI — v22. Master rebuild.
+   Mindset: editorial minimal, JTBD-first, trust-by-compliance, no-slop.
+   7-section landing: Hero → Trust → Confronto → Metodo → Pricing → FAQ → Closing.
+   Pricing: 2 tier (Free €0 + Pro €14,99), nessun Coaching.
    ========================================================================== */
 
-* { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
 
 :root {
-  --bg: #FFFFFF;
-  --bg-alt: #FAFAFA;
-  --bg-tint: #F5F8FC;
-  --text-primary: #0A1628;
-  --text-secondary: #3D4A5C;
-  --text-tertiary: #6B7585;
-  --accent: #1A73E8;
-  --accent-dark: #1457B0;
-  --accent-deep: #0B2A4A;
-  --cta: #1A73E8;
-  --cta-hover: #1457B0;
-  --cta-deep: #0B3A63;
-  --border: #E5E7EB;
-  --border-light: #EFF1F4;
+  --bg:           #FFFFFF;
+  --bg-alt:       #FAFAFA;
+  --bg-tint:      #F4F7FB;
+  --surface:      #FFFFFF;
+  --surface-raised:#F7FAFD;
+
+  --text-primary:   #0A1628;
+  --text-secondary: #475569;
+  --text-tertiary:  #6B7585;
+  --text-muted:     #94A3B8;
+
+  --accent:        #0F4C81;
+  --accent-hover:  #0B3A63;
+  --accent-deep:   #071D33;
+  --accent-light:  #EFF6FF;
+  --accent-border: #BFDBFE;
+  --accent-ring:   rgba(15, 76, 129, .20);
+
+  --success:       #16A34A;
+  --success-deep:  #0F766E;
+  --success-bg:    #ECFDF5;
+  --warning:       #B45309;
+  --warning-bg:    #FFFBEB;
+  --error:         #DC2626;
+  --error-bg:      #FEF2F2;
+
+  --border:        #E5E7EB;
+  --border-light:  #EFF1F4;
   --border-strong: #CBD5E1;
 
-  --success: #16A34A;
-  --success-deep: #0F766E;
-  --success-bg: #ECFDF5;
-  --warning: #B45309;
-  --warning-bg: #FFFBEB;
-  --error: #DC2626;
-  --error-bg: #FEF2F2;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10:40px;
+  --space-12:48px;
+  --space-16:64px;
+  --space-20:80px;
+  --space-24:96px;
+  --space-32:128px;
 
-  --info-bg: #EFF6FF;
-  --info-border: #BFDBFE;
-  --info-text: #1457B0;
+  --radius-sm:  6px;
+  --radius:    10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  --shadow-1: 0 1px 2px rgba(15, 76, 129, .05), 0 4px 14px rgba(15, 76, 129, .08);
+  --shadow-2: 0 4px 14px rgba(15, 76, 129, .06), 0 14px 32px rgba(15, 76, 129, .10);
+  --shadow-3: 0 8px 24px rgba(15, 76, 129, .10), 0 24px 48px rgba(15, 76, 129, .14);
 
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, 'Cascadia Code', Menlo, Monaco, Consolas, monospace;
+
+  --container-max: 1120px;
 }
 
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 
 body {
   margin: 0;
@@ -136,81 +149,222 @@ body {
   font-feature-settings: "ss01" on, "cv11" on;
 }
 
-h1, h2, h3, h4 { font-weight: 700; line-height: 1.12; letter-spacing: -0.025em; margin: 0; color: var(--text-primary); font-family: var(--font-sans); }
-h1 { font-size: clamp(2.6rem, 5.5vw + 0.5rem, 4.25rem); letter-spacing: -0.045em; font-weight: 800; }
-h2 { font-size: clamp(1.875rem, 2.5vw + 1rem, 2.5rem); }
-h3 { font-size: 1.25rem; letter-spacing: -0.01em; font-weight: 700; }
-h4 { font-size: 1.0625rem; font-weight: 600; }
+::selection { background: var(--accent-light); color: var(--text-primary); }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+h1 {
+  font-size: clamp(2.5rem, 4.8vw + 0.4rem, 4rem);
+  letter-spacing: -0.045em;
+  font-weight: 700;
+}
+h2 {
+  font-size: clamp(1.75rem, 2.2vw + 1rem, 2.4rem);
+  letter-spacing: -0.03em;
+}
+h3 {
+  font-size: 1.1875rem;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+}
+h4 {
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
 p { margin: 0; }
 a { color: inherit; text-decoration: none; }
-ul { list-style: none; padding: 0; margin: 0; }
+ul, ol { list-style: none; padding: 0; margin: 0; }
+button { font-family: inherit; }
 .hidden { display: none !important; }
 
-.container { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
-@media (min-width: 768px) { .container { padding: 0 32px; } }
-
-::selection { background: #EFF6FF; color: var(--text-primary); }
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+@media (min-width: 768px) {
+  .container { padding: 0 32px; }
+}
 
 .skip-link {
-  position: fixed; top: 8px; left: 8px;
-  background: var(--text-primary); color: #fff;
-  padding: 10px 14px; border-radius: 6px; font-weight: 600; font-size: 14px;
-  z-index: 100; transform: translateY(-200%);
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  background: var(--accent-deep);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  z-index: 200;
+  transform: translateY(-200%);
   transition: transform .15s ease;
 }
 .skip-link:focus { transform: translateY(0); }
 
-/* ---------- Navbar (minimal, sticky) ---------- */
+/* ==========================================================================
+   NAVBAR — minimal, sticky, single CTA
+   ========================================================================== */
+
 .navbar {
   border-bottom: 1px solid var(--border);
-  background: rgba(255,255,255,.78);
+  background: rgba(255, 255, 255, .82);
   backdrop-filter: saturate(180%) blur(12px);
   -webkit-backdrop-filter: saturate(180%) blur(12px);
-  position: sticky; top: 0; z-index: 50;
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 .navbar-inner {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   height: 64px;
 }
-.logo { font-size: 1.0625rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text-primary); display: inline-flex; align-items: center; gap: 8px; }
-.logo-mark { width: 24px; height: 24px; border-radius: 6px; background: var(--cta); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #fff; font-family: var(--font-mono); }
-.logo-text { color: var(--text-primary); }
-.logo-text span { color: var(--cta); }
-
-.nav-cta {
-  background: var(--cta);
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+}
+.brand-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--accent);
   color: #fff;
-  padding: 11px 18px;
-  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.02em;
+}
+.brand-name { color: var(--text-primary); }
+
+.nav-actions { display: flex; align-items: center; gap: 8px; }
+.nav-link {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  transition: color .15s ease;
+}
+.nav-link:hover { color: var(--accent); }
+
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font-weight: 600;
   font-size: 14.5px;
   min-height: 44px;
-  display: inline-flex; align-items: center; justify-content: center;
-  border: 1px solid var(--cta);
-  transition: background .15s ease, transform .12s ease, box-shadow .15s ease;
+  padding: 11px 18px;
+  border-radius: var(--radius);
+  border: 1px solid;
+  cursor: pointer;
+  letter-spacing: -0.005em;
+  transition: background .18s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
 }
-.nav-cta:hover { background: var(--cta-hover); transform: scale(0.985); box-shadow: 0 6px 14px rgba(26,115,232,.25), inset 0 1px 0 rgba(255,255,255,.18); }
-.nav-cta:active { background: var(--cta-deep); transform: scale(1); box-shadow: inset 0 2px 4px rgba(0,0,0,.12); }
-.nav-cta:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
 
-/* ---------- Section base ---------- */
-.section { padding: 96px 0; }
-@media (min-width: 768px) { .section { padding: 128px 0; } }
-.section-tight { padding: 72px 0; }
-@media (min-width: 768px) { .section-tight { padding: 96px 0; } }
-.section.bg-alt { background: var(--bg-alt); }
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .15);
+}
+.btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, .10);
+}
+.btn-primary:active {
+  background: var(--accent-deep);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, .14);
+}
+.btn-primary:focus-visible {
+  outline: 2px solid var(--accent-deep);
+  outline-offset: 3px;
+}
+.btn-primary svg { flex-shrink: 0; transition: transform .15s ease; }
+.btn-primary:hover svg { transform: translateX(2px); }
 
-.section-heading { text-align: left; max-width: 640px; margin: 0 0 56px; }
-.section-heading.center { text-align: center; margin-left: auto; margin-right: auto; }
+.btn-secondary {
+  background: var(--bg);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.btn-secondary:hover {
+  background: var(--accent-light);
+  border-color: var(--accent-hover);
+}
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--accent-deep);
+  outline-offset: 3px;
+}
+
+.btn-large {
+  min-height: 52px;
+  padding: 15px 26px;
+  font-size: 15.5px;
+}
+
+/* ==========================================================================
+   TIER — generic section spacing + base components
+   ========================================================================== */
+
+.section {
+  padding: clamp(64px, 8vw, 96px) 0;
+}
+.section-tight {
+  padding: clamp(48px, 6vw, 72px) 0;
+}
+.section--alt { background: var(--bg-alt); }
+.section--accentBg { background: var(--accent-light); }
+
 .section-eyebrow {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: .14em;
-  color: var(--accent);
+  letter-spacing: .12em;
   text-transform: uppercase;
-  margin-bottom: 10px;
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.section-eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
   display: inline-block;
+}
+.section-heading {
+  max-width: 640px;
+  margin-bottom: clamp(40px, 6vw, 56px);
+}
+.section-heading--center {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
 }
 .section-heading h2 { margin-bottom: 14px; }
 .section-heading p {
@@ -219,858 +373,1056 @@ ul { list-style: none; padding: 0; margin: 0; }
   line-height: 1.6;
   max-width: 580px;
 }
-.section-heading.center p { margin-left: auto; margin-right: auto; }
+.section-heading--center p { margin: 0 auto; }
 
-/* ============================================
-   1. HERO — pivot 2 (density), pivot 4 (left-align), pivot 6 (pure white bg)
-   ============================================ */
+/* ==========================================================================
+   1. HERO — JTBD-first, asymmetric split, real mockup
+   ========================================================================== */
+
 .hero {
-  padding: 88px 0 64px;
+  padding: clamp(72px, 10vw, 112px) 0 clamp(56px, 8vw, 80px);
   background: var(--bg);
 }
-@media (min-width: 768px) { .hero { padding: 124px 0 80px; } }
-
 .hero-grid {
   display: grid;
-  gap: 56px;
+  gap: clamp(40px, 6vw, 64px);
   align-items: center;
 }
-@media (min-width: 900px) {
-  .hero-grid { grid-template-columns: 0.95fr 1.05fr; gap: 64px; }
+@media (min-width: 960px) {
+  .hero-grid {
+    grid-template-columns: 0.95fr 1.05fr;
+    gap: 64px;
+  }
 }
 
-.hero-text { max-width: 560px; text-align: left; }
-
+.hero-text {
+  max-width: 560px;
+  text-align: left;
+}
 .hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-mono);
   font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: .08em;
-  color: var(--accent-dark);
-  text-transform: uppercase;
-  margin-bottom: 22px;
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 7px 14px;
-  background: var(--info-bg);
-  border: 1px solid var(--info-border);
+  letter-spacing: .04em;
+  color: var(--accent-deep);
+  background: var(--accent-light);
+  border: 1px solid var(--accent-border);
+  padding: 6px 12px;
   border-radius: 9999px;
+  margin-bottom: 22px;
 }
-.hero-eyebrow .dot {
-  width: 6px; height: 6px; border-radius: 50%;
+.hero-eyebrow .pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
   background: var(--success);
-  animation: dotPulse 2.6s ease-in-out infinite;
+  flex-shrink: 0;
 }
-@keyframes dotPulse {
+@keyframes pulseDot {
   0%, 80%, 100% { transform: scale(1); opacity: 1; }
   90% { transform: scale(1.6); opacity: 0.55; }
 }
 
-.hero h1 { margin-bottom: 18px; }
-.hero h1 .accent {
-  background: linear-gradient(120deg, var(--accent) 0%, var(--accent-deep) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  background-size: 200% 100%;
-  animation: gradFlow 12s ease-in-out infinite;
+.hero h1 {
+  margin-bottom: 20px;
 }
-@keyframes gradFlow {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+.hero h1 .fade-line {
+  display: inline-block;
+  opacity: 0;
+  animation: fadeLine .55s cubic-bezier(.2, .8, .2, 1) forwards;
+}
+@keyframes fadeLine {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero h1 .fade-line.d2 { animation-delay: .10s; }
+.hero h1 .fade-line.d3 { animation-delay: .20s; }
+.hero h1 .fade-line.d4 { animation-delay: .30s; }
+.hero h1 .fade-line.d5 { animation-delay: .40s; }
+.hero h1 .fade-line.d6 { animation-delay: .50s; }
+
+.hero h1 .accent-word {
+  color: var(--accent);
+  font-style: italic;
+  font-weight: 700;
 }
 
 .hero-subtitle {
   font-size: 1.0625rem;
-  color: var(--text-secondary);
-  max-width: 540px;
-  margin-bottom: 32px;
   line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 28px;
+  max-width: 520px;
 }
-@media (min-width: 768px) { .hero-subtitle { font-size: 1.125rem; } }
+@media (min-width: 768px) {
+  .hero-subtitle { font-size: 1.125rem; }
+}
+.hero-subtitle strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.hero-subtitle .em-dash { color: var(--text-tertiary); margin: 0 .35em; }
 
 .hero-cta-row {
-  display: flex; flex-direction: column; gap: 14px; align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 24px;
 }
 @media (min-width: 480px) {
-  .hero-cta-row { flex-direction: row; align-items: center; gap: 18px; }
+  .hero-cta-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 18px;
+  }
+}
+.hero-trust-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+}
+.hero-trust-pills span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+.hero-trust-pills svg {
+  width: 13px;
+  height: 13px;
+  color: var(--success);
+}
+.hero-trust-pills .pill-sep {
+  width: 3px;
+  height: 3px;
+  background: var(--text-muted);
+  border-radius: 50%;
 }
 
-/* ---------- Primary CTA: physical pressure ---------- */
-.cta-primary {
-  background: var(--cta);
-  color: #fff;
-  padding: 16px 26px;
-  border-radius: 9px;
-  font-weight: 600;
-  font-size: 15.5px;
-  min-height: 52px;
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  border: 1px solid var(--cta);
-  cursor: pointer;
-  font-family: inherit;
-  transition: background .15s ease, transform .12s ease, box-shadow .15s ease;
-  box-shadow: 0 1px 0 rgba(0,0,0,.06), inset 0 1px 0 rgba(255,255,255,.18);
-}
-.cta-primary:hover { background: var(--cta-hover); transform: scale(0.985); box-shadow: 0 6px 14px rgba(26,115,232,.25), inset 0 1px 0 rgba(255,255,255,.20); }
-.cta-primary:active { background: var(--cta-deep); transform: scale(1); box-shadow: inset 0 2px 4px rgba(0,0,0,.14); }
-.cta-primary:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
-.cta-primary svg { transition: transform .12s ease; }
-.cta-primary:hover svg { transform: translateX(2px); }
+/* ----- Hero mockup (the actual product state, not a fake render) ----- */
 
-.cta-link {
-  color: var(--accent);
-  font-weight: 600;
-  font-size: 14.5px;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  padding: 10px 4px;
-  display: inline-flex; align-items: center; gap: 6px;
-  transition: color .15s ease;
-}
-.cta-link:hover { color: var(--accent-dark); }
-.cta-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
-
-/* ============================================
-   Mockup (3-tab real product state, unchanged strong)
-   ============================================ */
-.mockup-card {
-  background: var(--bg);
+.mockup {
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  max-width: 660px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-1);
+  max-width: 620px;
   width: 100%;
   margin: 0 auto;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 1px 0 rgba(15,76,129,.04), 0 14px 40px rgba(15,76,129,.10);
-  transition: box-shadow .25s ease, transform .25s ease;
+  transition: box-shadow .3s ease;
 }
-.mockup-card:hover { box-shadow: 0 1px 0 rgba(15,76,129,.04), 0 20px 56px rgba(15,76,129,.14); transform: translateY(-2px); }
+.mockup:hover { box-shadow: var(--shadow-2); }
 
 .mockup-chrome {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 12px 16px;
   background: var(--bg-alt);
   border-bottom: 1px solid var(--border);
   gap: 12px;
+  font-size: 12px;
 }
-.mockup-chrome-left { display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1; }
-.mockup-chrome-logo {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12px; font-weight: 800;
-  color: var(--text-primary);
-  flex-shrink: 0;
-  font-family: var(--font-sans);
-}
-.mockup-chrome-dot { width: 8px; height: 8px; background: var(--cta); border-radius: 50%; flex-shrink: 0; }
-.mockup-breadcrumb {
-  font-family: var(--font-mono);
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 11px;
-  color: var(--text-tertiary);
+.mockup-chrome-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   min-width: 0;
+  flex: 1;
+}
+.mockup-chrome-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+.mockup-chrome-mark::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+}
+.mockup-chrome-path {
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
 }
-.mockup-breadcrumb-current { color: var(--text-primary); font-weight: 700; }
 .mockup-chrome-avatar {
-  width: 28px; height: 28px;
-  background: var(--cta); color: #fff;
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  color: #fff;
   font-family: var(--font-mono);
-  font-size: 11px; font-weight: 800;
+  font-size: 11px;
+  font-weight: 700;
   border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
-
-.mockup-body { min-height: 380px; }
-.mockup-main { padding: 18px; min-width: 0; }
 
 .mockup-status {
-  display: flex; align-items: center; gap: 14px;
-  padding: 8px 12px;
-  background: var(--bg-alt);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  font-size: 11px;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
+  display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-light);
   font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
 }
-.mockup-status-item { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.mockup-status-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 .mockup-status-dot {
-  width: 7px; height: 7px;
-  background: var(--success);
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
+  background: var(--success);
   flex-shrink: 0;
-  animation: statusPulse 2.6s ease-in-out infinite;
+  animation: pulseDot 2.6s ease-in-out infinite;
 }
-@keyframes statusPulse {
-  0%, 80%, 100% { transform: scale(1); opacity: 1; }
-  90% { transform: scale(1.5); opacity: 0.55; }
+.mockup-status-timer {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
 }
-.mockup-status-timer { color: var(--text-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
-.timer-num { color: var(--cta); }
-
-.mockup-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11px; text-transform: uppercase; letter-spacing: .12em; font-weight: 700;
-  color: var(--text-tertiary);
-  margin-bottom: 12px;
-  display: flex; align-items: center; gap: 6px;
-}
-.mockup-eyebrow-dot { width: 6px; height: 6px; background: var(--cta); border-radius: 50%; display: inline-block; }
+.mockup-status-timer .timer-num { color: var(--accent); }
 
 .mockup-tabs {
-  display: flex; gap: 4px;
-  background: var(--bg-alt);
-  border-radius: 10px;
+  display: flex;
+  background: var(--bg-tint);
   padding: 4px;
-  margin-bottom: 16px;
+  gap: 2px;
+  margin: 16px 16px 0;
+  border-radius: 10px;
 }
 .mockup-tab {
   flex: 1;
-  background: transparent; border: none;
-  padding: 9px 10px;
-  border-radius: 8px;
-  font-size: 13px; font-weight: 700;
+  background: transparent;
+  border: none;
+  padding: 10px 8px;
+  font-size: 12.5px;
+  font-weight: 600;
   color: var(--text-tertiary);
+  border-radius: 8px;
   cursor: pointer;
-  transition: background .15s ease, color .15s ease;
   font-family: inherit;
-  min-height: 44px;
-  text-align: center;
+  min-height: 40px;
+  letter-spacing: -0.005em;
+  transition: background .15s ease, color .15s ease;
 }
 .mockup-tab:hover { color: var(--text-primary); }
-.mockup-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.mockup-tab.is-active { background: var(--bg); color: var(--cta); box-shadow: 0 1px 2px rgba(15,76,129,.08); }
+.mockup-tab.is-active {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: 0 1px 2px rgba(15, 76, 129, .08);
+}
+.mockup-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
-.mockup-panel { transition: opacity .2s ease; }
-.mockup-meta {
+.mockup-body { padding: 18px 20px 20px; }
+
+.mockup-eyebrow {
   font-family: var(--font-mono);
-  font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
   color: var(--text-tertiary);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
-.mockup-meta-hint {
-  font-style: italic; font-size: 12px; color: var(--text-tertiary); margin-top: 12px;
+.mockup-eyebrow-mark {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
 }
-.mockup-content { font-size: 16px; line-height: 1.55; color: var(--text-primary); }
-.mockup-content em.missed {
+
+.mockup-quote {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-primary);
+  font-weight: 500;
+  margin: 0 0 14px;
+  letter-spacing: -0.005em;
+}
+
+.mockup-hint {
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+  font-style: italic;
+  margin-top: 10px;
+}
+
+.mockup-answer {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+.mockup-answer .missed-cite {
   background: var(--warning-bg);
   color: var(--warning);
-  font-style: normal;
   font-weight: 600;
-  padding: 0 4px;
-  border-radius: 3px;
   text-decoration: line-through wavy var(--warning);
   text-decoration-thickness: 1.5px;
+  padding: 0 4px;
+  border-radius: 3px;
 }
 .typing-cursor {
   display: inline-block;
   width: 8px;
-  height: 0.9em;
-  background: var(--cta);
+  height: .9em;
+  background: var(--accent);
   margin-left: 6px;
   vertical-align: text-bottom;
-  animation: typing-blink 1s steps(2, end) infinite;
-  border-radius: 1px;
+  animation: typingBlink 1.05s steps(2, end) infinite;
+  border-radius: 1.5px;
+}
+@keyframes typingBlink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 
-.mockup-score-row {
-  display: flex; align-items: center; gap: 18px;
-  padding-bottom: 14px; margin-bottom: 14px;
-  border-bottom: 1px solid var(--border);
+.mockup-report { padding: 4px 0 0; }
+
+.mockup-grade-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 14px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-light);
 }
-.mockup-score-circle {
-  width: 84px; height: 84px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: var(--bg-alt);
-  border: 3px solid var(--cta);
-  border-radius: 50%;
+.mockup-grade-circle {
+  width: 84px;
+  height: 84px;
   flex-shrink: 0;
+  border: 3px solid var(--accent);
+  background: var(--bg-tint);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
   line-height: 1;
-  font-family: var(--font-mono);
 }
-.mockup-score-num { font-size: 28px; font-weight: 800; color: var(--text-primary); }
-.mockup-score-of { font-size: 11px; color: var(--text-tertiary); font-weight: 600; margin-top: 2px; }
-.mockup-score-detail { flex: 1; }
-.mockup-score-label { font-size: 14px; color: var(--text-primary); font-weight: 700; line-height: 1.4; margin-bottom: 4px; }
-.mockup-score-note { font-size: 12px; color: var(--text-tertiary); line-height: 1.5; }
+.mockup-grade-num { font-size: 28px; font-weight: 700; color: var(--text-primary); }
+.mockup-grade-of { font-size: 10.5px; color: var(--text-tertiary); margin-top: 3px; font-weight: 700; }
+.mockup-grade-text { flex: 1; }
+.mockup-grade-label { font-size: 14.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+.mockup-grade-note { font-size: 12.5px; color: var(--text-tertiary); line-height: 1.5; }
 
-.mockup-feedback { margin: 0 0 14px 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.mockup-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
 .mockup-feedback li {
-  font-size: 14px; color: var(--text-primary);
-  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 12px;
   border-radius: 8px;
-  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px;
   line-height: 1.5;
 }
-.mockup-feedback .report-good { background: var(--success-bg); }
-.mockup-feedback .report-work { background: var(--warning-bg); }
-.mockup-feedback .report-icon {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 18px; height: 18px;
+.mockup-feedback .good { background: var(--success-bg); color: var(--text-primary); }
+.mockup-feedback .work { background: var(--warning-bg); color: var(--text-primary); }
+.mockup-feedback .ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  font-weight: 800; font-size: 12px;
-  flex-shrink: 0;
   color: #fff;
-  margin-top: 1px;
   font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 11px;
+  flex-shrink: 0;
+  margin-top: 1px;
 }
-.mockup-feedback .report-good .report-icon { background: var(--success-deep); }
-.mockup-feedback .report-work .report-icon { background: var(--warning); }
-.mockup-extra {
-  font-size: 12px; color: var(--text-secondary);
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-  line-height: 1.5;
+.mockup-feedback .good .ico { background: var(--success-deep); }
+.mockup-feedback .work .ico { background: var(--warning); }
+
+.mockup-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-deep);
+  background: var(--accent-light);
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-top: 4px;
 }
 
-/* ============================================
-   2. TRUST BAND — own section (Separate from hero, container queries)
-   PIVOT 12: container queries for fine re-flow
-   ============================================ */
+/* ==========================================================================
+   2. TRUST BAND — own section so it shows above the fold on mobile
+   ========================================================================== */
+
 .trust-band {
-  container-name: trust-row;
-  container-type: inline-size;
   background: var(--bg-alt);
   border-top: 1px solid var(--border-light);
   border-bottom: 1px solid var(--border-light);
-  padding: 20px 0;
+  padding: clamp(20px, 3vw, 28px) 0;
 }
 .trust-band-inner {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 10px 14px;
-}
-@container trust-row (max-width: 600px) {
-  .trust-band-inner { gap: 8px 10px; }
-  .trust-pill { font-size: 12px; padding: 6px 10px; }
+  gap: 10px 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
 }
 .trust-pill {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 7px 13px;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 500;
-  color: var(--text-secondary);
-  font-family: var(--font-sans);
   letter-spacing: -0.005em;
-  transition: color .15s ease, transform .15s ease;
 }
-.trust-pill:hover { color: var(--text-primary); transform: translateY(-1px); }
-.trust-pill svg { width: 14px; height: 14px; color: var(--accent); }
-.trust-pill-dot { color: var(--text-tertiary); }
-
-/* ============================================
-   3. R1 MINI-QUIZ — solid active state (no gradient)
-   ============================================ */
-.quiz-card {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 1px 0 rgba(15,76,129,.04), 0 14px 40px rgba(15,76,129,.10);
-  padding: 36px 32px;
-  max-width: 720px;
-  margin: 0 auto;
-  transition: box-shadow .25s ease, transform .25s ease;
+.trust-pill svg {
+  width: 14px;
+  height: 14px;
+  color: var(--accent);
+  flex-shrink: 0;
 }
-@media (min-width: 768px) { .quiz-card { padding: 48px 40px; } }
-.quiz-card:hover { box-shadow: 0 1px 0 rgba(15,76,129,.04), 0 20px 56px rgba(15,76,129,.14); transform: translateY(-2px); }
-
-.quiz-pills {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
-}
-.quiz-pill {
-  font-family: inherit;
-  font-size: 14px; font-weight: 600;
-  padding: 10px 18px;
-  border-radius: 9999px;
-  background: var(--bg);
-  border: 1.5px solid var(--border-strong);
-  color: var(--accent-dark);
-  cursor: pointer;
-  min-height: 44px;
-  transition: background .15s ease, border-color .15s ease, color .15s ease;
-}
-.quiz-pill:hover:not(.is-active) { background: var(--bg-alt); border-color: var(--info-border); }
-.quiz-pill:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.quiz-pill.is-active {
-  background: var(--cta);
-  border-color: var(--cta);
-  color: #fff;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,.10), 0 1px 0 rgba(255,255,255,.18);
-}
-
-.quiz-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 28px auto;
-  max-width: 480px;
-}
-
-.quiz-panel {
-  display: none;
-}
-.quiz-panel.is-active { display: block; }
-
-.quiz-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--success-deep);
-  margin-bottom: 12px;
-  display: inline-flex; align-items: center; gap: 6px;
-}
-.quiz-eyebrow::before {
-  content: '';
-  width: 6px; height: 6px;
-  background: var(--success);
+.trust-pill-sep {
+  width: 3px;
+  height: 3px;
+  background: var(--text-muted);
   border-radius: 50%;
-}
-.quiz-question {
-  font-size: 1.0625rem;
-  font-weight: 600;
-  line-height: 1.45;
-  color: var(--text-primary);
-  margin-bottom: 18px;
-  font-style: italic;
-  letter-spacing: -0.01em;
-}
-.quiz-answer-label {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--accent-dark);
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-.quiz-answer-body {
-  font-size: 1rem;
-  line-height: 1.65;
-  color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
-.quiz-cta-bar {
-  margin-top: 32px;
-  display: flex; flex-direction: column; gap: 14px; align-items: center; justify-content: center;
-}
-@media (min-width: 560px) {
-  .quiz-cta-bar { flex-direction: row; gap: 24px; }
-}
+/* ==========================================================================
+   3. CONFRONTO — kills the "why not ChatGPT?" objection (hero problem)
+   ========================================================================== */
 
-/* ============================================
-   4. CONFRONTO CRUDO — solid bg cards, no gradient
-   ============================================ */
-.compare-stack {
+.confronto-stack {
+  display: grid;
+  gap: 14px;
   max-width: 980px;
   margin: 0 auto;
-  display: grid;
-  gap: 14px;
-}
-.compare-grid {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: 1fr;
-  align-items: stretch;
 }
 @media (min-width: 820px) {
-  .compare-grid { grid-template-columns: 1fr 1fr; }
+  .confronto-stack {
+    grid-template-columns: 1.55fr 1fr 1fr;
+    gap: 14px;
+  }
 }
-
-.compare-card {
-  background: var(--bg);
+.confronto-card {
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 28px 28px 24px;
+  border-radius: var(--radius-lg);
+  padding: 28px 26px 24px;
+  transition: border-color .15s ease, box-shadow .25s ease, transform .25s ease;
   position: relative;
-  transition: box-shadow .2s ease, transform .2s ease, border-color .15s ease;
 }
-.compare-card:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(15,76,129,.12), 0 2px 6px rgba(15,76,129,.06); }
-
-.compare-card.us {
-  background: var(--info-bg);
-  border-color: var(--info-border);
-  padding: 36px 32px 32px;
-  border-width: 2px;
+.confronto-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-1);
 }
-.compare-tag {
+.confronto-card.us {
+  background: var(--accent-light);
+  border: 2px solid var(--accent);
+  padding: 32px 28px 28px;
+}
+.confronto-card.us:hover {
+  box-shadow: 0 14px 32px rgba(15, 76, 129, .14);
+}
+.confronto-tag {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
-  padding: 4px 11px;
-  border-radius: 6px;
-  background: var(--cta);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
   color: #fff;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
-.compare-card.alt .compare-tag {
+.confronto-card.alt .confronto-tag {
   background: transparent;
   border: 1px solid var(--border-strong);
   color: var(--text-tertiary);
 }
-
-.compare-card h3 { font-size: 1.3125rem; margin-bottom: 8px; line-height: 1.25; }
-.compare-card-sub {
+.confronto-card h3 {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+  line-height: 1.25;
+}
+.confronto-card.us h3 {
+  font-size: 1.375rem;
+  color: var(--accent-deep);
+}
+.confronto-card .confronto-sub {
   color: var(--text-secondary);
   font-size: .9375rem;
   line-height: 1.55;
-  margin-bottom: 22px;
-  max-width: 540px;
+  margin-bottom: 20px;
 }
-
-.compare-rows { display: flex; flex-direction: column; gap: 14px; }
-.compare-row {
+.confronto-card .confronto-rows {
   display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 14px;
-  align-items: baseline;
-  padding: 8px 0;
+  gap: 10px;
+}
+.confronto-row {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: 12px;
+  padding: 6px 0;
   border-bottom: 1px solid var(--border-light);
+  align-items: baseline;
 }
-.compare-row:last-child { border-bottom: none; }
-@media (max-width: 560px) {
-  .compare-row { grid-template-columns: 1fr; gap: 4px; }
+.confronto-row:last-child { border-bottom: none; }
+@media (max-width: 520px) {
+  .confronto-row { grid-template-columns: 1fr; gap: 2px; padding: 8px 0; }
 }
-.compare-row-name {
+.confronto-row-key {
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: 10.5px;
   font-weight: 700;
   color: var(--text-tertiary);
-  text-transform: uppercase;
   letter-spacing: .04em;
+  text-transform: uppercase;
 }
-.compare-row-val {
-  font-size: 14px;
-  color: var(--text-primary);
+.confronto-card.us .confronto-row-key {
+  color: var(--accent);
+}
+.confronto-row-val {
+  font-size: 13.5px;
   line-height: 1.5;
+  color: var(--text-secondary);
 }
-.compare-card.alt .compare-row-val { color: var(--text-secondary); }
+.confronto-card.us .confronto-row-val { color: var(--text-primary); font-weight: 500; }
 
-.compare-footnote {
-  margin-top: 28px;
-  text-align: left;
-  font-size: 13px;
-  color: var(--text-tertiary);
-  line-height: 1.6;
-  max-width: 720px;
-}
+/* ==========================================================================
+   4. METODO — bento mosaic con cite reali
+   ========================================================================== */
 
-/* ============================================
-   5. METODO — bento mosaic with real law cite in tile-large
-   PIVOT 9: visual weight via real text snippet
-   ============================================ */
 .metodo-bento {
   max-width: 1100px;
   margin: 0 auto;
   display: grid;
   gap: 14px;
-  grid-template-columns: 1fr;
 }
-@media (min-width: 720px) {
+@media (min-width: 760px) {
   .metodo-bento {
     grid-template-columns: 1.4fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-rows: auto auto auto;
     grid-template-areas:
-      "large t1"
-      "large t2"
+      "main t1"
+      "main t2"
       "t3   t3";
+    gap: 14px;
   }
-  .metodo-tile.tile-large { grid-area: large; }
-  .metodo-tile:nth-of-type(2) { grid-area: t1; }
-  .metodo-tile:nth-of-type(3) { grid-area: t2; }
-  .metodo-tile:nth-of-type(4) { grid-area: t3; }
+  .metodo-tile--main { grid-area: main; }
+  .metodo-tile--t1   { grid-area: t1; }
+  .metodo-tile--t2   { grid-area: t2; }
+  .metodo-tile--t3   { grid-area: t3; }
 }
 .metodo-tile {
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 26px 26px 24px;
-  display: flex; flex-direction: column;
-  transition: transform .2s ease, box-shadow .2s ease, border-color .15s ease;
+  border-radius: var(--radius-lg);
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s ease, box-shadow .25s ease, border-color .15s ease;
 }
-.metodo-tile:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(15,76,129,.12), 0 3px 8px rgba(15,76,129,.06); }
-
-.metodo-tile.tile-large {
-  background: var(--info-bg);
-  border-color: var(--info-border);
-  border-width: 2px;
-  padding: 36px 32px 30px;
+.metodo-tile:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-1);
 }
-.metodo-tag {
+.metodo-tile--main {
+  background: var(--accent-light);
+  border: 2px solid var(--accent);
+  padding: 32px 28px;
+}
+.metodo-tile-tag {
   font-family: var(--font-mono);
-  display: inline-flex; align-items: center; align-self: flex-start;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: .06em;
+  letter-spacing: .04em;
   text-transform: uppercase;
-  color: var(--accent-dark);
-  background: var(--bg);
-  border: 1px solid var(--info-border);
-  padding: 4px 10px;
-  border-radius: 6px;
-  margin-bottom: 14px;
+  color: var(--accent);
+  background: var(--surface);
+  border: 1px solid var(--accent-border);
+  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+  align-self: flex-start;
+  margin-bottom: 12px;
 }
-.metodo-tile.tile-large .metodo-tag {
-  font-size: 12px;
-  padding: 5px 12px;
-  border-color: var(--cta);
-  color: var(--accent-dark);
+.metodo-tile--main .metodo-tile-tag {
+  font-size: 11.5px;
+  padding: 5px 11px;
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }
-.metodo-tile h3 { font-size: 1.1875rem; margin-bottom: 10px; line-height: 1.25; }
-.metodo-tile.tile-large h3 { font-size: 1.4375rem; }
+.metodo-tile h3 {
+  font-size: 1.125rem;
+  margin-bottom: 8px;
+  letter-spacing: -0.015em;
+}
+.metodo-tile--main h3 {
+  font-size: 1.375rem;
+  color: var(--accent-deep);
+  margin-bottom: 12px;
+}
 .metodo-tile p {
   color: var(--text-secondary);
   font-size: .9375rem;
   line-height: 1.6;
 }
-.metodo-tile.tile-large p { font-size: 1rem; }
-
-/* PIVOT 9: Real law cite visible in title-large metodo tile */
-.metodo-law-cite {
-  font-family: var(--font-mono);
+.metodo-tile--main p { font-size: 1rem; color: var(--text-primary); }
+.metodo-cite {
   display: inline-block;
   margin-top: 14px;
   padding: 10px 14px;
-  background: var(--bg);
-  border: 1px solid var(--info-border);
-  border-radius: 6px;
-  font-size: 12px;
+  background: var(--surface);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
   font-weight: 600;
-  color: var(--accent-dark);
+  color: var(--accent-deep);
   letter-spacing: -0.005em;
   font-variant-numeric: tabular-nums;
+  align-self: flex-start;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
-/* ============================================
-   6. DISPONIBILITÀ — Beta + Garanzia fused
-   ============================================ */
-.beta-card {
-  max-width: 920px;
-  margin: 0 auto;
-  background: var(--bg);
-  border: 2px solid var(--cta);
-  border-radius: 14px;
-  padding: 44px 36px;
+/* ==========================================================================
+   5. PRICING — 2 tier (NO Coaching) con reciprocity + anchoring
+   ========================================================================== */
+
+.pricing-stack {
   display: grid;
-  gap: 32px;
-  text-align: left;
-  box-shadow: 0 14px 40px rgba(26,115,232,.10), 0 2px 6px rgba(26,115,232,.04);
+  gap: 14px;
+  max-width: 980px;
+  margin: 0 auto;
 }
-@media (min-width: 768px) {
-  .beta-card { grid-template-columns: 1.4fr 1fr; align-items: center; gap: 40px; padding: 56px 48px; }
+@media (min-width: 820px) {
+  .pricing-stack {
+    grid-template-columns: 1fr 1.5fr;
+    gap: 18px;
+  }
 }
-
-.beta-badge {
-  display: inline-flex; align-items: center;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+.tier {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s ease, box-shadow .25s ease;
+}
+.tier:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-1);
+}
+.tier--pro {
+  background: linear-gradient(180deg, var(--accent-light) 0%, var(--surface) 100%);
+  border: 2px solid var(--accent);
+  padding: 36px 32px;
+}
+.tier-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
   color: #fff;
-  background: var(--cta);
-  padding: 5px 11px;
-  border-radius: 9999px;
-  margin-bottom: 16px;
-}
-.beta-card h3 { font-size: 1.5625rem; margin-bottom: 10px; line-height: 1.2; }
-.beta-sub {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  line-height: 1.55;
-  margin-bottom: 22px;
-}
-
-.beta-features {
-  display: flex; flex-wrap: wrap;
-  gap: 10px 22px;
-  margin-top: 8px;
-}
-.beta-features span {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-.beta-features span::before {
-  content: '';
-  display: inline-block;
-  width: 6px; height: 6px;
-  background: var(--success);
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.beta-cta-block { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
-
-.beta-garanzia-pill {
-  display: inline-flex; align-items: center; gap: 8px;
   font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--accent-dark);
-  background: var(--info-bg);
-  border: 1px solid var(--info-border);
-  padding: 8px 14px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 5px 12px;
   border-radius: 9999px;
   white-space: nowrap;
 }
-.beta-garanzia-pill svg { width: 14px; height: 14px; }
-.beta-foot {
-  font-size: 12px;
-  color: var(--text-tertiary);
+.tier-name {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.tier-title {
+  font-size: 1.5rem;
+  margin-bottom: 6px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.tier-desc {
+  color: var(--text-secondary);
+  font-size: .9375rem;
   line-height: 1.5;
+  margin-bottom: 18px;
+}
+.tier-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.tier-price-amount {
+  font-family: var(--font-mono);
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.tier-price-period {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+}
+.tier-price-sub {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: 18px;
+  font-weight: 500;
+}
+.tier-price-sub strong { color: var(--accent-deep); font-weight: 600; }
+.tier-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex: 1;
+}
+.tier-features li {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding-left: 0;
+}
+.tier-features li::before {
+  content: '✓';
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
 }
 
-/* ============================================
-   7. FAQ — Pareto 5 domande
-   ============================================ */
-.faq-list {
+.tier-cta { margin-top: auto; }
+.tier-meta {
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tier-meta strong { color: var(--text-secondary); font-weight: 600; }
+
+.pricing-secondary-line {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.pricing-secondary-line a {
+  color: var(--accent);
+  border-bottom: 1px dotted var(--accent-border);
+}
+.pricing-secondary-line a:hover { border-bottom-color: var(--accent); }
+
+/* ==========================================================================
+   6. FAQ — 4 reali dubbi dei candidati PA
+   ========================================================================== */
+
+.faq {
   max-width: 720px;
   margin: 0 auto;
-  display: flex; flex-direction: column; gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 .faq-item {
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px 24px;
+  border-radius: var(--radius);
+  padding: 18px 22px;
   transition: background .15s ease, border-color .15s ease;
 }
-.faq-item:hover { border-color: var(--border-strong); background: var(--bg-alt); }
+.faq-item:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-alt);
+}
 .faq-item summary {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   cursor: pointer;
   list-style: none;
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.005em;
+  line-height: 1.4;
 }
 .faq-item summary::-webkit-details-marker { display: none; }
 .faq-item summary::marker { display: none; content: ''; }
 .faq-chevron {
   flex-shrink: 0;
-  font-weight: 700;
   color: var(--text-tertiary);
-  font-size: 13px;
-  transition: transform .25s cubic-bezier(.16,1,.3,1), color .15s ease;
-  display: inline-block;
   font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 14px;
+  transition: transform .25s cubic-bezier(.16, 1, .3, 1), color .15s ease;
 }
-.faq-item[open] .faq-chevron { transform: rotate(180deg); color: var(--accent); }
+.faq-item[open] .faq-chevron {
+  transform: rotate(45deg);
+  color: var(--accent);
+}
 .faq-answer {
   margin-top: 12px;
-  font-size: 15px;
+  font-size: 14.5px;
   color: var(--text-secondary);
   line-height: 1.65;
   max-width: 640px;
 }
 
-/* ============================================
-   8. FIDUCIA — closing onesty pillar
-   ============================================ */
-.fiducia-anchor {
+/* ==========================================================================
+   7. CHIUSURA + FOOTER — Peak-End finale, founder marker onesty
+   ========================================================================== */
+
+.closing {
+  background: var(--accent-light);
+  border-top: 1px solid var(--accent-border);
+  padding: clamp(72px, 8vw, 96px) 0 clamp(48px, 6vw, 64px);
+}
+.closing-text {
   max-width: 600px;
-  margin: 0 auto;
+  margin: 0 auto 28px;
   text-align: left;
 }
-.fiducia-anchor.center { text-align: center; }
-.fiducia-lead {
+.closing-text--center { text-align: center; }
+.closing-eyebrow {
   font-family: var(--font-mono);
-  color: var(--accent-dark);
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
-  margin-bottom: 14px;
-  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--accent-deep);
+  background: var(--surface);
+  border: 1px solid var(--accent-border);
   padding: 5px 11px;
-  background: var(--info-bg);
-  border: 1px solid var(--info-border);
   border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
 }
-.fiducia-anchor h2 { margin-bottom: 18px; font-size: 1.625rem; }
-.fiducia-copy {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  line-height: 1.65;
-  margin-bottom: 32px;
-}
-.free-trial-icon {
-  width: 88px; height: 88px;
-  margin: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--info-bg);
+.closing-eyebrow .pulse-dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
+  background: var(--success);
 }
+.closing-text h2 {
+  font-size: clamp(1.625rem, 2vw + 1rem, 2.125rem);
+  letter-spacing: -0.03em;
+  margin-bottom: 18px;
+}
+.closing-text p {
+  color: var(--text-primary);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+.closing-text p + p { margin-top: 14px; }
+.closing-text .em-dash { color: var(--text-tertiary); margin: 0 .25em; }
 
-/* ============================================
-   FOOTER — PIVOT 10: founder marker
-   ============================================ */
+.closing-disclaimer {
+  max-width: 600px;
+  margin: 32px auto 0;
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  text-align: left;
+  padding-left: 16px;
+  border-left: 3px solid var(--accent-border);
+}
+.closing-disclaimer strong { color: var(--text-secondary); font-weight: 600; }
+
 footer {
   border-top: 1px solid var(--border);
-  padding: 48px 0 56px;
-  background: var(--bg-alt);
+  background: var(--bg);
+  padding: clamp(40px, 5vw, 56px) 0 clamp(32px, 4vw, 40px);
 }
-.footer-inner {
-  display: flex; flex-direction: column;
+.footer-stack {
+  display: flex;
+  flex-direction: column;
   gap: 24px;
   align-items: flex-start;
-  text-align: left;
 }
 @media (min-width: 768px) {
-  .footer-inner { flex-direction: row; justify-content: space-between; align-items: flex-start; gap: 48px; }
+  .footer-stack {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 48px;
+  }
 }
-.footer-brand { display: flex; flex-direction: column; gap: 6px; }
-.footer-brand-name { font-weight: 800; color: var(--text-primary); font-size: 1rem; letter-spacing: -0.02em; }
+.footer-brand-row {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 460px;
+}
+.footer-brand-row .brand { color: var(--text-primary); }
 .footer-founder {
   font-size: 13px;
   color: var(--text-secondary);
-  line-height: 1.55;
+  line-height: 1.6;
   font-weight: 500;
 }
 .footer-founder-mark {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
-  color: var(--accent-dark);
-  letter-spacing: .04em;
+  letter-spacing: .06em;
   text-transform: uppercase;
-  display: inline-block;
+  color: var(--accent-deep);
+  background: var(--accent-light);
+  border: 1px solid var(--accent-border);
   padding: 3px 9px;
-  background: var(--info-bg);
-  border: 1px solid var(--info-border);
   border-radius: 9999px;
+  display: inline-block;
   margin-right: 8px;
   vertical-align: 1px;
 }
-.footer-trust { font-size: 13px; color: var(--text-tertiary); line-height: 1.6; margin-top: 4px; }
-.footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
-.footer-links a {
+.footer-trust-row {
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+  line-height: 1.55;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+.footer-trust-row span { display: inline-flex; align-items: center; gap: 6px; }
+.footer-trust-row svg {
+  width: 13px;
+  height: 13px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.footer-links-cols {
+  display: grid;
+  gap: 14px 36px;
+  grid-template-columns: 1fr;
+  font-size: 13.5px;
+}
+@media (min-width: 520px) {
+  .footer-links-cols {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.footer-col-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+.footer-links-cols a {
+  display: block;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 0;
+  transition: color .15s ease;
+}
+.footer-links-cols a:hover { color: var(--accent); }
+
+.footer-legal {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 24px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+.footer-legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.footer-legal-links a {
+  color: var(--text-secondary);
   font-weight: 500;
   transition: color .15s ease;
 }
-.footer-links a:hover { color: var(--accent); }
-.footer-copy {
-  margin-top: 28px;
-  font-size: 13px;
-  color: var(--text-tertiary);
-}
+.footer-legal-links a:hover { color: var(--accent); }
 
-/* ---------- Hero micro-rise (only animation left) ---------- */
+/* ==========================================================================
+   Micro-interactions: hero rise (only entry animation)
+   ========================================================================== */
+
 .hero-rise > * {
   opacity: 0;
   animation: hero-rise-anim .55s cubic-bezier(.2, .8, .2, 1) forwards;
@@ -1078,21 +1430,33 @@ footer {
 .hero-rise > *:nth-child(1) { animation-delay: 30ms; }
 .hero-rise > *:nth-child(2) { animation-delay: 130ms; }
 .hero-rise > *:nth-child(3) { animation-delay: 220ms; }
-.hero-rise > *:nth-child(4) { animation-delay: 310ms; }
 @keyframes hero-rise-anim {
   from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes typing-blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
+/* ==========================================================================
+   Mobile penyusutan
+   ========================================================================== */
+
+@media (max-width: 720px) {
+  .container { padding: 0 20px; }
+  .hero { padding: 56px 0 40px; }
+  .section { padding: 56px 0; }
+  .confronto-card { padding: 24px 22px; }
+  .metodo-tile { padding: 22px 20px; }
+  .tier { padding: 26px 22px; }
+  .tier--pro { padding: 30px 24px; }
+  .faq-item { padding: 16px 18px; }
+  .footer-stack { align-items: center; text-align: center; }
+  .footer-brand-row { align-items: center; }
+  .nav-actions { gap: 4px; }
+  .nav-link { display: none; }
 }
 
-/* ---------- Florence Press button states (kill animated border patterns) ---------- */
-button, .cta-primary, .quiz-pill, .nav-cta {
-  position: relative;
-}
+/* ==========================================================================
+   Reduced motion: kill animations, keep layout intact
+   ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -1101,532 +1465,543 @@ button, .cta-primary, .quiz-pill, .nav-cta {
     transition-duration: .001ms !important;
     scroll-behavior: auto !important;
   }
-  .hero-rise > * { opacity: 1 !important; transform: none !important; }
-  .hero h1 .accent { background-position: 0% 50% !important; animation: none !important; }
-  .hero-eyebrow .dot, .mockup-status-dot { animation: none !important; }
+  .hero-rise > *,
+  .hero h1 .fade-line {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .mockup-status-dot,
+  .pulse-dot {
+    animation: none !important;
+  }
 }
 
-/* ---------- Mobile ---------- */
-@media (max-width: 720px) {
-  .section { padding: 64px 0; }
-  .hero { padding: 64px 0 40px; }
-  .hero-grid { gap: 36px; }
-  .trust-band-inner { gap: 8px 10px; }
-  .trust-pill { font-size: 12px; padding: 6px 10px; }
-  .beta-card { padding: 32px 22px; gap: 24px; }
-  .metodo-tile { padding: 22px 20px; }
-  .compare-card { padding: 24px 22px; }
-  .footer-inner { align-items: center; text-align: center; }
+/* ==========================================================================
+   Print: clean
+   ========================================================================== */
+
+@media print {
+  .navbar, .sticky-mobile-cta, footer .footer-legal { display: none; }
 }
 </style>
 </head>
 
 <body>
 
-<a href="#main" class="skip-link">Salta al contenuto</a>
+<a href="#hero" class="skip-link">Salta al contenuto</a>
 
-<!-- Navbar -->
-<header class="navbar">
+<header class="navbar" role="banner">
   <div class="container navbar-inner">
-    <a href="/" class="logo" aria-label="ConcorsoAI home">
-      <span class="logo-mark">CA</span>
-      <span class="logo-text">Concorso<span>AI</span></span>
+    <a href="/" class="brand" aria-label="ConcorsoAI — home">
+      <span class="brand-mark" aria-hidden="true">CA</span>
+      <span class="brand-name">ConcorsoAI</span>
     </a>
-    <a href="auth.html?mode=register" class="nav-cta">Inizia gratis</a>
+    <nav class="nav-actions" aria-label="Navigazione principale">
+      <a href="#confronto" class="nav-link">Perché non ChatGPT</a>
+      <a href="#pricing" class="nav-link">Prezzi</a>
+      <a href="#faq" class="nav-link">FAQ</a>
+      <a href="auth.html?mode=register" class="btn-primary" aria-label="Inizia la prima simulazione gratuita">
+        Inizia gratis
+      </a>
+    </nav>
   </div>
 </header>
 
-<main id="main">
+<main id="hero">
 
-<!-- ============== 1. HERO (H1 + 1 sub + 1 CTA + mockup only) ============== -->
-<section class="hero" aria-labelledby="hero-h1">
-  <div class="container">
-    <div class="hero-grid">
-      <div class="hero-text hero-rise">
-        <p class="hero-eyebrow"><span class="dot" aria-hidden="true"></span>Beta aperta · 3 simulazioni gratis al mese</p>
-        <h1 id="hero-h1">Simula l'<span class="accent">orale</span> sul tuo bando, prima dell'orale.</h1>
-        <p class="hero-subtitle">Domande solo sul tuo programma, non risposte generiche. Carica il bando, il commissario AI fa domande e ti dice cosa ripassare.</p>
-        <div class="hero-cta-row">
-          <a href="auth.html?mode=register" class="cta-primary">
-            Simula l'orale gratuitamente
-            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-          </a>
-        </div>
-      </div>
+  <!-- ===========================================================
+       1) HERO — JTBD-first, asymmetric split, real mockup
+       =========================================================== -->
+  <section class="hero" aria-labelledby="hero-h1">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-text hero-rise">
+          <span class="hero-eyebrow">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            Beta aperta · 3 simulazioni gratis al mese · Senza carta
+          </span>
 
-      <!-- Mockup (real 3-tab product state) -->
-      <div class="mockup-card hero-rise" role="region" aria-label="Esempio del flusso di una simulazione in diritto amministrativo">
-        <div class="mockup-chrome">
-          <div class="mockup-chrome-left">
-            <span class="mockup-chrome-logo">
-              <span class="mockup-chrome-dot" aria-hidden="true"></span>
-              ConcorsoAI
+          <h1 id="hero-h1">
+            <span class="fade-line d1">Simula l'</span><span class="fade-line d2 accent-word">orale</span><span class="fade-line d3"> sul</span><span class="fade-line d4"> </span><span class="fade-line d5">tuo</span><span class="fade-line d6"> bando,</span>
+            <br />
+            <span class="fade-line d4">prima dell'</span><span class="fade-line d5">orale.</span>
+          </h1>
+
+          <p class="hero-subtitle">
+            Carica il bando. <strong>Il commissario AI lo legge</strong> e ti interroga solo sugli argomenti del tuo concorso — non su tutto, in generale, come fa ChatGPT.
+            <span class="em-dash">·</span>
+            Ogni risposta ti dice cosa hai sbagliato, cosa hai dimenticato, e dove ti sei arenato.
+          </p>
+
+          <div class="hero-cta-row">
+            <a href="auth.html?mode=register" class="btn-primary btn-large" aria-label="Inizia la tua prima simulazione orale gratuita">
+              Inizia la tua prima simulazione
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true">
+                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </a>
+            <a href="#demo" class="cta-link">
+              Guarda un esempio reale ↓
+            </a>
+          </div>
+
+          <div class="hero-trust-pills" aria-label="Garanzie di base">
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              Server UE
             </span>
-            <span class="mockup-breadcrumb" aria-label="Posizione nella simulazione">
-              <span>Simulazione</span>
-              <span class="mockup-chrome-sep" aria-hidden="true">/</span>
-              <span class="mockup-breadcrumb-current">Diritto Amministrativo · Esame 1</span>
+            <span class="pill-sep" aria-hidden="true"></span>
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              Dati cifrati
+            </span>
+            <span class="pill-sep" aria-hidden="true"></span>
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              Mai dati a LLM USA
             </span>
           </div>
-          <span class="mockup-chrome-avatar" aria-label="Profilo utente">MR</span>
         </div>
 
-        <div class="mockup-body">
-          <div class="mockup-main">
-            <div class="mockup-eyebrow">
-              <span class="mockup-eyebrow-dot" aria-hidden="true"></span>
-              Esempio di sessione
+        <div class="mockup hero-rise" role="region" aria-label="Esempio di una sessione simulata in diritto amministrativo">
+          <div class="mockup-chrome">
+            <div class="mockup-chrome-meta">
+              <span class="mockup-chrome-mark">ConcorsoAI</span>
+              <span class="mockup-chrome-path">/ Comune di Milano 2026 / Diritto Amm.</span>
+            </div>
+            <span class="mockup-chrome-avatar" aria-label="Profilo utente">MR</span>
+          </div>
+
+          <div class="mockup-status" aria-label="Stato della sessione">
+            <span class="mockup-status-item">
+              <span class="mockup-status-dot" aria-hidden="true"></span>
+              Commissario attivo
+            </span>
+            <span class="mockup-status-item" aria-label="Tempo trascorso">
+              <span class="mockup-status-timer"><span class="timer-num">01:23</span> / 05:00</span>
+            </span>
+            <span class="mockup-status-item">Domanda 4 / 12</span>
+          </div>
+
+          <div class="mockup-tabs" role="tablist" aria-label="Stati di una sessione">
+            <button class="mockup-tab is-active" role="tab" aria-selected="true" data-tab="question" id="t-q" aria-controls="p-q">Domanda</button>
+            <button class="mockup-tab" role="tab" aria-selected="false" data-tab="answer" id="t-a" aria-controls="p-a">La tua risposta</button>
+            <button class="mockup-tab" role="tab" aria-selected="false" data-tab="report" id="t-r" aria-controls="p-r">Report</button>
+          </div>
+
+          <div class="mockup-body">
+            <div class="mockup-panel" id="p-q" role="tabpanel" aria-labelledby="t-q" data-panel="question">
+              <p class="mockup-eyebrow"><span class="mockup-eyebrow-mark"></span> Domanda · 5ª materia</p>
+              <blockquote class="mockup-quote">«Mi parli del principio di imparzialità della Pubblica Amministrazione. A quale norma si riferisce?»</blockquote>
+              <p class="mockup-hint">Domanda generata leggendo il PDF del bando che hai appena caricato.</p>
             </div>
 
-            <div class="mockup-status" aria-label="Stato della simulazione">
-              <span class="mockup-status-item">
-                <span class="mockup-status-dot" aria-hidden="true"></span>
-                Microfono attivo
-              </span>
-              <span class="mockup-status-item" id="mockup-timer-status" aria-label="Timer simulazione: 01:23 di 05:00">
-                <span class="mockup-status-timer"><span class="timer-num" id="mockup-timer">01:23</span> / 05:00</span>
-              </span>
-              <span class="mockup-status-item">Domanda 04 / 12</span>
+            <div class="mockup-panel hidden" id="p-a" role="tabpanel" aria-labelledby="t-a" data-panel="answer">
+              <p class="mockup-eyebrow"><span class="mockup-eyebrow-mark"></span> La tua risposta</p>
+              <p class="mockup-answer">«L'imparzialità è un principio cardine della PA. La PA deve comportarsi in modo equo verso i cittadini, senza favorire nessuno. È un principio generale che discende dalla <span class="missed-cite">Costituzione</span>.»<span class="typing-cursor" aria-hidden="true"></span></p>
+              <p class="mockup-hint">Hai tralasciato il riferimento normativo specifico. Vedi il Report.</p>
             </div>
 
-            <div class="mockup-tabs" role="tablist" aria-label="Stati di una simulazione">
-              <button class="mockup-tab is-active" role="tab" aria-selected="true" tabindex="0" data-tab="question" id="tab-question" aria-controls="panel-question">1. Domanda</button>
-              <button class="mockup-tab" role="tab" aria-selected="false" tabindex="-1" data-tab="answer" id="tab-answer" aria-controls="panel-answer">2. La tua risposta</button>
-              <button class="mockup-tab" role="tab" aria-selected="false" tabindex="-1" data-tab="report" id="tab-report" aria-controls="panel-report">3. Report AI</button>
-            </div>
-
-            <div class="mockup-panel" role="tabpanel" aria-labelledby="tab-question" id="panel-question" data-panel="question" aria-hidden="false">
-              <p class="mockup-meta">Domanda di esempio</p>
-              <p class="mockup-content">"Mi parli del principio di imparzialità della Pubblica Amministrazione. A quale norma si riferisce?"</p>
-              <p class="mockup-meta-hint">Clicca "2. La tua risposta" per vedere come rispondi.</p>
-            </div>
-
-            <div class="mockup-panel hidden" hidden role="tabpanel" aria-labelledby="tab-answer" id="panel-answer" data-panel="answer" aria-hidden="true">
-              <p class="mockup-meta">Tu rispondi<span class="typing-cursor" aria-hidden="true"></span></p>
-              <p class="mockup-content">"L'imparzialità è un principio cardine della PA. La PA deve comportarsi in modo equo verso i cittadini, senza favorire nessuno. È un principio generale che discende dalla <em class="missed">Costituzione</em>."</p>
-              <p class="mockup-meta-hint">Clicca "3. Report AI" per vedere il feedback.</p>
-            </div>
-
-            <div class="mockup-panel hidden" hidden role="tabpanel" aria-labelledby="tab-report" id="panel-report" data-panel="report" aria-hidden="true">
-              <p class="mockup-meta">Punteggio di esempio (il tuo dipende dalle risposte)</p>
-              <div class="mockup-score-row">
-                <div class="mockup-score-circle" aria-label="Punteggio 78 su 100">
-                  <div class="mockup-score-num">78</div>
-                  <div class="mockup-score-of">/ 100</div>
+            <div class="mockup-panel hidden" id="p-r" role="tabpanel" aria-labelledby="t-r" data-panel="report">
+              <p class="mockup-eyebrow"><span class="mockup-eyebrow-mark"></span> Report della sessione</p>
+              <div class="mockup-report">
+                <div class="mockup-grade-row">
+                  <div class="mockup-grade-circle" aria-label="Punteggio 78 su 100">
+                    <div class="mockup-grade-num">78</div>
+                    <div class="mockup-grade-of">/ 100</div>
+                  </div>
+                  <div class="mockup-grade-text">
+                    <p class="mockup-grade-label">Corretta ma incompleta.</p>
+                    <p class="mockup-grade-note">La risposta è pertinente, ma manca il riferimento normativo specifico che la commissione si aspetta.</p>
+                  </div>
                 </div>
-                <div class="mockup-score-detail">
-                  <p class="mockup-score-label">Corretta ma incompleta</p>
-                  <p class="mockup-score-note">La risposta è pertinente, ma manca il riferimento normativo specifico.</p>
-                </div>
+
+                <ul class="mockup-feedback">
+                  <li class="good">
+                    <span class="ico" aria-hidden="true">+</span>
+                    Hai spiegato bene cosa significa imparzialità, senza uscire dal tema.
+                  </li>
+                  <li class="good">
+                    <span class="ico" aria-hidden="true">+</span>
+                    Risposta chiara, ritmo sicuro, niente giri di parole.
+                  </li>
+                  <li class="work">
+                    <span class="ico" aria-hidden="true">!</span>
+                    Per chiudere bene, collega il principio all'art. 97 della Costituzione e all'art. 1 della L. 241/1990.
+                  </li>
+                </ul>
+
+                <p class="mockup-tag">Da ripassare → art. 97 Cost. · L. 241/1990, art. 1</p>
               </div>
-
-              <ul class="mockup-feedback">
-                <li class="report-good">
-                  <span class="report-icon" aria-hidden="true">+</span>
-                  <span>Hai spiegato correttamente cosa significa imparzialità.</span>
-                </li>
-                <li class="report-good">
-                  <span class="report-icon" aria-hidden="true">+</span>
-                  <span>Risposta breve e comprensibile, senza uscire dal tema.</span>
-                </li>
-                <li class="report-work">
-                  <span class="report-icon" aria-hidden="true">&#8599;</span>
-                  <span>Per completarla, collega il principio all'art. 97 della Costituzione e all'art. 1 della Legge 241/1990.</span>
-                </li>
-              </ul>
-              <p class="mockup-extra">Esci dalla sessione con un punto preciso da ripassare.</p>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============== 2. TRUST BAND (own section) ============== -->
-<div class="trust-band" aria-label="Caratteristiche di sicurezza e accesso">
-  <div class="container">
-    <div class="trust-band-inner">
-      <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg>Dati cifrati</span>
-      <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>Server UE (GDPR)</span>
-      <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Nessuna carta</span>
-      <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>Disdici quando vuoi</span>
-    </div>
-  </div>
-</div>
-
-<!-- ============== 3. R1 MINI-QUIZ (live demo) ============== -->
-<section id="scegli-materia" class="bg-alt section">
-  <div class="container">
-    <div class="section-heading">
-      <p class="section-eyebrow">Prova subito</p>
-      <h2>Scegli la tua materia. Ti mostro una domanda vera.</h2>
-      <p>Tocca una materia. Vedrai una domanda tipo, una risposta-tipo e lo schema per rispondere bene. Esempi reali, ancorati ai riferimenti normativi italiani.</p>
-    </div>
-
-    <div class="quiz-card">
-      <div class="quiz-pills" role="tablist" aria-label="Scegli una materia">
-        <button id="qm-amm" type="button" class="quiz-pill is-active" data-materia="amm" role="tab" aria-selected="true" tabindex="0" aria-controls="qp-amm">Diritto Amministrativo</button>
-        <button id="qm-cost" type="button" class="quiz-pill" data-materia="cost" role="tab" aria-selected="false" tabindex="-1" aria-controls="qp-cost">Diritto Costituzionale</button>
-        <button id="qm-cont" type="button" class="quiz-pill" data-materia="cont" role="tab" aria-selected="false" tabindex="-1" aria-controls="qp-cont">Contabilità Pubblica</button>
-        <button id="qm-pen" type="button" class="quiz-pill" data-materia="pen" role="tab" aria-selected="false" tabindex="-1" aria-controls="qp-pen">Diritto Penale</button>
-        <button id="qm-altro" type="button" class="quiz-pill" data-materia="altro" role="tab" aria-selected="false" tabindex="-1" aria-controls="qp-altro">Altra materia</button>
-      </div>
-
-      <div class="quiz-divider" role="presentation"></div>
-
-      <div id="qp-amm" class="quiz-panel is-active" role="tabpanel" aria-labelledby="qm-amm" data-materia="amm" tabindex="0">
-        <p class="quiz-eyebrow">Domanda d'esempio · Commissario AI</p>
-        <p class="quiz-question">"Ci parli del principio di trasparenza nella Pubblica Amministrazione. A quale norma si riferisce?"</p>
-        <p class="quiz-answer-label">Schema di risposta</p>
-        <p class="quiz-answer-body">L'art. 1 della L. 241/1990 lo sancisce. Si applica a: accesso agli atti, motivazione dei provvedimenti, pubblicità sui siti istituzionali. Esempio pratico: richiesta di accesso civico generalizzato, ex D.Lgs. 33/2013.</p>
-      </div>
-
-      <div id="qp-cost" class="quiz-panel" role="tabpanel" aria-labelledby="qm-cost" data-materia="cost" tabindex="0" hidden>
-        <p class="quiz-eyebrow">Domanda d'esempio · Commissario AI</p>
-        <p class="quiz-question">"Quale articolo della Costituzione italiana sancisce il principio di uguaglianza? Mi faccia un esempio in materia di pubblico impiego."</p>
-        <p class="quiz-answer-label">Schema di risposta</p>
-        <p class="quiz-answer-body">L'art. 3 della Costituzione, in particolare il comma 2 sull'uguaglianza sostanziale. In materia di pubblico impiego: divieto di discriminazione nell'accesso, art. 97 Cost., DPR 487/1994 e giurisprudenza costituzionale.</p>
-      </div>
-
-      <div id="qp-cont" class="quiz-panel" role="tabpanel" aria-labelledby="qm-cont" data-materia="cont" tabindex="0" hidden>
-        <p class="quiz-eyebrow">Domanda d'esempio · Commissario AI</p>
-        <p class="quiz-question">"Quali sono i principi del bilancio dello Stato? In quali circostanze la Corte Costituzionale ammette scostamenti dal pareggio?"</p>
-        <p class="quiz-answer-label">Schema di risposta</p>
-        <p class="quiz-answer-body">Universalità, unità, integrità, specializzazione, annualità e equilibrio (L. 196/2009). La Corte Costituzionale n. 88/2014 qualifica l'equilibrio come principio flessibile in contesti eccezionali, non come regola assoluta.</p>
-      </div>
-
-      <div id="qp-pen" class="quiz-panel" role="tabpanel" aria-labelledby="qm-pen" data-materia="pen" tabindex="0" hidden>
-        <p class="quiz-eyebrow">Domanda d'esempio · Commissario AI</p>
-        <p class="quiz-question">"Mi spieghi la differenza tra dolo eventuale e colpa cosciente. Quando si configura il primo?"</p>
-        <p class="quiz-answer-label">Schema di risposta</p>
-        <p class="quiz-answer-body">Entrambi presuppongono la rappresentazione anticipata dell'evento. Nel dolo eventuale l'agente accetta il rischio; nella colpa cosciente lo esclude per sé. Cass. Pen. SS.UU. 2014, n. 38343: criterio dell'accettazione del rischio.</p>
-      </div>
-
-      <div id="qp-altro" class="quiz-panel" role="tabpanel" aria-labelledby="qm-altro" data-materia="altro" tabindex="0" hidden>
-        <p class="quiz-eyebrow">Domanda d'esempio · Commissario AI</p>
-        <p class="quiz-question">"Mi descriva un caso reale dove ha applicato il principio di buon andamento della Pubblica Amministrazione."</p>
-        <p class="quiz-answer-label">Schema di risposta</p>
-        <p class="quiz-answer-body">L'art. 97 della Costituzione enuncia buon andamento e imparzialità. Esempio concreto: riorganizzazione di un ufficio con tempi di evasione calati su pratiche standardizzate. Meglio se hai numeri reali mostrabili.</p>
-      </div>
-
-      <div class="quiz-cta-bar">
-        <a href="auth.html?mode=register" class="cta-primary">Carica il tuo bando</a>
-        <a href="#confronto" class="cta-link">→ confronta con ChatGPT</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============== 4. CONFRONTO CRUDO (solid bg, no gradient) ============== -->
-<section id="confronto" class="section">
-  <div class="container">
-    <div class="section-heading">
-      <p class="section-eyebrow">Confronto onesto</p>
-      <h2>Noi, ChatGPT, esercitarti da solo.</h2>
-      <p>Confronto qualitativo basato sull'uso reale dei tre strumenti a luglio 2026. ChatGPT resta eccellente dove è nato per essere usato. Noi siamo diversi perché ancorati al tuo bando.</p>
-    </div>
-
-    <div class="compare-stack">
-      <article class="compare-card us">
-        <span class="compare-tag">ConcorsoAI</span>
-        <h3>Allenamento specifico sul tuo concorso.</h3>
-        <p class="compare-card-sub">Carica il bando, il commissario AI estrae gli argomenti e ti interroga solo su quelli. Niente quiz a crocette, niente risposte generiche.</p>
-        <div class="compare-rows">
-          <div class="compare-row"><span class="compare-row-name">Domande sul tuo bando</span><span class="compare-row-val">Estrae i contenuti dal PDF automaticamente</span></div>
-          <div class="compare-row"><span class="compare-row-name">Simulazione orale con timer</span><span class="compare-row-val">Voce o testo, timer realistico di 5 minuti</span></div>
-          <div class="compare-row"><span class="compare-row-name">Feedback 3 metriche live</span><span class="compare-row-val">Chiarezza, struttura, contenuto</span></div>
-          <div class="compare-row"><span class="compare-row-name">Ancoraggio a leggi italiane</span><span class="compare-row-val">Sì, riferimenti puntuali (Costituzione, L. 241/1990, DPR 487/1994)</span></div>
-          <div class="compare-row"><span class="compare-row-name">Server UE cifrato</span><span class="compare-row-val">Sì, Supabase su datacenter UE</span></div>
-        </div>
-      </article>
-
-      <div class="compare-grid">
-        <article class="compare-card alt">
-          <span class="compare-tag">ChatGPT</span>
-          <h3>Ottimo prompt engineer, fragile sul contesto.</h3>
-          <p>Risposte generiche eccellenti, ma servono prompt lunghi per ottenere qualcosa di specifico sul tuo bando. Niente timer, niente feedback strutturato, server extra-UE.</p>
-        </article>
-        <article class="compare-card alt">
-          <span class="compare-tag">Da solo</span>
-          <h3>Nessuno strumento è uno strumento.</h3>
-          <p>Leggi appunti e manuali, ma non provi mai l'esposizione orale. Non c'è un timer che ti ferma. Non c'è feedback che ti dice cosa migliorare.</p>
-        </article>
-      </div>
-    </div>
-
-    <p class="compare-footnote">Nessuna riga è una promessa di punteggio. È una descrizione di cosa fa o non fa ciascuno strumento, basata sull'uso reale a luglio 2026.</p>
-  </div>
-</section>
-
-<!-- ============== 5. METODO — bento mosaic with real law cite ============== -->
-<section class="bg-alt section">
-  <div class="container">
-    <div class="section-heading">
-      <p class="section-eyebrow">Metodo</p>
-      <h2>Ancorato alle regole della PA italiana.</h2>
-      <p>Non è un chatbot generico. È modellato su come funzionano realmente i concorsi pubblici italiani.</p>
-    </div>
-
-    <div class="metodo-bento">
-      <article class="metodo-tile tile-large">
-        <span class="metodo-tag">Basi giuridiche</span>
-        <h3>Costituzione · L. 241/1990 · DPR 487/1994</h3>
-        <p>Le domande che il commissario AI genera sono ancorate ai riferimenti normativi reali della PA italiana: art. 97 Cost. sul buon andamento, L. 241/90 sul procedimento, DPR 487/94 sui concorsi, D.Lgs. 33/2013 sulla trasparenza.</p>
-        <span class="metodo-law-cite">art. 97 Cost. · art. 1 L. 241/1990 · DPR 487/1994 · D.Lgs. 33/2013</span>
-      </article>
-
-      <article class="metodo-tile">
-        <span class="metodo-tag">Commissioni</span>
-        <h3>Come una commissione vera.</h3>
-        <p>Domanda iniziale, approfondimento, follow-up. Lo schema reale di un orale PA, non un quiz a crocette.</p>
-      </article>
-
-      <article class="metodo-tile">
-        <span class="metodo-tag">Privacy by design</span>
-        <h3>GDPR · Supabase UE.</h3>
-        <p>Bandi cifrati, datacenter UE. Nessun dato condiviso con terze parti. Cancellazione dal profilo in qualunque momento.</p>
-      </article>
-
-      <article class="metodo-tile">
-        <span class="metodo-tag">Onesty · Q3 2026</span>
-        <h3>Zero promesse inventate.</h3>
-        <p>Niente abbonamenti automatici, niente statistiche finte. Quando Stripe si attiva, rimborso totale in un clic e 30 giorni per cambiare idea.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ============== 6. DISPONIBILITÀ (Beta + Garanzia fused) ============== -->
-<section id="disponibilita" class="section">
-  <div class="container">
-    <div class="section-heading">
-      <p class="section-eyebrow">Disponibilità</p>
-      <h2>In beta gratuita. Pagamenti in arrivo.</h2>
-      <p>Per ora è tutto gratis. Quando Stripe sarà attivo avrai 30 giorni per ripensarci e rimborso totale in un clic.</p>
-    </div>
-
-    <div class="beta-card">
-      <div>
-        <span class="beta-badge">Beta aperta</span>
-        <h3>Accesso completo gratis</h3>
-        <p class="beta-sub">3 simulazioni al mese, tutte le materie standard, 3 livelli di difficoltà (Facile, Realistico, Difficile), feedback live su 3 metriche. Niente carta, niente vincoli.</p>
-        <ul class="beta-features" aria-label="Cosa include il piano beta">
-          <li><span>3 simulazioni gratis al mese</span></li>
-          <li><span>Tutte le materie standard</span></li>
-          <li><span>3 livelli di difficoltà</span></li>
-          <li><span>Feedback su 3 metriche</span></li>
-        </ul>
-      </div>
-      <div class="beta-cta-block">
-        <a href="auth.html?mode=register" class="cta-primary">Inizia gratis</a>
-        <span class="beta-garanzia-pill" title="Quando il piano Pro sarà attivo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7v6h6M21 17a9 9 0 1 1-9-9 9 9 0 0 1 9 9z"/></svg>
-          Rimborso totale in un clic · 30 giorni
+  <!-- ===========================================================
+       2) TRUST BAND — own section
+       =========================================================== -->
+  <div class="trust-band" aria-label="Garanzie di privacy e accesso">
+    <div class="container">
+      <div class="trust-band-inner">
+        <span class="trust-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+          Dati cifrati, server UE
         </span>
-        <p class="beta-foot">Pagamenti via Stripe attivi dal Q3 2026. La garanzia è operativa dal giorno del lancio.</p>
+        <span class="trust-pill-sep" aria-hidden="true"></span>
+        <span class="trust-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Nessuna carta di credito per iniziare
+        </span>
+        <span class="trust-pill-sep" aria-hidden="true"></span>
+        <span class="trust-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+          Mai dati condivisi con LLM extra-UE
+        </span>
+        <span class="trust-pill-sep" aria-hidden="true"></span>
+        <span class="trust-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Disdici quando vuoi, senza vincoli
+        </span>
       </div>
     </div>
   </div>
-</section>
 
-<!-- ============== 7. FAQ (5 domande, Pareto) ============== -->
-<section id="faq" class="bg-alt section">
-  <div class="container">
-    <div class="section-heading">
-      <p class="section-eyebrow">FAQ oneste</p>
-      <h2>Le 5 domande che ci fanno di più.</h2>
-      <p>Risposte brevi e dirette. Se non trovi la tua, scrivici.</p>
-    </div>
+  <!-- ===========================================================
+       3) CONFRONTO — kills "why not ChatGPT?"
+       =========================================================== -->
+  <section class="section section--alt" id="confronto" aria-labelledby="confronto-h2">
+    <div class="container">
+      <div class="section-heading">
+        <span class="section-eyebrow">Perché non basta ChatGPT</span>
+        <h2 id="confronto-h2">ChatGPT non legge il tuo bando. ConcorsoAI sì.</h2>
+        <p>Lo sappiamo: l'hai già provato. «Fammi domande sul DPR 487.» E riparte ogni volta da zero. E non conosce gli argomenti specifici che la commissione del <em>tuo</em> concorso ti chiederà.</p>
+      </div>
 
-    <div class="faq-list">
-      <details class="faq-item">
-        <summary>
-          <span>Le domande sono davvero basate sul mio bando?</span>
-          <span class="faq-chevron" aria-hidden="true">↓</span>
-        </summary>
-        <div class="faq-answer">
-          Sì. L'AI estrae i contenuti del PDF che carichi e li usa come materiale di riferimento per le domande. Più i tuoi materiali sono completi, più le domande rispecchiano il tuo programma.
-        </div>
-      </details>
+      <div class="confronto-stack">
+        <article class="confronto-card us" aria-labelledby="conf-us-h">
+          <span class="confronto-tag">ConcorsoAI</span>
+          <h3 id="conf-us-h">Costruito sul tuo bando, simulazione dopo simulazione.</h3>
+          <p class="confronto-sub">Carichi il bando. Il commissario AI legge, estrae gli argomenti e ti interroga su quelli, non su tutto. Ricorda cosa hai detto nelle sessioni precedenti.</p>
+          <div class="confronto-rows">
+            <div class="confronto-row"><span class="confronto-row-key">Bando</span><span class="confronto-row-val">Legge il PDF che hai caricato. Lavora solo sui tuoi argomenti.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Materie</span><span class="confronto-row-val">Ogni materia del bando, nelle giuste proporzioni di peso.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Memoria</span><span class="confronto-row-val">Tra una simulazione e l'altra ricorda cosa hai sbagliato.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Feedback</span><span class="confronto-row-val">Chiarezza, struttura, contenuto. Con norma di riferimento.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Voce</span><span class="confronto-row-val">Riconoscimento vocale del browser. Rispondi come davanti alla commissione.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Costo</span><span class="confronto-row-val">3 simulazioni gratis al mese. Poi €14,99 al mese o €119 all'anno.</span></div>
+          </div>
+        </article>
 
-      <details class="faq-item">
-        <summary>
-          <span>Posso allenarmi su materie standard senza caricare il bando?</span>
-          <span class="faq-chevron" aria-hidden="true">↓</span>
-        </summary>
-        <div class="faq-answer">
-          Sì. Sono disponibili materie standard (Diritto Amministrativo, Costituzionale, Contabilità Pubblica, Diritto Penale) per simulazioni più generali di pratica. Il massimo dell'ancoraggio lo ottieni caricando il tuo bando.
-        </div>
-      </details>
+        <article class="confronto-card alt" aria-labelledby="conf-cgpt-h">
+          <span class="confronto-tag">ChatGPT</span>
+          <h3 id="conf-cgpt-h">Generico. Non conosce il tuo concorso.</h3>
+          <p class="confronto-sub">Devi scrivere ogni volta il prompt, reincollare il bando, ricordare la chat precedente. È un tool, non un allenatore.</p>
+          <div class="confronto-rows">
+            <div class="confronto-row"><span class="confronto-row-key">Bando</span><span class="confronto-row-val">Lo reincolli tu, ogni sessione. Se lo dimentichi, riparte da zero.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Materie</span><span class="confronto-row-val">Quelle che gli chiedi. Non quelle del bando.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Memoria</span><span class="confronto-row-val">Solo nella chat corrente. Domani è un altro dialogo.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Feedback</span><span class="confronto-row-val">Testuale, generico. Non distingue chiarezza da struttura.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Voce</span><span class="confronto-row-val">Solo testo. L'orale è un'altra cosa.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Costo</span><span class="confronto-row-val">€20/mese per la versione utile.</span></div>
+          </div>
+        </article>
 
-      <details class="faq-item">
-        <summary>
-          <span>I miei dati sono al sicuro?</span>
-          <span class="faq-chevron" aria-hidden="true">↓</span>
-        </summary>
-        <div class="faq-answer">
-          Sì. I bandi sono salvati cifrati su Supabase, datacenter UE. Nessun dato è condiviso con terze parti. Puoi cancellare tutto dalla dashboard in qualunque momento.
-        </div>
-      </details>
-
-      <details class="faq-item">
-        <summary>
-          <span>E se il bando è stato pubblicato da pochi giorni?</span>
-          <span class="faq-chevron" aria-hidden="true">↓</span>
-        </summary>
-        <div class="faq-answer">
-          Lo carichi tu come PDF o testo. L'AI estrae argomenti e riferimenti normativi e li usa come base per le domande. Più recente è il bando, più le domande rimangono ancorate ai materiali che hai caricato.
-        </div>
-      </details>
-
-      <details class="faq-item">
-        <summary>
-          <span>Posso rispondere a voce o solo per iscritto?</span>
-          <span class="faq-chevron" aria-hidden="true">↓</span>
-        </summary>
-        <div class="faq-answer">
-          Entrambe. Hai un pulsante microfono (riconoscimento vocale del browser) e un campo di testo. Il commissario AI capisce entrambi, e puoi alternare nella stessa sessione.
-        </div>
-      </details>
-    </div>
-  </div>
-</section>
-
-<!-- ============== 8. FIDUCIA — closing onesty pillar ============== -->
-<section id="fiducia" class="section-tight">
-  <div class="container">
-    <div class="fiducia-anchor">
-      <p class="fiducia-lead">Onesty</p>
-      <h2>Niente recensioni inventate. Preferiamo mostrarti come funziona.</h2>
-      <p class="fiducia-copy">Hai 3 simulazioni gratuite ogni mese. Nessuna carta e nessun vincolo: carica il materiale, prova una sessione e decidi dopo se proseguire.</p>
-      <div class="free-trial-icon" aria-hidden="true">
-        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="32" cy="32" r="24" stroke="#1A73E8" stroke-width="3.5"/>
-          <text x="32" y="36" text-anchor="middle" fill="#1A73E8" font-size="22" font-weight="800" font-family="Inter, system-ui">3</text>
-          <text x="32" y="48" text-anchor="middle" fill="#1A73E8" font-size="7" font-weight="700" font-family="Inter, system-ui">GRATIS</text>
-        </svg>
+        <article class="confronto-card alt" aria-labelledby="conf-solo-h">
+          <span class="confronto-tag">Da solo</span>
+          <h3 id="conf-solo-h">Sai cosa studi. Non sai se sei pronto.</h3>
+          <p class="confronto-sub">Libri, manuali, schemi. Studiare è facile, è lo stesso da sempre. Quello che manca è sapere se sei <em>davvero</em> pronto per le domande che ti farà la commissione.</p>
+          <div class="confronto-rows">
+            <div class="confronto-row"><span class="confronto-row-key">Bando</span><span class="confronto-row-val">Lo stampi e lo leggi passivamente.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Materie</span><span class="confronto-row-val">Rileggi tutto, anche quello che sai già.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Memoria</span><span class="confronto-row-val">Tutto nella tua testa, senza misurazione.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Feedback</span><span class="confronto-row-val">Nessuno. Lo capisci solo davanti alla commissione.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Voce</span><span class="confronto-row-val">Parli da solo. Nessuno ti corregge.</span></div>
+            <div class="confronto-row"><span class="confronto-row-key">Costo</span><span class="confronto-row-val">€200–500 di manuali. Mesi di studio.</span></div>
+          </div>
+        </article>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+
+  <!-- ===========================================================
+       4) METODO — bento 4 tile, cite reali
+       =========================================================== -->
+  <section class="section" id="metodo" aria-labelledby="metodo-h2">
+    <div class="container">
+      <div class="section-heading section-heading--center">
+        <span class="section-eyebrow">Come funziona</span>
+        <h2 id="metodo-h2">Quattro passaggi. Nessun manuale da leggere.</h2>
+        <p style="margin: 0 auto;">Dalla prima volta che apri la pagina alla tua prima simulazione completa, passano meno di cinque minuti. Tutto qui sotto.</p>
+      </div>
+
+      <div class="metodo-bento">
+        <article class="metodo-tile metodo-tile--main" aria-labelledby="m-main-h">
+          <span class="metodo-tile-tag">1 · Carica</span>
+          <h3 id="m-main-h">Carica il bando o scegli una materia standard.</h3>
+          <p>Trascini il PDF del bando sul browser e l'AI estrae gli argomenti. Oppure scegli una materia pronta (Diritto Amministrativo, Costituzionale, Contabilità Pubblica, Penale) per esercitarti senza bando. In entrambi i casi, la prima simulazione è pronta in meno di cinque minuti.</p>
+          <span class="metodo-cite">Riferimenti normativi usati: DPR 487/1994 · art. 97 Cost. · L. 241/1990 · D.Lgs. 33/2013</span>
+        </article>
+
+        <article class="metodo-tile metodo-tile--t1" aria-labelledby="m-t1-h">
+          <span class="metodo-tile-tag">2 · Configura</span>
+          <h3 id="m-t1-h">Scegli difficoltà e durata.</h3>
+          <p>Facile, Realistico, Difficile. Durata 10, 20 o 30 minuti. La simulazione si adatta al tempo che hai stasera, non a un programma fisso.</p>
+        </article>
+
+        <article class="metodo-tile metodo-tile--t2" aria-labelledby="m-t2-h">
+          <span class="metodo-tile-tag">3 · Rispondi</span>
+          <h3 id="m-t2-h">A voce o scrivendo, come davanti alla commissione.</h3>
+          <p>Il commissario AI fa la domanda. Tu rispondi. Se non sei d'accordo con la correzione, glielo dici. Il sistema tiene il punteggio live mentre parli.</p>
+        </article>
+
+        <article class="metodo-tile metodo-tile--t3" aria-labelledby="m-t3-h">
+          <span class="metodo-tile-tag">4 · Ricevi</span>
+          <h3 id="m-t3-h">Report finale con un punto preciso da ripassare.</h3>
+          <p>Chiarezza, struttura, contenuto. Ogni sessione ti dice esattamente su quale articolo tornare stasera. Senza doverti rileggere tutto il bando.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================================================
+       5) PRICING — 2 tier (Free + Pro), no Coaching
+       =========================================================== -->
+  <section class="section section--alt" id="pricing" aria-labelledby="pricing-h2">
+    <div class="container">
+      <div class="section-heading section-heading--center">
+        <span class="section-eyebrow">Quanto costa</span>
+        <h2 id="pricing-h2">Prova gratis. Poi decidi.</h2>
+        <p style="margin: 0 auto;">Tre simulazioni al mese senza mai mettere la carta. Quando vuoi di più, Pro sblocca tutto — senza clausole nascoste, senza finti sconti a tempo, senza bundle che non ti servono.</p>
+      </div>
+
+      <div class="pricing-stack">
+        <article class="tier" aria-labelledby="p-free-h">
+          <p class="tier-name">Free</p>
+          <h3 id="p-free-h" class="tier-title">Per iniziare.</h3>
+          <p class="tier-desc">Tre simulazioni al mese, senza registrazione prima. Per chi vuole solo capire come funziona.</p>
+          <div class="tier-price-row">
+            <span class="tier-price-amount">€0</span>
+          </div>
+          <p class="tier-price-sub"><strong>Sempre gratis.</strong> Senza carta, senza vincoli.</p>
+          <ul class="tier-features" aria-label="Cosa è incluso nel piano Free">
+            <li>3 simulazioni al mese, complete</li>
+            <li>Materie standard (Amm., Cost., Cont., Penale)</li>
+            <li>Feedback su chiarezza, struttura, contenuto</li>
+            <li>Riconoscimento vocale</li>
+            <li>Tutte le risposte salvate sulla dashboard</li>
+          </ul>
+          <div class="tier-cta">
+            <a href="auth.html?mode=register" class="btn-secondary btn-large" aria-label="Inizia gratis, tier Free">
+              Inizia gratis
+            </a>
+          </div>
+          <p class="tier-meta">
+            <strong>Cosa non è incluso</strong>: simulazioni illimitate, materie avanzate non-standard, storico oltre 30 giorni, priorità di banda.
+          </p>
+        </article>
+
+        <article class="tier tier--pro" aria-labelledby="p-pro-h">
+          <span class="tier-badge">Consigliato</span>
+          <p class="tier-name">Pro</p>
+          <h3 id="p-pro-h" class="tier-title">Per chi ha l'orale vicino.</h3>
+          <p class="tier-desc">Illimitato, ogni materia, ogni tipo di bando. Per chi fa sul serio.</p>
+          <div class="tier-price-row">
+            <span class="tier-price-amount">€14,99</span>
+            <span class="tier-price-period">/ mese</span>
+          </div>
+          <p class="tier-price-sub">O <strong>€119 all'anno</strong> (€9,91/mese · risparmi €60,88).<br />Costo giornaliero: <strong>€0,50</strong> — meno di mezzo caffè.</p>
+          <ul class="tier-features" aria-label="Cosa è incluso nel piano Pro">
+            <li>Simulazioni illimitate, ogni materia</li>
+            <li>Carica qualsiasi bando: concorsi, ami, enti locali</li>
+            <li>Materie avanzate (Tributario, Lavoro, Europeo, Civile)</li>
+            <li>Storico completo, grafici di evoluzione</li>
+            <li>Priorità di banda in questo momento di picco</li>
+            <li>Report PDF scaricabile dopo ogni sessione</li>
+          </ul>
+          <div class="tier-cta">
+            <a href="auth.html?mode=register&plan=pro" class="btn-primary btn-large"               aria-label="Inizia il piano Pro a 14 euro e 99 al mese">
+              Inizia Pro
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true">
+                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </a>
+          </div>
+          <p class="tier-meta">
+            <strong>Disdici quando vuoi</strong>, un click dalla dashboard.<br />
+            Quando Stripe sarà attivo, <strong>30 giorni soddisfatto o rimborsato</strong>.
+          </p>
+        </article>
+      </div>
+
+      <p class="pricing-secondary-line">
+        Vuoi il piano per una scuola di formazione o un team di studio? Scrivici a <a href="mailto:team@concorso-ai.it">team@concorso-ai.it</a> e prepariamo un piano dedicato.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===========================================================
+       6) FAQ — 4 reali dubbi dei candidati PA
+       =========================================================== -->
+  <section class="section" id="faq" aria-labelledby="faq-h2">
+    <div class="container">
+      <div class="section-heading section-heading--center">
+        <span class="section-eyebrow">Dubbi prima di iniziare</span>
+        <h2 id="faq-h2">Le domande che ogni candidato si fa, in ordine.</h2>
+        <p style="margin: 0 auto;">Quattro dubbi. Non dodici. Le risposte sono oneste, anche quando dicono che il tool non è per tutti.</p>
+      </div>
+
+      <div class="faq">
+        <details class="faq-item">
+          <summary>
+            Le domande sono davvero basate sul mio bando?
+            <span class="faq-chevron" aria-hidden="true">+</span>
+          </summary>
+          <p class="faq-answer">Sì. Carichi il PDF del bando o il testo, e l'AI estrae gli argomenti. Ogni domanda nasce da lì. Se il tuo bando è uscito due settimane fa, vale lo stesso: parti dai contenuti del PDF che hai. Se non hai ancora un bando, scegli una materia standard e ti alleni su quella.</p>
+        </details>
+        <details class="faq-item">
+          <summary>
+            L'AI può sbagliare su una citazione normativa?
+            <span class="faq-chevron" aria-hidden="true">+</span>
+          </summary>
+          <p class="faq-answer">Può succedere. Per questo ogni report ti dice di verificare sul bando ufficiale. L'AI è un allenatore, non un sostituto dello studio. Se noti qualcosa di strano su una norma, clicca «Non sono d'accordo, correggi» e il sistema si corregge in quel punto.</p>
+        </details>
+        <details class="faq-item">
+          <summary>
+            I miei dati sono al sicuro?
+            <span class="faq-chevron" aria-hidden="true">+</span>
+          </summary>
+          <p class="faq-answer">Sì. I bandi e le risposte sono salvati cifrati su Supabase, datacenter in Europa. Nessun dato è condiviso con LLM extra-UE. Puoi cancellare tutto dalla dashboard quando vuoi, senza doverci scrivere.</p>
+        </details>
+        <details class="faq-item">
+          <summary>
+            Posso rispondere a voce o solo per iscritto?
+            <span class="faq-chevron" aria-hidden="true">+</span>
+          </summary>
+          <p class="faq-answer">Entrambe. C'è un pulsante microfono (riconoscimento vocale del browser, gratuito, funziona su Chrome e Safari recenti) e il campo di testo normale. Il commissario capisce entrambi. Il riconoscimento vocale è il più utile: ti alleni a parlare davvero come davanti alla commissione.</p>
+        </details>
+        <details class="faq-item">
+          <summary>
+            Funziona anche se non sto ancora preparando un concorso?
+            <span class="faq-chevron" aria-hidden="true">+</span>
+          </summary>
+          <p class="faq-answer">Sì. Puoi scegliere una materia standard (Diritto Amministrativo, Costituzionale, Contabilità Pubblica, Penale) ed esercitarti senza bando. È utile per testare il tool prima di avere un bando reale, o per tenersi in allenamento tra un concorso e l'altro.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================================================
+       7) CHIUSURA ONESTY — Peak-End finale
+       =========================================================== -->
+  <section class="closing" aria-labelledby="closing-h2">
+    <div class="container">
+      <div class="closing-text closing-text--center">
+        <span class="closing-eyebrow">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          Una cosa da dire, prima di chiudere la pagina
+        </span>
+        <h2 id="closing-h2">L'orale non si vince studiando di più. Si vince allenandosi meglio.</h2>
+        <p>ConcorsoAI è fatto da <strong>due persone che hanno passato l'orale</strong>. Non da un'agenzia, non da una startup che ha letto male il problema. L'abbiamo costruito perché ce l'avremmo voluto avere noi, quando ci siamo trovati davanti alla commissione senza aver mai simulato una domanda seria.</p>
+        <p>Tre simulazioni gratis sono <strong>il modo migliore per capire se ti serve</strong>. Se non ti serve, le hai perse. Se ti serve, hai trovato lo strumento che ti avrebbe fatto vincere due settimane di tempo. <span class="em-dash">·</span> La scelta è tua, ma falla con cognizione.</p>
+        <div class="closing-disclaimer">
+          <strong>Trasparenza:</strong> l'AI può commettere errori su citazioni specifiche di articoli. Verifica sempre sul bando ufficiale. Quando avremo i primi 100 candidati veri, pubblicheremo i dati reali in questa pagina — non prima.
+        </div>
+      </div>
+    </div>
+  </section>
 
 </main>
 
-<!-- FOOTER (founder marker added) -->
-<footer>
-  <div class="container footer-inner">
-    <div class="footer-brand">
-      <p class="footer-brand-name"><span class="logo-mark">CA</span> Concorso<span style="color: var(--cta);">AI</span></p>
-      <p class="footer-founder"><span class="footer-founder-mark">Costruito a Milano</span> <span class="footer-founder-text">da 2 persone che hanno passato l'orale.</span></p>
-      <p class="footer-trust">Made in Italy · Nessuna carta richiesta · Supabase UE</p>
+<footer role="contentinfo">
+  <div class="container footer-stack">
+    <div class="footer-brand-row">
+      <a href="/" class="brand" aria-label="ConcorsoAI — home">
+        <span class="brand-mark" aria-hidden="true">CA</span>
+        <span class="brand-name">ConcorsoAI</span>
+      </a>
+      <p class="footer-founder">
+        <span class="footer-founder-mark">Made in Italy</span>
+        Costruito a Milano da 2 persone che hanno passato l'orale. Made in Italy. Beta aperta · Luglio 2026.
+      </p>
+      <p class="footer-trust-row" aria-label="Garanzie di privacy e cancellazione">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z"/><polyline points="9 12 11 14 16 9"/></svg> Server UE · dati cifrati</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg> Mai dati a LLM extra-UE</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Cancellazione immediata</span>
+      </p>
     </div>
-    <ul class="footer-links">
-      <li><a href="terms.html">Termini</a></li>
-      <li><a href="privacy.html">Privacy</a></li>
-      <li><a href="#faq">FAQ</a></li>
-      <li><a href="auth.html">Accedi</a></li>
-    </ul>
+
+    <nav class="footer-links-cols" aria-label="Link del footer">
+      <div>
+        <p class="footer-col-label">Prodotto</p>
+        <a href="#confronto">Confronto con ChatGPT</a>
+        <a href="#metodo">Come funziona</a>
+        <a href="#pricing">Prezzi</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div>
+        <p class="footer-col-label">Legale</p>
+        <a href="terms.html">Termini di servizio</a>
+        <a href="privacy.html">Privacy policy</a>
+        <a href="privacy.html#cookies">Cookie policy</a>
+        <a href="privacy.html#recesso">Diritto di recesso (Art. 49 Cod. Consumo)</a>
+        <a href="mailto:supporto@concorso-ai.it">supporto@concorso-ai.it</a>
+      </div>
+    </nav>
   </div>
-  <p class="container footer-copy">&copy; 2026 ConcorsoAI &middot; Tutti i diritti riservati.</p>
+
+  <div class="container">
+    <div class="footer-legal">
+      <span>© 2026 ConcorsoAI · Tutti i diritti riservati.</span>
+      <div class="footer-legal-links">
+        <a href="terms.html">Termini</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="privacy.html#cookies">Cookie</a>
+        <a href="mailto:supporto@concorso-ai.it">Contatti</a>
+      </div>
+    </div>
+  </div>
 </footer>
 
 <script>
-/* Mockuphero 3-tab switcher (vanilla JS, ARIA completo) */
+/* Vanilla JS: tab switching inside hero mockup only.
+   No build, no deps, no analytics, no surveillance. */
 (function () {
   var tabs = document.querySelectorAll('.mockup-tab');
   var panels = document.querySelectorAll('.mockup-panel');
-  if (!tabs.length || !panels.length) return;
-
-  function activate(targetKey) {
-    tabs.forEach(function (tab) {
-      var isActive = tab.getAttribute('data-tab') === targetKey;
-      tab.classList.toggle('is-active', isActive);
-      tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
-      tab.tabIndex = isActive ? 0 : -1;
-    });
-    panels.forEach(function (panel) {
-      var matches = panel.getAttribute('data-panel') === targetKey;
-      panel.classList.toggle('hidden', !matches);
-      panel.setAttribute('aria-hidden', matches ? 'false' : 'true');
-      if (matches) panel.removeAttribute('hidden');
-      else panel.setAttribute('hidden', '');
-    });
-  }
+  if (!tabs.length) return;
 
   tabs.forEach(function (tab) {
     tab.addEventListener('click', function () {
-      activate(tab.getAttribute('data-tab'));
+      var key = tab.getAttribute('data-tab');
+      tabs.forEach(function (t) {
+        var active = t === tab;
+        t.classList.toggle('is-active', active);
+        t.setAttribute('aria-selected', active ? 'true' : 'false');
+        t.setAttribute('tabindex', active ? '0' : '-1');
+      });
+      panels.forEach(function (p) {
+        var match = p.getAttribute('data-panel') === key;
+        p.classList.toggle('hidden', !match);
+        if (match) {
+          p.removeAttribute('hidden');
+          p.setAttribute('aria-hidden', 'false');
+        } else {
+          p.setAttribute('hidden', '');
+          p.setAttribute('aria-hidden', 'true');
+        }
+      });
     });
     tab.addEventListener('keydown', function (e) {
       if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-      e.preventDefault();
       var idx = Array.prototype.indexOf.call(tabs, tab);
-      var nextIdx = e.key === 'ArrowRight'
-        ? (idx + 1) % tabs.length
-        : (idx - 1 + tabs.length) % tabs.length;
-      tabs[nextIdx].focus();
-      activate(tabs[nextIdx].getAttribute('data-tab'));
-    });
-  });
-})();
-
-/* Mockup timer (orologio reale, avanza in secondi) */
-(function () {
-  var timer = document.getElementById('mockup-timer');
-  var timerStatus = document.getElementById('mockup-timer-status');
-  if (!timer || !timerStatus) return;
-  var initialSeconds = 83;
-  var maxSeconds = 300;
-  var startedAt = Date.now();
-  var intervalId = null;
-
-  function renderTimer() {
-    var elapsed = Math.min(maxSeconds, initialSeconds + Math.floor((Date.now() - startedAt) / 1000));
-    var minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
-    var seconds = String(elapsed % 60).padStart(2, '0');
-    timer.textContent = minutes + ':' + seconds;
-    timerStatus.setAttribute('aria-label', 'Timer simulazione: ' + minutes + ':' + seconds + ' di 05:00');
-    if (elapsed >= maxSeconds) window.clearInterval(intervalId);
-  }
-  renderTimer();
-  intervalId = window.setInterval(renderTimer, 1000);
-})();
-
-/* R1 Mini-Quiz switcher: vanilla JS, ARIA tabs */
-(function () {
-  var pills = document.querySelectorAll('.quiz-pill');
-  var panels = document.querySelectorAll('.quiz-panel');
-  if (!pills.length || !panels.length) return;
-
-  function activate(key) {
-    pills.forEach(function (pill) {
-      var isActive = pill.getAttribute('data-materia') === key;
-      pill.classList.toggle('is-active', isActive);
-      pill.setAttribute('aria-selected', isActive ? 'true' : 'false');
-      pill.tabIndex = isActive ? 0 : -1;
-    });
-    panels.forEach(function (panel) {
-      var matches = panel.getAttribute('data-materia') === key;
-      panel.classList.toggle('is-active', matches);
-      if (matches) panel.removeAttribute('hidden');
-      else panel.setAttribute('hidden', '');
-    });
-  }
-
-  pills.forEach(function (pill) {
-    pill.addEventListener('click', function () {
-      activate(pill.getAttribute('data-materia'));
-    });
-    pill.addEventListener('keydown', function (e) {
-      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-      e.preventDefault();
-      var idx = Array.prototype.indexOf.call(pills, pill);
-      var nextIdx = e.key === 'ArrowRight'
-        ? (idx + 1) % pills.length
-        : (idx - 1 + pills.length) % pills.length;
-      pills[nextIdx].focus();
-      activate(pills[nextIdx].getAttribute('data-materia'));
+      var next = e.key === 'ArrowRight'
+        ? tabs[(idx + 1) % tabs.length]
+        : tabs[(idx - 1 + tabs.length) % tabs.length];
+      next.focus();
+      next.click();
     });
   });
 })();
