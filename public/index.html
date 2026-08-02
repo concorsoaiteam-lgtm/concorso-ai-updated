@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#FAFAF7" />
-<title>ConcorsoAI — Simula l'orale sul tuo bando, prima dell'orale.</title>
-<meta name="description" content="Carica il PDF del tuo bando. Il commissario AI ti interroga solo sugli argomenti del concorso, ti corregge su chiarezza, struttura e contenuto, e ti dice cosa ripassare. Server UE. Made in Italy." />
+<meta name="theme-color" content="#FAF8F3" />
+<title>ConcorsoAI — Carica il bando. Scopri cosa dire all'orale.</title>
+<meta name="description" content="Carica il PDF del tuo bando. L'AI estrae le materie, ti fa le domande che potrebbe farti la commissione, ti corregge. Senza carta. Made in Italy." />
 <link rel="canonical" href="https://concorso-ai.vercel.app/" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230F4C81'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-family='system-ui'%3EC%3C/text%3E%3C/svg%3E" />
-<meta property="og:title" content="ConcorsoAI — Simula l'orale sul tuo bando, prima dell'orale." />
-<meta property="og:description" content="Il commissario AI legge il tuo bando e ti interroga come davanti alla commissione. Prova gratis, senza carta." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23FAF8F3'/%3E%3Ctext x='16' y='22' font-size='17' text-anchor='middle' fill='%230F1115' font-family='system-ui' font-weight='500'%3EC%3C/text%3E%3C/svg%3E" />
+<meta property="og:title" content="ConcorsoAI — Carica il bando. Scopri cosa dire all'orale." />
+<meta property="og:description" content="L'AI legge il tuo bando e ti interroga come davanti alla commissione. Prima dell'orale, senza carta." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://concorso-ai.vercel.app/" />
 <meta property="og:locale" content="it_IT" />
@@ -26,7 +26,7 @@
   "name": "ConcorsoAI",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "Web",
-  "description": "Simulatore orale AI per concorsi pubblici italiani.",
+  "description": "Simulatore orale AI per concorsi pubblici italiani. Carica il bando, l'AI ti interroga come la commissione.",
   "url": "https://concorso-ai.vercel.app/",
   "offers": [
     { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "EUR" },
@@ -37,264 +37,179 @@
 </head>
 <body>
 
+<a class="visually-hidden" href="#main">Salta al contenuto</a>
+
 <header class="nav" role="banner">
   <div class="container nav-inner">
     <a href="/" class="brand">ConcorsoAI</a>
-    <nav class="nav-links" aria-label="Navigazione">
-      <a href="#pricing">Prezzi</a>
-      <a href="#faq">FAQ</a>
-    </nav>
-    <a href="auth.html?mode=register" class="btn-primary" aria-label="Inizia gratis">
-      Inizia gratis →
-    </a>
+    <a href="#come-si-usa" class="nav-link">Come si usa</a>
+    <a href="auth.html?mode=register" class="btn-primary">Registrati gratis →</a>
   </div>
 </header>
 
-<main>
+<main id="main">
 
-<!-- HERO -->
+<!-- ============================================================
+     SEZIONE 1 — Cos'è
+     Hero editoriale. Solo tipografia. Niente immagini.
+     ============================================================ -->
 <section class="hero" aria-labelledby="hero-h1">
-  <div class="container hero-inner">
-    <span class="eyebrow">Beta aperta</span>
-    <h1 id="hero-h1" class="h1">
-      Simula l'orale sul tuo bando,<br /> prima dell'orale.
+  <div class="container">
+    <span class="hero-eyebrow">Commissario AI per l'orale dei concorsi pubblici</span>
+    <h1 id="hero-h1" class="hero-h1">
+      L'orale è una conversazione.<br />
+      Sai cosa dirai?
     </h1>
-    <p class="sub">
-      Carica il PDF del tuo bando. Il commissario AI lo legge e ti fa domande
-      solo sul tuo concorso, non domande a caso come ChatGPT. Ogni risposta ti dice
-      cosa hai sbagliato, cosa hai saltato e cosa rileggere.
+    <p class="hero-sub">
+      Carica il PDF del tuo bando. L'AI estrae le materie e ti fa solo le domande che potrebbe farti la commissione. Tu rispondi. Lei ti corregge. Esci sapendo cosa coprire il giorno dell'esame.
     </p>
-    <div class="cta-row">
+    <div class="hero-cta">
       <a href="auth.html?mode=register" class="btn-primary">
-        Inizia gratis
+        Registrati gratis <span aria-hidden="true">→</span>
       </a>
     </div>
-    <p class="trust-row">
-      Senza carta · 3 gratis al mese · Cancellazione in 1 click.
+    <p class="hero-micro">
+      Senza carta · 60 secondi per partire · cancelli in 1 click quando vuoi
     </p>
   </div>
 </section>
 
-<!-- CONFRONTO -->
-<section class="section" id="confronto" aria-labelledby="confronto-h2">
+<!-- ============================================================
+     SEZIONE 2 — Perché serve
+     Riconoscimento del dolore. Linguaggio editoriale.
+     ============================================================ -->
+<section class="section" aria-labelledby="perche-h2">
   <div class="container">
-    <span class="eyebrow">Confronto</span>
-    <h2 id="confronto-h2" class="h2">Perché ChatGPT non basta.</h2>
-    <p>Tre modi per prepararti l'orale. Solo uno conosce il tuo bando.</p>
-
-    <div class="comparison-wrap"><table class="comparison">
-      <thead>
-        <tr>
-          <th scope="col" class="comparison-row-label"><span class="visually-hidden">Caratteristica</span></th>
-          <th scope="col">Da solo</th>
-          <th scope="col">ChatGPT o corso generico</th>
-          <th scope="col" class="comparison-yours">ConcorsoAI</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th scope="row">Conosce il tuo bando</th>
-          <td>—</td>
-          <td>—</td>
-          <td class="comparison-yours">✓</td>
-        </tr>
-        <tr>
-          <th scope="row">Solo domande sul tuo concorso</th>
-          <td>—</td>
-          <td>—</td>
-          <td class="comparison-yours">✓</td>
-        </tr>
-        <tr>
-          <th scope="row">Ti corregge con leggi vere</th>
-          <td>—</td>
-          <td>—</td>
-          <td class="comparison-yours">✓</td>
-        </tr>
-        <tr>
-          <th scope="row">Ricorda le tue sessioni</th>
-          <td>—</td>
-          <td>—</td>
-          <td class="comparison-yours">✓</td>
-        </tr>
-        <tr>
-          <th scope="row">Disponibile quando studi tu</th>
-          <td>✓</td>
-          <td>A orari del corso</td>
-          <td class="comparison-yours">✓</td>
-        </tr>
-        <tr>
-          <th scope="row">Costo</th>
-          <td>Solo il tuo tempo</td>
-          <td>€500–2.000 (corsi) · €80–150/h (coach)</td>
-          <td class="comparison-yours"><strong>€14,99/mese</strong></td>
-        </tr>
-      </tbody>
-    </table></div>
+    <span class="eyebrow">Perché serve</span>
+    <h2 id="perche-h2" class="h2">Hai letto seicento pagine di bando.</h2>
+    <p class="essay">
+      Le sai tutte. Articolo per articolo, potresti citarle a memoria nel sonno. Ma il giorno dell'orale la commissione non ti chiederà di recitare — ti chiederà di <strong>ragionare</strong> su un caso. Davanti a tre persone che ti guardano. E non sai quale caso sarà.
+    </p>
+    <p class="essay">
+      È il problema che risolviamo: <strong>scopri in anticipo cosa potrebbero chiederti</strong>. Poi ti alleni a rispondere come se fosse davvero.
+    </p>
+    <span class="essay-meta">Senza recitare. Senza dispersione.</span>
   </div>
 </section>
 
-<!-- COMPLIANCE -->
-<section class="section" id="come-funziona" aria-labelledby="compliance-h2">
+<!-- ============================================================
+     SEZIONE 3 — Posso fidarmi
+     Trasparenza vera. Garanzia 30 giorni.
+     ============================================================ -->
+<section class="section" aria-labelledby="fiducia-h2">
   <div class="container">
-    <span class="eyebrow">Conformità</span>
-    <h2 id="compliance-h2" class="h2">
-      Fatto come le vere commissioni.
-    </h2>
-    <p>
-      Ti diciamo le norme da citare, subito. Non le devi cercare tu.
+    <span class="eyebrow">Posso fidarmi</span>
+    <h2 id="fiducia-h2" class="h2">Non troverai migliaia di recensioni. E sappiamo perché.</h2>
+    <p class="lead-p">
+      Siamo una piccola realtà italiana. Non abbiamo ancora abbastanza utenti per gonfiare i numeri su Trustpilot. Non li gonfiamo. Non mettiamo stelline finte, loghi di aziende sconosciute, o testimonial di persone che non esistono.
     </p>
-    <p class="cite-row">
-      art. 97 Cost. · L. 241/1990 · DPR 487/1994 · D.Lgs. 33/2013
-    </p>
-  </div>
-</section>
 
-<!-- COMPARAZIONI UMANE -->
-<section class="section" id="scenari" aria-labelledby="scenari-h2">
-  <div class="container">
-    <span class="eyebrow">Scenari d'uso</span>
-    <h2 id="scenari-h2" class="h2">Tre situazioni in cui ti riconosci.</h2>
-    <p>Sono scenari veri, di chi lo usa per davvero.</p>
+    <ul class="trust-list">
+      <li>
+        <span class="trust-key">Cosa c'è</span>
+        <span class="trust-val">Un modello AI che legge <strong>solo</strong> le materie del tuo bando. Niente domande prese da un concorso diverso.</span>
+      </li>
+      <li>
+        <span class="trust-key">Cosa non c'è</span>
+        <span class="trust-val">Pubblicità. Watermark. Survey a metà schermata. Pop-up al trentesimo secondo.</span>
+      </li>
+      <li>
+        <span class="trust-key">Server</span>
+        <span class="trust-val">In Europa. Cifrati a riposo. I tuoi dati e il tuo bando restano dove li metti.</span>
+      </li>
+      <li>
+        <span class="trust-key">Cancellazione</span>
+        <span class="trust-val">In 1 click dalla pagina del tuo account. <strong>Cancelli tutto</strong>, compresi storico e bando caricato.</span>
+      </li>
+    </ul>
 
-    <div class="scenarios">
-
-      <article class="scenario" aria-labelledby="scen-1-h">
-        <p class="scenario-num">Scenario 1</p>
-        <h3 id="scen-1-h" class="scenario-h">Hai l'orale fra 15 giorni.</h3>
-        <p class="scenario-p">
-          È come avere un'amica che ha appena passato lo stesso concorso. Ti chiede:
-          «Spiegami questo come se fossi davanti alla commissione».
-        </p>
-      </article>
-
-      <article class="scenario" aria-labelledby="scen-2-h">
-        <p class="scenario-num">Scenario 2</p>
-        <h3 id="scen-2-h" class="scenario-h">Stasera hai solo 30 minuti.</h3>
-        <p class="scenario-p">
-          È come avere un tutor che legge due pagine del tuo bando, estrae gli argomenti,
-          e ti interroga solo su quelli. Niente dispersione.
-        </p>
-      </article>
-
-      <article class="scenario" aria-labelledby="scen-3-h">
-        <p class="scenario-num">Scenario 3</p>
-        <h3 id="scen-3-h" class="scenario-h">Hai risposto, ma non sai se è giusto.</h3>
-        <p class="scenario-p">
-          È come un coach che ti dice: «Qui sei stato vago. Qui hai saltato l'articolo 97.
-          Qui ti sei diluito».
-        </p>
-      </article>
-
+    <div class="guarantee-callout">
+      <p class="h3">30 giorni di Pro. Se non va bene, indietro tutto.</p>
+      <p class="body-p">
+        Attivi il piano Pro. Provi per un mese intero, sul serio, col tuo bando. Se non funziona per il tuo concorso — perché manca una materia che ti serve, perché preferisci studiare in modo diverso, o per qualunque motivo — ti rimborsiamo.
+      </p>
+      <p class="body-p muted-line">
+        Un'email. Nessuna telefonata al call center. Nessun modulo di cinque pagine. Rimborso processato in tre giorni lavorativi.
+      </p>
     </div>
   </div>
 </section>
 
-<!-- PRICING -->
-<section class="section" id="pricing" aria-labelledby="pricing-h2">
+<!-- ============================================================
+     SEZIONE 4 — Come si usa
+     Lista numerata editoriale. Nessuna card, nessuna icona.
+     ============================================================ -->
+<section class="section" id="come-si-usa" aria-labelledby="come-h2">
   <div class="container">
-    <span class="eyebrow">Prezzi</span>
-    <h2 id="pricing-h2" class="h2">Piani e costi.</h2>
-    <p>
-      La versione Free è gratis per sempre. Pro sblocca tutto quando vuoi.
-    </p>
+    <span class="eyebrow">Come si usa</span>
+    <h2 id="come-h2" class="h2">Tre passi. Tutto qui.</h2>
 
-    <div class="pricing-grid">
-
-      <article class="tier" aria-labelledby="t-free-h">
-        <p class="tier-name">Free</p>
-        <h3 id="t-free-h" class="tier-h">Per iniziare.</h3>
-        <p class="tier-price"><span>€0</span></p>
-        <p class="tier-price-detail">Sempre gratis. Senza carta, senza vincoli.</p>
-        <ul class="tier-features">
-          <li>3 simulazioni al mese, complete</li>
-          <li>Materie di base: diritto, costituzione, contabilità, penale</li>
-          <li>Feedback su chiarezza, struttura e contenuto</li>
-          <li>Puoi parlare o scrivere</li>
-          <li>Storico degli ultimi 30 giorni</li>
-        </ul>
-        <a href="auth.html?mode=register" class="btn-secondary">Inizia gratis</a>
-      </article>
-
-      <article class="tier tier--pro" aria-labelledby="t-pro-h">
-        <p class="tier-name">Pro</p>
-        <h3 id="t-pro-h" class="tier-h">Per chi ha l'orale vicino.</h3>
-        <p class="tier-price">€14,99 <span class="tier-price-period">/ mese</span></p>
-        <p class="tier-price-detail">
-          O €119 all'anno — €0,50 al giorno, risparmi €60,88.
-        </p>
-        <ul class="tier-features">
-          <li>Simulazioni illimitate, ogni materia</li>
-          <li>Bandi di enti locali, amministrazioni, ministeri</li>
-          <li>Materie avanzate: tributario, lavoro, europeo, civile</li>
-          <li>Storico completo, grafici dei tuoi progressi</li>
-          <li>Report PDF dopo ogni sessione</li>
-          <li>Server veloce, anche nelle ore di punta</li>
-        </ul>
-        <a href="auth.html?mode=register&plan=pro" class="btn-primary">Attiva Pro</a>
-      </article>
-
-    </div>
+    <ol class="steps reveal" role="list">
+      <li>
+        <div>
+          <h3 class="step-h">Carica il bando.</h3>
+          <p class="step-p">In PDF. Il modello legge solo le materie del tuo concorso — niente dispersione, niente domande su argomenti che non ti serviranno. Se è un bando di un concorso per il ministero dell'Istruzione, non ti chiederà di ragioneria.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3 class="step-h">Rispondi alle domande.</h3>
+          <p class="step-p">Una alla volta, come davanti alla commissione. Puoi parlare (con il microfono) o scrivere. Le domande sono scelte per metterti in difficoltà — nel modo in cui lo faranno davvero.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3 class="step-h">Scopri cosa coprire il giorno dell'orale.</h3>
+          <p class="step-p">Per ogni risposta: cosa hai coperto bene, dove sei stato vago, quale articolo o fonte normativa rileggere. Niente voti a caso. Solo quello che ti manca, indicato con precisione.</p>
+        </div>
+      </li>
+    </ol>
   </div>
 </section>
 
-<!-- GARANZIA -->
-<section class="section section--garanzia" id="garanzia" aria-labelledby="garanzia-h2">
+<!-- ============================================================
+     SEZIONE 5 — Cosa succede se provo
+     Cosa ottieni, cosa costa, come esci. CTA finale.
+     ============================================================ -->
+<section class="section" aria-labelledby="prova-h2">
   <div class="container">
-    <span class="eyebrow">Garanzia</span>
-    <h2 id="garanzia-h2" class="h2">Non abbiamo migliaia di recensioni. Abbiamo una promessa.</h2>
-    <p class="garanzia-p">
-      Siamo in beta. Non ci trovi su Trustpilot, e non mettiamo recensioni finte.
-      Non abbiamo utenti abbastanza per gonfiare quei numeri, e non lo faremo.
-    </p>
-    <p class="garanzia-p">
-      Allora ti diamo questo: <strong>prova Pro per 30 giorni</strong>.
-      Se non ti piace — perché l'AI non funziona per il tuo bando, perché preferisci altro,
-      o per qualsiasi motivo — ti rimborsiamo tutto.
-    </p>
-    <p class="garanzia-meta">
-      Nessuna domanda, nessun modulo, nessuna call al call center.
-      Un'email a <a href="mailto:supporto@concorso-ai.it">supporto@concorso-ai.it</a>
-      e rimborso processato in 3 giorni lavorativi.
-    </p>
-  </div>
-</section>
+    <span class="eyebrow">Cosa succede se provo</span>
+    <h2 id="prova-h2" class="h2">Tre simulazioni complete. Senza carta, senza vincoli.</h2>
 
-<!-- FAQ -->
-<section class="section" id="faq" aria-labelledby="faq-h2">
-  <div class="container">
-    <span class="eyebrow">Domande frequenti</span>
-    <h2 id="faq-h2" class="h2">Dubbi prima di iniziare.</h2>
+    <p class="lead-p">
+      Dopo la registrazione, la prima cosa che vedrai è il posto dove caricare il tuo bando. La seconda è la prima domanda. La terza è il feedback su cosa ti sei lasciato fuori.
+    </p>
 
-    <div class="faq-list">
-      <details class="faq-item">
-        <summary class="faq-q">Ho un bando del mio Comune. Funziona?</summary>
-        <p class="faq-a">
-          Sì. Con Pro carichi qualsiasi bando (comune, regione, ministero).
-          L'AI legge le materie e ti chiede solo quelle.
-        </p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-q">Perché non basta ChatGPT?</summary>
-        <p class="faq-a">
-          ChatGPT non conosce il tuo bando e riparte da zero ogni volta.
-          ConcorsoAI legge il tuo bando, ti dice le norme da citare
-          e ti dà un punteggio in tempo reale.
-        </p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-q">I miei dati dove vanno?</summary>
-        <p class="faq-a">
-          Server in UE, cifrati a riposo. Mai passati a LLM fuori UE.
-          Puoi cancellare tutto in 1 click.
-        </p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-q">Posso disdire quando voglio?</summary>
-        <p class="faq-a">
-          Sì. 1 click dalla tua pagina, niente vincoli, niente call center.
-          Se non ti piace, 30 giorni per fartelo rimborsare.
-        </p>
-      </details>
+    <ul class="prova-points">
+      <li>
+        <span class="prov-key">Ottieni</span>
+        <span class="prov-val"><strong>3 simulazioni complete al mese</strong>, gratis per sempre. Senza carta.</span>
+      </li>
+      <li>
+        <span class="prov-key">Costo</span>
+        <span class="prov-val">Zero per la versione Free. <strong>€14,99 al mese</strong> se decidi di attivare Pro (illimitato, ogni materia, ogni bando). Nessun contratto. Cancelli in 1 click.</span>
+      </li>
+      <li>
+        <span class="prov-key">Esci</span>
+        <span class="prov-val">Quando vuoi, dal tuo account. Un click. Tutto sparito, compresi bando e storico.</span>
+      </li>
+      <li>
+        <span class="prov-key">Dubbi</span>
+        <span class="prov-val">Scrivi a <a class="prova-link" href="mailto:supporto@concorso-ai.it">supporto@concorso-ai.it</a> — risponde una persona, in italiano.</span>
+      </li>
+    </ul>
+
+    <div class="final-cta">
+      <p class="h3">Se sei arrivato fin qui, sai cosa ti serve.</p>
+      <p class="body-p">
+        Niente dietrologie, niente segreti. Carichi il bando, rispondi, scopri cosa dire all'orale. La parte difficile — lo studio — resta tua.
+      </p>
+      <div class="hero-cta">
+        <a href="auth.html?mode=register" class="btn-primary">
+          Registrati gratis <span aria-hidden="true">→</span>
+        </a>
+      </div>
+      <p class="hero-micro">60 secondi · senza carta · un'email per cancellare</p>
     </div>
   </div>
 </section>
@@ -305,16 +220,17 @@
   <div class="container">
     <div class="footer-grid">
       <div>
-        <p class="brand footer-brand">ConcorsoAI</p>
+        <p class="footer-brand">ConcorsoAI</p>
         <p class="footer-tag">
-          Commissario AI per l'orale dei concorsi pubblici italiani. Carica il bando, ti interroghiamo, ti correggiamo.
+          Simulatore d'orale per concorsi pubblici italiani. Carica il bando, ti interroghiamo come la commissione.
         </p>
       </div>
       <nav aria-label="Prodotto">
         <p class="footer-col-label">Prodotto</p>
         <ul class="footer-links">
-          <li><a href="#pricing">Prezzi</a></li>
-          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#come-si-usa">Come si usa</a></li>
+          <li><a href="pricing.html">Prezzi</a></li>
+          <li><a href="mailto:supporto@concorso-ai.it">Contatti</a></li>
         </ul>
       </nav>
       <nav aria-label="Legale">
@@ -323,7 +239,6 @@
           <li><a href="terms.html">Termini</a></li>
           <li><a href="privacy.html">Privacy</a></li>
           <li><a href="privacy.html#cookies">Cookie</a></li>
-          <li><a href="privacy.html#recesso">Recesso</a></li>
           <li><a href="mailto:supporto@concorso-ai.it">supporto@concorso-ai.it</a></li>
         </ul>
       </nav>
@@ -334,6 +249,8 @@
     </div>
   </div>
 </footer>
+
+<script src="js/landing.js" defer></script>
 
 </body>
 </html>
