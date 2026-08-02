@@ -116,36 +116,80 @@
   // ==========================================================
   // 3. Mobile sticky CTA — visibile solo dopo che l'hero esce
   //    da viewport. Su desktop è sempre nascosto (display:none CSS).
+  //
+  //    P14 file 18: auto-hide su footer — la sticky bar NON deve
+  //    coprire i link legal (privacy, ToS) del footer. Logica:
+  //    visibile solo se hero FUORI viewport E footer NON visibile.
   // ==========================================================
   function initMobileStickyCta() {
     var sticky = document.getElementById('sticky-cta-mobile');
     if (!sticky) return;
 
-    var hero = document.querySelector('.hero');
-    if (!hero || !('IntersectionObserver' in window)) {
-      // fallback: mostra sempre su mobile se hero non trovato
-      if (window.matchMedia('(max-width: 720px)').matches) {
-        sticky.classList.add('is-shown');
-        sticky.setAttribute('aria-hidden', 'false');
-      }
+    var isMobile = window.matchMedia('(max-width: 720px)').matches;
+    if (!isMobile) {
+      // Su desktop la barra non esiste (display:none CSS).
+      // Settiamo aria-hidden=true comunque per coerenza semantica.
+      sticky.setAttribute('aria-hidden', 'true');
       return;
     }
 
-    var io = new IntersectionObserver(function (entries) {
+    var hero = document.querySelector('.hero');
+    var footer = document.querySelector('.footer');
+    var preferReducedMotion = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function setShown(shown) {
+      if (shown) {
+        sticky.classList.add('is-shown');
+        sticky.setAttribute('aria-hidden', 'false');
+      } else {
+        sticky.classList.remove('is-shown');
+        sticky.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    if (!('IntersectionObserver' in window) || !hero) {
+      setShown(true);
+      return;
+    }
+
+    var heroOut = false;
+    var footerIn = false;
+
+    function syncVisibility() {
+      // Sticky CTA visibile: hero FUORI viewport AND footer NON visibile AND mobile.
+      setShown(heroOut && !footerIn);
+    }
+
+    // Pre-seed: se la pagina è già scrollata all'init (utente che torna),
+    // evita race condition con IO. Calcoliamo lo stato una volta a mano.
+    var heroRect = hero.getBoundingClientRect();
+    heroOut = heroRect.bottom < 0;
+    if (footer) {
+      var footerRect = footer.getBoundingClientRect();
+      footerIn = footerRect.top < (window.innerHeight || document.documentElement.clientHeight);
+    }
+    syncVisibility();
+
+    var heroObserver = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
-        // sticky visibile solo quando l'hero NON è più in viewport
-        var heroOut = !entry.isIntersecting && entry.boundingClientRect.top < 0;
-        if (heroOut) {
-          sticky.classList.add('is-shown');
-          sticky.setAttribute('aria-hidden', 'false');
-        } else {
-          sticky.classList.remove('is-shown');
-          sticky.setAttribute('aria-hidden', 'true');
-        }
+        heroOut = !entry.isIntersecting;
+        syncVisibility();
       });
     }, { threshold: 0 });
+    heroObserver.observe(hero);
 
-    io.observe(hero);
+    if (footer) {
+      var footerObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          footerIn = entry.isIntersecting;
+          syncVisibility();
+        });
+      }, { threshold: 0.1 });
+      footerObserver.observe(footer);
+    } else {
+      footerIn = false;
+    }
   }
 
   // ==========================================================

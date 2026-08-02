@@ -106,6 +106,21 @@ button:focus-visible {
 }
 
 /* =========================================================================
+   touch-action (mobile P8) - rimuove tap-delay 300ms SOLO sugli
+   elementi CTA-like (button primari). Scope ristretto:
+   */
+   - nav link / footer link NON vogliono manipulation (double-tap-zoom
+     legittimo nei footer con link a doc esterne).
+   - hero/final CTA devono rispondere immediatamente.
+   Pattern: solo .btn-primary (CTA primarie) + .nav-link (anchor interni).
+   ========================================================================= */
+
+.btn-primary,
+.nav-link {
+  touch-action: manipulation;
+}
+
+/* =========================================================================
    nav — sticky, slim, 3 voci visibili
    ========================================================================= */
 
@@ -124,6 +139,7 @@ button:focus-visible {
   align-items: center;
   justify-content: space-between;
   height: 60px;
+  gap: var(--s-5);
 }
 
 .brand {
@@ -229,6 +245,36 @@ button:focus-visible {
   color: var(--muted);
   margin: 0;
   letter-spacing: -0.005em;
+}
+
+/* Recency line sotto hero-micro — trust-by-recency (file 14 P11).
+   Pattern: claim verificabile (data + numero materie), non "live".
+   Statica nel tempo, NON animata. Mai "X utenti connessi ora" fake.
+   Bumpato a 13px per evitare che formi una "seconda microcopy grigia"
+   indistinguibile da hero-micro. Time in --ink-soft per pesare un filo
+   di più (è una prova di recency, non una reassurance). */
+.hero-recency {
+  margin-top: var(--s-3);
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: -0.005em;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-recency-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  flex-shrink: 0;
+}
+
+.hero-recency time {
+  color: var(--ink-soft);
+  font-weight: 500;
 }
 
 /* =========================================================================
@@ -1004,30 +1050,33 @@ button:focus-visible {
 
 /* =========================================================================
    prefers-reduced-motion (WCAG)
-   ========================================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .reveal, .reveal.is-visible {
-    opacity: 1;
-    transform: none;
-    transition: none;
+   ========================================================================= */  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal, .reveal.is-visible {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .sticky-cta-mobile-bar {
+      /* nessuno slide-up animato: appare istantaneo quando .is-shown */
+      transform: none;
+      transition: visibility 0s linear 0s;
+    }
+    .mockup-cursor, .mockup-cursor-final {
+      animation: none; opacity: 1;
+    }
+    .mockup-timer-dot { animation: none; opacity: 1; }
+    .mockup-feedback-word { opacity: 1; transition: none; }
+    /* Progress bar breathing — ferma su reduced motion */
+    .mockup-progress-fill {
+      animation: none;
+      width: 40%;
+    }
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
   }
-  .sticky-cta-mobile-bar {
-    /* nessuno slide-up animato: appare istantaneo quando .is-shown */
-    transform: none;
-    transition: visibility 0s linear 0s;
-  }
-  .mockup-cursor, .mockup-cursor-final {
-    animation: none; opacity: 1;
-  }
-  .mockup-timer-dot { animation: none; opacity: 1; }
-  .mockup-feedback-word { opacity: 1; transition: none; }
-  *, *::before, *::after {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-  }
-}
 
 /* =========================================================================
    anchor offset per sticky nav
@@ -1074,6 +1123,10 @@ section[id] {
     padding: 12px 18px;
     width: 100%;
     justify-content: center;
+  }
+  .hero-recency {
+    margin-top: var(--s-2);
+    font-size: 12px;
   }
 
   /* Section rhythm su mobile */
@@ -1168,7 +1221,7 @@ section[id] {
   .footer-legal { flex-direction: column; gap: 6px; }
 }
 
-/* hidden utility (skip-link WCAG) */
+/* hidden utility (skip-link WCAG 2.4.1) */
 .visually-hidden {
   position: absolute !important;
   width: 1px; height: 1px;
@@ -1193,4 +1246,9 @@ section[id] {
   font-weight: 500;
   border-radius: 4px;
   z-index: 100;
+  /* WCAG 2.4.7: focus indicator chiari su tutti gli interactive.
+     Skip-link deve avere un outline proprio per distinguerlo
+     dal background nero. */
+  outline: 2px solid var(--bg);
+  outline-offset: -4px;
 }

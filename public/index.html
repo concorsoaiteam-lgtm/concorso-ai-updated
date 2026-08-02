@@ -37,22 +37,22 @@
 </head>
 <body>
 
-<a class="visually-hidden" href="#main">Salta al contenuto</a>
+<a class="visually-hidden" href="#main-content">Salta al contenuto principale</a>
 
-<header class="nav" role="banner">
-  <div class="container nav-inner">
+<header class="nav" role="banner" aria-label="Intestazione">
+  <nav class="nav-inner container" aria-label="Navigazione principale">
     <a href="/" class="brand">
       <span class="brand-dot" aria-hidden="true"></span>
       ConcorsoAI
     </a>
     <a href="#in-pratica" class="nav-link">In pratica</a>
-    <a href="auth.html?mode=register" class="btn-primary">
+    <a href="auth.html?mode=register" class="btn-primary" data-cta="nav">
       Registrati gratis <span class="btn-arrow" aria-hidden="true">→</span>
     </a>
-  </div>
+  </nav>
 </header>
 
-<main id="main">
+<main id="main-content" role="main" aria-label="Contenuto principale">
 
 <!-- ============================================================
      SEZIONE 1 — Hero
@@ -68,11 +68,15 @@
       Carica il PDF del bando. L'AI estrae le materie e ti fa le domande che la commissione potrebbe farti davvero.
     </p>
     <div class="hero-cta">
-      <a href="auth.html?mode=register" class="btn-primary">
+      <a href="auth.html?mode=register" class="btn-primary" data-cta="hero">
         Registrati gratis <span class="btn-arrow" aria-hidden="true">→</span>
       </a>
     </div>
-    <p class="hero-micro">Senza carta. Cancellazione in 1 click.</p>
+    <p class="hero-micro" id="hero-micro-hero">Senza carta. Cancellazione in 1 click.</p>
+    <p class="hero-recency" id="hero-recency-text">
+      <span class="hero-recency-dot" aria-hidden="true"></span>
+      Banca domande aggiornata il <time datetime="2026-08-01">1° Agosto 2026</time> · 184 materie coperte.
+    </p>
   </div>
 </section>
 
@@ -242,7 +246,7 @@
         Carichi il bando, rispondi, scopri cosa dire. La parte difficile — lo studio — resta tua.
       </p>
       <div class="hero-cta">
-        <a href="auth.html?mode=register" class="btn-primary">
+        <a href="auth.html?mode=register" class="btn-primary" data-cta="final">
           Registrati gratis <span class="btn-arrow" aria-hidden="true">→</span>
         </a>
       </div>
@@ -295,17 +299,16 @@
 
 <!-- Sticky CTA mobile (thumb zone) — shown solo dopo che l'hero è fuori viewport.
      Bar compatto: solo un piccolo dot identitario + bottone CTA,
-     padding 6px button-padding 7px font 13px. Slide-up + fade-in 280ms. -->
-<aside class="sticky-cta-mobile" id="sticky-cta-mobile" aria-hidden="true">
-  <div class="sticky-cta-mobile-bar">
-    <span class="sticky-cta-mobile-dot" aria-hidden="true"></span>
-    <a href="auth.html?mode=register" class="btn-primary">
-      Registrati gratis <span class="btn-arrow" aria-hidden="true">→</span>
-    </a>
-  </div>
-</aside>
+     padding 6px button-padding 7px font 13px. Slide-up + fade-in 280ms. -->    <div class="sticky-cta-mobile" id="sticky-cta-mobile" role="region" aria-label="Azione rapida persistente" data-cta-mode="sticky">
+      <div class="sticky-cta-mobile-bar">
+        <span class="sticky-cta-mobile-dot" aria-hidden="true"></span>
+        <a href="auth.html?mode=register" class="btn-primary" data-cta="sticky">
+          Registrati gratis <span class="btn-arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
 
-<script src="js/landing.js" defer></script>
+    <script src="js/landing.js" defer></script>
 
-</body>
+  </body>
 </html>
