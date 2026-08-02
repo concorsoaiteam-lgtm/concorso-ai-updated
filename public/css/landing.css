@@ -1,23 +1,26 @@
 /* =========================================================================
    ConcorsoAI — landing
-   Editoriale. Cream + ink. Pochi colori. Gerarchia tipografica forte.
-   Nessuna decorazione. Nessun badge. Nessuna pill. Nessun gradient.
-   Riferimenti visivi: Apple Newsroom, Mercury bank, Linear, Basecamp.
+   Editoriale. Cream + ink. Gerarchia tipografica forte.
+   Nessuna decorazione. Nessun badge. Nessun gradient. Nessun glow.
+   Riferimenti visivi: Apple Newsroom, Mercury bank, Linear, Basecamp,
+   Notion product pages.
    ========================================================================= */
 
 :root {
-  /* Palette — mono-cromatica. Niente secondario: solo ink su cream. */
-  --bg:        #FAF8F3; /* warm cream, tipo carta */
-  --ink:       #0F1115; /* ink nero, leggermente soft per retina */
-  --ink-soft:  #2A2D34; /* testo secondario su cream */
+  /* Palette — rigorosamente mono-cromatica */
+  --bg:        #FAF8F3; /* warm cream */
+  --bg-2:      #F2EDE2; /* warm cream, un gradino più cupo — usato 1 volta */
+  --ink:       #0F1115; /* ink nero, soft per retina */
+  --ink-soft:  #2A2D34; /* testo secondario */
   --muted:     #6B6F78; /* caption, eyebrow */
-  --line:      #E6DFD2; /* warm divider */
+  --line:      #E6DFD2; /* divider chiaro */
+  --line-2:    #D5CCBA; /* divider forte */
 
-  /* Token tipografici */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-               Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Token tipografici — Inter Variable 400/500/600 */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
-  /* Token spacing — multipli di 4 */
+  /* Spacing — multipli di 4 */
   --s-4: 16px;
   --s-5: 24px;
   --s-6: 32px;
@@ -27,11 +30,18 @@
   --s-10: 128px;
   --s-11: 160px;
 
-  /* Container narrow, editoriale */
-  --container: 880px;
+  /* Container — narrow editoriale (testi), ma la nav/footer si estendono */
+  --container: 920px;
+
+  /* Motion */
+  --t-fast: 120ms;
+  --t-base: 200ms;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ----- reset, base ----- */
+/* =========================================================================
+   reset, base
+   ========================================================================= */
 
 *,
 *::before,
@@ -55,6 +65,7 @@ body {
   font-feature-settings: "ss01", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 img { max-width: 100%; display: block; }
@@ -64,12 +75,12 @@ a {
   text-decoration: none;
 }
 
-/* Focus accessibile, sempre presente, mai rimosso */
+/* Focus sempre presente (WCAG 2.4.7) */
 a:focus-visible,
 button:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 ::selection {
@@ -77,7 +88,9 @@ button:focus-visible {
   color: var(--bg);
 }
 
-/* ----- container ----- */
+/* =========================================================================
+   container
+   ========================================================================= */
 
 .container {
   max-width: var(--container);
@@ -85,13 +98,17 @@ button:focus-visible {
   padding-inline: 24px;
 }
 
-/* ----- nav ----- */
+/* =========================================================================
+   nav — sticky, slim, 3 voci visibili
+   ========================================================================= */
 
 .nav {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: var(--bg);
+  background: rgba(250, 248, 243, 0.85);
+  backdrop-filter: saturate(180%) blur(8px);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
   border-bottom: 1px solid var(--line);
 }
 
@@ -99,46 +116,43 @@ button:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: 60px;
 }
 
 .brand {
   font-size: 16px;
-  font-weight: 500;
-  letter-spacing: -0.015em;
+  font-weight: 600;
+  letter-spacing: -0.018em;
   color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.nav-links {
-  display: flex;
-  gap: 32px;
-  font-size: 14px;
-  color: var(--muted);
+.brand-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--ink);
+  border-radius: 50%;
+  display: inline-block;
 }
 
-.nav-links a {
-  transition: color 150ms ease;
-}
-
-.nav-links a:hover {
-  color: var(--ink);
-}
-
-/* Singolo link in mezzo alla nav */
 .nav-link {
   font-size: 14px;
+  font-weight: 400;
   color: var(--muted);
   letter-spacing: -0.005em;
-  transition: color 150ms ease;
+  transition: color var(--t-base) ease;
 }
 
 .nav-link:hover {
   color: var(--ink);
 }
 
-/* ----- buttons ----- */
+/* =========================================================================
+   buttons
+   ========================================================================= */
 
-/* Primary: ink nero pieno. Editoriale, non neon. */
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -151,9 +165,11 @@ button:focus-visible {
   letter-spacing: -0.005em;
   border-radius: 4px;
   border: 1px solid var(--ink);
-  transition: background-color 150ms ease, color 150ms ease,
-              transform 120ms ease;
+  transition: background-color var(--t-base) ease,
+              color var(--t-base) ease,
+              transform var(--t-fast) ease;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .btn-primary:hover {
@@ -165,31 +181,45 @@ button:focus-visible {
   transform: scale(0.985);
 }
 
-/* ----- HERO ----- */
+.btn-arrow {
+  display: inline-block;
+  transition: transform var(--t-base) var(--ease);
+}
+
+.btn-primary:hover .btn-arrow {
+  transform: translateX(2px);
+}
+
+/* =========================================================================
+   HERO — silence + tension
+   Pad-left più ampio per dare respiro al H1 più a sinistra del container
+   (effetto editorial-offset, come fa Apple Newsroom)
+   ========================================================================= */
 
 .hero {
-  padding-top: var(--s-10);
-  padding-bottom: var(--s-10);
+  padding-top: 96px;
+  padding-bottom: 112px;
+  position: relative;
 }
 
 .hero-h1 {
-  font-size: clamp(40px, 6.4vw, 80px);
+  font-size: clamp(40px, 6.4vw, 84px);
   font-weight: 500;
-  letter-spacing: -0.04em;
-  line-height: 1.02;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
   color: var(--ink);
-  margin: 0 0 var(--s-6);
+  margin: 0 0 40px;
   max-width: 16ch;
   text-wrap: balance;
 }
 
 .hero-sub {
-  font-size: clamp(17px, 1.5vw, 19px);
+  font-size: clamp(17px, 1.4vw, 19px);
   font-weight: 400;
-  line-height: 1.55;
+  line-height: 1.5;
   color: var(--ink-soft);
-  max-width: 48ch;
-  margin: 0 0 var(--s-7);
+  max-width: 44ch;
+  margin: 0 0 48px;
 }
 
 .hero-cta {
@@ -203,49 +233,94 @@ button:focus-visible {
   letter-spacing: -0.005em;
 }
 
-/* ----- sezioni generiche ----- */
+/* Piccolo "live status" sotto il microcopy — segnale di credibilità operativa */
+.hero-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 24px;
+  letter-spacing: -0.005em;
+}
+
+.hero-status-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--ink);
+  border-radius: 50%;
+  animation: status-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* =========================================================================
+   sezioni generiche — ritmo verticale alternato
+   - .section--quiet: poco padding (respiro)
+   - .section--heavy: tanto padding (tensione)
+   - .section--surface: bg leggermente più cupo (separazione)
+   ========================================================================= */
 
 .section {
-  padding-block: var(--s-10);
+  padding-block: 112px;
+}
+
+.section--quiet {
+  padding-block: 80px;
+}
+
+.section--heavy {
+  padding-block: 144px;
+}
+
+.section--surface {
+  background: var(--bg-2);
+}
+
+.section--border-top {
+  border-top: 1px solid var(--line);
 }
 
 .eyebrow {
   display: block;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: var(--s-5);
+  margin-bottom: 24px;
 }
 
 .h2 {
   font-size: clamp(30px, 4vw, 48px);
   font-weight: 500;
-  letter-spacing: -0.03em;
-  line-height: 1.08;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
   color: var(--ink);
-  margin: 0 0 var(--s-6);
+  margin: 0 0 32px;
   max-width: 22ch;
   text-wrap: balance;
 }
 
 .h3 {
-  font-size: clamp(20px, 1.8vw, 22px);
+  font-size: clamp(20px, 1.7vw, 22px);
   font-weight: 500;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
   line-height: 1.25;
   color: var(--ink);
   margin: 0;
 }
 
 .lead-p {
-  font-size: clamp(17px, 1.5vw, 19px);
+  font-size: clamp(17px, 1.4vw, 19px);
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.55;
   color: var(--ink-soft);
   max-width: 56ch;
-  margin: 0 0 var(--s-5);
+  margin: 0 0 24px;
 }
 
 .body-p {
@@ -254,7 +329,7 @@ button:focus-visible {
   line-height: 1.65;
   color: var(--ink-soft);
   max-width: 56ch;
-  margin: 0 0 var(--s-4);
+  margin: 0 0 16px;
 }
 
 .body-p:last-child {
@@ -265,43 +340,49 @@ button:focus-visible {
   color: var(--muted);
 }
 
-/* ----- SEZIONE 2 — perché serve ----- */
+/* =========================================================================
+   SEZIONE 2 — perché serve (essay, solo testo, respiro)
+   ========================================================================= */
 
 .essay {
-  /* Editor-like, big line-height, narrow column, deep ink */
   font-size: clamp(19px, 1.6vw, 21px);
   font-weight: 400;
-  line-height: 1.55;
+  line-height: 1.5;
   color: var(--ink);
-  max-width: 34ch;
+  max-width: 32ch;
 }
 
 .essay strong {
-  font-weight: 500;
+  /* Italian editorial convention: italic alone for emphasis. Bold+italic sentesi troppo "marketing". */
+  font-style: italic;
+  font-weight: 400;
 }
 
-/* ----- SEZIONE 3 — posso fidarmi ----- */
+/* =========================================================================
+   SEZIONE 3 — posso fidarmi (lista + callout)
+   ========================================================================= */
 
 .trust-list {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 32px 0 0;
   border-top: 1px solid var(--line);
+  max-width: 56ch;
 }
 
 .trust-list li {
-  padding: var(--s-5) 0;
+  padding: 24px 0;
   border-bottom: 1px solid var(--line);
   display: grid;
-  grid-template-columns: 64px 1fr;
-  gap: var(--s-5);
+  grid-template-columns: 80px 1fr;
+  gap: 24px;
   align-items: baseline;
 }
 
 .trust-list .trust-key {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -318,32 +399,64 @@ button:focus-visible {
   font-weight: 500;
 }
 
+/* Callout del rimborso 30 giorni — è il "weight anchor" della pagina */
 .guarantee-callout {
-  margin-top: var(--s-8);
-  padding: var(--s-7);
-  border: 1px solid var(--ink);
+  margin-top: 64px;
+  padding: 40px 36px;
+  border: 2px solid var(--ink);
   border-radius: 4px;
   max-width: 56ch;
+  background: var(--bg);
+  position: relative;
 }
 
 .guarantee-callout .h3 {
-  margin-bottom: var(--s-3);
+  margin-bottom: 16px;
+  font-size: 22px;
+  letter-spacing: -0.02em;
 }
 
 .guarantee-callout .body-p {
   font-size: 16px;
-  margin-bottom: var(--s-4);
+  line-height: 1.6;
+  margin-bottom: 16px;
 }
 
 .guarantee-callout .body-p:last-child {
   margin-bottom: 0;
 }
 
-/* ----- SEZIONE 4 — in pratica (mockup schermata simulazione) ----- */
+/* "geo-anchor" sotto il callout — server location, super-editorial */
+.guarantee-geo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.guarantee-geo-label {
+  font-weight: 500;
+  color: var(--ink-soft);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+/* =========================================================================
+   SEZIONE 4 — in pratica (mockup del prodotto)
+   Visual anchor della landing: border-2px ink, interno tipografico curato.
+   ========================================================================= */
 
 .mockup {
-  margin-top: var(--s-7);
-  border: 1px solid var(--ink);
+  margin-top: 56px;
+  border: 2px solid var(--ink);
   border-radius: 4px;
   background: var(--bg);
   overflow: hidden;
@@ -353,22 +466,23 @@ button:focus-visible {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 8px 14px;
-  font-size: 12px;
+  gap: 6px 12px;
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
-  padding: var(--s-4) var(--s-6);
+  padding: 14px 24px;
   border-bottom: 1px solid var(--line);
+  background: var(--bg-2);
 }
 
 .mockup-meta-sep {
-  color: var(--line-strong);
+  color: var(--line-2);
 }
 
 .mockup-block {
-  padding: var(--s-6);
+  padding: 28px 24px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -377,12 +491,12 @@ button:focus-visible {
 }
 
 .mockup-label {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--muted);
-  margin: 0 0 14px;
+  margin: 0 0 12px;
 }
 
 .mockup-text {
@@ -395,12 +509,41 @@ button:focus-visible {
 }
 
 .mockup-text strong {
+  font-weight: 600;
+}
+
+/* La DOMANDA è il focus visivo del mockup — più grande, più scura */
+.mockup-block--question .mockup-text {
+  font-size: 21px;
+  line-height: 1.4;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+.mockup-block--question .mockup-text::before {
+  content: "“";
+  font-size: 28px;
+  line-height: 0;
+  vertical-align: -8px;
+  margin-right: 2px;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.mockup-block--question .mockup-text::after {
+  content: "”";
+  font-size: 28px;
+  line-height: 0;
+  vertical-align: -8px;
+  margin-left: 2px;
+  color: var(--ink);
   font-weight: 500;
 }
 
 .mockup-cursor {
   display: inline-block;
-  width: 9px;
+  width: 8px;
   height: 18px;
   background: var(--ink);
   margin-left: 3px;
@@ -413,52 +556,93 @@ button:focus-visible {
   51%, 100% { opacity: 0; }
 }
 
+/* "AI feedback" — typewriter-style reveal triggered by viewport */
+.mockup-feedback {
+  position: relative;
+}
+
+.mockup-feedback-word {
+  opacity: 0;
+}
+
+.mockup-feedback-word.is-visible {
+  opacity: 1;
+  transition: opacity 60ms linear;
+}
+
+.mockup-feedback .mockup-cursor-final {
+  display: inline-block;
+  width: 7px;
+  height: 16px;
+  background: var(--ink);
+  margin-left: 3px;
+  vertical-align: text-bottom;
+  animation: mockup-blink 1.1s steps(2) infinite 200ms;
+}
+
+.mockup-feedback.is-done .mockup-cursor-final {
+  animation: none;
+  opacity: 0;
+}
+
 .mockup-footnote {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--s-6);
-  padding: var(--s-4) var(--s-6);
+  gap: 0;
+  padding: 14px 24px;
   border-top: 1px solid var(--line);
-  font-size: 12px;
-  color: var(--muted);
-  letter-spacing: -0.005em;
+  background: var(--bg-2);
 }
 
 .mockup-footnote-item {
   display: inline-flex;
   align-items: baseline;
   gap: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  letter-spacing: -0.005em;
+  padding-right: 24px;
+  margin-right: 24px;
+  border-right: 1px solid var(--line);
+}
+
+.mockup-footnote-item:last-child {
+  border-right: 0;
+  padding-right: 0;
+  margin-right: 0;
 }
 
 .mockup-footnote-item strong {
-  color: var(--ink-soft);
+  color: var(--ink);
   font-weight: 500;
-  font-size: 13px;
 }
 
-/* ----- SEZIONE 5 — cosa succede se provo ----- */
+/* =========================================================================
+   SEZIONE 5 — cosa succede se provo + final CTA
+   Closer visivo della pagina.
+   ========================================================================= */
 
 .prova-points {
   list-style: none;
   padding: 0;
-  margin: var(--s-6) 0 0;
+  margin: 32px 0 0;
   border-top: 1px solid var(--line);
-  max-width: 48ch;
+  max-width: 56ch;
 }
 
 .prova-points li {
   display: grid;
-  grid-template-columns: 24px 1fr;
-  gap: var(--s-4);
-  padding: var(--s-5) 0;
+  grid-template-columns: 80px 1fr;
+  gap: 24px;
+  padding: 24px 0;
   border-bottom: 1px solid var(--line);
   align-items: baseline;
 }
 
 .prova-points .prov-key {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -476,53 +660,65 @@ button:focus-visible {
 }
 
 .final-cta {
-  margin-top: var(--s-8);
-  padding-top: var(--s-7);
-  border-top: 1px solid var(--ink);
+  margin-top: 80px;
+  padding-top: 56px;
+  border-top: 2px solid var(--ink);
+  text-align: left;
 }
 
 .final-cta .body-p {
-  margin-bottom: var(--s-4);
+  margin-bottom: 32px;
+  max-width: 44ch;
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--ink);
+  font-weight: 400;
+  letter-spacing: -0.01em;
 }
 
-/* ----- footer ----- */
+/* =========================================================================
+   footer
+   ========================================================================= */
 
 .footer {
   border-top: 1px solid var(--line);
-  padding-block: var(--s-8) var(--s-6);
-  margin-top: var(--s-10);
+  padding-block: 64px 32px;
+  margin-top: 80px;
 }
 
 .footer-grid {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
-  gap: var(--s-8);
-  margin-bottom: var(--s-8);
+  gap: 64px;
+  margin-bottom: 64px;
 }
 
 .footer-brand {
   font-size: 16px;
-  font-weight: 500;
-  letter-spacing: -0.015em;
+  font-weight: 600;
+  letter-spacing: -0.018em;
   color: var(--ink);
-  margin: 0 0 var(--s-3);
+  margin: 0 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .footer-tag {
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.55;
   color: var(--muted);
   max-width: 36ch;
   margin: 0;
 }
 
 .footer-col-label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--muted);
-  margin: 0 0 var(--s-4);
+  margin: 0 0 16px;
 }
 
 .footer-links {
@@ -537,7 +733,7 @@ button:focus-visible {
 
 .footer-links a {
   color: var(--ink-soft);
-  transition: color 150ms ease;
+  transition: color var(--t-base) ease;
 }
 
 .footer-links a:hover {
@@ -546,16 +742,70 @@ button:focus-visible {
 
 .footer-legal {
   border-top: 1px solid var(--line);
-  padding-top: var(--s-5);
+  padding-top: 24px;
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: var(--s-3);
+  gap: 12px;
   font-size: 13px;
   color: var(--muted);
 }
 
-/* ----- reveal on scroll (vanilla, con IntersectionObserver) ----- */
+/* =========================================================================
+   sticky CTA mobile (FOGG thumb-zone) — solo viewport mobile
+   Appare quando l'utente scrolla oltre l'hero.
+   ========================================================================= */
+
+.sticky-cta-mobile {
+  display: none;
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 60;
+  /* sicurezza safe-area iPhone */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.sticky-cta-mobile.is-shown {
+  display: block;
+}
+
+.sticky-cta-mobile-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 6px;
+  padding: 12px 14px 12px 16px;
+  box-shadow: 0 1px 0 rgba(15, 17, 21, 0.08);
+}
+
+.sticky-cta-mobile-bar .btn-primary {
+  background: var(--bg);
+  color: var(--ink);
+  border-color: var(--bg);
+  padding: 10px 16px;
+  font-size: 14px;
+}
+
+.sticky-cta-mobile-bar .btn-primary:hover {
+  background: transparent;
+  color: var(--bg);
+}
+
+.sticky-cta-mobile-label {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--bg);
+}
+
+/* =========================================================================
+   reveal-on-scroll (vanilla, IntersectionObserver)
+   ========================================================================= */
 
 .reveal {
   opacity: 0;
@@ -569,44 +819,56 @@ button:focus-visible {
   transform: translateY(0);
 }
 
-/* Honor prefers-reduced-motion */
+/* =========================================================================
+   prefers-reduced-motion (WCAG)
+   ========================================================================= */
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+
   .reveal,
   .reveal.is-visible {
     opacity: 1;
     transform: none;
     transition: none;
   }
-  .mockup-cursor {
+
+  .mockup-cursor,
+  .mockup-cursor-final {
     animation: none;
     opacity: 1;
-    width: 11px;
-    height: 3px;
-    vertical-align: baseline;
   }
+
+  .hero-status-dot {
+    animation: none;
+    opacity: 1;
+  }
+
+  /* typewriter → reveal istantaneo */
+  .mockup-feedback-word { opacity: 1; transition: none; }
+
   *, *::before, *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
 }
 
-/* ----- anchor offset per sticky nav ----- */
+/* =========================================================================
+   anchor offset per sticky nav
+   ========================================================================= */
 
 section[id] {
   scroll-margin-top: 80px;
 }
 
-/* ----- responsive ----- */
+/* =========================================================================
+   responsive — mobile-first rispetto al desktop
+   ========================================================================= */
 
 @media (max-width: 720px) {
   :root {
-    --s-10: 80px;
-    --s-9: 56px;
-  }
-
-  .nav-links {
-    display: none;
+    --s-10: 96px;
+    --s-9: 64px;
   }
 
   .container {
@@ -615,84 +877,148 @@ section[id] {
 
   .nav-inner {
     height: 56px;
+    gap: 8px;
   }
 
   .brand {
     font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  /* Su mobile nascondiamo "In pratica" dal nav — l'utente scrolla
+     comunque verso il basso dove c'è il mockup. Nav compact:
+     brand + CTA, massima conversione in thumb zone. */
+  .nav-link {
+    display: none;
+  }
+
+  .nav .btn-primary {
+    padding: 10px 14px;
+    font-size: 14px;
   }
 
   /* Hero */
   .hero {
-    padding-top: var(--s-9);
-    padding-bottom: var(--s-9);
+    padding-top: 64px;
+    padding-bottom: 88px;
   }
   .hero-h1 {
-    font-size: 38px;
-    letter-spacing: -0.03em;
-    line-height: 1.05;
+    font-size: 40px;
+    letter-spacing: -0.035em;
+    line-height: 1.0;
     max-width: 14ch;
+    margin-bottom: 32px;
   }
   .hero-sub {
     font-size: 17px;
+    margin-bottom: 40px;
   }
   .btn-primary {
     padding: 12px 18px;
     font-size: 15px;
+    width: 100%;
+    justify-content: center;
+  }
+  .hero-status {
+    margin-top: 20px;
   }
 
-  /* Trust list: stack */
+  /* Section rhythm */
+  .section { padding-block: 88px; }
+  .section--quiet { padding-block: 64px; }
+  .section--heavy { padding-block: 112px; }
+
+  .h2 {
+    margin-bottom: 24px;
+    max-width: 100%;
+  }
+
+  /* Trust list: stack, niente side-label */
+  .trust-list { margin-top: 24px; }
   .trust-list li {
     grid-template-columns: 1fr;
-    gap: var(--s-2);
-    padding: var(--s-4) 0;
+    gap: 8px;
+    padding: 20px 0;
   }
   .trust-list .trust-key {
-    font-size: 12px;
+    font-size: 11px;
+  }
+
+  /* Callout più stretto su mobile */
+  .guarantee-callout {
+    margin-top: 48px;
+    padding: 28px 24px;
+  }
+
+  /* Geo line nascosta su mobile (TG: meno density) */
+  .guarantee-geo {
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
   /* Prova points: stack */
   .prova-points li {
     grid-template-columns: 1fr;
-    gap: var(--s-2);
-    padding: var(--s-4) 0;
-  }
-
-  /* Footer */
-  .footer-grid {
-    grid-template-columns: 1fr;
-    gap: var(--s-6);
-    margin-bottom: var(--s-6);
-  }
-  .footer-legal {
-    flex-direction: column;
-    gap: var(--s-2);
-  }
-
-  /* Guarantee callout */
-  .guarantee-callout {
-    padding: var(--s-5);
+    gap: 8px;
+    padding: 20px 0;
   }
 
   /* Mockup */
   .mockup {
-    margin-top: var(--s-6);
+    margin-top: 40px;
   }
   .mockup-meta {
-    padding: var(--s-3) var(--s-5);
-    font-size: 11px;
+    padding: 12px 18px;
+    font-size: 10.5px;
+    gap: 4px 10px;
   }
   .mockup-block {
-    padding: var(--s-5);
+    padding: 22px 18px;
+  }
+  .mockup-block--question .mockup-text {
+    font-size: 18px;
+    line-height: 1.4;
+  }
+  .mockup-block--question .mockup-text::before,
+  .mockup-block--question .mockup-text::after {
+    font-size: 24px;
   }
   .mockup-text {
     font-size: 16px;
   }
   .mockup-footnote {
-    padding: var(--s-3) var(--s-5);
+    padding: 12px 18px;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .mockup-footnote-item {
+    padding-right: 0;
+    margin-right: 0;
+    border-right: 0;
+  }
+
+  /* Final CTA */
+  .final-cta {
+    margin-top: 56px;
+    padding-top: 40px;
+  }
+  .final-cta .body-p {
+    font-size: 17px;
+  }
+
+  /* Footer */
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    margin-bottom: 40px;
+  }
+  .footer-legal {
+    flex-direction: column;
+    gap: 8px;
   }
 }
 
-/* Hidden utility */
+/* hidden utility (skip-link WCAG) */
 .visually-hidden {
   position: absolute !important;
   width: 1px; height: 1px;
@@ -718,4 +1044,3 @@ section[id] {
   border-radius: 4px;
   z-index: 100;
 }
-
