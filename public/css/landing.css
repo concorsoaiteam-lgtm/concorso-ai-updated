@@ -1086,6 +1086,246 @@ button:focus-visible {
 }
 
 /* =========================================================================
+   SEZIONE 5 — PLAN CARDS (Free / Pro percorsouente)
+   ----
+   Scopo: cambiare "Free vs Pro = decisione" in "Free è dove inizi,
+   Pro è dove arrivi se vorrai". Default effect (file 03 P11) — la voce
+   dominante è il Free.
+   ----
+   Asimmetria:
+     - Free: 7/12 colonna, padding generoso, ink-on-cream, border 2px ink
+     - Pro: 5/12 colonna, padding contratto, ink-soft-on-cream, border 1px ink
+   Entrambi hanno CTA + 3 bullet + price block. Stessa CTM-capacity
+   pattern (file 22 §pricing 2-tier), letto convergenza.
+   ----
+   Anti-gap:
+     - niente "Piano consigliato" pill (file 24 anti-slop)
+     - entry CTA sul Pro è testuale (no button che porti al pagamento)
+       per evitare decisione troppo-presto = file 14 P8 trust;
+       ma è chiaro cliccabile (link stilizzato).
+     - entry CTA sul Free = btn-primary (esattamente lo stesso già presente).
+   ----
+   Note tecniche:
+     - bullet: <span> 6px ink circolare, non check (file 24 anti-slop "no fake badge").
+       Pattern: lista italiana editorial, niente "✓" turquoise che ricordano SaaS.
+     - "Inizia qui" vs "Quando vorrai di più": copy framing per default effect.
+       Il user non decide "quale piano scegliere" — decide "quale è il prossimo passo".
+   ========================================================================= */
+.plan-grid {
+  margin-top: var(--s-7);
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: var(--s-6);
+  align-items: stretch;
+}
+
+.plan-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-radius: 6px;
+  padding: var(--s-7);
+  position: relative;
+}
+
+.plan-card--free {
+  border: 2px solid var(--ink);
+  /* Voce dominante: border 2px + padding generoso + headline ink
+     (file 06 P2 Von Restorff isolation: solo Free ha border 2px). */
+  padding: var(--s-8) var(--s-7);
+}
+
+.plan-card--pro {
+  border: 1px solid var(--ink);
+  /* Voce secondaria: border 1px + padding contratto + headline ink-soft.
+     Geometricamente più leggero = eye-anchor 2 della sezione. */
+  padding: var(--s-7) var(--s-6);
+  background: var(--bg);
+  /* Default effect (file 03 P11): la stessa card Free cream(--bg).
+     Differenziazione SOLO via SIZE + BORDER + HEADLINE.
+     Niente "card premium piú cupa" che per SaaS conventions
+     significa "upgrade set apart" (= violazione di default-effect). */
+}
+
+.plan-card-head {
+  margin-bottom: var(--s-5);
+}
+
+.plan-card-eyebrow {
+  /* "Inizia qui" / "Quando vorrai di più" — micro-label sopra il titolo.
+     "Quando vorrai di più" posiziona Pro come upgrade futuro, non alternativa
+     da scegliere (file 03 P11 default effect). */
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 var(--s-3);
+}
+
+.plan-card-title {
+  font-size: clamp(28px, 2.5vw, 36px);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  color: var(--ink);
+  margin: 0 0 var(--s-4);
+}
+
+.plan-card--pro .plan-card-title {
+  color: var(--ink-soft);
+  /* Pro title in ink-soft (file 06 P1 tipografia gerarchia). */
+  font-size: clamp(24px, 2vw, 30px);
+  /* Anche peso dimensionale: leggermente più piccolo, distanza dal Free. */
+}
+
+.plan-card-price {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  border-top: 1px solid var(--line);
+  padding-top: var(--s-4);
+}
+
+.plan-card-price-num {
+  font-family: var(--font-sans);
+  font-size: clamp(28px, 2.2vw, 34px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.plan-card--pro .plan-card-price-num {
+  color: var(--ink-soft);
+  font-size: clamp(24px, 1.8vw, 30px);
+}
+
+.plan-card-price-meta {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: -0.005em;
+  font-weight: 400;
+}
+
+.plan-card-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--s-5) 0 var(--s-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  flex-grow: 1;
+}
+
+.plan-card-list li {
+  display: flex;
+  gap: var(--s-3);
+  align-items: flex-start;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.plan-card--free .plan-card-list li {
+  font-size: 17px;
+  /* bullet del Free leggermente più grande per coerenza con la voce dominante. */
+  color: var(--ink-soft);
+}
+
+.plan-card-bullet {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+  flex-shrink: 0;
+  margin-top: 9px;
+  /* Bullet geometrico (cerchio ink 6px) invece di "✓ turquoise".
+     file 24 anti-slop P3: NO fake badges. Pattern file 22 §pricing "✓"
+     sostituito da punto geometricco neutro. */
+}
+
+.plan-card--pro .plan-card-bullet {
+  background: var(--ink-soft);
+}
+
+.plan-card-list strong {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.plan-card-list em {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.plan-card-foot {
+  margin-top: auto;
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.plan-card--free .plan-card-foot {
+  border-top-color: var(--line-2);
+  /* Sul Free il border-top ha un tono appena più forte = gerarchia. */
+}
+
+.plan-card-cta {
+  width: 100%;
+  justify-content: center;
+}
+
+.plan-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  padding: 4px 0;
+  transition: text-decoration-thickness var(--t-base) ease, gap var(--t-base) var(--ease);
+}
+
+.plan-card-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+.plan-card-link:hover .btn-arrow {
+  transform: translateX(3px);
+}
+
+.plan-card-link .btn-arrow {
+  display: inline-block;
+  transition: transform var(--t-base) var(--ease);
+}
+
+.plan-card-meta {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: -0.005em;
+  line-height: 1.45;
+}
+
+.plan-card--pro .plan-card-meta {
+  font-size: 11px;
+}
+
+/* =========================================================================
    footer
    ========================================================================= */
 
@@ -1433,6 +1673,22 @@ section[id] {
   /* Final CTA */
   .final-cta { margin-top: var(--s-9); padding-top: var(--s-7); }
   .final-cta .body-p { font-size: 17px; margin-bottom: var(--s-5); }
+
+  /* Plan cards mobile: stack verticale, Free prima di Pro (default effect).
+     Su mobile la Free card mantiene padding più ampio come segnale
+     di dominanza visiva. */
+  .plan-grid {
+    grid-template-columns: 1fr;
+    gap: var(--s-5);
+  }
+  .plan-card--free,
+  .plan-card--pro {
+    padding: var(--s-6);
+  }
+  .plan-card-title { font-size: 26px; }
+  .plan-card--pro .plan-card-title { font-size: 22px; }
+  .plan-card-price-num { font-size: 28px; }
+  .plan-card--pro .plan-card-price-num { font-size: 24px; }
 
   /* Footer */
   .footer-grid {

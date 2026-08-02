@@ -275,6 +275,108 @@
   </div>
 </section>
 
+<!-- ============================================================
+     SEZIONE 5 — Cosa succede dopo (percorso utente)
+
+     SCOPO: ridurre il dubbio post-CTA. Pattern file 03 P11 default effect
+     + file 13 P15 CTA coherence + file 22 §pricing (2-tier, Free dominant).
+
+     Perché esiste: dopo S04 closer, l'utente pensa implicitamente
+     "Ok, mi registro...ma il Free &egrave; davvero gratis? Cosa mi perdo?
+     Devo già scegliere Pro?". Questa sezione chiude quel dubbio.
+
+     ARCHITETTURA:
+     - 2 card affiancate, grid 7/5 (Free dominante / Pro più leggero)
+     - Free = voce primaria (ink on cream). Pro = voce secondaria
+       (ink-soft, border ink 1px sola)
+     - ENTRAMBI i CTA puntano a /auth?mode=register (no doppio funnel)
+     - Bullet count: 3 ciascuna (file 11 P4 Pattern D benefit-driven)
+     - Copy: risultato dell'azione (file 11 P4 "❌ simulazioni
+       ✅ allenati tre volte con il tuo bando")
+     - Limite onesty explicito: entrambe dichiarano il limite
+       (Free = 3 mensili; Pro = illimitato)
+
+     ANTI-FUNNEL: niente "Passa a Pro &mdash; €14,99". No "Consigliato".
+     Niente button che porta al pagamento. Solo Registrati gratis.
+     ============================================================ -->
+<section class="section section--quiet section--border-top" aria-labelledby="percorso-h2">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 id="percorso-h2" class="h2">Cosa succede appena ti registri.</h2>
+    </div>
+
+    <p class="lead-p">
+      Apri un account <strong>Free</strong> in automatico. Zero passi in più, zero scelte. Se vorrai, in qualunque momento, potrai passare a Pro. Se non vorrai, resti sul Free senza limiti di tempo.
+    </p>
+
+    <div class="plan-grid" role="group" aria-label="Cosa include il piano Free e il piano Pro">
+
+      <!-- FREE: dominante -->
+      <article class="plan-card plan-card--free">
+        <header class="plan-card-head">
+          <p class="plan-card-eyebrow">Inizia qui</p>
+          <h3 class="plan-card-title">Free</h3>
+          <p class="plan-card-price"><span class="plan-card-price-num">&euro;0</span><span class="plan-card-price-meta">per sempre, senza carta</span></p>
+        </header>
+
+        <ul class="plan-card-list">
+          <li>
+            <span class="plan-card-bullet" aria-hidden="true"></span>
+            <span>Tre simulazioni complete al mese, sul tuo bando reale.</span>
+          </li>
+          <li>
+            <span class="plan-card-bullet" aria-hidden="true"></span>
+            <span>Feedback puntuale su cosa hai risposto bene e cosa no.</span>
+          </li>
+          <li>
+            <span class="plan-card-bullet" aria-hidden="true"></span>
+            <span>Cinque domande per materia &mdash; abbastanza per sentire il ritmo delle domande vere.</span>
+          </li>
+        </ul>
+
+        <div class="plan-card-foot">
+          <a href="auth.html?mode=register" class="btn-primary plan-card-cta" data-cta="plan-free">
+            Registrati gratis <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+          <p class="plan-card-meta">45 secondi. Nessun vincolo. Cancellabile subito.</p>
+        </div>
+      </article>
+
+      <!-- PRO: voice più leggero, ma non "consigliato" -->
+      <article class="plan-card plan-card--pro">
+        <header class="plan-card-head">
+          <p class="plan-card-eyebrow">Quando vorrai di più</p>
+          <h3 class="plan-card-title">Pro</h3>
+          <p class="plan-card-price"><span class="plan-card-price-num">&euro;14,99</span><span class="plan-card-price-meta">al mese, solo se lo attivi tu</span></p>
+        </header>
+
+        <ul class="plan-card-list">
+          <li>
+            <span class="plan-card-bullet" aria-hidden="true"></span>
+            <span>Simulazioni <strong>illimitate</strong>, ogni materia, ogni giorno.</span>
+          </li>
+          <li>
+            <span class="plan-card-bullet" aria-hidden="true"></span>
+            <span>Banca completa con tutte le domande di quell&rsquo;anno e dei cinque prima.</span>
+          </li>
+          <li>
+            <span class="plan-card-bullet" aria-hidden="true"></span>
+            <span>Storico e ripasso mirato: sai <em>cosa stai migliorando</em>.</span>
+          </li>
+        </ul>
+
+        <div class="plan-card-foot">
+          <a href="auth.html?mode=register" class="plan-card-link" data-cta="plan-pro">
+            Pro vive gi&agrave; dentro la tua dashboard &mdash; lo attivi quando ti serve, non prima
+            <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+          <p class="plan-card-meta">Solo &euro;14,99 al mese. Cancellabile in 1 click dal tuo account.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
 </main>
 
 <footer class="footer" role="contentinfo">
