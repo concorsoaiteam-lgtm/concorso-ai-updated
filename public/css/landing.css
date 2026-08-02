@@ -914,49 +914,75 @@ button:focus-visible {
 
 /* =========================================================================
    sticky CTA mobile (FOGG thumb-zone) — solo ≤720px
+   Comparsa animata (slide-up + fade-in) quando l'hero esce da viewport.
+   Posizionato in basso (4px dal fondo), compatto per non disturbare.
    ========================================================================= */
 
 .sticky-cta-mobile {
+  /* sempre in DOM mobile; nascosto con opacity/transform/pointer-events
+     così l'animazione di entrata può essere eseguita senza hack display */
   display: none;
   position: fixed;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
+  left: 8px;
+  right: 8px;
+  bottom: 4px;
   z-index: 60;
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-.sticky-cta-mobile.is-shown { display: block; }
-
 .sticky-cta-mobile-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: var(--s-3);
   background: var(--ink);
   color: var(--bg);
-  border-radius: 6px;
-  padding: 10px 12px 10px 16px;
+  border-radius: 4px;
+  padding: 6px 8px 6px 12px;
   box-shadow: 0 1px 0 rgba(15, 17, 21, 0.08);
+  /* Stato iniziale: sotto viewport + trasparente.
+     IMPORTANTE: visibility:nonefinché .is-shown per a11y (SR non legge
+     un bottone che non dovrebbe esistere finché la CTA non è "valida"). */
+  transform: translateY(14px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 280ms ease, transform 280ms var(--ease),
+              visibility 0s linear 280ms;
 }
 
+.sticky-cta-mobile.is-shown .sticky-cta-mobile-bar {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 280ms ease, transform 280ms var(--ease),
+              visibility 0s linear 0s;
+}
+
+/* Brand-dot piccolo a sinistra — identità senza disturbare */
+.sticky-cta-mobile-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--bg);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: var(--s-2);
+}
+
+/* CTA dentro sticky: più compatta del primary globale */
 .sticky-cta-mobile-bar .btn-primary {
   background: var(--bg);
   color: var(--ink);
   border-color: var(--bg);
-  padding: 9px 14px;
-  font-size: 14px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
 }
 
 .sticky-cta-mobile-bar .btn-primary:hover {
   background: transparent;
-  color: var(--bg);
-}
-
-.sticky-cta-mobile-label {
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
   color: var(--bg);
 }
 
@@ -986,6 +1012,11 @@ button:focus-visible {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+  .sticky-cta-mobile-bar {
+    /* nessuno slide-up animato: appare istantaneo quando .is-shown */
+    transform: none;
+    transition: visibility 0s linear 0s;
   }
   .mockup-cursor, .mockup-cursor-final {
     animation: none; opacity: 1;
@@ -1115,6 +1146,14 @@ section[id] {
   }
 
   /* (prova-points rimosso — sostituito da prova-prose) */
+
+  /* Sticky CTA mobile mostrato in basso, sempre in DOM */
+  .sticky-cta-mobile {
+    display: block;       /* override del display:none desktop */
+    left: 8px;
+    right: 8px;
+    bottom: 4px;
+  }
 
   /* Final CTA */
   .final-cta { margin-top: var(--s-9); padding-top: var(--s-7); }
