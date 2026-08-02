@@ -17,28 +17,59 @@
 
   // ==========================================================
   // 1. Reveal-on-scroll via IntersectionObserver
+  //    Tre categorie: (a) .reveal generico (fade+slide-up).
+  //                     (b) .section-num chapter marker (fade+4px slide).
+  //                     (c) .h2 headline (fade+8px slide, no delay).
   //    (graceful fallback se IntersectionObserver mancante)
   // ==========================================================
+  // Per evitare "enginnered" repetition: il reveal-on-scroll si applica solo
+  // al primo .section-num visibile in pagina (S01). Al suo scatto, tutti i
+  // restanti .reveal/.section-num/.h2 diventano visibili immediatamente.
+  // Persistito via sessionStorage per non riapplicare a ritorno pagina.
+  // Pattern file 06 P7 gerarchia visiva: una sola "firma" di entrata,
+  // no stagger ripetuto su tutte le sezioni.
   function initReveal() {
+    var targets = document.querySelectorAll('.reveal, .section-num, .h2');
+    if (!targets.length) return;
+
+    // Honor prefers-reduced-motion + fallback no-IntersectionObserver
     if (prefersReducedMotion || !('IntersectionObserver' in window)) {
-      document.querySelectorAll('.reveal').forEach(function (el) {
-        el.classList.add('is-visible');
-      });
+      targets.forEach(function (el) { el.classList.add('is-visible'); });
+      return;
+    }
+
+    // Se l'utente ha giá visitato la pagina nella sessione, renderizza tutto.
+    var revealApplied = false;
+    try {
+      revealApplied = window.sessionStorage.getItem('concorso_reveal_first_seen') === '1';
+    } catch (e) { /* privacy-mode: fail-safe */ }
+    if (revealApplied) {
+      targets.forEach(function (el) { el.classList.add('is-visible'); });
+      return;
+    }
+
+    // Single observer sul primo .section-num: quando entra in viewport,
+    // sblocca tutti gli altri target. Evita stagger ripetuto (file 06/07).
+    var firstSectionNum = document.querySelector('section .section-num');
+    if (!firstSectionNum) {
+      targets.forEach(function (el) { el.classList.add('is-visible'); });
       return;
     }
 
     var observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
-        }
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+        // Marca tutti i restanti come visibili per ridurre stagger-cascade.
+        targets.forEach(function (el) {
+          if (el !== entry.target) el.classList.add('is-visible');
+        });
+        observer.unobserve(entry.target);
+        try { window.sessionStorage.setItem('concorso_reveal_first_seen', '1'); } catch (e) {}
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
 
-    document.querySelectorAll('.reveal').forEach(function (el) {
-      observer.observe(el);
-    });
+    observer.observe(firstSectionNum);
   }
 
   // ==========================================================

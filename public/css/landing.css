@@ -160,15 +160,39 @@ button:focus-visible {
   display: inline-block;
 }
 
+/* =========================================================================
+   nav-link: underline reveal on hover (non-shift, non-glow).
+   Pseudo-element after, scale-X 0 → 1, transform-origin sx.
+   eye-tracking: hover-su-link rivela che "uesta è una anchor cliccabile
+   che porta a #in-pratica" senza essere aggressivo. Pattern file 06 P7.
+   ========================================================================= */
 .nav-link {
   font-size: 14px;
   font-weight: 400;
   color: var(--muted);
   letter-spacing: -0.005em;
+  position: relative;
   transition: color var(--t-base) ease;
 }
 
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 280ms var(--ease);
+}
+
 .nav-link:hover { color: var(--ink); }
+.nav-link:hover::after { transform: scaleX(1); }
+
+/* Sticky CTA mobile sticky è un contesto a parte: nav-link mobili
+   sono hidden, quindi l'efetto non si applica lì. */
 
 /* =========================================================================
    button
@@ -198,14 +222,29 @@ button:focus-visible {
   color: var(--ink);
 }
 
-.btn-primary:active { transform: scale(0.985); }
+.btn-primary:active {
+  transform: scale(0.985);
+  /* active: scale lieve in giù, feedback immediate al click. Pattern Apple HIG. */
+}
 
+/* =========================================================================
+   Arrow micro-interaction — trenta, deliberato.
+   translateX 4px + opacity 0,85 sul rest della freccia.
+   Hover: l'arco-arrow scatta leggermente in avanti per dare "intenzione".
+   Niente bounce, niente motion-flash. Pattern file 07 P6.
+   ========================================================================= */
 .btn-arrow {
   display: inline-block;
   transition: transform var(--t-base) var(--ease);
 }
 
-.btn-primary:hover .btn-arrow { transform: translateX(3px); }
+.btn-primary:hover .btn-arrow {
+  transform: translateX(4px);
+}
+
+.btn-primary:active .btn-arrow {
+  transform: translateX(2px);
+}
 
 /* =========================================================================
    HERO — silence + tension
@@ -285,14 +324,41 @@ button:focus-visible {
    (pattern AI). Il numero è un marcatore editoriale, non un tag.
    ========================================================================= */
 
+/* =========================================================================
+   section-header — chapter marker grid.
+   Due colonne: 72px numero + 1fr H2. Allineamento baseline.
+   Nessun eyebrow uppercase, nessun label bonus. Pattern file 06 Visual Hierarchy.
+   Margine-bottom generoso = respiro prima del paragrafo. file 07 line-height.
+   ========================================================================= */
 .section-header {
   display: grid;
-  grid-template-columns: 72px 1fr;
+  grid-template-columns: 88px 1fr;
   gap: var(--s-5);
   align-items: baseline;
   margin-bottom: var(--s-7);
+  position: relative;
+  /* Una linea sottile sotto l'header: latte tra la zona-titolo e la zona-corpo.
+     Crea un "ritmo editoriale" cap-side. 24px ink-faint, none-disturbante. */
+  padding-bottom: var(--s-5);
 }
 
+.section-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 24px;
+  height: 1px;
+  background: var(--ink);
+  /* Piccolo filetto nero sotto il chapter marker. Non una divider completa,
+     solo un'eco grafica che dice "capitolo". Pattern file 06 P7 micro-detail. */
+}
+
+/* =========================================================================
+   section-num — chapter marker.
+   Quando la sezione entra in viewport, piccola fade + 4px slide-up.
+   Eye-anchor 1 dentro la sezione. Pattern file 06 P1 + file 13 P3.
+   ========================================================================= */
 .section-num {
   display: block;
   font-size: 28px;
@@ -301,6 +367,15 @@ button:focus-visible {
   line-height: 1;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
+  /* Reveal-on-scroll: opacity 0 di default, IntersectionObserver .is-visible. */
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 600ms ease-out 60ms, transform 600ms ease-out 60ms;
+}
+
+.section-num.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* =========================================================================
@@ -325,6 +400,17 @@ button:focus-visible {
   margin: 0 0 var(--s-6);
   max-width: 22ch;
   text-wrap: balance;
+  /* Reveal-on-scroll: fade + 8px slide-up, 60ms più tardi del numero.
+     Per breath "numero prima, H2 dopo": il eye-anchor inizia sul chapter
+     marker, poi atterra sul H2 con un attimo di pausa percepito. */
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 700ms ease-out 140ms, transform 700ms ease-out 140ms;
+}
+
+.h2.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .h3 {
@@ -347,12 +433,22 @@ button:focus-visible {
 }
 
 .lead-p {
-  font-size: clamp(17px, 1.4vw, 19px);
+  font-size: clamp(19px, 1.5vw, 22px);
   font-weight: 400;
   line-height: 1.55;
-  color: var(--ink-soft);
+  letter-spacing: -0.01em;
+  color: var(--ink);
   max-width: 56ch;
   margin: 0 0 var(--s-6);
+}
+
+.lead-p-follow {
+  font-size: clamp(17px, 1.4vw, 19px);
+  color: var(--ink-soft);
+  font-weight: 400;
+  letter-spacing: 0;
+  margin-top: calc(var(--s-6) * -1 + var(--s-5));
+  /* Segue leggermente più in basso — respiro "post callout"  */
 }
 
 .body-p {
@@ -373,18 +469,50 @@ button:focus-visible {
    FLOW: num → H2 → essay (tight, NO list)
    ========================================================================= */
 
+/* =========================================================================
+   S01 ESSAY — editorial cadence.
+   Due paragrafi: il primo dichiara il problema, il secondo chiude con la
+   "勿prima domanda" (la perdita specifica). Pattern: italian editorial
+   rhythm — comma, em-dash, period, period (file 07 P6 + file 11 P1).
+   Il "essay-follow" è leggermente più piccolo del primo paragrafo per
+   creare un "respiro calante" (Bertin visual weight decrescente). Non
+   serve essere uguale, deve essere in leggero receding verso il secondo
+   blocco: file 06 P1 gerarchia tipografica.
+   ========================================================================= */
 .essay {
-  font-size: clamp(19px, 1.6vw, 22px);
+  font-size: clamp(20px, 1.7vw, 24px);
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 1.45;
   color: var(--ink);
-  max-width: 32ch;
+  max-width: 38ch;
 }
 
 .essay strong {
   /* Italian editorial: italic = emphasis, weight rimane 400. */
   font-style: italic;
   font-weight: 500;
+  color: var(--ink);
+}
+
+.essay em {
+  /* Sulla parola "tuo" nel secondo paragrafo — restrizione personalizzante.
+     Color ink = emphasi si isola dal --ink-soft di base del paragrafo. */
+  font-style: italic;
+  font-weight: 500;
+  color: var(--ink);
+  /* No background: stay clean. Pattern file 07 P6 italic su singola parola. */
+}
+
+.essay-follow {
+  margin-top: var(--s-6);
+  font-size: clamp(17px, 1.5vw, 21px);
+  /* Recede rispetto al primo paragrafo di 2-3px = respiro calante. */
+  line-height: 1.5;
+  color: var(--ink-soft);
+  font-weight: 400;
+  max-width: 40ch;
+  /* max-width uniforme con .essay per italien-cadence confortevole
+     (Bringhurst: 60-75 char/line, qui targeting read-su-mobile 40ch). */
 }
 
 /* =========================================================================
@@ -393,44 +521,126 @@ button:focus-visible {
    (Questo rompe il pattern "eyebrow - h2 - para - cards" AI-style.)
    ========================================================================= */
 
+/* =========================================================================
+   GUARANTEE CALLOUT — premium reassurance zone.
+   4 livelli visivi dentro la card:
+     (a) tag chip "Rimborso garantito" — microtag in alto a sx
+     (b) headline forte ("Prova il piano Pro per un mese intero…")
+     (c) body 17px ink, breathing 1.6
+     (d) geo list — 3 colonne dt/dd semantic, fine 1px custom divider on top
+   Razionale: prima era flat box. Ora:
+     - la gerarchia interna guida l'occhio dall'alto (tag) al basso (geo-list)
+     - il tag chip funge da pre-header label (file 06 P1, P7) come un timbro
+     - il geo-list usa <dl>/<dt>/<dd> semantici (file 19 P8 ARIA landmarks)
+     - la border 2px ink + soft inset cream + tag chip alto a sinistra
+       ricorda "official receipt" senza essere cartolinesco
+   ========================================================================= */
 .guarantee-callout {
-  margin-top: var(--s-8);
-  margin-bottom: var(--s-9);
-  padding: var(--s-8) var(--s-7);
+  margin-top: var(--s-9);
+  margin-bottom: var(--s-10);
+  padding: var(--s-9) var(--s-8) var(--s-8);
   border: 2px solid var(--ink);
-  border-radius: 4px;
-  max-width: 56ch;
+  border-radius: 6px;
+  max-width: 64ch;
   background: var(--bg);
   position: relative;
+  /* Doppia border + inset shadow = "decorative box", non premium.
+     2px ink border solo, più il tag chip on top, è giá abbastanza
+     "official receipt". Pattern file 06 P2 Von Restorff isolation. */
+}
+
+.guarantee-tag {
+  position: absolute;
+  top: -11px;
+  left: var(--s-8);
+  background: var(--bg-2);
+  color: var(--ink-soft);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--line-2);
+  /* Tag chip in alto a sx della card: come un timbro ufficiale su una
+     ricevuta, ma con tonality cream (no competizione con H3 ink-on-cream).
+     Eye-anchor 1 dentro la card. Pattern file 06 P2 (single accent Von Restorff). */
+}
+
+.guarantee-callout .h3-callout {
+  font-size: clamp(22px, 2vw, 26px);
+  font-weight: 500;
+  letter-spacing: -0.028em;
+  line-height: 1.18;
+  color: var(--ink);
+  margin: 0 0 var(--s-6);
+  /* br > line-height 1.18 = ritmo editorial "due righe brevi" invece di uno solo
+     lungo, per dare respiro. Pattern file 11 P26. */
 }
 
 .guarantee-callout .body-p {
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--ink-soft);
   margin-bottom: var(--s-4);
+  font-weight: 400;
 }
 
-.guarantee-callout .body-p:last-child { margin-bottom: 0; }
-
-.guarantee-geo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px var(--s-4);
-  margin-top: var(--s-5);
-  padding-top: var(--s-5);
-  border-top: 1px solid var(--line);
-  font-size: 12px;
-  font-weight: 400;
+.guarantee-callout .muted-line {
   color: var(--muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* Geo list — semantic dt/dd, 3 colonne desktop, stack mobile.
+   Niente border superiore continua: ogni item ha il suo "filetto".
+   Il tutto diventa un index di "dove vivono i tuoi dati" con tono
+   "istituzionale moderno" (file 14 P12). */
+.guarantee-geo {
+  margin-top: var(--s-7);
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--line-2);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-6) var(--s-7);
+}
+
+.guarantee-geo-list {
+  display: contents;
+  /* "display: contents" fa sì che il <dl> non interferisca con il layout
+     grid del parent. <dt>+<dd> fluiscono direttamente nelle grid cells.
+     Pattern file 09 grid + file 19 ARIA semantic. */
+}
+
+.guarantee-geo-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
 .guarantee-geo-label {
-  font-weight: 500;
-  color: var(--ink-soft);
-  letter-spacing: var(--tracking);  /* sistema unificato */
-  text-transform: uppercase;
   font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0;
+}
+
+.guarantee-geo-value {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--ink-soft);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.guarantee-geo-meta {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 12px;
 }
 
 /* Trust-list (supporting, viene DOPO il callout) — leggera */
@@ -1052,11 +1262,15 @@ button:focus-visible {
    prefers-reduced-motion (WCAG)
    ========================================================================= */  @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .reveal, .reveal.is-visible {
+    .reveal, .reveal.is-visible,
+    .section-num, .section-num.is-visible,
+    .h2, .h2.is-visible {
       opacity: 1;
       transform: none;
       transition: none;
     }
+    /* nav-link::after su reduced: nessuno scaleX (transform off limits) */
+    .nav-link::after { transition: none; }
     .sticky-cta-mobile-bar {
       /* nessuno slide-up animato: appare istantaneo quando .is-shown */
       transform: none;
@@ -1138,19 +1352,27 @@ section[id] {
 
   /* Section header su mobile: numero più piccolo */
   .section-header {
-    grid-template-columns: 48px 1fr;
+    grid-template-columns: 56px 1fr;
     gap: var(--s-4);
     margin-bottom: var(--s-5);
+    padding-bottom: var(--s-4);
   }
   .section-num { font-size: 22px; }
+  .section-header::after { width: 16px; }
 
   /* Callout e geo su mobile */
   .guarantee-callout {
-    margin-top: var(--s-7);
-    margin-bottom: var(--s-8);
-    padding: var(--s-6) var(--s-5);
+    margin-top: var(--s-8);
+    margin-bottom: var(--s-9);
+    padding: var(--s-7) var(--s-5) var(--s-6);
   }
-  .guarantee-geo { flex-wrap: wrap; gap: 6px; }
+  .guarantee-callout .h3-callout { font-size: 20px; }
+  .guarantee-callout .body-p { font-size: 16px; }
+  .guarantee-tag { left: var(--s-5); }
+  .guarantee-geo {
+    grid-template-columns: 1fr;
+    gap: var(--s-4);
+  }
 
   /* Trust list: stack */
   .trust-list li {
