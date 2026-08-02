@@ -1,42 +1,53 @@
 /* =========================================================================
    ConcorsoAI — landing
    Editoriale. Cream + ink. Gerarchia tipografica forte.
-   Nessuna decorazione. Nessun badge. Nessun gradient. Nessun glow.
-   Riferimenti visivi: Apple Newsroom, Mercury bank, Linear, Basecamp,
-   Notion product pages.
+   Sistema tipografico unificato. Chapter-number pattern (no eyebrows
+   "blog post" style). Mockup come vera applicazione, non illustrazione.
+   Nessuna decorazione. Nessun gradient. Nessun glow. Nessun AI-slop.
+   Riferimenti editoriali: Linear, Stripe, Raycast, Vercel, Granola,
+   Perplexity, Notion, Mercury bank, Apple Newsroom.
    ========================================================================= */
 
 :root {
   /* Palette — rigorosamente mono-cromatica */
   --bg:        #FAF8F3; /* warm cream */
-  --bg-2:      #F2EDE2; /* warm cream, un gradino più cupo — usato 1 volta */
+  --bg-2:      #F2EDE2; /* warm cream, un gradino più cupo */
   --ink:       #0F1115; /* ink nero, soft per retina */
   --ink-soft:  #2A2D34; /* testo secondario */
-  --muted:     #6B6F78; /* caption, eyebrow */
-  --line:      #E6DFD2; /* divider chiaro */
+  --ink-faint: #8A8E96; /* meta-info */
+  --muted:     #6B6F78; /* caption */
+  --line:      #E6DFD2; /* divider sottile */
   --line-2:    #D5CCBA; /* divider forte */
 
-  /* Token tipografici — Inter Variable 400/500/600 */
+  /* Font */
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont,
                "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
-  /* Spacing — multipli di 4 */
+  /* Spacing system (multipli di 4, oltre 64 multipli di 32) */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3: 12px;
   --s-4: 16px;
   --s-5: 24px;
   --s-6: 32px;
-  --s-7: 48px;
-  --s-8: 64px;
-  --s-9: 96px;
-  --s-10: 128px;
-  --s-11: 160px;
+  --s-7: 40px;
+  --s-8: 48px;
+  --s-9: 64px;
+  --s-10: 96px;
+  --s-11: 128px;
 
-  /* Container — narrow editoriale (testi), ma la nav/footer si estendono */
+  /* Container narrow editoriale */
   --container: 920px;
 
   /* Motion */
   --t-fast: 120ms;
   --t-base: 200ms;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Sistema tracking — usato da tutti gli elementi uppercase.
+     Ogni "eyebrow-like" usa tracking TRACKING (0.14em).
+     Niente deroghe al sistema. */
+  --tracking: 0.14em;
 }
 
 /* =========================================================================
@@ -65,17 +76,13 @@ body {
   font-feature-settings: "ss01", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
 img { max-width: 100%; display: block; }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+a { color: inherit; text-decoration: none; }
 
-/* Focus sempre presente (WCAG 2.4.7) */
+/* Focus (WCAG 2.4.7) — sottile, non invasivo */
 a:focus-visible,
 button:focus-visible {
   outline: 2px solid var(--ink);
@@ -106,9 +113,9 @@ button:focus-visible {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(250, 248, 243, 0.85);
-  backdrop-filter: saturate(180%) blur(8px);
-  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  background: rgba(250, 248, 243, 0.82);
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
   border-bottom: 1px solid var(--line);
 }
 
@@ -145,12 +152,10 @@ button:focus-visible {
   transition: color var(--t-base) ease;
 }
 
-.nav-link:hover {
-  color: var(--ink);
-}
+.nav-link:hover { color: var(--ink); }
 
 /* =========================================================================
-   buttons
+   button
    ========================================================================= */
 
 .btn-primary {
@@ -177,38 +182,33 @@ button:focus-visible {
   color: var(--ink);
 }
 
-.btn-primary:active {
-  transform: scale(0.985);
-}
+.btn-primary:active { transform: scale(0.985); }
 
 .btn-arrow {
   display: inline-block;
   transition: transform var(--t-base) var(--ease);
 }
 
-.btn-primary:hover .btn-arrow {
-  transform: translateX(2px);
-}
+.btn-primary:hover .btn-arrow { transform: translateX(3px); }
 
 /* =========================================================================
    HERO — silence + tension
-   Pad-left più ampio per dare respiro al H1 più a sinistra del container
-   (effetto editorial-offset, come fa Apple Newsroom)
+   H1 weight 600 = dominance. Sub-H1 breath. CTA = single dark mass.
    ========================================================================= */
 
 .hero {
-  padding-top: 96px;
-  padding-bottom: 112px;
+  padding-top: 112px;
+  padding-bottom: 144px;
   position: relative;
 }
 
 .hero-h1 {
   font-size: clamp(40px, 6.4vw, 84px);
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  line-height: 0.98;
+  font-weight: 600;             /* ↑ da 500 → 600 per dominance */
+  letter-spacing: -0.04em;      /* ↑ pulito, niente -0.045em */
+  line-height: 1.0;             /* ↑ esatto, niente magic numbers */
   color: var(--ink);
-  margin: 0 0 40px;
+  margin: 0 0 var(--s-7);
   max-width: 16ch;
   text-wrap: balance;
 }
@@ -219,12 +219,10 @@ button:focus-visible {
   line-height: 1.5;
   color: var(--ink-soft);
   max-width: 44ch;
-  margin: 0 0 48px;
+  margin: 0 0 var(--s-8);
 }
 
-.hero-cta {
-  margin-bottom: var(--s-3);
-}
+.hero-cta { margin-bottom: var(--s-3); }
 
 .hero-micro {
   font-size: 13px;
@@ -233,66 +231,44 @@ button:focus-visible {
   letter-spacing: -0.005em;
 }
 
-/* Piccolo "live status" sotto il microcopy — segnale di credibilità operativa */
-.hero-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 24px;
-  letter-spacing: -0.005em;
+/* =========================================================================
+   SECTION HEADER — chapter marker pattern (Linear / Granola / Vercel docs)
+   Struttura: numero GRANDE a sinistra (font-size ~28px, weight 500)
+   + H2 a destra. Nessun label intermedio.
+   Questo rompe davvero il pattern "eyebrow uppercase → H2 → testo"
+   (pattern AI). Il numero è un marcatore editoriale, non un tag.
+   ========================================================================= */
+
+.section-header {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: var(--s-5);
+  align-items: baseline;
+  margin-bottom: var(--s-7);
 }
 
-.hero-status-dot {
-  width: 6px;
-  height: 6px;
-  background: var(--ink);
-  border-radius: 50%;
-  animation: status-pulse 2.4s ease-in-out infinite;
-}
-
-@keyframes status-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+.section-num {
+  display: block;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
 }
 
 /* =========================================================================
-   sezioni generiche — ritmo verticale alternato
-   - .section--quiet: poco padding (respiro)
-   - .section--heavy: tanto padding (tensione)
-   - .section--surface: bg leggermente più cupo (separazione)
+   sezioni generiche — ritmo verticale alternato (Bertin visual weight)
    ========================================================================= */
 
 .section {
-  padding-block: 112px;
+  padding-block: var(--s-10);
 }
 
-.section--quiet {
-  padding-block: 80px;
-}
-
-.section--heavy {
-  padding-block: 144px;
-}
-
-.section--surface {
-  background: var(--bg-2);
-}
-
-.section--border-top {
-  border-top: 1px solid var(--line);
-}
-
-.eyebrow {
-  display: block;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 24px;
-}
+.section--quiet { padding-block: 80px; }
+.section--heavy { padding-block: 128px; }
+.section--surface { background: var(--bg-2); }
+.section--border-top { border-top: 1px solid var(--line); }
 
 .h2 {
   font-size: clamp(30px, 4vw, 48px);
@@ -300,7 +276,7 @@ button:focus-visible {
   letter-spacing: -0.035em;
   line-height: 1.04;
   color: var(--ink);
-  margin: 0 0 32px;
+  margin: 0 0 var(--s-6);
   max-width: 22ch;
   text-wrap: balance;
 }
@@ -314,13 +290,23 @@ button:focus-visible {
   margin: 0;
 }
 
+/* Intestazione callout: stessa altezza visiva di H3 ma più scura */
+.h3-callout {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  color: var(--ink);
+  margin: 0 0 var(--s-4);
+}
+
 .lead-p {
   font-size: clamp(17px, 1.4vw, 19px);
   font-weight: 400;
   line-height: 1.55;
   color: var(--ink-soft);
   max-width: 56ch;
-  margin: 0 0 24px;
+  margin: 0 0 var(--s-6);
 }
 
 .body-p {
@@ -329,23 +315,20 @@ button:focus-visible {
   line-height: 1.65;
   color: var(--ink-soft);
   max-width: 56ch;
-  margin: 0 0 16px;
+  margin: 0 0 var(--s-4);
 }
 
-.body-p:last-child {
-  margin-bottom: 0;
-}
+.body-p:last-child { margin-bottom: 0; }
 
-.muted-line {
-  color: var(--muted);
-}
+.muted-line { color: var(--muted); }
 
 /* =========================================================================
-   SEZIONE 2 — perché serve (essay, solo testo, respiro)
+   SEZIONE 2 — perché serve (essay)
+   FLOW: num → H2 → essay (tight, NO list)
    ========================================================================= */
 
 .essay {
-  font-size: clamp(19px, 1.6vw, 21px);
+  font-size: clamp(19px, 1.6vw, 22px);
   font-weight: 400;
   line-height: 1.5;
   color: var(--ink);
@@ -353,38 +336,81 @@ button:focus-visible {
 }
 
 .essay strong {
-  /* Italian editorial convention: italic alone for emphasis. Bold+italic sentesi troppo "marketing". */
+  /* Italian editorial: italic = emphasis, weight rimane 400. */
   font-style: italic;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 /* =========================================================================
-   SEZIONE 3 — posso fidarmi (lista + callout)
+   SEZIONE 3 — posso fidarmi
+   FLOW: num → H2 → lead → CALLOUT FIRST → poi trust-list supporting.
+   (Questo rompe il pattern "eyebrow - h2 - para - cards" AI-style.)
    ========================================================================= */
 
+.guarantee-callout {
+  margin-top: var(--s-8);
+  margin-bottom: var(--s-9);
+  padding: var(--s-8) var(--s-7);
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  max-width: 56ch;
+  background: var(--bg);
+  position: relative;
+}
+
+.guarantee-callout .body-p {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: var(--s-4);
+}
+
+.guarantee-callout .body-p:last-child { margin-bottom: 0; }
+
+.guarantee-geo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px var(--s-4);
+  margin-top: var(--s-5);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.guarantee-geo-label {
+  font-weight: 500;
+  color: var(--ink-soft);
+  letter-spacing: var(--tracking);  /* sistema unificato */
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+/* Trust-list (supporting, viene DOPO il callout) — leggera */
 .trust-list {
   list-style: none;
   padding: 0;
-  margin: 32px 0 0;
+  margin: 0;
   border-top: 1px solid var(--line);
   max-width: 56ch;
 }
 
 .trust-list li {
-  padding: 24px 0;
+  padding: var(--s-5) 0;
   border-bottom: 1px solid var(--line);
   display: grid;
   grid-template-columns: 80px 1fr;
-  gap: 24px;
+  gap: var(--s-5);
   align-items: baseline;
 }
 
 .trust-list .trust-key {
-  font-size: 12px;
+  font-size: 11px;                  /* sistema unificato */
   font-weight: 500;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tracking);  /* sistema unificato — era 0.08em */
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--ink-faint);          /* più chiaro → supporting */
 }
 
 .trust-list .trust-val {
@@ -399,82 +425,176 @@ button:focus-visible {
   font-weight: 500;
 }
 
-/* Callout del rimborso 30 giorni — è il "weight anchor" della pagina */
-.guarantee-callout {
-  margin-top: 64px;
-  padding: 40px 36px;
-  border: 2px solid var(--ink);
-  border-radius: 4px;
-  max-width: 56ch;
-  background: var(--bg);
-  position: relative;
-}
-
-.guarantee-callout .h3 {
-  margin-bottom: 16px;
-  font-size: 22px;
-  letter-spacing: -0.02em;
-}
-
-.guarantee-callout .body-p {
-  font-size: 16px;
-  line-height: 1.6;
-  margin-bottom: 16px;
-}
-
-.guarantee-callout .body-p:last-child {
-  margin-bottom: 0;
-}
-
-/* "geo-anchor" sotto il callout — server location, super-editorial */
-.guarantee-geo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid var(--line);
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--muted);
-  letter-spacing: 0.02em;
-}
-
-.guarantee-geo-label {
-  font-weight: 500;
-  color: var(--ink-soft);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-size: 11px;
-}
-
 /* =========================================================================
-   SEZIONE 4 — in pratica (mockup del prodotto)
-   Visual anchor della landing: border-2px ink, interno tipografico curato.
+   SEZIONE 4 — in pratica (mockup "real app")
+   FLOW: num → H2 → mockup IMMEDIATAMENTE (no intro paragraph).
+   La mockup parla da sola. Niente "spiegazione prima del prodotto".
    ========================================================================= */
 
 .mockup {
-  margin-top: 56px;
+  margin-top: var(--s-8);
   border: 2px solid var(--ink);
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--bg);
   overflow: hidden;
+  /* sembra una vera finestra di applicazione */
+}
+
+/* "Window chrome" sottile sopra la mockup — feedback che è una app */
+.mockup-chrome {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 10px 14px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.mockup-chrome-dots {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.mockup-chrome-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--line-2);
+}
+
+.mockup-chrome-dot--ink {  /* dot ink = "questo è il tab attivo" */
+  background: var(--ink);
+}
+
+.mockup-chrome-tab {
+  margin-left: var(--s-3);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* Profile chip (top-right del mockup) — credibilità */
+.mockup-profile {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  letter-spacing: -0.005em;
+}
+
+.mockup-profile-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Progress bar 1px — sentirsi "in live" dentro il prodotto */
+.mockup-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 12px var(--s-5);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.mockup-progress-bar {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+  position: relative;
+  overflow: hidden;
+}
+
+.mockup-progress-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 40%;  /* 2 di 5 = 40% */
+  background: var(--ink);
+  /* micro-motion: riempimento lento che respira. Appena percettibile,
+     restituisce "live" senza gridare "demo". */
+  animation: mockup-progress-breathe 6s ease-in-out infinite;
+}
+
+@keyframes mockup-progress-breathe {
+  0%, 100% { width: 40%; }
+  50%      { width: 46%; }
+}
+
+.mockup-progress-text {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.mockup-progress-divider {
+  width: 1px;
+  height: 12px;
+  background: var(--line);
+}
+
+.mockup-timer {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.005em;
+}
+
+.mockup-timer-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+  margin-right: 6px;
+  vertical-align: 1px;
+  animation: mockup-timer-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes mockup-timer-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
 
 .mockup-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 6px 12px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  gap: 6px var(--s-3);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: -0.005em;
   color: var(--muted);
-  padding: 14px 24px;
+  padding: 12px var(--s-5);
   border-bottom: 1px solid var(--line);
-  background: var(--bg-2);
+}
+
+.mockup-meta-title {
+  color: var(--ink);
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 .mockup-meta-sep {
@@ -482,21 +602,19 @@ button:focus-visible {
 }
 
 .mockup-block {
-  padding: 28px 24px;
+  padding: var(--s-7) var(--s-5);
   border-bottom: 1px solid var(--line);
 }
 
-.mockup-block:last-child {
-  border-bottom: 0;
-}
+.mockup-block:last-child { border-bottom: 0; }
 
 .mockup-label {
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--tracking);
   text-transform: uppercase;
-  color: var(--muted);
-  margin: 0 0 12px;
+  color: var(--ink-faint);
+  margin: 0 0 14px;
 }
 
 .mockup-text {
@@ -508,11 +626,9 @@ button:focus-visible {
   max-width: 64ch;
 }
 
-.mockup-text strong {
-  font-weight: 600;
-}
+.mockup-text strong { font-weight: 600; }
 
-/* La DOMANDA è il focus visivo del mockup — più grande, più scura */
+/* DOMANDA: focal block del mockup. Testo più grande, virgolette reali «...». */
 .mockup-block--question .mockup-text {
   font-size: 21px;
   line-height: 1.4;
@@ -521,24 +637,12 @@ button:focus-visible {
   color: var(--ink);
 }
 
-.mockup-block--question .mockup-text::before {
-  content: "“";
-  font-size: 28px;
-  line-height: 0;
-  vertical-align: -8px;
-  margin-right: 2px;
-  color: var(--ink);
+.mockup-block--question .mockup-text .q-open,
+.mockup-block--question .mockup-text .q-close {
+  font-size: 24px;
   font-weight: 500;
-}
-
-.mockup-block--question .mockup-text::after {
-  content: "”";
-  font-size: 28px;
-  line-height: 0;
-  vertical-align: -8px;
-  margin-left: 2px;
   color: var(--ink);
-  font-weight: 500;
+  margin: 0 1px;
 }
 
 .mockup-cursor {
@@ -556,10 +660,8 @@ button:focus-visible {
   51%, 100% { opacity: 0; }
 }
 
-/* "AI feedback" — typewriter-style reveal triggered by viewport */
-.mockup-feedback {
-  position: relative;
-}
+/* "AI feedback" typewriter */
+.mockup-feedback { position: relative; }
 
 .mockup-feedback-word {
   opacity: 0;
@@ -570,7 +672,7 @@ button:focus-visible {
   transition: opacity 60ms linear;
 }
 
-.mockup-feedback .mockup-cursor-final {
+.mockup-cursor-final {
   display: inline-block;
   width: 7px;
   height: 16px;
@@ -585,11 +687,69 @@ button:focus-visible {
   opacity: 0;
 }
 
+/* Sotto il feedback: shortcut + cite */
+.mockup-feedback-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3) var(--s-5);
+  margin-top: var(--s-4);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: -0.005em;
+}
+
+.mockup-feedback-shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.mockup-feedback-shortcut kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 18px;
+  padding: 0 5px;
+  border: 1px solid var(--line-2);
+  border-radius: 3px;
+  background: var(--bg);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.mockup-feedback-cite {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+  font-style: normal;
+}
+
+.mockup-feedback-cite a {
+  color: var(--ink);
+  border-bottom: 1px solid var(--line-2);
+  padding-bottom: 1px;
+  transition: border-color var(--t-base) ease;
+}
+
+.mockup-feedback-cite a:hover {
+  border-bottom-color: var(--ink);
+}
+
+/* Footnote del mockup — più sobrio, niente border-right pillar */
 .mockup-footnote {
   display: flex;
   flex-wrap: wrap;
-  gap: 0;
-  padding: 14px 24px;
+  gap: var(--s-4) var(--s-5);
+  padding: var(--s-4) var(--s-5);
   border-top: 1px solid var(--line);
   background: var(--bg-2);
 }
@@ -597,19 +757,10 @@ button:focus-visible {
 .mockup-footnote-item {
   display: inline-flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 6px;
   font-size: 13px;
   color: var(--ink-soft);
   letter-spacing: -0.005em;
-  padding-right: 24px;
-  margin-right: 24px;
-  border-right: 1px solid var(--line);
-}
-
-.mockup-footnote-item:last-child {
-  border-right: 0;
-  padding-right: 0;
-  margin-right: 0;
 }
 
 .mockup-footnote-item strong {
@@ -618,56 +769,58 @@ button:focus-visible {
 }
 
 /* =========================================================================
-   SEZIONE 5 — cosa succede se provo + final CTA
-   Closer visivo della pagina.
+   SEZIONE 5 — cosa succede se provo
+   FLOW: num → H2 → prova-points → final CTA chiusura PULITA.
    ========================================================================= */
 
-.prova-points {
-  list-style: none;
-  padding: 0;
-  margin: 32px 0 0;
-  border-top: 1px solid var(--line);
+/* =========================================================================
+   SEZIONE 5 — cosa succede se provo
+   FLUSSO: chapter-mark → H2 → prova-PROSE (NO border, NO grid label).
+   Questo rompe l'identità "border-list" che S3 trust-list già usa.
+   Le 3 voci sono ora prose editoriali, non cards.
+   ========================================================================= */
+
+.prova-prose {
+  margin: 0;
   max-width: 56ch;
 }
 
-.prova-points li {
-  display: grid;
-  grid-template-columns: 80px 1fr;
-  gap: 24px;
-  padding: 24px 0;
-  border-bottom: 1px solid var(--line);
-  align-items: baseline;
-}
-
-.prova-points .prov-key {
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.prova-points .prov-val {
+.prova-prose .prova-item {
   font-size: 17px;
   font-weight: 400;
-  line-height: 1.55;
+  line-height: 1.6;
   color: var(--ink-soft);
+  margin: 0 0 var(--s-6);
 }
 
-.prova-points .prov-val strong {
+.prova-prose .prova-item:last-child { margin-bottom: 0; }
+
+.prova-prose .prova-item-label {
+  font-weight: 500;
+  color: var(--ink);
+  margin-right: 6px;
+  font-style: italic;
+  font-size: 16px;
+}
+
+.prova-prose .prova-item strong {
   color: var(--ink);
   font-weight: 500;
 }
 
+/* Rimosso: .prova-points (era lista con grid 80px — clashava visivamente
+   con .trust-list di S3). Le "Ottieni / Costo / Esci" ora sono prosa,
+   non row di tabella. */
+
 .final-cta {
-  margin-top: 80px;
-  padding-top: 56px;
+  margin-top: var(--s-10);
+  padding-top: var(--s-8);
   border-top: 2px solid var(--ink);
   text-align: left;
 }
 
 .final-cta .body-p {
-  margin-bottom: 32px;
+  margin-bottom: var(--s-6);
   max-width: 44ch;
   font-size: 19px;
   line-height: 1.5;
@@ -682,15 +835,15 @@ button:focus-visible {
 
 .footer {
   border-top: 1px solid var(--line);
-  padding-block: 64px 32px;
-  margin-top: 80px;
+  padding-block: var(--s-9) var(--s-6);
+  margin-top: var(--s-10);
 }
 
 .footer-grid {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
-  gap: 64px;
-  margin-bottom: 64px;
+  gap: var(--s-9);
+  margin-bottom: var(--s-9);
 }
 
 .footer-brand {
@@ -698,7 +851,7 @@ button:focus-visible {
   font-weight: 600;
   letter-spacing: -0.018em;
   color: var(--ink);
-  margin: 0 0 12px;
+  margin: 0 0 var(--s-3);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -709,16 +862,26 @@ button:focus-visible {
   line-height: 1.55;
   color: var(--muted);
   max-width: 36ch;
+  margin: 0 0 var(--s-3);
+}
+
+.footer-legal-line {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-faint);
+  letter-spacing: -0.005em;
+  line-height: 1.5;
   margin: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .footer-col-label {
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.16em;
+  letter-spacing: var(--tracking);
   text-transform: uppercase;
   color: var(--muted);
-  margin: 0 0 16px;
+  margin: 0 0 var(--s-4);
 }
 
 .footer-links {
@@ -736,24 +899,21 @@ button:focus-visible {
   transition: color var(--t-base) ease;
 }
 
-.footer-links a:hover {
-  color: var(--ink);
-}
+.footer-links a:hover { color: var(--ink); }
 
 .footer-legal {
   border-top: 1px solid var(--line);
-  padding-top: 24px;
+  padding-top: var(--s-5);
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--s-3);
   font-size: 13px;
   color: var(--muted);
 }
 
 /* =========================================================================
-   sticky CTA mobile (FOGG thumb-zone) — solo viewport mobile
-   Appare quando l'utente scrolla oltre l'hero.
+   sticky CTA mobile (FOGG thumb-zone) — solo ≤720px
    ========================================================================= */
 
 .sticky-cta-mobile {
@@ -763,23 +923,20 @@ button:focus-visible {
   right: 12px;
   bottom: 12px;
   z-index: 60;
-  /* sicurezza safe-area iPhone */
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-.sticky-cta-mobile.is-shown {
-  display: block;
-}
+.sticky-cta-mobile.is-shown { display: block; }
 
 .sticky-cta-mobile-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--s-3);
   background: var(--ink);
   color: var(--bg);
   border-radius: 6px;
-  padding: 12px 14px 12px 16px;
+  padding: 10px 12px 10px 16px;
   box-shadow: 0 1px 0 rgba(15, 17, 21, 0.08);
 }
 
@@ -787,7 +944,7 @@ button:focus-visible {
   background: var(--bg);
   color: var(--ink);
   border-color: var(--bg);
-  padding: 10px 16px;
+  padding: 9px 14px;
   font-size: 14px;
 }
 
@@ -804,7 +961,7 @@ button:focus-visible {
 }
 
 /* =========================================================================
-   reveal-on-scroll (vanilla, IntersectionObserver)
+   reveal-on-scroll
    ========================================================================= */
 
 .reveal {
@@ -825,28 +982,16 @@ button:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-
-  .reveal,
-  .reveal.is-visible {
+  .reveal, .reveal.is-visible {
     opacity: 1;
     transform: none;
     transition: none;
   }
-
-  .mockup-cursor,
-  .mockup-cursor-final {
-    animation: none;
-    opacity: 1;
+  .mockup-cursor, .mockup-cursor-final {
+    animation: none; opacity: 1;
   }
-
-  .hero-status-dot {
-    animation: none;
-    opacity: 1;
-  }
-
-  /* typewriter → reveal istantaneo */
+  .mockup-timer-dot { animation: none; opacity: 1; }
   .mockup-feedback-word { opacity: 1; transition: none; }
-
   *, *::before, *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
@@ -862,160 +1007,126 @@ section[id] {
 }
 
 /* =========================================================================
-   responsive — mobile-first rispetto al desktop
+   responsive — mobile-first discipline
    ========================================================================= */
 
 @media (max-width: 720px) {
   :root {
-    --s-10: 96px;
-    --s-9: 64px;
+    --s-10: 80px;
+    --s-9: 56px;
   }
 
-  .container {
-    padding-inline: 20px;
-  }
+  .container { padding-inline: 20px; }
 
-  .nav-inner {
-    height: 56px;
-    gap: 8px;
-  }
+  .nav-inner { height: 56px; gap: 8px; }
+  .brand { font-size: 15px; flex-shrink: 0; }
 
-  .brand {
-    font-size: 15px;
-    flex-shrink: 0;
-  }
-
-  /* Su mobile nascondiamo "In pratica" dal nav — l'utente scrolla
-     comunque verso il basso dove c'è il mockup. Nav compact:
-     brand + CTA, massima conversione in thumb zone. */
-  .nav-link {
-    display: none;
-  }
-
+  .nav-link { display: none; }
   .nav .btn-primary {
     padding: 10px 14px;
     font-size: 14px;
   }
 
   /* Hero */
-  .hero {
-    padding-top: 64px;
-    padding-bottom: 88px;
-  }
+  .hero { padding-top: 64px; padding-bottom: var(--s-9); }
   .hero-h1 {
     font-size: 40px;
-    letter-spacing: -0.035em;
     line-height: 1.0;
     max-width: 14ch;
-    margin-bottom: 32px;
+    margin-bottom: var(--s-6);
   }
   .hero-sub {
     font-size: 17px;
-    margin-bottom: 40px;
+    margin-bottom: var(--s-8);
   }
   .btn-primary {
     padding: 12px 18px;
-    font-size: 15px;
     width: 100%;
     justify-content: center;
   }
-  .hero-status {
-    margin-top: 20px;
-  }
 
-  /* Section rhythm */
-  .section { padding-block: 88px; }
+  /* Section rhythm su mobile */
+  .section { padding-block: var(--s-9); }
   .section--quiet { padding-block: 64px; }
-  .section--heavy { padding-block: 112px; }
+  .section--heavy { padding-block: var(--s-10); }
 
-  .h2 {
-    margin-bottom: 24px;
-    max-width: 100%;
+  .h2 { margin-bottom: var(--s-5); max-width: 100%; }
+
+  /* Section header su mobile: numero più piccolo */
+  .section-header {
+    grid-template-columns: 48px 1fr;
+    gap: var(--s-4);
+    margin-bottom: var(--s-5);
   }
+  .section-num { font-size: 22px; }
 
-  /* Trust list: stack, niente side-label */
-  .trust-list { margin-top: 24px; }
+  /* Callout e geo su mobile */
+  .guarantee-callout {
+    margin-top: var(--s-7);
+    margin-bottom: var(--s-8);
+    padding: var(--s-6) var(--s-5);
+  }
+  .guarantee-geo { flex-wrap: wrap; gap: 6px; }
+
+  /* Trust list: stack */
   .trust-list li {
     grid-template-columns: 1fr;
-    gap: 8px;
-    padding: 20px 0;
-  }
-  .trust-list .trust-key {
-    font-size: 11px;
-  }
-
-  /* Callout più stretto su mobile */
-  .guarantee-callout {
-    margin-top: 48px;
-    padding: 28px 24px;
-  }
-
-  /* Geo line nascosta su mobile (TG: meno density) */
-  .guarantee-geo {
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  /* Prova points: stack */
-  .prova-points li {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    padding: 20px 0;
+    gap: var(--s-2);
+    padding: var(--s-4) 0;
   }
 
   /* Mockup */
-  .mockup {
-    margin-top: 40px;
-  }
+  .mockup { margin-top: var(--s-6); }
+  .mockup-chrome { padding: 8px 12px; gap: 8px; }
+  .mockup-chrome-tab { font-size: 10px; }
+  .mockup-profile { padding: 3px 8px 3px 3px; font-size: 11px; }
+  .mockup-profile-avatar { width: 20px; height: 20px; font-size: 10px; }
+
+  .mockup-progress { padding: 10px var(--s-4); gap: 10px; }
+  .mockup-progress-text { font-size: 10px; }
+
   .mockup-meta {
-    padding: 12px 18px;
-    font-size: 10.5px;
-    gap: 4px 10px;
+    padding: 10px var(--s-4);
+    font-size: 12px;
   }
-  .mockup-block {
-    padding: 22px 18px;
-  }
+
+  .mockup-block { padding: var(--s-5) var(--s-4); }
   .mockup-block--question .mockup-text {
     font-size: 18px;
     line-height: 1.4;
   }
-  .mockup-block--question .mockup-text::before,
-  .mockup-block--question .mockup-text::after {
-    font-size: 24px;
+  .mockup-block--question .mockup-text .q-open,
+  .mockup-block--question .mockup-text .q-close {
+    font-size: 22px;
   }
-  .mockup-text {
-    font-size: 16px;
-  }
-  .mockup-footnote {
-    padding: 12px 18px;
+  .mockup-text { font-size: 16px; }
+
+  .mockup-feedback-meta {
     flex-direction: column;
-    gap: 6px;
+    align-items: flex-start;
+    gap: var(--s-2);
   }
-  .mockup-footnote-item {
-    padding-right: 0;
-    margin-right: 0;
-    border-right: 0;
+  .mockup-feedback-cite { margin-left: 0; }
+
+  .mockup-footnote {
+    padding: 10px var(--s-4);
+    flex-direction: column;
+    gap: 4px;
   }
 
+  /* (prova-points rimosso — sostituito da prova-prose) */
+
   /* Final CTA */
-  .final-cta {
-    margin-top: 56px;
-    padding-top: 40px;
-  }
-  .final-cta .body-p {
-    font-size: 17px;
-  }
+  .final-cta { margin-top: var(--s-9); padding-top: var(--s-7); }
+  .final-cta .body-p { font-size: 17px; margin-bottom: var(--s-5); }
 
   /* Footer */
   .footer-grid {
     grid-template-columns: 1fr;
-    gap: 40px;
-    margin-bottom: 40px;
+    gap: var(--s-7);
+    margin-bottom: var(--s-7);
   }
-  .footer-legal {
-    flex-direction: column;
-    gap: 8px;
-  }
+  .footer-legal { flex-direction: column; gap: 6px; }
 }
 
 /* hidden utility (skip-link WCAG) */
