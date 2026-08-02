@@ -53,38 +53,6 @@
 </header>
 
 <main id="main-content" role="main" aria-label="Contenuto principale">
-
-<!-- ============================================================
-     SEZIONE 1 — Hero
-     Silence + tension. Massimo respiro, H1 weight 600 domina.
-     ============================================================ -->
-<section class="hero" aria-labelledby="hero-h1">
-  <div class="container">
-    <h1 id="hero-h1" class="hero-h1">
-      L'orale &egrave; una conversazione.<br />
-      Sai cosa dirai?
-    </h1>
-    <p class="hero-sub">
-      Carica il PDF del bando. Ti facciamo le domande che probabilmente far&agrave; la commissione &mdash; solo sulle materie del tuo concorso.
-    </p>
-    <div class="hero-cta">
-      <a href="auth.html?mode=register" class="btn-primary" data-cta="hero">
-        Inizia la tua prima simulazione <span class="btn-arrow" aria-hidden="true">→</span>
-      </a>
-    </div>
-    <p class="hero-micro" id="hero-micro-hero">Senza carta. Cancellazione in 1 click. Nessun follow-up telefonico.</p>
-    <p class="hero-recency" id="hero-recency-text">
-      <span class="hero-recency-dot" aria-hidden="true"></span>
-      Banca domande aggiornata il <time datetime="2026-08-01">1&deg; Agosto 2026</time> · 184 materie coperte.
-    </p>
-  </div>
-</section>
-
-<!-- ============================================================
-     SEZIONE 2 — Perché serve
-     FLOW: section-num → H2 → essay.
-     Pattern chapter-marker editoriale, niente eyebrow-blog-style.
-     ============================================================ -->
 <section class="section section--quiet section--border-top" aria-labelledby="perche-h2">
   <div class="container">
     <div class="section-header">
@@ -100,81 +68,10 @@
   </div>
 </section>
 
-<!-- ============================================================
-     SEZIONE 3 — Posso fidarmi
-     FLOW: section-num → H2 → lead → CALLOUT (peso dominante) → trust-list supporting.
-     Questo rompe "eyebrow - h2 - text - cards" AI pattern.
-     ============================================================ -->
-<section class="section section--heavy" aria-labelledby="fiducia-h2">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-num">02</span>
-      <h2 id="fiducia-h2" class="h2">Non troverai migliaia di recensioni. E sappiamo perché.</h2>
-    </div>
-    <p class="lead-p">
-      Siamo una piccola realt&agrave; italiana. Non abbiamo utenti a sufficienza per gonfiare i numeri &mdash; e non li gonfiamo.
-    </p>
-    <p class="lead-p lead-p-follow">
-      Niente stelline comprate, niente loghi inventati. Se ti va di provare, c&rsquo;&egrave; la garanzia di rimborso qui accanto a rassicurarti. Se non ti va, sei libero di andartene.
-    </p>
-
-    <aside class="guarantee-callout" role="note" aria-label="Garanzia rimborso entro 30 giorni">
-      <span class="guarantee-tag" aria-hidden="true">Rimborso garantito</span>
-      <h3 class="h3-callout">
-        Prova il piano Pro per un mese intero.<br>
-        Se non ti aiuta, indietro tutto.
-      </h3>
-      <p class="body-p">
-        Attivi il piano Pro, provi sul serio, col tuo bando. Se non funziona — perché manca una materia, perché preferisci altro, o per qualunque motivo — ti rimborsiamo.
-      </p>
-      <p class="body-p muted-line">
-        Un&rsquo;email. Niente call center. Niente moduli. Rimborso in tre giorni lavorativi.
-      </p>
-
-      <div class="guarantee-geo" aria-hidden="false">
-        <dl class="guarantee-geo-list">
-          <div class="guarantee-geo-item">
-            <dt class="guarantee-geo-label">Server</dt>
-            <dd class="guarantee-geo-value">Italia <span class="guarantee-geo-meta">(Hetzner)</span></dd>
-          </div>
-          <div class="guarantee-geo-item">
-            <dt class="guarantee-geo-label">Backup</dt>
-            <dd class="guarantee-geo-value">Italia</dd>
-          </div>
-          <div class="guarantee-geo-item">
-            <dt class="guarantee-geo-label">Supporto</dt>
-            <dd class="guarantee-geo-value">italiano, in orario</dd>
-          </div>
-        </dl>
-      </div>
-    </aside>
-
-    <ul class="trust-list">
-      <li>
-        <span class="trust-key">C'è</span>
-        <span class="trust-val">Solo le materie del <strong>tuo</strong> bando. Mai domande prese da un concorso diverso o da materie non richieste.</span>
-      </li>
-      <li>
-        <span class="trust-key">Non c'è</span>
-        <span class="trust-val">Pubblicità. Watermark. Survey. Pop-up. Upgrade forzati. Niente di niente.</span>
-      </li>
-      <li>
-        <span class="trust-key">Dati</span>
-        <span class="trust-val">Server in Italia, cifrati. <strong>Cancelli tutto</strong> — bando, storico, account — in un click, e sparisce davvero.</span>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<!-- ============================================================
-     SEZIONE 4 — In pratica
-     FLOW: section-num → H2 → MOCKUP IMMEDIATAMENTE (no intro paragraph).
-     La mockup parla da sola. Niente "spiegazione prima del prodotto".
-     ============================================================ -->
 <section class="section section--heavy section--surface" id="in-pratica" aria-labelledby="esempio-h2">
   <div class="container">
     <div class="section-header">
-      <span class="section-num">03</span>
+      <span class="section-num">02</span>
       <h2 id="esempio-h2" class="h2">Così si svolge una simulazione.</h2>
     </div>
 
@@ -245,13 +142,167 @@
 </section>
 
 <!-- ============================================================
-     SEZIONE 5 — Cosa succede se provo
-     FLOW: section-num → H2 → prova-points → final CTA chiusura sobria.
+     SEZIONE 3 — Cosa ricevi appena ti registri.
+
+     Scopo: ridurre il dubbio post-cta. Pattern file 03 P11 default effect
+     + file 13 P15 cta coherence. Il free è il default; il pro è
+     "l'evoluzione che arriverà" — mai "il prodotto migliore".
+
+     Architettura:
+     - 2 card affiancate, grid 7/5 (free dominante)
+     - free = voce primaria (ink on cream). pro = voce secondaria
+       (ink-soft, border ink 1px sola, bg(--bg) uniforme)
+     - entrambi i cta puntano a /auth?mode=register (no doppio funnel)
+     - bullet count: 3 ciascuna, benefit-driven (file 11 P4 Pattern D)
+     - ogni riga leggibile in <2 secondi: "azione → risultato"
      ============================================================ -->
-<section class="section section--quiet section--border-top" aria-labelledby="prova-h2">
+<section class="section section--quiet" aria-labelledby="percorso-h2">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 id="percorso-h2" class="h2">Cosa ricevi appena ti registri.</h2>
+    </div>
+
+    <p class="lead-p">
+      L'iscrizione apre un account <strong>Free</strong> in automatico. Niente passaggi in più, niente scelte da fare adesso. Se vorrai, in qualunque momento, potrai passare a Pro dalla tua dashboard. Se non vorrai, resti sul Free senza limiti di tempo.
+    </p>
+
+    <div class="plan-grid" role="group" aria-label="Cosa include il piano Free e il piano Pro">
+
+      <!-- FREE: card dominante -->
+      <article class="plan-card plan-card--free">
+        <header class="plan-card-head">
+          <p class="plan-card-eyebrow">Account attivato subito</p>
+          <div class="plan-card-title-row">
+            <h3 class="plan-card-title">Free</h3>
+            <p class="plan-card-price"><span class="plan-card-price-num">€0</span><span class="plan-card-price-meta">per sempre, senza carta</span></p>
+          </div>
+        </header>
+
+        <ul class="plan-card-list">
+          <li>
+            <span class="plan-card-result">Tre simulazioni al mese</span>
+            <span class="plan-card-detail">sul tuo bando reale, con feedback puntuale.</span>
+          </li>
+          <li>
+            <span class="plan-card-result">Cinque domande per materia</span>
+            <span class="plan-card-detail">già abbastanza per sentire il ritmo delle domande vere.</span>
+          </li>
+          <li>
+            <span class="plan-card-result">Lo storico delle tue prove</span>
+            <span class="plan-card-detail">rivedi cosa stai migliorando, mese dopo mese.</span>
+          </li>
+        </ul>
+
+        <div class="plan-card-foot">
+          <a href="auth.html?mode=register" class="btn-primary plan-card-cta" data-cta="plan-free">
+            Registrati gratis <span class="btn-arrow" aria-hidden="true">→</span>
+          </a>
+          <p class="plan-card-meta">45 secondi. Cancellabile subito.</p>
+        </div>
+      </article>
+
+      <!-- PRO: voce più leggero, mai "consigliato" -->
+      <article class="plan-card plan-card--pro">
+        <header class="plan-card-head">
+          <p class="plan-card-eyebrow">Quando vorrai allenarti di più</p>
+          <div class="plan-card-title-row">
+            <h3 class="plan-card-title">Pro</h3>
+            <p class="plan-card-price"><span class="plan-card-price-num">€14,99</span><span class="plan-card-price-meta">al mese — solo se lo attivi tu</span></p>
+          </div>
+        </header>
+
+        <ul class="plan-card-list">
+          <li>
+            <span class="plan-card-result">Simulazioni illimitate</span>
+            <span class="plan-card-detail">ogni materia, ogni giorno, senza attesa.</span>
+          </li>
+          <li>
+            <span class="plan-card-result">Banca completa</span>
+            <span class="plan-card-detail">tutte le domande di quest'anno e dei cinque prima.</span>
+          </li>
+          <li>
+            <span class="plan-card-result">Ripasso mirato</span>
+            <span class="plan-card-detail">sai sempre <em>cosa stai migliorando</em>.</span>
+          </li>
+        </ul>
+
+        <div class="plan-card-foot">
+          <p class="plan-card-link-static">
+            Pro vive già dentro la tua dashboard — lo attivi quando ti serve, non prima.
+          </p>
+          <p class="plan-card-meta">Solo €14,99 al mese. Cancellabile in 1 click dal tuo account.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section section--heavy" aria-labelledby="fiducia-h2">
   <div class="container">
     <div class="section-header">
       <span class="section-num">04</span>
+      <h2 id="fiducia-h2" class="h2">Non troverai migliaia di recensioni. E sappiamo perché.</h2>
+    </div>
+    <p class="lead-p">
+      Siamo una piccola realt&agrave; italiana. Non abbiamo utenti a sufficienza per gonfiare i numeri &mdash; e non li gonfiamo.
+    </p>
+    <p class="lead-p lead-p-follow">
+      Niente stelline comprate, niente loghi inventati. Se ti va di provare, c&rsquo;&egrave; la garanzia di rimborso qui accanto a rassicurarti. Se non ti va, sei libero di andartene.
+    </p>
+
+    <aside class="guarantee-callout" role="note" aria-label="Garanzia rimborso entro 30 giorni">
+      <span class="guarantee-tag" aria-hidden="true">Rimborso garantito</span>
+      <h3 class="h3-callout">
+        Prova il piano Pro per un mese intero.<br>
+        Se non ti aiuta, indietro tutto.
+      </h3>
+      <p class="body-p">
+        Attivi il piano Pro, provi sul serio, col tuo bando. Se non funziona — perché manca una materia, perché preferisci altro, o per qualunque motivo — ti rimborsiamo.
+      </p>
+      <p class="body-p muted-line">
+        Un&rsquo;email. Niente call center. Niente moduli. Rimborso in tre giorni lavorativi.
+      </p>
+
+      <div class="guarantee-geo" aria-hidden="false">
+        <dl class="guarantee-geo-list">
+          <div class="guarantee-geo-item">
+            <dt class="guarantee-geo-label">Server</dt>
+            <dd class="guarantee-geo-value">Italia <span class="guarantee-geo-meta">(Hetzner)</span></dd>
+          </div>
+          <div class="guarantee-geo-item">
+            <dt class="guarantee-geo-label">Backup</dt>
+            <dd class="guarantee-geo-value">Italia</dd>
+          </div>
+          <div class="guarantee-geo-item">
+            <dt class="guarantee-geo-label">Supporto</dt>
+            <dd class="guarantee-geo-value">italiano, in orario</dd>
+          </div>
+        </dl>
+      </div>
+    </aside>
+
+    <ul class="trust-list">
+      <li>
+        <span class="trust-key">C'è</span>
+        <span class="trust-val">Solo le materie del <strong>tuo</strong> bando. Mai domande prese da un concorso diverso o da materie non richieste.</span>
+      </li>
+      <li>
+        <span class="trust-key">Non c'è</span>
+        <span class="trust-val">Pubblicità. Watermark. Survey. Pop-up. Upgrade forzati. Niente di niente.</span>
+      </li>
+      <li>
+        <span class="trust-key">Dati</span>
+        <span class="trust-val">Server in Italia, cifrati. <strong>Cancelli tutto</strong> — bando, storico, account — in un click, e sparisce davvero.</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="section section--quiet section--border-top" aria-labelledby="prova-h2">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-num">05</span>
       <h2 id="prova-h2" class="h2">Tre simulazioni complete. Senza carta, senza vincoli.</h2>
     </div>
 
@@ -271,109 +322,6 @@
         </a>
       </div>
       <p class="hero-micro">45 secondi per registrarti. Via tutto in 1 click, quando vuoi.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================
-     SEZIONE 5 — Cosa succede dopo (percorso utente)
-
-     SCOPO: ridurre il dubbio post-CTA. Pattern file 03 P11 default effect
-     + file 13 P15 CTA coherence + file 22 §pricing (2-tier, Free dominant).
-
-     Perché esiste: dopo S04 closer, l'utente pensa implicitamente
-     "Ok, mi registro...ma il Free &egrave; davvero gratis? Cosa mi perdo?
-     Devo già scegliere Pro?". Questa sezione chiude quel dubbio.
-
-     ARCHITETTURA:
-     - 2 card affiancate, grid 7/5 (Free dominante / Pro più leggero)
-     - Free = voce primaria (ink on cream). Pro = voce secondaria
-       (ink-soft, border ink 1px sola)
-     - ENTRAMBI i CTA puntano a /auth?mode=register (no doppio funnel)
-     - Bullet count: 3 ciascuna (file 11 P4 Pattern D benefit-driven)
-     - Copy: risultato dell'azione (file 11 P4 "❌ simulazioni
-       ✅ allenati tre volte con il tuo bando")
-     - Limite onesty explicito: entrambe dichiarano il limite
-       (Free = 3 mensili; Pro = illimitato)
-
-     ANTI-FUNNEL: niente "Passa a Pro &mdash; €14,99". No "Consigliato".
-     Niente button che porta al pagamento. Solo Registrati gratis.
-     ============================================================ -->
-<section class="section section--quiet section--border-top" aria-labelledby="percorso-h2">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-num">05</span>
-      <h2 id="percorso-h2" class="h2">Cosa succede appena ti registri.</h2>
-    </div>
-
-    <p class="lead-p">
-      Apri un account <strong>Free</strong> in automatico. Zero passi in più, zero scelte. Se vorrai, in qualunque momento, potrai passare a Pro. Se non vorrai, resti sul Free senza limiti di tempo.
-    </p>
-
-    <div class="plan-grid" role="group" aria-label="Cosa include il piano Free e il piano Pro">
-
-      <!-- FREE: dominante -->
-      <article class="plan-card plan-card--free">
-        <header class="plan-card-head">
-          <p class="plan-card-eyebrow">Inizia qui</p>
-          <h3 class="plan-card-title">Free</h3>
-          <p class="plan-card-price"><span class="plan-card-price-num">&euro;0</span><span class="plan-card-price-meta">per sempre, senza carta</span></p>
-        </header>
-
-        <ul class="plan-card-list">
-          <li>
-            <span class="plan-card-bullet" aria-hidden="true"></span>
-            <span>Tre simulazioni complete al mese, sul tuo bando reale.</span>
-          </li>
-          <li>
-            <span class="plan-card-bullet" aria-hidden="true"></span>
-            <span>Feedback puntuale su cosa hai risposto bene e cosa no.</span>
-          </li>
-          <li>
-            <span class="plan-card-bullet" aria-hidden="true"></span>
-            <span>Cinque domande per materia &mdash; abbastanza per sentire il ritmo delle domande vere.</span>
-          </li>
-        </ul>
-
-        <div class="plan-card-foot">
-          <a href="auth.html?mode=register" class="btn-primary plan-card-cta" data-cta="plan-free">
-            Registrati gratis <span class="btn-arrow" aria-hidden="true">&rarr;</span>
-          </a>
-          <p class="plan-card-meta">45 secondi. Nessun vincolo. Cancellabile subito.</p>
-        </div>
-      </article>
-
-      <!-- PRO: voice più leggero, ma non "consigliato" -->
-      <article class="plan-card plan-card--pro">
-        <header class="plan-card-head">
-          <p class="plan-card-eyebrow">Quando vorrai di più</p>
-          <h3 class="plan-card-title">Pro</h3>
-          <p class="plan-card-price"><span class="plan-card-price-num">&euro;14,99</span><span class="plan-card-price-meta">al mese, solo se lo attivi tu</span></p>
-        </header>
-
-        <ul class="plan-card-list">
-          <li>
-            <span class="plan-card-bullet" aria-hidden="true"></span>
-            <span>Simulazioni <strong>illimitate</strong>, ogni materia, ogni giorno.</span>
-          </li>
-          <li>
-            <span class="plan-card-bullet" aria-hidden="true"></span>
-            <span>Banca completa con tutte le domande di quell&rsquo;anno e dei cinque prima.</span>
-          </li>
-          <li>
-            <span class="plan-card-bullet" aria-hidden="true"></span>
-            <span>Storico e ripasso mirato: sai <em>cosa stai migliorando</em>.</span>
-          </li>
-        </ul>
-
-        <div class="plan-card-foot">
-          <a href="auth.html?mode=register" class="plan-card-link" data-cta="plan-pro">
-            Pro vive gi&agrave; dentro la tua dashboard &mdash; lo attivi quando ti serve, non prima
-            <span class="btn-arrow" aria-hidden="true">&rarr;</span>
-          </a>
-          <p class="plan-card-meta">Solo &euro;14,99 al mese. Cancellabile in 1 click dal tuo account.</p>
-        </div>
-      </article>
     </div>
   </div>
 </section>

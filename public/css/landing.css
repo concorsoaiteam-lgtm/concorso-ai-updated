@@ -1214,49 +1214,40 @@ button:focus-visible {
 .plan-card-list {
   list-style: none;
   padding: 0;
-  margin: var(--s-5) 0 var(--s-6);
+  margin: var(--s-6) 0 var(--s-6);
   display: flex;
   flex-direction: column;
-  gap: var(--s-4);
+  gap: var(--s-5);
   flex-grow: 1;
+  border-top: 1px solid var(--line);
+  padding-top: var(--s-5);
 }
 
 .plan-card-list li {
   display: flex;
-  gap: var(--s-3);
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 6px;
+  /* Risultato-azione → risultato, in 2 righe:
+     - linea superiore: "Tre simulazioni al mese" (peso 500, ink)
+     - linea inferiore: "sul tuo bando reale…" (peso 400, ink-soft)
+     Lettura 2-secondi: il risultato è l'eye-anchor 1 della riga. */
+}
+
+
+.plan-card-result {
   font-size: 16px;
-  font-weight: 400;
-  line-height: 1.5;
-  color: var(--ink-soft);
-}
-
-.plan-card--free .plan-card-list li {
-  font-size: 17px;
-  /* bullet del Free leggermente più grande per coerenza con la voce dominante. */
-  color: var(--ink-soft);
-}
-
-.plan-card-bullet {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--ink);
-  flex-shrink: 0;
-  margin-top: 9px;
-  /* Bullet geometrico (cerchio ink 6px) invece di "✓ turquoise".
-     file 24 anti-slop P3: NO fake badges. Pattern file 22 §pricing "✓"
-     sostituito da punto geometricco neutro. */
-}
-
-.plan-card--pro .plan-card-bullet {
-  background: var(--ink-soft);
-}
-
-.plan-card-list strong {
   font-weight: 500;
+  letter-spacing: -0.012em;
   color: var(--ink);
+  line-height: 1.35;
+}
+
+.plan-card-detail {
+  font-size: 14.5px;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  color: var(--ink-soft);
+  line-height: 1.5;
 }
 
 .plan-card-list em {
@@ -1265,6 +1256,11 @@ button:focus-visible {
   color: var(--ink);
 }
 
+
+.plan-card-list strong {
+  font-weight: 500;
+  color: var(--ink);
+}
 .plan-card-foot {
   margin-top: auto;
   padding-top: var(--s-5);
@@ -1310,6 +1306,19 @@ button:focus-visible {
 .plan-card-link .btn-arrow {
   display: inline-block;
   transition: transform var(--t-base) var(--ease);
+}
+
+.plan-card-link-static {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--ink-soft);
+  letter-spacing: -0.005em;
+  line-height: 1.5;
+  /* Nota informativa sulla card Pro: zero CTA, zero link,
+     zero pressione all'acquisto. Il Pro arriva in dashboard
+     quando l'utente lo decide. file 03 P11 default effect. */
 }
 
 .plan-card-meta {
