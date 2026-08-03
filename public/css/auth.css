@@ -231,13 +231,15 @@ body {
 }
 
 /* =========================================================================
-   Error region (globale)
+   Errori di flusso — SEMPRE sotto il bottone premuto, mai sopra il form.
+   Fade + slide 6px (leggero, mai shake). Ogni form ha il proprio slot
+   (#form-error-*); JS scrive solo nello slot del pannello attivo.
    ========================================================================= */
 
-.auth-error {
+.form-error {
   display: none;
-  margin-top: var(--s-5);
-  padding: 10px var(--s-3);
+  margin: var(--s-2) 0 0;
+  padding: 9px var(--s-3);
   background: var(--error-bg);
   border: 1px solid rgba(164, 71, 46, 0.28);
   border-radius: 4px;
@@ -246,7 +248,15 @@ body {
   color: var(--error);
 }
 
-.auth-error.is-visible { display: block; }
+.form-error.is-visible {
+  display: block;
+  animation: form-error-in 220ms var(--ease);
+}
+
+@keyframes form-error-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 /* =========================================================================
    OAuth
@@ -390,6 +400,13 @@ body {
 }
 
 .field-error.is-visible { display: block; }
+
+/* Hint sotto i campi (es. OTP) */
+.field-hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
 
 /* Hint / azioni secondarie del campo */
 .field-actions {
@@ -640,6 +657,71 @@ body {
   color: var(--muted);
   max-width: 34ch;
 }
+
+/* =========================================================================
+   Pannello "email inviata" — checklist di cosa aspettarsi
+   ========================================================================= */
+
+.auth-checklist {
+  margin: var(--s-4) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.auth-checklist li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.auth-checklist li::before {
+  content: "·";
+  position: absolute;
+  left: 4px;
+  color: var(--line-2);
+}
+
+.auth-checklist b { font-weight: 500; color: var(--ink-soft); }
+
+/* Chip con l'email dell'utente (pannello verifica) */
+.auth-email-chip {
+  font-weight: 500;
+  color: var(--ink);
+  word-break: break-all;
+}
+
+/* Input OTP a 6 cifre — tipografia dedicata, niente spinner numerici */
+.otp-input {
+  font-size: 20px;
+  letter-spacing: 10px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  padding: 0 12px;
+}
+
+.otp-input::placeholder { letter-spacing: 10px; }
+
+/* =========================================================================
+   Turnstile (Cloudflare) — slot inattivo finché non configurato.
+   Managed mode: il widget appare solo se Cloudflare lo richiede.
+   ========================================================================= */
+
+.turnstile-slot {
+  display: none;
+}
+
+.turnstile-slot.is-active {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--s-2);
+}
+
+.turnstile-slot iframe { margin: 0 auto; }
 
 /* =========================================================================
    Trust line — sotto il form, sobria

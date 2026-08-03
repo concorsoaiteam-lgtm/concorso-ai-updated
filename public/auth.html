@@ -41,9 +41,6 @@
           </button>
         </nav>
 
-        <!-- Error region globale (role=alert) -->
-        <div class="auth-error" id="auth-error" role="alert" aria-live="polite"></div>
-
         <!-- ==========================================================
              PANEL: ACCEDI
              ========================================================== -->
@@ -100,6 +97,9 @@
               <span class="btn-arrow" aria-hidden="true">→</span>
               <span class="btn-busy-bar" aria-hidden="true"></span>
             </button>
+            <!-- Errore di flusso: compare ESATTAMENTE sotto il bottone premuto,
+                 mai sopra il form (fade + slide 6px). -->
+            <p class="form-error" id="form-error-login" role="alert"></p>
           </form>
 
           <p class="auth-switch">Non hai un account?
@@ -164,10 +164,16 @@
               <span>Accetto i <a href="terms.html">termini</a> e la <a href="privacy.html">privacy</a>. Niente spam, promesso.</span>
             </label>
 
+            <!-- Turnstile (Cloudflare): slot inattivo finché non configuri
+                 window.__SUPABASE_CAPTCHA = { siteKey }. Managed mode:
+                 appare solo quando Cloudflare lo ritiene necessario. -->
+            <div class="turnstile-slot" id="turnstile-slot"></div>
+
             <button type="submit" class="btn-primary btn-block" id="register-submit" disabled>
               <span class="btn-label">Crea account gratis</span>
               <span class="btn-busy-bar" aria-hidden="true"></span>
             </button>
+            <p class="form-error" id="form-error-register" role="alert"></p>
           </form>
 
           <p class="auth-switch">Hai già un account?
@@ -198,6 +204,7 @@
               <span class="btn-label">Invia il link</span>
               <span class="btn-busy-bar" aria-hidden="true"></span>
             </button>
+            <p class="form-error" id="form-error-forgot" role="alert"></p>
           </form>
 
           <p class="auth-switch">
@@ -206,7 +213,8 @@
         </section>
 
         <!-- ==========================================================
-             PANEL: EMAIL INVIATA (stato di conferma, anti-enumeration)
+             PANEL: EMAIL INVIATA (recovery password, anti-enumeration)
+             Schermata completa: cosa aspettarsi + prossima azione.
              ========================================================== -->
         <section class="auth-panel" id="panel-sent" role="status" tabindex="-1" hidden>
           <div class="auth-success-icon" aria-hidden="true">
@@ -214,14 +222,55 @@
               <path stroke-linecap="round" stroke-linejoin="round" pathLength="1" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           </div>
-          <h1 class="auth-title" id="sent-title" tabindex="-1">Controlla la tua email</h1>
+          <h1 class="auth-title" id="sent-title" tabindex="-1">Email inviata</h1>
           <p class="auth-success-text" id="sent-text">
-            Se l'indirizzo è registrato, troverai il link nella casella.
-            Controlla anche lo spam.
+            Se l'indirizzo è registrato, riceverai un'email entro pochi minuti.
           </p>
-          <button type="button" class="btn-ghost" id="resend-btn">Non è arrivata? Invia di nuovo</button>
+          <ul class="auth-checklist">
+            <li>Controlla la cartella <b>Spam</b></li>
+            <li>Controlla la cartella <b>Promozioni</b></li>
+            <li>Attendi qualche minuto: a volte le email arrivano in ritardo</li>
+            <li>Verifica di aver scritto bene l'indirizzo</li>
+          </ul>
+          <button type="button" class="btn-ghost" id="resend-btn">Invia di nuovo</button>
           <p class="auth-switch">
             <button type="button" data-goto="login">← Torna all'accesso</button>
+          </p>
+        </section>
+
+        <!-- ==========================================================
+             PANEL: VERIFICA EMAIL (signup, conferme attive)
+             Flusso OTP: codice a 6 cifre dal template email.
+             Attivo quando "Confirm email" è abilitato in Supabase.
+             ========================================================== -->
+        <section class="auth-panel" id="panel-verify" tabindex="-1" hidden>
+          <p class="auth-eyebrow">Verifica email</p>
+          <h1 class="auth-title">Controlla la tua email</h1>
+          <p class="auth-sub">Ti abbiamo inviato un codice a
+            <span class="auth-email-chip" id="verify-email"></span>.
+            Aprila e inserisci il codice qui sotto.
+          </p>
+
+          <form id="form-verify" class="form" novalidate>
+            <div class="field">
+              <label class="field-label" for="verify-code">Codice di verifica</label>
+              <input class="field-input otp-input" id="verify-code" name="code" type="text"
+                     inputmode="numeric" autocomplete="one-time-code" maxlength="6"
+                     pattern="[0-9]{6}" placeholder="••••••" required />
+              <p class="field-hint" id="verify-hint">6 cifre. Controlla anche lo spam.</p>
+              <p class="field-error" id="verify-code-error"></p>
+            </div>
+
+            <button type="submit" class="btn-primary btn-block" id="verify-submit">
+              <span class="btn-label">Verifica e inizia</span>
+              <span class="btn-busy-bar" aria-hidden="true"></span>
+            </button>
+            <p class="form-error" id="form-error-verify" role="alert"></p>
+          </form>
+
+          <button type="button" class="btn-ghost" id="verify-resend">Non è arrivato? Invia di nuovo</button>
+          <p class="auth-switch">
+            <button type="button" data-goto="register">← Usa un'altra email</button>
           </p>
         </section>
 
@@ -257,6 +306,7 @@
               <span class="btn-label">Aggiorna password</span>
               <span class="btn-busy-bar" aria-hidden="true"></span>
             </button>
+            <p class="form-error" id="form-error-reset" role="alert"></p>
           </form>
         </section>
 

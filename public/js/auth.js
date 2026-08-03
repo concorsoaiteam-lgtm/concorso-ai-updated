@@ -43,9 +43,8 @@
   var REDUCED_MOTION = window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // Contesto del pannello "email inviata": signup vs recovery.
-  // Usato da handleResend per reinviare il tipo giusto di email.
-  var sentContext = "signup";
+  // Email della registrazione in attesa di verifica OTP (pannello verify).
+  var pendingEmail = "";
 
   /* ------------------------------------------------------------------
      Helpers
@@ -89,20 +88,33 @@
      ------------------------------------------------------------------ */
   var authErrTimer = null;
 
+  // Slot errore per pannello: l'errore compare SEMPRE sotto il bottone
+  // del pannello attivo, mai sopra il form (fade + slide 6px).
+  var FORM_ERRORS = {
+    login: "form-error-login",
+    register: "form-error-register",
+    forgot: "form-error-forgot",
+    verify: "form-error-verify",
+    reset: "form-error-reset"
+  };
+  var activePanel = "login";
+
   function showAuthError(msg) {
-    var box = $("auth-error");
-    if (!box) return;
-    box.textContent = msg;
-    box.classList.add("is-visible");
+    var slot = $(FORM_ERRORS[activePanel]);
+    if (!slot) return;
+    slot.textContent = msg;
+    slot.classList.add("is-visible");
     window.clearTimeout(authErrTimer);
     authErrTimer = window.setTimeout(clearAuthError, 6000);
   }
 
   function clearAuthError() {
-    var box = $("auth-error");
-    if (!box) return;
-    box.textContent = "";
-    box.classList.remove("is-visible");
+    Object.keys(FORM_ERRORS).forEach(function (k) {
+      var slot = $(FORM_ERRORS[k]);
+      if (!slot) return;
+      slot.textContent = "";
+      slot.classList.remove("is-visible");
+    });
     window.clearTimeout(authErrTimer);
   }
 
@@ -121,8 +133,15 @@
     }
   }
 
+  // supabase-js espone il codice errore in `code` (da error_code) ma in
+  // versioni/percorsi diversi può essere in `error_code`: normalizziamo.
+  function errCode(err) {
+    return err && (err.code || err.error_code);
+  }
+
   // Traduzione errori: prima per codice Supabase (err.code), poi per messaggio.
   // Mai rivelare dettagli che permettano enumeration (OWASP Forgot Password).
+  // Ogni messaggio include la prossima azione consigliata.
   function translateAuthError(message, code) {
     var c = String(code || "").toLowerCase();
     var msg = String(message || "").toLowerCase();
@@ -158,7 +177,22 @@
     if (c.indexOf("otp_expired") !== -1 ||
         msg.indexOf("token has expired") !== -1 ||
         msg.indexOf("expired") !== -1) {
-      return "Il link è scaduto o non è più valido. Richiedine uno nuovo.";
+      return "Il link o il codice è scaduto. Richiedine uno nuovo.";
+    }
+    if (c.indexOf("invalid_token") !== -1 ||
+        msg.indexOf("invalid token") !== -1) {
+      return "Codice non corretto. Controlla l'email e riprova.";
+    }
+    if (c.indexOf("timeout") !== -1 ||
+        msg.indexOf("timeout") !== -1 ||
+        msg.indexOf("timed out") !== -1) {
+      return "Il server ha impiegato troppo tempo a rispondere. Riprova tra qualche secondo.";
+    }
+    if (c.indexOf("internal server error") !== -1 ||
+        c === "500" || c === "502" || c === "503" ||
+        msg.indexOf("internal server error") !== -1 ||
+        msg.indexOf("service unavailable") !== -1) {
+      return "Il server è momentaneamente occupato. Riprova tra qualche minuto.";
     }
     if (c.indexOf("user_already_exists") !== -1 ||
         c.indexOf("already_registered") !== -1 ||
@@ -182,7 +216,7 @@
   /* ------------------------------------------------------------------
      Pannelli: router + focus management
      ------------------------------------------------------------------ */
-  var PANELS = ["login", "register", "forgot", "sent", "reset"];
+  var PANELS = ["login", "register", "forgot", "sent", "verify", "reset"];
 
   function showPanel(name) {
     PANELS.forEach(function (n) {
@@ -210,7 +244,12 @@
     if (tabL) tabL.setAttribute("aria-selected", String(isLogin && name === "login"));
     if (tabR) tabR.setAttribute("aria-selected", String(!isLogin && name === "register"));
 
+    activePanel = name;
     clearAuthError();
+
+    // Turnstile si attiva solo quando serve: primo ingresso nel pannello
+    // Registrati (script + widget lazy, zero costo al load della pagina).
+    if (name === "register") initTurnstile();
 
     // Focus: primo campo per i form, titolo per gli stati di conferma
     window.setTimeout(function () {
@@ -219,6 +258,7 @@
       else if (name === "register") target = $("register-email");
       else if (name === "forgot") target = $("forgot-email");
       else if (name === "sent") target = $("sent-title");
+      else if (name === "verify") target = $("verify-code");
       else if (name === "reset") target = $("reset-password");
       if (target) target.focus({ preventScroll: true });
     }, 260);
@@ -388,7 +428,7 @@
       })
       .catch(function (err) {
         setBusy(btn, false, "", "Entra");
-        showAuthError(translateAuthError(err && err.message, err && err.code));
+        showAuthError(translateAuthError(err && err.message, errCode(err)));
       });
   }
 
@@ -425,8 +465,8 @@
 
     // Solo email + password. Niente nome: verrà chiesto in onboarding.
     // emailRedirectTo: il link di conferma atterra su una pagina del nostro
-    // dominio (mai sul default del progetto). captchaToken: hook Turnstile
-    // dormiente — incluso solo se configurato (vedi getCaptchaToken).
+    // dominio (mai sul default del progetto). captchaToken: Turnstile —
+    // incluso solo se configurato (vedi initTurnstile).
     var signupOptions = {
       emailRedirectTo: window.location.origin + "/auth.html?mode=login"
     };
@@ -436,23 +476,43 @@
     supabaseClient.auth.signUp({ email: email, password: password, options: signupOptions })
       .then(function (res) {
         if (res.error) throw res.error;
-        if (!res.data.session) {
-          // Email confirmation attiva: stato "email inviata"
-          track("auth_register_pending", {});
+
+        // Duplicato "silenzioso": GoTrue restituisce 200 con identities=[]
+        // quando l'email esiste già (comportamento reale, mai inventato).
+        // Verificato empiricamente: l'alternativa è l'errore user_already_exists.
+        var user = res.data && res.data.user;
+        var identities = user && user.identities;
+        if (user && Array.isArray(identities) && identities.length === 0) {
           setBusy(btn, false, "", "Crea account gratis");
-          sentContext = "signup";
-          $("sent-text").textContent =
-            "Ti abbiamo inviato un link di conferma. Aprilo per attivare l'account e iniziare le tue prime simulazioni.";
-          showPanel("sent");
-        } else {
+          showAuthError("Esiste già un account con questa email. Prova ad accedere.");
+          return;
+        }
+
+        if (res.data && res.data.session) {
+          // Conferma email disattivata nel progetto: sessione immediata.
           track("auth_register_ok", {});
           window.location.href = DASHBOARD_URL;
+          return;
         }
+
+        // Conferma email attiva: il passo successivo è verificare l'email.
+        // Pannello OTP con codice a 6 cifre (template Supabase: {{ .Token }}).
+        pendingEmail = email;
+        track("auth_register_pending", {});
+        setBusy(btn, false, "", "Crea account gratis");
+        $("verify-email").textContent = email;
+        showPanel("verify");
       })
       .catch(function (err) {
         setBusy(btn, false, "", "Crea account gratis");
         $("register-submit").disabled = !$("terms-checkbox").checked;
-        showAuthError(translateAuthError(err && err.message, err && err.code));
+        // Token Turnstile monouso: dopo un tentativo fallito il widget viene
+        // resettato e il token scartato, così il retry parte da zero.
+        if (window.turnstile && window.turnstile.reset && turnstileState === "rendered") {
+          try { window.turnstile.reset(); } catch (x) { /* noop */ }
+        }
+        window.__TURNSTILE_TOKEN = "";
+        showAuthError(translateAuthError(err && err.message, errCode(err)));
       });
   }
 
@@ -482,18 +542,12 @@
     })
       .then(function () {
         setBusy(btn, false, "", "Invia il link");
-        // Anti-enumeration: stesso messaggio in ogni caso
-        sentContext = "recovery";
-        $("sent-text").textContent =
-          "Se l'indirizzo è registrato, troverai il link per impostare una nuova password. Controlla anche lo spam.";
+        // Anti-enumeration: stessa schermata in ogni caso
         showPanel("sent");
       })
       .catch(function (err) {
         setBusy(btn, false, "", "Invia il link");
-        // Privacy: non confermare lo stato dell'email, mostra comunque lo stato
-        sentContext = "recovery";
-        $("sent-text").textContent =
-          "Se l'indirizzo è registrato, troverai il link per impostare una nuova password. Controlla anche lo spam.";
+        // Privacy: mai confermare lo stato dell'email. Stessa schermata.
         showPanel("sent");
         try { console.debug("[ConcorsoAI] reset error:", err && err.message); } catch (x) { /* noop */ }
       });
@@ -539,36 +593,78 @@
         window.setTimeout(function () { window.location.href = DASHBOARD_URL; }, 900);
       })      .catch(function (err) {
         setBusy(btn, false, "", "Aggiorna password");
-        showAuthError(translateAuthError(err && err.message, err && err.code));
+        showAuthError(translateAuthError(err && err.message, errCode(err)));
       });
     });
   }
 
+  /* ------------------------------------------------------------------
+     Verifica email OTP (signup) — pannello verify
+     ------------------------------------------------------------------ */
+  function handleVerifySubmit(e) {
+    e.preventDefault();
+    if (!guardSupabase()) return;
+    if (!pendingEmail) {
+      showAuthError("La sessione di registrazione è scaduta. Riparti dalla registrazione.");
+      return;
+    }
+
+    var code = String($("verify-code").value || "").trim();
+    if (!/^\d{6}$/.test(code)) {
+      return setFieldError("verify-code", "verify-code-error", "Il codice ha 6 cifre. Controlla l'email.");
+    }
+
+    var btn = $("verify-submit");
+    setBusy(btn, true, "Verifica…", "Verifica e inizia");
+    track("auth_submit", { mode: "verify_otp" });
+
+    supabaseClient.auth.verifyOtp({ email: pendingEmail, token: code, type: "signup" })
+      .then(function (res) {
+        if (res.error) throw res.error;
+        track("auth_verify_ok", {});
+        window.location.href = DASHBOARD_URL;
+      })
+      .catch(function (err) {
+        setBusy(btn, false, "", "Verifica e inizia");
+        showAuthError(translateAuthError(err && err.message, errCode(err)));
+        var input = $("verify-code");
+        if (input) {
+          input.value = "";
+          input.focus({ preventScroll: true });
+        }
+      });
+  }
+
+  function handleVerifyResend() {
+    if (!pendingEmail) return;
+    if (!guardSupabase()) return;
+    var btn = $("verify-resend");
+    btn.disabled = true;
+    try {
+      if (supabaseClient.auth.resend) {
+        // Stesso emailRedirectTo della prima email: anche il link di conferma
+        // contenuto nell'email atterra su /auth.html?mode=login.
+        supabaseClient.auth.resend({
+          type: "signup",
+          email: pendingEmail,
+          options: { emailRedirectTo: window.location.origin + "/auth.html?mode=login" }
+        }).catch(function () { /* silenzioso per privacy */ });
+      }
+    } catch (e) { /* noop */ }
+    showToast("Nuovo codice inviato. Controlla la casella.");
+    window.setTimeout(function () { btn.disabled = false; }, 4000);
+  }
+
   function handleResend() {
+    // Solo contesto recovery (pannello sent): la registrazione usa il
+    // pannello verify con il proprio resend (handleVerifyResend).
     if (!lastEmail) return;
     if (!guardSupabase()) return;
     var btn = $("resend-btn");
     btn.disabled = true;
-
-    if (sentContext === "recovery") {
-      // Nel contesto recovery va reinviato il link di reset, non quello di signup
-      supabaseClient.auth.resetPasswordForEmail(lastEmail, {
-        redirectTo: window.location.origin + "/auth.html?type=recovery"
-      }).catch(function () { /* silenzioso per privacy */ });
-    } else {
-      try {
-        if (supabaseClient.auth.resend) {
-          // Stesso emailRedirectTo della prima email: il link di conferma
-          // atterra sempre su /auth.html?mode=login (mai sul default progetto).
-          supabaseClient.auth.resend({
-            type: "signup",
-            email: lastEmail,
-            options: { emailRedirectTo: window.location.origin + "/auth.html?mode=login" }
-          }).catch(function () { /* silenzioso per privacy */ });
-        }
-      } catch (e) { /* noop */ }
-    }
-
+    supabaseClient.auth.resetPasswordForEmail(lastEmail, {
+      redirectTo: window.location.origin + "/auth.html?type=recovery"
+    }).catch(function () { /* silenzioso per privacy */ });
     showToast("Nuovo link inviato. Controlla la casella.");
     window.setTimeout(function () { btn.disabled = false; }, 4000);
   }
@@ -580,7 +676,7 @@
       provider: "google",
       options: { redirectTo: window.location.origin + DASHBOARD_URL }
     }).catch(function (err) {
-      showAuthError(translateAuthError(err && err.message, err && err.code));
+      showAuthError(translateAuthError(err && err.message, errCode(err)));
     });
   }
 
@@ -590,12 +686,57 @@
      Richiede inoltre che il provider sia abilitato in Supabase Dashboard
      (Auth → Bot and Abuse Protection). Senza configurazione ritorna "".
      ------------------------------------------------------------------ */
+  // Turnstile (Cloudflare) — inattivo finché non configuri
+  // window.__SUPABASE_CAPTCHA = { siteKey }. Lo script e il widget si
+  // caricano SOLO quando il pannello Registrati viene mostrato (zero costo
+  // finché non serve) e si rende dentro #turnstile-slot, visibile solo allora.
+  var turnstileState = "off"; // off | loading | ready | rendered
+
+  function initTurnstile() {
+    try {
+      var cfg = window.__SUPABASE_CAPTCHA;
+      if (!cfg || !cfg.siteKey || turnstileState !== "off") return;
+      turnstileState = "loading";
+      function onReady() {
+        turnstileState = "ready";
+        renderTurnstile();
+      }
+      if (typeof window.turnstile === "object") { onReady(); return; }
+      var s = document.createElement("script");
+      s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      s.async = true;
+      s.onload = onReady;
+      document.head.appendChild(s);
+    } catch (e) { /* noop */ }
+  }
+
+  function renderTurnstile() {
+    try {
+      var cfg = window.__SUPABASE_CAPTCHA;
+      if (!cfg || !cfg.siteKey || turnstileState !== "ready") return;
+      var slot = $("turnstile-slot");
+      if (!slot || slot.querySelector("iframe")) return;
+      window.turnstile.render(slot, {
+        sitekey: cfg.siteKey,
+        theme: "light",
+        callback: function (token) { window.__TURNSTILE_TOKEN = token; }
+      });
+      slot.classList.add("is-active");
+      turnstileState = "rendered";
+    } catch (e) { /* noop */ }
+  }
+
   function getCaptchaToken() {
     try {
       var cfg = window.__SUPABASE_CAPTCHA;
       if (!cfg || !cfg.siteKey) return "";
-      if (typeof window.turnstile !== "object") return "";
-      return window.turnstile.getResponse();
+      // I token Turnstile sono monouso: li consumiamo subito, così un retry
+      // dopo un errore non riusa un token già validato (captcha_failed).
+      var t = window.__TURNSTILE_TOKEN || "";
+      window.__TURNSTILE_TOKEN = "";
+      if (t) return t;
+      if (typeof window.turnstile === "object") return window.turnstile.getResponse() || "";
+      return "";
     } catch (e) { return ""; }
   }
 
@@ -718,12 +859,22 @@
       try { history.replaceState(null, "", "/auth.html?mode=forgot"); } catch (x) { /* ignora */ }
     });
     $("resend-btn").addEventListener("click", handleResend);
+    $("form-verify").addEventListener("submit", handleVerifySubmit);
+    $("verify-resend").addEventListener("click", handleVerifyResend);
     $("google-btn").addEventListener("click", function () { handleGoogle(); });
     $("google-btn-2").addEventListener("click", function () { handleGoogle(); });
 
     // Gate terms → submit
     $("terms-checkbox").addEventListener("change", function () {
       $("register-submit").disabled = !$("terms-checkbox").checked;
+    });
+
+    // Input OTP: solo cifre, max 6, errore che sparisce mentre digita
+    var otpInput = $("verify-code");
+    otpInput.addEventListener("input", function () {
+      otpInput.value = otpInput.value.replace(/\D/g, "").slice(0, 6);
+      setFieldError("verify-code", "verify-code-error", "");
+      clearAuthError();
     });
 
     // Clear globale errori su input

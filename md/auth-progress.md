@@ -1,7 +1,62 @@
 # ConcorsoAI — Auth Progress Log
 
-> Aggiornato: round 42 (master polish — edge cases, motion, performance, security audit)
+> Aggiornato: round 43 (bug signup indagato empiricamente, errori inline, OTP, Turnstile)
 > Regola: il progetto non viene MAI lasciato in uno stato incompleto. Questo file è la fonte di verità sullo stato.
+
+---
+
+## Cosa è stato fatto (round 43)
+
+### 1. Bug "Esiste già un account" — causa radice (indagata, non workaround)
+
+**Verifica empirica** contro l'endpoint reale (`POST /auth/v1/signup`, stessa anon key del codice):
+- Email nuova → **200 + sessione immediata** (`email_confirmed_at` impostato) → il progetto ha **"Confirm email" DISATTIVATO**.
+- Stessa email ripetuta → `{ error_code: "user_already_exists" }` (422).
+- Login errato → `invalid_credentials`.
+
+**Conclusione**: il client non inventa lo stato. Ogni email testata nelle prove viene **auto-confermata e resta registrata per sempre**; riusandola, Supabase risponde correttamente `user_already_exists` → il messaggio era vero ma *ambientale*. Il difetto reale era l'UX: l'errore appariva **sopra il form** (sembrava un bug) e mancava un flusso di verifica email (perché le conferme sono off).
+
+**Fix applicati**: gestione esatta dei duplicati (rilevamento `identities.length === 0`, comportamento reale di GoTrue, oltre a `user_already_exists`), errori inline sotto il bottone, pannello OTP pronto.
+
+### 2. Errori inline sotto il bottone (mai sopra il form)
+- Rimosso il box globale in cima; 5 slot per-forma (`#form-error-login/register/forgot/verify/reset`) **subito sotto il bottone premuto**.
+- Animazione leggera: **fade + slide 6px** (220ms, `--ease`), mai shake. `role="alert"`.
+
+### 3. Bot protection — Cloudflare Turnstile (lazy)
+- Slot nel form Registrati + caricamento **solo quando il pannello Registrati viene mostrato** e solo se configuri `window.__SUPABASE_CAPTCHA = { siteKey }`.
+- Managed mode: il widget appare solo se Cloudflare lo ritiene necessario.
+- Token **monouso**: scartato a ogni lettura e widget resettato dopo un submit fallito (niente `captcha_failed` al retry).
+
+### 4. Registrazione → verifica email (flusso OTP)
+- Nuovo pannello **verify**: codice a 6 cifre (input filtro solo cifre, `autocomplete="one-time-code"`), bottone "Verifica e inizia" (`verifyOtp({ type: "signup" })`), "Invia di nuovo" (`auth.resend`), "Usa un'altra email".
+- **ATTIVO solo quando abiliti "Confirm email" in Supabase** (vedi azioni richieste sotto). Con conferme off il signup continua a dare sessione immediata → dashboard.
+
+### 5. Password dimenticata — schermata completa
+- Pannello sent ridisegnato: ✓ Email inviata · "Se l'indirizzo è registrato, riceverai un'email entro pochi minuti" · checklist (Spam / Promozioni / attendi / verifica indirizzo) · bottone "Invia di nuovo" (cooldown 4s). Anti-enumeration invariata.
+
+### 6. Google che chiede il telefono — analisi
+- **Non è dovuto a scope o configurazione OAuth**: è la verifica di sicurezza di Google sul SUO account (risk-based). Gli scope di default GoTrue (`email profile`) non sono stati modificati (come richiesto). Nessuna azione possibile dal client; nessun fix necessario.
+
+### 7-8. Stati mancanti aggiunti
+- `invalid_token` ("Codice non corretto. Controlla l'email e riprova."), timeout ("Il server ha impiegato troppo tempo…"), 5xx ("Il server è momentaneamente occupato…"), messaggio `otp_expired` aggiornato per coprire anche il codice. Ogni messaggio include la prossima azione.
+- `errCode(err)` normalizza `err.code || err.error_code` (robustezza tra versioni supabase-js).
+
+### Verifiche round 43
+- `node -c` ✅ · coerenza ID HTML/JS ✅ · code review ✅ (fix applicati: token Turnstile monouso, `role` pannello verify, render lazy).
+- Test API reali documentati sopra (email `diag-*@example.com` create nel progetto — da eliminare in dashboard Auth → Users).
+
+---
+
+## AZIONI RICHIESTE (per attivare i nuovi flussi)
+
+| # | Azione | Dove | Effetto |
+|---|---|---|---|
+| A | **Abilitare "Confirm email"** | Supabase → Auth → Sign In / Up → Email | Attiva il flusso di verifica (pannello OTP). Senza questo, signup = sessione immediata |
+| B | **Aggiungere `{{ .Token }}` al template** "Confirm signup" | Supabase → Auth → Email Templates | Fa arrivare il codice a 6 cifre al posto del solo link |
+| C | **Site key Turnstile** | Cloudflare Dashboard → Turnstile | Configura `window.__SUPABASE_CAPTCHA = { siteKey }` in `auth.html` (o pagina di build) |
+| D | **Turnstile provider in Supabase** | Supabase → Auth → Bot and Abuse Protection | Supabase valida il token ricevuto |
+| E | **Pulire gli utenti di test** | Supabase → Auth → Users | Eliminare `diag-*@example.com` e `fresh*@example.com` creati durante la diagnosi |
+| F | Redirect whitelist, Google provider, rate limit, SMTP, backup | vedi tabella round 41 sotto | Invariati |
 
 ---
 
