@@ -94,6 +94,9 @@
     fullText = fullText.trim();
     if (fullText.length === 0) return;
 
+    var confidenceTarget = parseInt(block.getAttribute('data-confidence'), 10) || 0;
+    var confidenceEl = block.querySelector('.mockup-feedback-confidence-num');
+
     // Reduced motion o no-JS fallback → mostra tutto subito
     if (prefersReducedMotion || !('IntersectionObserver' in window)) {
       textEl.textContent = fullText;
@@ -119,17 +122,40 @@
     }
 
     function startTyping() {
-      // Tempo per parola: ~85ms = ritmo conversazionale lento
-      var perWord = 85;
-      spans.forEach(function (span, idx) {
-        setTimeout(function () { span.classList.add('is-visible'); }, idx * perWord);
-      });
-      // Nascondi cursore finale dopo l'ultima parola
+      // Pause "thinking" col skeleton SHIMMER prima di partire con le parole:
+      // 850ms = "l'AI sta pensando" → poi typewriter.
+      // block has already class="is-loading" by HTML default; remove triggers skeleton fade-out.
+      // Il reveal del testo avviene solo DOPO la pausa.
       setTimeout(function () {
-        cursorEl.style.opacity = '0';
-        textEl.setAttribute('aria-hidden', 'false');
-        block.classList.add('is-done');
-      }, spans.length * perWord + 350);
+        block.classList.remove('is-loading');
+        var perWord = 85;
+        spans.forEach(function (span, idx) {
+          setTimeout(function () { span.classList.add('is-visible'); }, idx * perWord);
+        });
+        // Confidence badge si anima dopo l'ultima parola
+        var totalTyping = spans.length * perWord + 280;
+        setTimeout(function () {
+          cursorEl.style.opacity = '0';
+          textEl.setAttribute('aria-hidden', 'false');
+          block.classList.add('is-done');
+          // Anima confidenza 0 → target in 720ms ease-out, solo se > 0
+          if (confidenceEl && confidenceTarget > 0 && !prefersReducedMotion) {
+            var start = null;
+            var dur = 720;
+            function step2(ts) {
+              if (start === null) start = ts;
+              var p = Math.min(1, (ts - start) / dur);
+              var eased = 1 - (1 - p) * (1 - p);
+              confidenceEl.textContent = String(Math.round(confidenceTarget * eased));
+              if (p < 1) window.requestAnimationFrame(step2);
+              else confidenceEl.textContent = String(confidenceTarget);
+            }
+            window.requestAnimationFrame(step2);
+          } else if (confidenceEl) {
+            confidenceEl.textContent = String(confidenceTarget);
+          }
+        }, totalTyping);
+      }, 850); // skeleton duration
     }
 
     var io = new IntersectionObserver(function (entries) {

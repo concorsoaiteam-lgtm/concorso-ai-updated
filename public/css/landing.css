@@ -741,6 +741,135 @@ button:focus-visible {
   /* sembra una vera finestra di applicazione */
 }
 
+/* ==========================================================
+   Skeleton loader (Shimmer) — Pattern Stripe/Linear/OpenAI: gray-pulse
+   reveal. Nessuno spinner, nessun "Loading…". Solo barre con shimmer.
+   Visibile durante il typewriter prima che le parole appaiano.
+   ========================================================== */
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.mockup-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 2px 0;
+}
+
+.mockup-skeleton-bar {
+  height: 10px;
+  background: var(--bg-2);
+  border-radius: 999px;
+  position: relative;
+  overflow: hidden;
+}
+
+.mockup-skeleton-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s linear infinite;
+}
+
+.mockup-skeleton-bar:nth-child(1) { width: 92%; }
+.mockup-skeleton-bar:nth-child(2) { width: 78%; animation-delay: 0.18s; }
+.mockup-skeleton-bar:nth-child(3) { width: 65%; animation-delay: 0.36s; }
+.mockup-skeleton-bar:nth-child(4) { width: 86%; animation-delay: 0.54s; }
+
+/* Quando il typewriter inizia, nascondi skeleton */
+.mockup-feedback:not(.is-loading) .mockup-skeleton { display: none; }
+
+/* Live-dot nel mockup-chrome — rinforza "Live" testuale */
+.mockup-live-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--ink);
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  margin-top: -1px;
+  animation: mockup-live-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes mockup-live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(0.92); }
+}
+
+/* Micro-stat row (Sessione N di N) — micro-elemento dashboard real */
+.mockup-stat-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  margin-top: 8px;
+  padding: 6px var(--s-5) 8px;
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+
+.mockup-stat-row .mockup-stat-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-faint);
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+}
+
+.mockup-stat-row .mockup-stat-num {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.mockup-stat-row .mockup-stat-sep {
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+/* Confidence badge — pill che appare dopo typewriter */
+.mockup-feedback-confidence {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  padding: 3px 8px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  opacity: 0;
+  transition: opacity 320ms var(--ease);
+}
+
+.mockup-feedback.is-done .mockup-feedback-confidence { opacity: 1; }
+.mockup-feedback.is-done .mockup-feedback-confidence { transform: translateY(0); }
+
+.mockup-feedback-confidence-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mockup-skeleton-bar::after { animation: none; opacity: 0; }
+  .mockup-live-dot { animation: none; }
+  .mockup-feedback-confidence { opacity: 1; transition: none; }
+}
+
 /* "Window chrome" sottile sopra la mockup — feedback che è una app */
 .mockup-chrome {
   display: flex;
