@@ -413,15 +413,6 @@ button:focus-visible {
   transform: translateY(0);
 }
 
-.h3 {
-  font-size: clamp(20px, 1.7vw, 22px);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
-  color: var(--ink);
-  margin: 0;
-}
-
 /* Intestazione callout: stessa altezza visiva di H3 ma più scura */
 .h3-callout {
   font-size: 22px;
@@ -802,12 +793,6 @@ button:focus-visible {
   color: var(--ink-faint);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
-}
-
-.mockup-progress-divider {
-  width: 1px;
-  height: 12px;
-  background: var(--line);
 }
 
 .mockup-timer {
@@ -1278,34 +1263,6 @@ button:focus-visible {
 .plan-card-cta {
   width: 100%;
   justify-content: center;
-}
-
-.plan-card-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-2);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink);
-  letter-spacing: -0.005em;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
-  padding: 4px 0;
-  transition: text-decoration-thickness var(--t-base) ease, gap var(--t-base) var(--ease);
-}
-
-.plan-card-link:hover {
-  text-decoration-thickness: 2px;
-}
-
-.plan-card-link:hover .btn-arrow {
-  transform: translateX(3px);
-}
-
-.plan-card-link .btn-arrow {
-  display: inline-block;
-  transition: transform var(--t-base) var(--ease);
 }
 
 .plan-card-link-static {

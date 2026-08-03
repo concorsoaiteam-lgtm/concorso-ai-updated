@@ -166,8 +166,6 @@
 
     var hero = document.querySelector('.hero');
     var footer = document.querySelector('.footer');
-    var preferReducedMotion = window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function setShown(shown) {
       if (shown) {
