@@ -982,3 +982,21 @@ button:focus-visible,
   .preview-skeleton-bar::after { animation: none; opacity: 0; }
   .btn-primary.is-busy .btn-busy-bar { animation: none; opacity: 0; }
 }
+
+/* =========================================================================
+   Honeypot anti-bot — campo nascosto a utenti e screen reader.
+   I bot compilano i campi nascosti; il submit viene ignorato in JS.
+   ========================================================================= */
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}

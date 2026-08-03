@@ -19,8 +19,21 @@
     ? __SUPABASE_ANON_KEY
     : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM";
 
+  // Produzione (round 41): flow PKCE esplicito (OAuth 2.1 per SPA, mai implicit),
+  // autoRefreshToken + detectSessionInUrl per deep link recovery/OAuth.
+  // NB: NESSUN storageKey custom — dashboard/simulation usano la chiave default
+  //     (sb-<ref>-auth-token): una chiave diversa spezzerebbe il login.
+  // NB: localStorage è il massimo consentito su static hosting (vedi
+  //     md/auth-architecture.md §5.5): mitigato da CSP + textContent ovunque.
   var supabaseClient = window.supabase
-    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          flowType: "pkce",
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+          persistSession: true
+        }
+      })
     : null;
 
   // telemetry.js e auth-patch.js leggono window.supabaseClient
@@ -108,25 +121,58 @@
     }
   }
 
-  function translateAuthError(message) {
+  // Traduzione errori: prima per codice Supabase (err.code), poi per messaggio.
+  // Mai rivelare dettagli che permettano enumeration (OWASP Forgot Password).
+  function translateAuthError(message, code) {
+    var c = String(code || "").toLowerCase();
     var msg = String(message || "").toLowerCase();
-    if (msg.indexOf("invalid login credentials") !== -1) {
+
+    if (c.indexOf("invalid_credentials") !== -1 ||
+        msg.indexOf("invalid login credentials") !== -1) {
       return "Email o password non corretti. Riprova, o recupera la password.";
     }
-    if (msg.indexOf("email not confirmed") !== -1) {
+    if (c.indexOf("email_not_confirmed") !== -1 ||
+        msg.indexOf("email not confirmed") !== -1) {
       return "Conferma prima la tua email: trovi il link nella casella (o nello spam).";
     }
-    if (msg.indexOf("already registered") !== -1) {
-      return "Esiste già un account con questa email. Prova ad accedere.";
+    if (c.indexOf("over_email_send_rate_limit") !== -1 ||
+        msg.indexOf("email rate limit") !== -1 ||
+        msg.indexOf("rate limit") !== -1) {
+      return "Troppe email in poco tempo. Aspetta qualche minuto e riprova.";
     }
-    if (msg.indexOf("password should be at least") !== -1 ||
+    if (c.indexOf("over_request_rate_limit") !== -1 ||
+        msg.indexOf("too many requests") !== -1) {
+      return "Troppi tentativi. Aspetta un minuto e riprova.";
+    }
+    if (c.indexOf("user_banned") !== -1) {
+      return "Questo account è stato sospeso. Scrivici per maggiori informazioni.";
+    }
+    if (c.indexOf("captcha_failed") !== -1) {
+      return "Verifica non superata. Riprova.";
+    }
+    if (c.indexOf("weak_password") !== -1 ||
+        msg.indexOf("password should be at least") !== -1 ||
         msg.indexOf("at least 8 characters") !== -1) {
       return "La password è troppo corta: servono almeno 8 caratteri.";
     }
-    if (msg.indexOf("rate limit") !== -1) {
-      return "Troppi tentativi. Aspetta un minuto e riprova.";
+    if (c.indexOf("otp_expired") !== -1 ||
+        msg.indexOf("token has expired") !== -1 ||
+        msg.indexOf("expired") !== -1) {
+      return "Il link è scaduto o non è più valido. Richiedine uno nuovo.";
     }
-    if (msg.indexOf("failed to fetch") !== -1 ||
+    if (c.indexOf("user_already_exists") !== -1 ||
+        c.indexOf("already_registered") !== -1 ||
+        msg.indexOf("already registered") !== -1) {
+      return "Esiste già un account con questa email. Prova ad accedere.";
+    }
+    if (c.indexOf("email_provider_disabled") !== -1) {
+      return "L'accesso con email non è disponibile in questo momento. Riprova più tardi.";
+    }
+    if (c.indexOf("signup_disabled") !== -1) {
+      return "La registrazione è temporaneamente chiusa. Riprova più tardi.";
+    }
+    if (c.indexOf("failed to fetch") !== -1 ||
+        msg.indexOf("failed to fetch") !== -1 ||
         msg.indexOf("network") !== -1) {
       return "Problema di connessione. Riprova tra qualche secondo.";
     }
@@ -312,6 +358,11 @@
   function handleLogin(e) {
     e.preventDefault();
     if (!guardSupabase()) return;
+
+    // Honeypot anti-bot (campo nascosto compilato solo dalle botte)
+    var hpLogin = $("hp-field-login");
+    if (hpLogin && String(hpLogin.value || "").trim() !== "") return;
+
     var email = String($("login-email").value || "").trim();
     var password = $("login-password").value || "";
 
@@ -334,13 +385,18 @@
       })
       .catch(function (err) {
         setBusy(btn, false, "", "Entra");
-        showAuthError(translateAuthError(err && err.message));
+        showAuthError(translateAuthError(err && err.message, err && err.code));
       });
   }
 
   function handleRegister(e) {
     e.preventDefault();
     if (!guardSupabase()) return;
+    // Honeypot anti-bot: i bot compilano i campi nascosti. Se valorizzato,
+    // ignoriamo il submit in modo silenzioso (nessun costo lato server).
+    var hp = $("hp-field");
+    if (hp && String(hp.value || "").trim() !== "") return;
+
     var email = String($("register-email").value || "").trim();
     var password = $("register-password").value || "";
     var terms = $("terms-checkbox").checked;
@@ -362,7 +418,16 @@
     track("auth_submit", { mode: "register" });
 
     // Solo email + password. Niente nome: verrà chiesto in onboarding.
-    supabaseClient.auth.signUp({ email: email, password: password })
+    // emailRedirectTo: il link di conferma atterra su una pagina del nostro
+    // dominio (mai sul default del progetto). captchaToken: hook Turnstile
+    // dormiente — incluso solo se configurato (vedi getCaptchaToken).
+    var signupOptions = {
+      emailRedirectTo: window.location.origin + "/auth.html?mode=login"
+    };
+    var captchaToken = getCaptchaToken();
+    if (captchaToken) signupOptions.captchaToken = captchaToken;
+
+    supabaseClient.auth.signUp({ email: email, password: password, options: signupOptions })
       .then(function (res) {
         if (res.error) throw res.error;
         if (!res.data.session) {
@@ -381,13 +446,18 @@
       .catch(function (err) {
         setBusy(btn, false, "", "Crea account gratis");
         $("register-submit").disabled = !$("terms-checkbox").checked;
-        showAuthError(translateAuthError(err && err.message));
+        showAuthError(translateAuthError(err && err.message, err && err.code));
       });
   }
 
   function handleForgot(e) {
     e.preventDefault();
     if (!guardSupabase()) return;
+
+    // Honeypot anti-bot anche qui: il recovery è un vettore di email-bombing.
+    var hpForgot = $("hp-field-forgot");
+    if (hpForgot && String(hpForgot.value || "").trim() !== "") return;
+
     var email = String($("forgot-email").value || "").trim();
     if (!isValidEmail(email)) {
       return setFieldError("forgot-email", "forgot-email-error", "Inserisci un indirizzo email valido");
@@ -458,9 +528,9 @@
         setBusy(btn, false, "", "Aggiorna password");
         showToast("Password aggiornata. Stai entrando…");
         window.setTimeout(function () { window.location.href = DASHBOARD_URL; }, 900);
-      }).catch(function (err) {
+      })      .catch(function (err) {
         setBusy(btn, false, "", "Aggiorna password");
-        showAuthError(translateAuthError(err && err.message));
+        showAuthError(translateAuthError(err && err.message, err && err.code));
       });
     });
   }
@@ -479,8 +549,13 @@
     } else {
       try {
         if (supabaseClient.auth.resend) {
-          supabaseClient.auth.resend({ type: "signup", email: lastEmail })
-            .catch(function () { /* silenzioso per privacy */ });
+          // Stesso emailRedirectTo della prima email: il link di conferma
+          // atterra sempre su /auth.html?mode=login (mai sul default progetto).
+          supabaseClient.auth.resend({
+            type: "signup",
+            email: lastEmail,
+            options: { emailRedirectTo: window.location.origin + "/auth.html?mode=login" }
+          }).catch(function () { /* silenzioso per privacy */ });
         }
       } catch (e) { /* noop */ }
     }
@@ -496,8 +571,41 @@
       provider: "google",
       options: { redirectTo: window.location.origin + DASHBOARD_URL }
     }).catch(function (err) {
-      showAuthError(translateAuthError(err && err.message));
+      showAuthError(translateAuthError(err && err.message, err && err.code));
     });
+  }
+
+  /* ------------------------------------------------------------------
+     Hook Turnstile (dormiente) — bot protection opzionale.
+     Si attiva SOLO se configurato: window.__SUPABASE_CAPTCHA = { siteKey }.
+     Richiede inoltre che il provider sia abilitato in Supabase Dashboard
+     (Auth → Bot and Abuse Protection). Senza configurazione ritorna "".
+     ------------------------------------------------------------------ */
+  function getCaptchaToken() {
+    try {
+      var cfg = window.__SUPABASE_CAPTCHA;
+      if (!cfg || !cfg.siteKey) return "";
+      if (typeof window.turnstile !== "object") return "";
+      return window.turnstile.getResponse();
+    } catch (e) { return ""; }
+  }
+
+  /* ------------------------------------------------------------------
+     Guard di sessione — /auth con sessione attiva → dashboard.
+     getUser() valida il JWT lato server (anti-tamper dello storage),
+     a differenza di getSession() che legge solo lo storage locale.
+     Eccezione: flusso recovery (type=recovery) non redirige mai.
+     ------------------------------------------------------------------ */
+  function guardAuthenticated() {
+    if (!supabaseClient) return Promise.resolve(false);
+    return supabaseClient.auth.getUser().then(function (res) {
+      if (res && res.data && res.data.user) {
+        track("auth_redirect_active_session", {});
+        window.location.replace(DASHBOARD_URL);
+        return true;
+      }
+      return false;
+    }).catch(function () { return false; });
   }
 
   /* ------------------------------------------------------------------
@@ -625,6 +733,12 @@
     }
 
     track("auth_view", { mode: params.mode || "login" });
+
+    // Guard di sessione: se già autenticato vai in dashboard
+    // (mai nel flusso recovery: il reset deve restare disponibile).
+    if (params.type !== "recovery") {
+      guardAuthenticated();
+    }
 
     // Preview viva
     startPreviewLoop();
