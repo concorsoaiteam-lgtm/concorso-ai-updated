@@ -158,6 +158,22 @@ button:focus-visible {
   background: var(--ink);
   border-radius: 50%;
   display: inline-block;
+  transition: transform var(--t-base) var(--ease),
+              opacity var(--t-base) var(--ease);
+}
+
+.brand:hover .brand-dot,
+.brand:focus-visible .brand-dot {
+  transform: scale(1.35);
+  /* Subito "pulse" sul brand-dot quando hover o focus sulla nav-link.
+     220ms ease-out per 1.35x scale: micro-feedback che dice "questo è il
+     brand, ti sta guardando". Nessun colore diverso. */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-dot { transition: none; }
+  .brand:hover .brand-dot,
+  .brand:focus-visible .brand-dot { transform: none; }
 }
 
 /* =========================================================================
@@ -247,6 +263,52 @@ button:focus-visible {
 }
 
 /* =========================================================================
+   hero-recency-dot + hero-counter: micro-motion.
+   .hero-recency-dot: pulse leggermente più ampio in sync con breathing.
+   .hero-counter: breathe effect sottile quando il numero sale. file 06.
+   ========================================================================= */
+
+.hero-counter {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.005em;
+  /* Quando il counter sale, l'opacity sale + leggerissimo translateY
+     (-2px) per dare "presenza d'ingresso". Nessun colore diverso. */
+}
+
+.hero-recency-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--ink);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+  margin-bottom: 2px;
+  vertical-align: middle;
+  opacity: 0.7;
+  animation: hero-recency-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes hero-recency-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.92); }
+  50%      { opacity: 0.95; transform: scale(1);    }
+}
+
+@keyframes hero-counter-rise {
+  0%   { opacity: 0.0;  transform: translateY(-2px); }
+  100% { opacity: 1.0;  transform: translateY(0);    }
+}
+
+.hero-counter.is-counted {
+  animation: hero-counter-rise 320ms var(--ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-recency-dot { animation: none; opacity: 0.7; }
+  .hero-counter { animation: none; opacity: 1; }
+}
+
+/* =========================================================================
    HERO — silence + tension
    H1 weight 600 = dominance. Sub-H1 breath. CTA = single dark mass.
    ========================================================================= */
@@ -301,14 +363,6 @@ button:focus-visible {
   align-items: center;
   gap: var(--s-2);
   font-variant-numeric: tabular-nums;
-}
-
-.hero-recency-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--ink-faint);
-  flex-shrink: 0;
 }
 
 .hero-recency time {
@@ -781,8 +835,13 @@ button:focus-visible {
 }
 
 @keyframes mockup-progress-breathe {
-  0%, 100% { width: 40%; }
-  50%      { width: 46%; }
+  /* Asymmetric cycle: inhale (40→47), momentary plateau, gentle exhale (47→41).
+     Peak excursion ~7%. Sub-perceptual ma "respirante":
+     si vede che è vivo, non si percepisce come movimento. */
+  0%        { width: 40%; }
+  42%       { width: 47%; }
+  58%       { width: 45%; }
+  100%      { width: 41%; }
 }
 
 .mockup-progress-text {

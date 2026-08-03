@@ -222,12 +222,68 @@
   }
 
   // ==========================================================
+  // 4. Hero counter — numero "184 materie coperte" sale da 0 a target.
+  //    Trigger: al primo reveal-on-scroll (single-pass).
+  //    Persiste in sessionStorage per non ri-animare al back-button.
+  //    Rispetta prefers-reduced-motion (mostra il valore finale subito).
+  // ==========================================================
+  function initHeroCounter() {
+    var counters = document.querySelectorAll('.hero-counter[data-target]');
+    if (!counters.length) return;
+
+    // Honor prefers-reduced-motion + no-raf fallback
+    if (prefersReducedMotion) {
+      counters.forEach(function (el) { el.classList.add('is-counted'); });
+      return;
+    }
+
+    // Skip if already animated in this session.
+    var ran = false;
+    try {
+      ran = window.sessionStorage.getItem('concorso_counter_done') === '1';
+    } catch (e) { /* privacy */ }
+    if (ran) {
+      counters.forEach(function (el) { el.classList.add('is-counted'); });
+      return;
+    }
+
+    function animateOne(el) {
+      var target = parseInt(el.getAttribute('data-target'), 10);
+      if (!target || target < 1) {
+        el.classList.add('is-counted');
+        return;
+      }
+      var duration = 1400; // 1.4s — conversazionale
+      var start = null;
+      el.textContent = '0';
+      function step(ts) {
+        if (start === null) start = ts;
+        var progress = Math.min(1, (ts - start) / duration);
+        // ease-out quad: 1 - (1-t)^2
+        var eased = 1 - (1 - progress) * (1 - progress);
+        el.textContent = Math.round(target * eased).toString();
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        } else {
+          el.textContent = target.toString();
+          el.classList.add('is-counted');
+          try { window.sessionStorage.setItem('concorso_counter_done', '1'); } catch (e) {}
+        }
+      }
+      window.requestAnimationFrame(step);
+    }
+
+    counters.forEach(animateOne);
+  }
+
+  // ==========================================================
   // Bootstrap
   // ==========================================================
   function init() {
     initReveal();
     initTypewriter();
     initMobileStickyCta();
+    initHeroCounter();
   }
 
   if (document.readyState === 'loading') {
