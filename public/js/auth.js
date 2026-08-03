@@ -366,8 +366,11 @@
     var email = String($("login-email").value || "").trim();
     var password = $("login-password").value || "";
 
+    if (!email) {
+      return setFieldError("login-email", "login-email-error", "Inserisci la tua email");
+    }
     if (!isValidEmail(email)) {
-      return setFieldError("login-email", "login-email-error", "Inserisci un indirizzo email valido");
+      return setFieldError("login-email", "login-email-error", "L'email non è valida. Inserisci un indirizzo reale.");
     }
     if (!password) {
       return setFieldError("login-password", "login-password-error", "Inserisci la password");
@@ -401,8 +404,11 @@
     var password = $("register-password").value || "";
     var terms = $("terms-checkbox").checked;
 
+    if (!email) {
+      return setFieldError("register-email", "register-email-error", "Inserisci la tua email");
+    }
     if (!isValidEmail(email)) {
-      return setFieldError("register-email", "register-email-error", "Inserisci un indirizzo email valido");
+      return setFieldError("register-email", "register-email-error", "L'email non è valida. Inserisci un indirizzo reale.");
     }
     if (password.length < 8) {
       return setFieldError("register-password", "register-password-error", "La password deve avere almeno 8 caratteri");
@@ -459,8 +465,11 @@
     if (hpForgot && String(hpForgot.value || "").trim() !== "") return;
 
     var email = String($("forgot-email").value || "").trim();
+    if (!email) {
+      return setFieldError("forgot-email", "forgot-email-error", "Inserisci la tua email");
+    }
     if (!isValidEmail(email)) {
-      return setFieldError("forgot-email", "forgot-email-error", "Inserisci un indirizzo email valido");
+      return setFieldError("forgot-email", "forgot-email-error", "L'email non è valida. Inserisci un indirizzo reale.");
     }
 
     lastEmail = email;
@@ -704,6 +713,9 @@
     $("forgot-link").addEventListener("click", function (e) {
       e.preventDefault();
       showPanel("forgot");
+      // Stato deep-linkabile: il refresh non riporta al login
+      // (vedi md/auth-edge-cases.md §5.1).
+      try { history.replaceState(null, "", "/auth.html?mode=forgot"); } catch (x) { /* ignora */ }
     });
     $("resend-btn").addEventListener("click", handleResend);
     $("google-btn").addEventListener("click", function () { handleGoogle(); });
@@ -728,6 +740,8 @@
       showPanel("register");
       $("tab-login").setAttribute("aria-selected", "false");
       $("tab-register").setAttribute("aria-selected", "true");
+    } else if (params.mode === "forgot") {
+      showPanel("forgot");
     } else {
       showPanel("login");
     }

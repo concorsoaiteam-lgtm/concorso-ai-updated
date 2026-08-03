@@ -620,6 +620,19 @@ body {
 
 .auth-success-icon svg { width: 20px; height: 20px; }
 
+/* Il segno di spunta si "disegna" quando il pannello entra (320ms, un solo
+   colpo, mai loop). pathLength=1 normalizza il tratto: dashoffset 1→0.
+   Sotto reduced-motion l'animazione finisce istantanea → checkmark piena. */
+.auth-panel.is-enter .auth-success-icon svg path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: auth-draw 320ms var(--ease) both;
+}
+
+@keyframes auth-draw {
+  to { stroke-dashoffset: 0; }
+}
+
 .auth-success-text {
   margin: var(--s-3) 0 0;
   font-size: 14px;

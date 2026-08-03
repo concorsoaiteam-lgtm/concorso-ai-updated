@@ -1,7 +1,28 @@
 # ConcorsoAI — Auth Progress Log
 
-> Aggiornato: round 41 (production hardening)
+> Aggiornato: round 42 (master polish — edge cases, motion, performance, security audit)
 > Regola: il progetto non viene MAI lasciato in uno stato incompleto. Questo file è la fonte di verità sullo stato.
+
+---
+
+## Cosa è stato fatto (round 42)
+
+### Documentazione
+- ✅ `md/auth-edge-cases.md` — 20 scenari limite progettati (sessioni, recovery, rete, OAuth, navigazione, abuso): cosa vede / cosa succede / cosa può fare / copy / CTA / comportamento UX. Mappa scenario → gestito da (Codice / Supabase / Config / Futuro).
+- ✅ `md/auth-motion.md` — architettura del movimento: token di motion, 19 microinterazioni specificate (evento, durata, easing, delay, stato, quando NON parte, reduced-motion), regole dure (mai shake, mai confetti), mappa implementazione.
+- ✅ `md/auth-performance.md` — percorso critico, metriche target (LCP<1.2s, CLS=0, INP<200ms), interventi (pin CDN), rischi, cose deliberate NON fatte con motivo.
+- ✅ `md/auth-security-checklist.md` — audit completo per controllo: 40+ voci con stato ✔/⚠/❌, mappatura OWASP ASVS / NIST 800-63B, gap e piano.
+
+### Codice (miglioramenti invisibili, niente redesign)
+- ✅ **Pin CDN Supabase a `@2.112.0/dist/umd/supabase.min.js`** (prima `@2` = tag mobile): build deterministica + cache immutabile (`auth.html`).
+- ✅ **Routing deep-linkabile per forgot**: click su "Password dimenticata?" → `history.replaceState(/auth.html?mode=forgot)` + routing in `init()` → il refresh non riporta al login (`auth.js`).
+- ✅ **Checkmark "disegnata"** sul pannello email inviata: tratto SVG (pathLength=1) con stroke-dashoffset 320ms, un solo colpo, azzerata da reduced-motion (`auth.css` + `pathLength` in `auth.html`).
+- ✅ **Copy errore email unificato** tra validazione live e handler submit (login/register/forgot): stessa frase, zero incoerenza.
+
+### Motivazioni (sintesi)
+- **UX**: nessun pannello si perde al refresh; il successo ha una chiusura sobria; gli errori dicono sempre la stessa cosa.
+- **Performance**: il tag `@2` mobile era l'unica fonte di non-determinismo del bundle.
+- **Sicurezza**: nessun cambiamento di superficie (audit completo in `auth-security-checklist.md`).
 
 ---
 
@@ -37,7 +58,7 @@
 | 1 | **Redirect whitelist Supabase** | Supabase Dashboard → Auth → URL Configuration | Aggiungere `https://concorso-ai.vercel.app/auth.html`, `/auth`, `/dashboard.html`, `/dashboard` |
 | 2 | **Provider Google** | Supabase Dashboard → Auth → Providers | Abilitare Google (client ID/secret dal Google Cloud Console) |
 | 3 | **Template email** (conferma + recovery) | Supabase Dashboard → Auth → Email Templates | Personalizzare da default; la recovery deve puntare a `/auth.html?type=recovery` |
-| 4 | **Rate limit tuning** | Supabase Dashboard → Auth → Rate Limits | Verificare default (30/h per endpoint); alzare signup se servono beta |
+| 4 | **Rate limit tuning** | Supabase Dashboard → Auth → Rate Limits | Verificare default (≈ login 60/h, signup/recovery 30/h per IP); alzare signup se servono beta |
 | 5 | **SMTP custom** (opzionale) | Supabase Dashboard → Auth → SMTP | Il default Supabase ha limite di invio; con volume reale serve SMTP |
 | 6 | **Backup automatici + billing alerts** | Supabase Dashboard → Project Settings | Abilitare entrambi |
 | 7 | **Eseguire `supabase/rls.sql`** | SQL Editor | Creare profiles + policy storage (idempotente) |
