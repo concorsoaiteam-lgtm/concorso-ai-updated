@@ -1401,10 +1401,22 @@ button:focus-visible {
 
 .footer-links a {
   color: var(--ink-soft);
-  transition: color var(--t-base) ease;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--muted);
+  text-underline-offset: 3px;
+  /* Editorial premium: underline sempre presente, 1px muted (~5.4:1 vs bg,
+     >3:1 UI contrast WCAG 1.4.11), 3px offset. Hover: colore ink +
+     underline ink. Pattern Apple HIG / Stripe / Mercury: l'affordance
+     visiva del link non dipende dall'hover. Riduce il tempo di scanning. */
+  transition: color var(--t-base) ease,
+              text-decoration-color var(--t-base) ease;
 }
 
-.footer-links a:hover { color: var(--ink); }
+.footer-links a:hover {
+  color: var(--ink);
+  text-decoration-color: var(--ink);
+}
 
 .footer-legal {
   border-top: 1px solid var(--line);
