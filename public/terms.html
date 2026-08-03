@@ -4,84 +4,350 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Termini di Servizio — ConcorsoAI</title>
-  <meta name="description" content="Termini di Servizio di ConcorsoAI — condizioni d'uso per la simulazione orale dei concorsi pubblici con AI." />
-  <meta name="theme-color" content="#F7FBFF" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.3/index.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.0.3/index.min.css" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
-          colors: {
-            brand: {
-              50: '#F7FBFF', 100: '#EAF4FF', 200: '#D6E8FF', 300: '#A9CDF8',
-              400: '#5EA0E8', 500: '#2563EB', 600: '#0F4C81',
-              700: '#0B3A63', 800: '#0B2A4A', 900: '#071D33'
-            }
-          }
-        }
-      }
-    }
+  <meta name="description" content="Termini di Servizio di ConcorsoAI: cosa puoi fare con il simulatore, cosa ti chiediamo, e cosa succede se passi al piano Pro." />
+  <meta name="theme-color" content="#FAF8F3" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://concorso-ai.vercel.app/terms.html" />
+  <link rel="stylesheet" href="/css/landing.css" />
+  <link rel="stylesheet" href="/css/legal.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Termini di Servizio — ConcorsoAI",
+    "inLanguage": "it",
+    "url": "https://concorso-ai.vercel.app/terms.html"
+  }
   </script>
-  <link rel="stylesheet" href="/css/terms.css" />
 </head>
-<body class="font-sans antialiased selection:bg-brand-200 selection:text-brand-900">
-  <header class="sticky top-0 z-50 border-b border-brand-200/80 bg-white/86 backdrop-blur-xl shadow-sm">
-    <nav class="mx-auto flex h-16 max-w-3xl items-center justify-between px-4 sm:px-6">
-      <a href="index.html" class="rounded-xl text-xl font-extrabold tracking-tight text-brand-900">Concorso<span class="text-gradient">AI</span></a>
-      <a href="index.html" class="rounded-xl border border-brand-200 bg-white px-4 py-2 text-sm font-bold text-brand-700 hover:bg-brand-50 transition">← Indietro</a>
+<body>
+
+<a class="visually-hidden" href="#main-content">Salta al contenuto principale</a>
+
+<!-- Navbar IDENTICA alla landing -->
+<header class="nav" role="banner" aria-label="Intestazione">
+  <nav class="nav-inner container" aria-label="Navigazione principale">
+    <a href="/" class="brand">
+      <span class="brand-dot" aria-hidden="true"></span>
+      ConcorsoAI
+    </a>
+    <a href="/#in-pratica" class="nav-link">In pratica</a>
+    <a href="auth.html?mode=register" class="btn-primary" data-cta="nav">
+      Registrati gratis <span class="btn-arrow" aria-hidden="true">→</span>
+    </a>
+  </nav>
+</header>
+
+<main id="main-content" role="main" aria-label="Termini di Servizio">
+
+  <div class="legal-page">
+
+    <header class="legal-hero">
+      <span class="legal-eyebrow">Termini</span>
+      <h1 class="legal-title">Termini di Servizio.</h1>
+      <p class="legal-updated">Ultimo aggiornamento: 3 Agosto 2026</p>
+      <p class="legal-intro">
+        Le regole del gioco, scritte in italiano. Pochi articoli, niente
+        legalese. Se qualcosa non è chiaro, scrivici prima di registrarti a
+        <a class="legal-link" href="mailto:supporto@concorso-ai.it">supporto@concorso-ai.it</a>.
+      </p>
+    </header>
+
+    <nav class="legal-toc" aria-label="Indice dei Termini">
+      <p class="legal-toc-label">Indice</p>
+      <ol class="legal-toc-list">
+        <li><a href="#oggetto">Cosa offre ConcorsoAI</a></li>
+        <li><a href="#account">Account</a></li>
+        <li><a href="#uso">Uso corretto</a></li>
+        <li><a href="#gratis">Piano Free</a></li>
+        <li><a href="#pro">Piano Pro e pagamenti</a></li>
+        <li><a href="#rimborso">Rimborsi</a></li>
+        <li><a href="#proprieta">Proprietà intellettuale</a></li>
+        <li><a href="#limitazioni">Limitazioni di responsabilità</a></li>
+        <li><a href="#modifiche">Modifiche ai termini</a></li>
+        <li><a href="#legge">Legge applicabile e foro</a></li>
+        <li><a href="#contatti">Contatti</a></li>
+      </ol>
     </nav>
-  </header>
 
-  <main class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
-    <h1 class="text-3xl font-black tracking-[-0.035em] text-brand-900 sm:text-4xl">Termini di Servizio</h1>
-    <p class="mt-2 text-sm font-semibold text-brand-600">Ultimo aggiornamento: 08/07/2026</p>
+    <article class="legal-body">
 
-    <div class="mt-10 space-y-8 text-brand-700 leading-7">
-      <section>
-        <h2 class="text-xl font-black text-brand-900">1. Oggetto del servizio</h2>
-        <p class="mt-3">ConcorsoAI fornisce una piattaforma SaaS per la simulazione dell'esame orale dei concorsi pubblici italiani tramite intelligenza artificiale. Il servizio include: caricamento bandi in formato PDF, generazione di domande tramite AI, simulazione interattiva con commissario virtuale, e feedback sulle risposte.</p>
+      <section id="oggetto" class="legal-section">
+        <h2 class="legal-h2">Cosa offre ConcorsoAI</h2>
+        <p class="legal-p">
+          ConcorsoAI è un simulatore dell'esame orale dei concorsi pubblici
+          italiani. Carichi il tuo bando in PDF, ti facciamo le domande che
+          probabilmente farà la commissione, tu rispondi, e noi ti diamo un
+          feedback puntuale.
+        </p>
+        <p class="legal-p">
+          È uno strumento di <strong>preparazione</strong>. Non è un corso, non
+          è un centro di formazione, non è un coach personale. Usalo per
+          allenarti; non sostituisce studio, diritto, normativa specifica.
+        </p>
+        <p class="legal-p">
+          La lingua del servizio è l'italiano. I bandi e le risposte che
+          inserisci sono in italiano. Se carichi PDF in altre lingue, proviamo
+          a interpretarli ma i risultati dipendono dalla qualità del testo.
+        </p>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">2. Account e registrazione</h2>
-        <p class="mt-3">Per utilizzare il servizio è necessario creare un account fornendo un indirizzo email valido e una password. L'utente è responsabile della riservatezza delle proprie credenziali. È possibile registrarsi anche tramite Google OAuth.</p>
+      <section id="account" class="legal-section">
+        <h2 class="legal-h2">Account</h2>
+        <h3 class="legal-h3">Come crei l'account</h3>
+        <ul class="legal-ul">
+          <li>Con email e password.</li>
+          <li>Oppure con Google (se scegli "Continua con Google").</li>
+        </ul>
+        <h3 class="legal-h3">Cosa ti chiediamo</h3>
+        <ul class="legal-ul">
+          <li>Un'email valida, che controlli davvero (ricevi lì le comunicazioni importanti).</li>
+          <li>Una password che non hai già usato altrove (un password manager aiuta).</li>
+          <li>In fase di registrazione, di accettare questi Termini e la Privacy Policy.</li>
+        </ul>
+        <h3 class="legal-h3">Cose che devi a noi</h3>
+        <ul class="legal-ul">
+          <li>Non condividere le credenziali. Se succede, cambiarle subito.</li>
+          <li>Non creare account multipli per bypassare i limiti del piano Free.</li>
+          <li>Se l'email cambia, aggiornarla dalla dashboard.</li>
+        </ul>
+        <h3 class="legal-h3">Cose che puoi fare</h3>
+        <ul class="legal-ul">
+          <li>Eliminare l'account in qualsiasi momento dalla dashboard.</li>
+          <li>Scaricare i tuoi dati in JSON (portabilità GDPR).</li>
+        </ul>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">3. Utilizzo del servizio</h2>
-        <p class="mt-3">Il servizio è destinato esclusivamente alla preparazione personale per concorsi pubblici. L'utente si impegna a non: (a) utilizzare il servizio per finalità illegali, (b) tentare di manipolare o sovraccaricare l'infrastruttura tecnica, (c) caricare contenuti offensivi o non pertinenti.</p>
+      <section id="uso" class="legal-section">
+        <h2 class="legal-h2">Uso corretto</h2>
+        <p class="legal-p">
+          ConcorsoAI è pensato per la preparazione personale a concorsi
+          pubblici italiani. Cose che vanno bene:
+        </p>
+        <ul class="legal-ul">
+          <li>Allenarti da solo con il tuo bando.</li>
+          <li>Condividere screenshot dello storico punti con chi ti sta aiutando a prepararti.</li>
+          <li>Segnalarci bug o errori nei feedback (grazie davvero).</li>
+        </ul>
+        <p class="legal-p">
+          Cose che <strong>non</strong> vanno bene:
+        </p>
+        <ul class="legal-ul">
+          <li>Estrarre sistematicamente le domande del database per rivenderle o riutilizzarle altrove.</li>
+          <li>Caricare bandi di altre persone senza il loro consenso, o bandi con dati personali di terzi.</li>
+          <li>Tentare di sovraccaricare l'infrastruttura (bot, scraping, flooding).</li>
+          <li>Pubblicare i feedback generati dall'AI come se fossero giurisprudenza reale.</li>
+          <li>Qualsiasi uso illegale, fraudolento, o che violi diritti di terzi.</li>
+        </ul>
+        <div class="legal-callout" role="note">
+          <p class="legal-callout-label">Se qualcosa non va</p>
+          <p class="legal-p">
+            Se noti un uso anomalo del servizio da parte di altri utenti,
+            scrivi a
+            <a class="legal-link" href="mailto:supporto@concorso-ai.it">supporto@concorso-ai.it</a>.
+          </p>
+        </div>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">4. Proprietà intellettuale</h2>
-        <p class="mt-3">Il software, il design, i testi e i contenuti originali di ConcorsoAI sono di proprietà esclusiva di ConcorsoAI. I bandi caricati dall'utente rimangono di proprietà dell'utente e non vengono condivisi con terze parti.</p>
+      <section id="gratis" class="legal-section">
+        <h2 class="legal-h2">Piano Free</h2>
+        <p class="legal-p">
+          Puoi usare ConcorsoAI gratuitamente, sempre. Il piano Free include:
+        </p>
+        <ul class="legal-ul">
+          <li>3 simulazioni al mese, basate sul tuo bando reale.</li>
+          <li>5 domande per materia del tuo bando.</li>
+          <li>Storico delle tue simulazioni e dei feedback.</li>
+        </ul>
+        <p class="legal-p">
+          Quando esaurisci le simulazioni del mese, il piano Free riprende il
+          mese successivo. Non c'è nessun meccanismo di upsell aggressivo: ti
+          proponiamo il Pro solo se lo richiedi o se hai raggiunto il limite.
+        </p>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">5. Limitazione di responsabilità</h2>
-        <p class="mt-3">ConcorsoAI è uno strumento di preparazione e non garantisce il superamento di alcun concorso pubblico. I feedback generati dall'AI sono indicativi e non sostituiscono il giudizio di una commissione reale. L'utente utilizza il servizio sotto la propria responsabilità.</p>
+      <section id="pro" class="legal-section">
+        <h2 class="legal-h2">Piano Pro e pagamenti</h2>
+        <p class="legal-p">
+          Il piano Pro sblocca simulazioni illimitate, copertura completa
+          di tutte le materie del bando, e un sistema di ripasso mirato
+          sulle risposte in cui sei meno preciso.
+        </p>
+        <h3 class="legal-h3">Prezzo</h3>
+        <p class="legal-p">
+          <strong>€14,99 al mese</strong>, oppure <strong>€119 all'anno</strong>
+          (risparmio ~34%). I prezzi sono IVA inclusa per la maggior parte
+          delle configurazioni di acquisto italiane. Per i dettagli correnti,
+          vedi la pagina <a class="legal-link" href="pricing.html">Prezzi</a>.
+        </p>
+        <h3 class="legal-h3">Pagamenti</h3>
+        <p class="legal-p">
+          I pagamenti sono gestiti da <strong>Stripe</strong>. Non vediamo
+          mai il numero della tua carta; memorizziamo solo un riferimento
+          opaco che ci consente di addebitare o rimborsare.
+        </p>
+        <h3 class="legal-h3">Rinnovo</h3>
+        <p class="legal-p">
+          L'abbonamento si rinnova automaticamente alla scadenza (mensile o
+          annuale, a seconda del piano scelto) usando il metodo di pagamento
+          associato all'account.
+        </p>
+        <h3 class="legal-h3">Cancellazione</h3>
+        <p class="legal-p">
+          Puoi disdire l'abbonamento in qualsiasi momento dalla dashboard
+          (<em>Impostazioni → Abbonamento → Disdici</em>). La disdetta è
+          <strong>immediata</strong>: smetti di pagare al ciclo successivo.
+          Conservi i benefici Pro fino alla scadenza del periodo già pagato.
+        </p>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">6. Piani e pagamenti</h2>
-        <p class="mt-3">ConcorsoAI offre piani gratuiti e a pagamento. I dettagli dei piani sono pubblicati sulla pagina dei prezzi. I pagamenti sono gestiti tramite provider terzi. L'utente può disdire in qualsiasi momento.</p>
+      <section id="rimborso" class="legal-section">
+        <h2 class="legal-h2">Rimborsi</h2>
+        <p class="legal-p">
+          Se cambi idea entro <strong>14 giorni</strong> dal primo pagamento,
+          ti rimborsiamo l'importo senza domande. Dopo i 14 giorni, puoi
+          comunque disdire e ti rimborsiamo eventuale periodo non goduto in
+          base al credito residuo.
+        </p>
+        <p class="legal-p">
+          Per chiedere un rimborso, scrivi a
+          <a class="legal-link" href="mailto:supporto@concorso-ai.it">supporto@concorso-ai.it</a>.
+          Lo gestiamo manualmente entro 5 giorni lavorativi.
+        </p>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">7. Modifiche ai termini</h2>
-        <p class="mt-3">ConcorsoAI si riserva il diritto di modificare i presenti termini in qualsiasi momento. Le modifiche saranno comunicate via email o tramite avviso sulla piattaforma. L'uso continuato del servizio dopo le modifiche costituisce accettazione dei nuovi termini.</p>
+      <section id="proprieta" class="legal-section">
+        <h2 class="legal-h2">Proprietà intellettuale</h2>
+        <h3 class="legal-h3">Cosa è nostro</h3>
+        <ul class="legal-ul">
+          <li>Il codice dell'applicazione, del backend e dei modelli.</li>
+          <li>Il design, i testi del sito, i marchi, il logo "ConcorsoAI".</li>
+          <li>Il database di domande che abbiamo costruito.</li>
+        </ul>
+        <h3 class="legal-h3">Cosa è tuo</h3>
+        <ul class="legal-ul">
+          <li>I PDF dei bandi che carichi restano tuoi. Non li pubblichiamo, non li condividiamo.</li>
+          <li>Le risposte che scrivi sono tue. Le usiamo solo per generare il feedback.</li>
+          <li>Lo storico delle tue simulazioni è tuo: puoi scaricarlo o cancellarlo.</li>
+        </ul>
+        <h3 class="legal-h3">Bandei pubblici e copyright</h3>
+        <p class="legal-p">
+          I bandi dei concorsi pubblici sono documenti pubblici. Se ritieni che
+          una parte del bando sia protetta da diritti di terzi e vada rimossa,
+          segnalacelo: la esaminiamo e, se confermato, rimuoviamo la parte
+          evitando di generare domande su quella materia.
+        </p>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">8. Contatti</h2>
-        <p class="mt-3">Per domande sui presenti termini, contattaci all'indirizzo email fornito nella dashboard del tuo account.</p>
+      <section id="limitazioni" class="legal-section">
+        <h2 class="legal-h2">Limitazioni di responsabilità</h2>
+        <p class="legal-p">
+          ConcorsoAI è uno strumento di preparazione, non una garanzia di
+          superamento. Le risposte della commissione vera dipendono da fattori
+          che nessun software può prevedere: personalità, preparazione specifica,
+          commissione specifica, giornata specifica.
+        </p>
+        <p class="legal-p">
+          I feedback generati dall'AI sono <strong>indicativi</strong>. Non
+          sostituiscono il giudizio di una commissione reale, né quello di un
+          preparatore umano. Sono un allenamento, non un verdetto.
+        </p>
+        <p class="legal-p">
+          Nei limiti consentiti dalla legge, ConcorsoAI non è responsabile per:
+        </p>
+        <ul class="legal-ul">
+          <li>Esiti negativi di un concorso pubblico.</li>
+          <li>Danni indiretti derivanti dall'uso del servizio.</li>
+          <li>Interruzioni temporanee del servizio per manutenzione o cause di forza maggiore.</li>
+          <li>Uso del servizio in modo contrario a questi Termini.</li>
+        </ul>
       </section>
+
+      <section id="modifiche" class="legal-section">
+        <h2 class="legal-h2">Modifiche ai termini</h2>
+        <p class="legal-p">
+          Possiamo aggiornare questi Termini. Quando lo facciamo:
+        </p>
+        <ul class="legal-ul">
+          <li>Cambiamo la data "Ultimo aggiornamento" in cima a questa pagina.</li>
+          <li>Per modifiche sostanziali (prezzo, limitazioni di responsabilità, gestione dei dati), ti avvisiamo via email almeno <strong>30 giorni prima</strong> dell'entrata in vigore.</li>
+          <li>Durante il periodo di preavviso, puoi disdire senza penali.</li>
+        </ul>
+        <p class="legal-p">
+          L'uso continuato del servizio dopo l'entrata in vigore delle
+          modifiche costituisce accettazione dei Termini aggiornati.
+        </p>
+      </section>
+
+      <section id="legge" class="legal-section">
+        <h2 class="legal-h2">Legge applicabile e foro</h2>
+        <p class="legal-p">
+          Questi Termini sono regolati dalla legge italiana. Per ogni
+          controversia è competente in via esclusiva il foro di
+          <span class="legal-placeholder">[DA COMPLETARE: città della sede legale]</span>, salvo norme
+          inderogabili a tutela del consumatore.
+        </p>
+      </section>
+
+      <section id="contatti" class="legal-section">
+        <h2 class="legal-h2">Contatti</h2>
+        <dl class="legal-dl">
+          <dt>Titolare</dt><dd><span class="legal-placeholder">[DA COMPLETARE: ragione sociale]</span></dd>
+          <dt>Sede</dt><dd><span class="legal-placeholder">[DA COMPLETARE]</span></dd>
+          <dt>Email</dt><dd><a class="legal-link" href="mailto:supporto@concorso-ai.it">supporto@concorso-ai.it</a></dd>
+          <dt>Privacy</dt><dd><a class="legal-link" href="mailto:privacy@concorso-ai.it">privacy@concorso-ai.it</a> <em>(se non ancora attiva)</em></dd>
+          <dt>PEC</dt><dd><span class="legal-placeholder">[DA COMPLETARE]</span></dd>
+        </dl>
+      </section>
+
+    </article>
+
+  </div>
+
+</main>
+
+<!-- Footer IDENTICO alla landing -->
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <p class="footer-brand">
+          <span class="brand-dot" aria-hidden="true"></span>
+          ConcorsoAI
+        </p>
+        <p class="footer-tag">
+          Simulatore d'orale per concorsi pubblici italiani. Carica il bando, ti interroghiamo come la commissione.
+        </p>
+        <p class="footer-legal-line">
+          Milano · Costruito in Italia. Beta aperta dal 2025.
+        </p>
+      </div>
+      <nav aria-label="Prodotto">
+        <p class="footer-col-label">Prodotto</p>
+        <ul class="footer-links">
+          <li><a href="/#in-pratica">In pratica</a></li>
+          <li><a href="pricing.html">Prezzi</a></li>
+          <li><a href="mailto:supporto@concorso-ai.it">Contatti</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Legale">
+        <p class="footer-col-label">Legale</p>
+        <ul class="footer-links">
+          <li><a href="terms.html">Termini</a></li>
+          <li><a href="privacy.html">Privacy</a></li>
+          <li><a href="cookies.html">Cookie</a></li>
+          <li><a href="mailto:supporto@concorso-ai.it">supporto@concorso-ai.it</a></li>
+        </ul>
+      </nav>
     </div>
-  </main>
+    <div class="footer-legal">
+      <span>© 2026 ConcorsoAI.</span>
+      <span>Made in Italy. Beta aperta.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/legal.js" defer></script>
+
 </body>
 </html>

@@ -1,0 +1,426 @@
+/* =========================================================================
+   ConcorsoAI — legal pages
+   Estensione di landing.css. Stessi token. Nessuna nuova palette.
+   Identità visiva IDENTICA alla landing: cream + ink, Inter, ritmo
+   alternato quiet/heavy, niente gradienti, niente glow, niente glassmorphism,
+   niente icone decorative.
+   Pattern chapter-marker (01–0N) ereditato dalla landing.
+
+   Carica DOPO landing.css. Override minimi: zero ridefinizione di token.
+   ========================================================================= */
+
+/* ---- layout shell: identico alla landing ma single-column narrow -------- */
+
+.legal-page {
+  /* Container narrow editoriale per leggibilità. Bringhurst 60–75 char/line,
+     target ~70ch = 920px / 16px-font ≈ 70 caratteri. Misura confortevole
+     sia desktop sia mobile. */
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 var(--s-5);
+}
+
+/* Page hero (titolo + last-updated + intro) — silence prima del contenuto.
+   Massimo respiro. H1 weight 600 come in landing .hero-h1, niente gradient. */
+.legal-hero {
+  padding: var(--s-10) 0 var(--s-9);
+  /* Stesso border-top hairline della landing, ma più sottile (line): la
+     progressione visiva dal navbar sticky → quiet → heavy è coerente. */
+  border-top: 1px solid var(--line);
+}
+
+.legal-eyebrow {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--s-5);
+}
+
+.legal-title {
+  font-size: clamp(32px, 4vw, 44px);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  color: var(--ink);
+  margin: 0 0 var(--s-5);
+  /* H1 pattern landing: stesse dimensioni/classificazione del .h2 della
+     landing perché le pagine legali non hanno un H1 above-the-fold che
+     compete con l'H1 della home; usiamo clamp(32px,4vw,44px) come le
+     sezioni editoriali. */
+}
+
+.legal-updated {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+  margin: 0 0 var(--s-7);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.legal-intro {
+  font-size: clamp(17px, 1.5vw, 19px);
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 64ch;
+  /* Massimo due righe di intro. Riduzione cognitive load: l'utente capisce
+     subito cosa troverà nella pagina prima ancora di vedere il TOC. */
+}
+
+/* ---- TOC — indice cliccabile -------------------------------------------- */
+
+.legal-toc {
+  padding: var(--s-7) 0 var(--s-9);
+  border-top: 1px solid var(--line);
+}
+
+.legal-toc-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 var(--s-4);
+}
+
+.legal-toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-3);
+  counter-reset: toc-counter;
+}
+
+.legal-toc-list li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  font-size: 15px;
+  font-weight: 400;
+  counter-increment: toc-counter;
+  /* TOC pattern editoriale: numero + label + dotleader. Riduce scanning. */
+}
+
+.legal-toc-list li::before {
+  content: counter(toc-counter, decimal-leading-zero);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  flex-shrink: 0;
+  min-width: 28px;
+  /* Stesso pattern "section-num" della landing. */
+}
+
+.legal-toc-list a {
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--muted);
+  text-underline-offset: 3px;
+  transition: color var(--t-base) ease,
+              text-decoration-color var(--t-base) ease;
+}
+
+.legal-toc-list a:hover {
+  color: var(--ink);
+  text-decoration-color: var(--ink);
+}
+
+/* Su mobile: due colonne per ridurre vertical scroll del TOC. */
+@media (min-width: 640px) {
+  .legal-toc-list {
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--s-7);
+  }
+}
+
+/* ---- Body content sections --------------------------------------------- */
+
+.legal-body {
+  padding: 0 0 var(--s-10);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-9);
+  /* Spaziatura generosa tra sezioni: file 06 P3 ritmo verticale. Ogni
+     sezione ha abbastanza respiro da non sembrare "murato" col successivo. */
+}
+
+.legal-section {
+  /* scroll-margin-top per sticky navbar (sticky nav ~64-72px
+     sticky-nav + a capo). */
+  scroll-margin-top: 88px;
+}
+
+.legal-h2 {
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 0 0 var(--s-5);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--line);
+  /* H2 della landing: stesso stile di .h2, dimensione clamp. La linea
+     sopra dividerà ogni sezione senza ripetere "card pattern". */
+}
+
+.legal-h3 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  margin: var(--s-6) 0 var(--s-3);
+}
+
+.legal-p {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  max-width: 70ch;
+  /* Bringhurst: 60–75 char, comfort reading. */
+  margin: 0 0 var(--s-4);
+}
+
+.legal-p:last-child {
+  margin-bottom: 0;
+}
+
+.legal-p strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.legal-ul,
+.legal-ol {
+  margin: 0 0 var(--s-5);
+  padding-left: var(--s-5);
+  max-width: 70ch;
+}
+
+.legal-ul li,
+.legal-ol li {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin-bottom: var(--s-3);
+}
+
+.legal-ul li::marker {
+  color: var(--ink-faint);
+  /* Bullet neutro (var(--ink-faint) = #8A8E96) = stesso pattern dei
+     .plan-card-bullet della landing: punto geometrico invece di "✓". */
+}
+
+.legal-ol li::marker {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.legal-callout {
+  background: var(--bg-2);
+  border-left: 2px solid var(--ink);
+  padding: var(--s-5) var(--s-6);
+  margin: var(--s-5) 0;
+  /* Callout ricorrente nella privacy per esercitare i diritti GDPR — pattern
+     Notion/Stripe: box neutro con barra ink a sinistra. Niente "card
+     decorata", niente icone. */
+  max-width: 70ch;
+}
+
+.legal-callout .legal-p,
+.legal-callout-label {
+  margin: 0;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.legal-callout-label {
+  font-weight: 600;
+  margin-bottom: var(--s-2);
+  font-size: 13px;
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* Definition list (per le definizioni reali: titolare, base giuridica,
+   durata, finalità). Pattern Stripe Docs / GitHub legal. */
+.legal-dl {
+  margin: 0 0 var(--s-5);
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 3fr;
+  row-gap: var(--s-3);
+  column-gap: var(--s-5);
+  max-width: 70ch;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.legal-dl dt {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.legal-dl dd {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+/* Sub-label (es. "art. 6.1.b GDPR") dentro <dt>: variante declinata del
+   termine — peso 400, ink-faint, dimensione ridotta. */
+.legal-dl-sub {
+  display: block;
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+@media (max-width: 540px) {
+  .legal-dl {
+    grid-template-columns: 1fr;
+    row-gap: var(--s-2);
+  }
+  .legal-dl dt {
+    margin-bottom: -4px;
+  }
+}
+
+/* ---- Highlight box per sezioni "dati raccolti" / "servizi terzi" ----- */
+
+.legal-table {
+  width: 100%;
+  max-width: 70ch;
+  border-collapse: collapse;
+  margin: var(--s-4) 0 var(--s-6);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.legal-table th,
+.legal-table td {
+  text-align: left;
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.legal-table th {
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line-2);
+}
+
+.legal-table td {
+  color: var(--ink-soft);
+}
+
+.legal-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.legal-table code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  color: var(--ink);
+  /* I <code> nella tabella cookie hanno bisogno di un monospace-font
+     per segnalare visivamente "questo è un identificatore tecnico".
+     ui-monospace fallback su tutti i browser moderni + Retina-friendly. */
+}
+
+/* ---- Placeholder marker (DA COMPLETARE) ------------------------------ */
+
+.legal-placeholder {
+  font-style: italic;
+  color: var(--ink-faint);
+  /* Placeholder testuale distinto dal body, NON sostituisce <em>.
+     <em> = emphasis semantico; questo = "richiede completamento". */
+}
+
+/* ---- Link inline (riferimenti normativi interni) -------------------- */
+
+.legal-link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--muted);
+  text-underline-offset: 3px;
+  transition: color var(--t-base) ease,
+              text-decoration-color var(--t-base) ease;
+}
+
+.legal-link:hover {
+  color: var(--ink);
+  text-decoration-color: var(--ink);
+}
+
+/* ---- Bookmark anchor target (TOC → sezione) ------------------------ */
+
+.legal-section:target .legal-h2 {
+  color: var(--ink);
+  /* Pattern GitHub docs: la sezione target dell'anchor evidenziata un filo
+     più scura. Micro-feedback che dice "eccoti qui". */
+}
+
+/* ---- Responsive ----------------------------------------------------- */
+
+@media (max-width: 720px) {
+  .legal-hero {
+    padding: var(--s-9) 0 var(--s-8);
+  }
+  .legal-toc {
+    padding: var(--s-6) 0 var(--s-8);
+  }
+  .legal-body {
+    gap: var(--s-8);
+  }
+  .legal-dl {
+    grid-template-columns: 1fr;
+  }
+  .legal-table {
+    font-size: 13px;
+  }
+  .legal-table th,
+  .legal-table td {
+    padding: var(--s-2) var(--s-3);
+  }
+}
+
+/* ---- reveal-on-scroll (riusa trigger single-pass della landing) ---- */
+
+.legal-section,
+.legal-toc {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 600ms ease-out 40ms, transform 600ms ease-out 40ms;
+}
+
+.legal-section.is-visible,
+.legal-toc.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* prefers-reduced-motion: rispetta WCAG 2.3.3 */
+@media (prefers-reduced-motion: reduce) {
+  .legal-section,
+  .legal-toc {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

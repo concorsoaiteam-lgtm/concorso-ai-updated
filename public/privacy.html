@@ -4,89 +4,374 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Privacy Policy — ConcorsoAI</title>
-  <meta name="description" content="Privacy Policy di ConcorsoAI — come trattiamo i tuoi dati personali nella preparazione ai concorsi pubblici." />
-  <meta name="theme-color" content="#F7FBFF" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.3/index.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.0.3/index.min.css" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
-          colors: {
-            brand: {
-              50: '#F7FBFF', 100: '#EAF4FF', 200: '#D6E8FF', 300: '#A9CDF8',
-              400: '#5EA0E8', 500: '#2563EB', 600: '#0F4C81',
-              700: '#0B3A63', 800: '#0B2A4A', 900: '#071D33'
-            }
-          }
-        }
-      }
-    }
+  <meta name="description" content="Privacy Policy di ConcorsoAI: quali dati raccogliamo, perché, per quanto tempo, e come esercitare i tuoi diritti GDPR." />
+  <meta name="theme-color" content="#FAF8F3" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://concorso-ai.vercel.app/privacy.html" />
+  <link rel="stylesheet" href="/css/landing.css" />
+  <link rel="stylesheet" href="/css/legal.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Privacy Policy — ConcorsoAI",
+    "inLanguage": "it",
+    "url": "https://concorso-ai.vercel.app/privacy.html"
+  }
   </script>
-  <link rel="stylesheet" href="/css/terms.css" />
 </head>
-<body class="font-sans antialiased selection:bg-brand-200 selection:text-brand-900">
-  <header class="sticky top-0 z-50 border-b border-brand-200/80 bg-white/86 backdrop-blur-xl shadow-sm">
-    <nav class="mx-auto flex h-16 max-w-3xl items-center justify-between px-4 sm:px-6">
-      <a href="index.html" class="rounded-xl text-xl font-extrabold tracking-tight text-brand-900">Concorso<span class="text-gradient">AI</span></a>
-      <a href="index.html" class="rounded-xl border border-brand-200 bg-white px-4 py-2 text-sm font-bold text-brand-700 hover:bg-brand-50 transition">← Indietro</a>
+<body>
+
+<a class="visually-hidden" href="#main-content">Salta al contenuto principale</a>
+
+<!-- Navbar IDENTICA alla landing -->
+<header class="nav" role="banner" aria-label="Intestazione">
+  <nav class="nav-inner container" aria-label="Navigazione principale">
+    <a href="/" class="brand">
+      <span class="brand-dot" aria-hidden="true"></span>
+      ConcorsoAI
+    </a>
+    <a href="/#in-pratica" class="nav-link">In pratica</a>
+    <a href="auth.html?mode=register" class="btn-primary" data-cta="nav">
+      Registrati gratis <span class="btn-arrow" aria-hidden="true">→</span>
+    </a>
+  </nav>
+</header>
+
+<main id="main-content" role="main" aria-label="Privacy Policy">
+
+  <div class="legal-page">
+
+    <header class="legal-hero">
+      <span class="legal-eyebrow">Privacy</span>
+      <h1 class="legal-title">Privacy Policy.</h1>
+      <p class="legal-updated">Ultimo aggiornamento: 3 Agosto 2026</p>
+      <p class="legal-intro">
+        Lo spieghiamo in italiano semplice, senza legalese. Qui sotto trovi cosa
+        raccogliamo quando usi ConcorsoAI, perché lo raccogliamo, per quanto
+        tempo lo conserviamo, e cosa puoi farci se cambi idea.
+      </p>
+    </header>
+
+    <!-- Indice cliccabile -->
+    <nav class="legal-toc" aria-label="Indice della Privacy Policy">
+      <p class="legal-toc-label">Indice</p>
+      <ol class="legal-toc-list">
+        <li><a href="#titolare">Chi siamo</a></li>
+        <li><a href="#dati">Quali dati raccogliamo</a></li>
+        <li><a href="#finalita">Perché li raccogliamo</a></li>
+        <li><a href="#base">La base giuridica</a></li>
+        <li><a href="#conservazione">Per quanto tempo</a></li>
+        <li><a href="#terze-parti">Servizi terzi che usiamo</a></li>
+        <li><a href="#diritti">I tuoi diritti</a></li>
+        <li><a href="#sicurezza">Sicurezza</a></li>
+        <li><a href="#cookie">Cookie</a></li>
+        <li><a href="#contatti">Contatti e reclamo</a></li>
+      </ol>
     </nav>
-  </header>
 
-  <main class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
-    <h1 class="text-3xl font-black tracking-[-0.035em] text-brand-900 sm:text-4xl">Privacy Policy</h1>
-    <p class="mt-2 text-sm font-semibold text-brand-600">Ultimo aggiornamento: 08/07/2026</p>
+    <article class="legal-body">
 
-    <div class="mt-10 space-y-8 text-brand-700 leading-7">
-      <section>
-        <h2 class="text-xl font-black text-brand-900">1. Titolare del trattamento</h2>
-        <p class="mt-3">ConcorsoAI tratta i dati personali nel rispetto del Regolamento UE 2016/679 (GDPR) e del D.Lgs. 196/2003. I dati sono trattati esclusivamente per erogare il servizio di simulazione orale.</p>
+      <section id="titolare" class="legal-section">
+        <h2 class="legal-h2">Chi siamo</h2>
+        <p class="legal-p">
+          ConcorsoAI è un simulatore di orale per concorsi pubblici italiani.
+          Quando ti registri o usi il servizio, il titolare del trattamento dei
+          dati è:
+        </p>
+        <dl class="legal-dl">
+          <dt>Titolare</dt><dd><span class="legal-placeholder">[DA COMPLETARE: ragione sociale]</span></dd>
+          <dt>Sede legale</dt><dd><span class="legal-placeholder">[DA COMPLETARE: indirizzo]</span></dd>
+          <dt>P.IVA / CF</dt><dd><span class="legal-placeholder">[DA COMPLETARE]</span></dd>
+          <dt>PEC</dt><dd><span class="legal-placeholder">[DA COMPLETARE]</span></dd>
+          <dt>Email privacy</dt><dd><a class="legal-link" href="mailto:privacy@concorso-ai.it">privacy@concorso-ai.it</a> <em>(se non ancora attiva, vedi "Contatti")</em></dd>
+        </dl>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">2. Dati raccolti</h2>
-        <p class="mt-3">Raccogliamo: (a) email e nome forniti in fase di registrazione, (b) bandi PDF caricati dall'utente, (c) testo delle risposte durante le simulazioni, (d) punteggi e metriche di feedback. Non raccogliamo dati di navigazione tramite cookie di profilazione.</p>
+      <section id="dati" class="legal-section">
+        <h2 class="legal-h2">Quali dati raccogliamo</h2>
+        <p class="legal-p">
+          Raccogliamo <strong>solo ciò che serve</strong> a farti funzionare il
+          servizio. Niente di più.
+        </p>
+        <h3 class="legal-h3">Quando ti registri</h3>
+        <ul class="legal-ul">
+          <li>Indirizzo email (serve per autenticarti e per contattarti se serve).</li>
+          <li>Nome visualizzato (opzionale; lo usi nella dashboard).</li>
+          <li>Se scegli "Continua con Google", riceviamo da Google il tuo nome, email e foto profilo pubblica.</li>
+        </ul>
+        <h3 class="legal-h3">Quando usi il simulatore</h3>
+        <ul class="legal-ul">
+          <li>I PDF del bando che carichi (servono per generare le domande).</li>
+          <li>Il testo delle risposte che scrivi nelle simulazioni.</li>
+          <li>I punteggi di feedback (chiarezza, struttura, contenuti).</li>
+          <li>Le materie e i livelli di difficoltà che selezioni.</li>
+        </ul>
+        <h3 class="legal-h3">Cosa <strong>non</strong> raccogliamo</h3>
+        <ul class="legal-ul">
+          <li>Nessun tracker pubblicitario, nessun pixel Facebook/Meta.</li>
+          <li>Nessun servizio di analytics comportamentale (Hotjar, Mixpanel, …).</li>
+          <li>Nessun cookie di profilazione (vedi <a class="legal-link" href="cookies.html">Cookie Policy</a>).</li>
+          <li>Nessun dato sensibile (salute, opinioni politiche, religione, …).</li>
+        </ul>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">3. Finalità del trattamento</h2>
-        <p class="mt-3">I dati sono trattati esclusivamente per: (a) erogare il servizio di simulazione, (b) calcolare statistiche di progresso personali, (c) migliorare la qualità dei feedback AI. Nessun dato è utilizzato per finalità commerciali o di marketing senza consenso esplicito.</p>
+      <section id="finalita" class="legal-section">
+        <h2 class="legal-h2">Perché li raccogliamo</h2>
+        <p class="legal-p">
+          Lo scopo è uno solo: farti simulare bene. Niente marketing nascosto,
+          niente pacchetti di dati venduti a terzi.
+        </p>
+        <dl class="legal-dl">
+          <dt>Erogare il servizio</dt>
+          <dd>Autenticarti, conservare le tue simulazioni, restituirti lo storico.</dd>
+
+          <dt>Generare le domande</dt>
+          <dd>Inviare il testo del bando al modello AI per estrarre le materie
+              e generare domande pertinenti al <em>tuo</em> concorso.</dd>
+
+          <dt>Migliorare il feedback</dt>
+          <dd>Restituirti un voto puntuale su ciò che hai detto e cosa manca.</dd>
+
+          <dt>Prevenire abusi</dt>
+          <dd>Rate limiting anti-abuso, anti scraping, log di sicurezza.</dd>
+
+          <dt>Complessità tecnica</dt>
+          <dd>Gestione billing (se passi al piano Pro) e recupero password.</dd>
+        </dl>
+        <p class="legal-p">
+          Per nessuna di queste finalità profiliamo la tua navigazione al di
+          fuori di ConcorsoAI, e non ti mostriamo annunci pubblicitari.
+        </p>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">4. Base giuridica</h2>
-        <p class="mt-3">Il trattamento si basa sull'esecuzione del contratto di servizio (art. 6.1.b GDPR) per i dati necessari all'erogazione, e sul legittimo interesse (art. 6.1.f GDPR) per il miglioramento del servizio.</p>
+      <section id="base" class="legal-section">
+        <h2 class="legal-h2">La base giuridica</h2>
+        <p class="legal-p">
+          Trattiamo i dati sulle basi previste dal Regolamento UE 2016/679 (GDPR):
+        </p>
+        <dl class="legal-dl">
+          <dt>Esecuzione del contratto<br><span class="legal-dl-sub">art. 6.1.b</span></dt>
+          <dd>Per i dati strettamente necessari a erogare il servizio che hai scelto (email, account, simulazioni, bando, risposte).</dd>
+
+          <dt>Legittimo interesse<br><span class="legal-dl-sub">art. 6.1.f</span></dt>
+          <dd>Per prevenire abusi, garantire la sicurezza dell'infrastruttura e migliorare la qualità del prodotto in forma aggregata e non identificativa.</dd>
+
+          <dt>Obblighi di legge<br><span class="legal-dl-sub">art. 6.1.c</span></dt>
+          <dd>Per conservare le fatture e i dati fiscali relativi agli abbonamenti a pagamento, secondo la normativa italiana.</dd>
+
+          <dt>Consenso esplicito<br><span class="legal-dl-sub">art. 6.1.a</span></dt>
+          <dd>Quando ti chiediamo un consenso specifico (es. ricevere comunicazioni promozionali, o accettare cookie non essenziali). Senza consenso non li usiamo.</dd>
+        </dl>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">5. Conservazione dei dati</h2>
-        <p class="mt-3">I dati personali sono conservati per tutta la durata dell'account e per un periodo massimo di 12 mesi dopo la cancellazione. I bandi caricati sono cifrati su Supabase (server UE). L'utente può richiedere la cancellazione immediata in qualsiasi momento dalla dashboard.</p>
+      <section id="conservazione" class="legal-section">
+        <h2 class="legal-h2">Per quanto tempo conserviamo i dati</h2>
+        <p class="legal-p">
+          I dati del tuo account restano finché l'account è attivo.
+        </p>
+        <dl class="legal-dl">
+          <dt>Account attivo</dt>
+          <dd>Email, profilo, bando, risposte, storico: tutto conservato finché non cancelli l'account.</dd>
+
+          <dt>Dopo la cancellazione</dt>
+          <dd>Cancelliamo (o anonimizziamo) i dati entro <span class="legal-placeholder">[DA COMPLETARE: durata, indicativamente 30 giorni]</span>, tranne quelli che dobbiamo conservare per legge (es. fatture: 10 anni).</dd>
+
+          <dt>Log di sicurezza</dt>
+          <dd>Conservati per <span class="legal-placeholder">[DA COMPLETARE: durata, indicativamente 90 giorni]</span>, poi cancellati automaticamente.</dd>
+        </dl>
+        <div class="legal-callout" role="note">
+          <p class="legal-callout-label">Vuoi cancellarti?</p>
+          <p class="legal-p">
+            Dalla dashboard, <em>Impostazioni → Elimina account</em>. La
+            cancellazione è irreversibile: i tuoi dati vengono rimossi.
+            Riceverai una email di conferma prima dell'eliminazione.
+          </p>
+        </div>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">6. Condivisione con terze parti</h2>
-        <p class="mt-3">I dati sono trattati tramite: Supabase (database e autenticazione, server UE), BluesMinds (API AI per generazione risposte), Vercel (hosting). Nessun dato è venduto o ceduto a terzi per finalità commerciali.</p>
+      <section id="terze-parti" class="legal-section">
+        <h2 class="legal-h2">Servizi terzi che usiamo</h2>
+        <p class="legal-p">
+          Per erogare il servizio ci appoggiamo ad alcuni fornitori tecnici.
+          Tutti conservano i dati <strong>in Europa</strong> o sono conformi a
+          decisioni di adeguatezza UE. Ecco l'elenco reale, con il ruolo di
+          ciascuno:
+        </p>
+        <table class="legal-table">
+          <thead>
+            <tr>
+              <th scope="col">Fornitore</th>
+              <th scope="col">Cosa fa per noi</th>
+              <th scope="col">Localizzazione dati</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Supabase</td>
+              <td>Database e autenticazione (email/password, Google OAuth).</td>
+              <td>UE (Frankfurt)</td>
+            </tr>
+            <tr>
+              <td>Stripe</td>
+              <td>Pagamenti dei piani a pagamento. Non vediamo mai il numero della tua carta.</td>
+              <td>UE</td>
+            </tr>
+            <tr>
+              <td>Resend</td>
+              <td>Invio email transazionali (benvenuto, recupero password).</td>
+              <td>UE / US con SCC</td>
+            </tr>
+            <tr>
+              <td>Google Gemini</td>
+              <td>Modello AI che genera le domande sulle materie del tuo bando e corregge le risposte.</td>
+              <td>UE / US con SCC</td>
+            </tr>
+            <tr>
+              <td>Vercel</td>
+              <td>Hosting del sito e delle API.</td>
+              <td>Globale (edge network)</td>
+            </tr>
+            <tr>
+              <td>Google OAuth</td>
+              <td>Accesso con account Google (solo se scegli "Continua con Google").</td>
+              <td>Google Ireland Ltd.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="legal-p">
+          Nessun dato è venduto, scambiato o condiviso con terzi per finalità
+          di marketing. I fornitori sopra sono selezionati perché offrono
+          <strong>Data Processing Agreements (DPA)</strong> conformi al GDPR.
+        </p>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">7. Diritti dell'utente</h2>
-        <p class="mt-3">L'utente ha diritto di: accedere ai propri dati, rettificarli, cancellarli, limitarne il trattamento, opporsi al trattamento, richiedere la portabilità. Per esercitare questi diritti, utilizzare la funzione di cancellazione nella dashboard o contattarci.</p>
+      <section id="diritti" class="legal-section">
+        <h2 class="legal-h2">I tuoi diritti</h2>
+        <p class="legal-p">
+          Il GDPR ti riconosce diritti concreti sui tuoi dati. Tutti esercitabili
+          gratuitamente, entro 30 giorni dalla richiesta:
+        </p>
+        <ul class="legal-ul">
+          <li><strong>Accesso</strong> — sapere quali dati abbiamo su di te.</li>
+          <li><strong>Rettifica</strong> — correggere dati sbagliati o incompleti.</li>
+          <li><strong>Cancellazione</strong> — far rimuovere i dati (diritto all'oblio).</li>
+          <li><strong>Limitazione</strong> — far elaborare i dati solo per finalità specifiche.</li>
+          <li><strong>Portabilità</strong> — ricevere i tuoi dati in formato JSON trasferibile.</li>
+          <li><strong>Opposizione</strong> — opporti a trattamenti basati su legittimo interesse.</li>
+          <li><strong>Revoca del consenso</strong> — senza dover dare motivazioni, in qualsiasi momento.</li>
+        </ul>
+        <div class="legal-callout" role="note">
+          <p class="legal-callout-label">Come esercitarli</p>
+          <p class="legal-p">
+            Vai su <em>Dashboard → Impostazioni → Privacy</em>, oppure scrivi a
+            <a class="legal-link" href="mailto:privacy@concorso-ai.it">privacy@concorso-ai.it</a>.
+            Rispondiamo entro 30 giorni.
+          </p>
+        </div>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">8. Cookie</h2>
-        <p class="mt-3">ConcorsoAI utilizza esclusivamente cookie tecnici essenziali per il funzionamento della piattaforma (autenticazione Supabase). Non utilizziamo cookie di profilazione, tracciamento o marketing.</p>
+      <section id="sicurezza" class="legal-section">
+        <h2 class="legal-h2">Sicurezza</h2>
+        <p class="legal-p">
+          Trattiamo i dati con le stesse cautele che metteremmo per proteggere
+          i nostri. Nello specifico:
+        </p>
+        <ul class="legal-ul">
+          <li>Connessione cifrata in transito (HTTPS / TLS).</li>
+          <li>Password salvate in forma cifrata e non reversibile (hash + salt).</li>
+          <li>Autenticazione con token a scadenza su Supabase.</li>
+          <li>Webhook firmati con HMAC per evitare spoofing.</li>
+          <li>Rate limiting per prevenire brute force e scraping.</li>
+          <li>Backup giornalieri, retention limitata.</li>
+        </ul>
+        <p class="legal-p">
+          Nessun sistema è invulnerabile al 100%. Se dovesse accadere un
+          incidente, te lo comunicheremo entro 72 ore come richiesto dall'art.
+          33 GDPR.
+        </p>
       </section>
 
-      <section>
-        <h2 class="text-xl font-black text-brand-900">9. Contatti</h2>
-        <p class="mt-3">Per domande sulla privacy o per esercitare i tuoi diritti, contattaci tramite la dashboard del tuo account.</p>
+      <section id="cookie" class="legal-section">
+        <h2 class="legal-h2">Cookie</h2>
+        <p class="legal-p">
+          Usiamo <strong>solo cookie tecnici</strong> necessari al
+          funzionamento del servizio. Niente cookie pubblicitari, niente
+          cookie analitici di terze parti, niente retargeting.
+        </p>
+        <p class="legal-p">
+          Per l'elenco puntuale dei cookie, vedi la
+          <a class="legal-link" href="cookies.html">Cookie Policy</a>.
+        </p>
       </section>
+
+      <section id="contatti" class="legal-section">
+        <h2 class="legal-h2">Contatti e reclamo</h2>
+        <p class="legal-p">
+          Per qualsiasi domanda sulla privacy, per esercitare i tuoi diritti, o
+          per segnalare un problema:
+        </p>
+        <dl class="legal-dl">
+          <dt>Email</dt>
+          <dd><a class="legal-link" href="mailto:privacy@concorso-ai.it">privacy@concorso-ai.it</a> <em>(se non ancora attiva, scrivi a <a class="legal-link" href="mailto:supporto@concorso-ai.it">supporto@concorso-ai.it</a>)</em></dd>
+          <dt>PEC</dt><dd><span class="legal-placeholder">[DA COMPLETARE]</span></dd>
+          <dt>Indirizzo</dt><dd><span class="legal-placeholder">[DA COMPLETARE: sede legale]</span></dd>
+        </dl>
+        <p class="legal-p">
+          Se ritieni che il trattamento dei tuoi dati non sia conforme al GDPR,
+          hai il diritto di presentare un reclamo all'autorità di controllo:
+          in Italia, il <a class="legal-link" href="https://www.garanteprivacy.it" rel="noopener">Garante per la Protezione dei Dati Personali</a>.
+        </p>
+      </section>
+
+    </article>
+
+  </div>
+
+</main>
+
+<!-- Footer IDENTICO alla landing -->
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <p class="footer-brand">
+          <span class="brand-dot" aria-hidden="true"></span>
+          ConcorsoAI
+        </p>
+        <p class="footer-tag">
+          Simulatore d'orale per concorsi pubblici italiani. Carica il bando, ti interroghiamo come la commissione.
+        </p>
+        <p class="footer-legal-line">
+          Milano · Costruito in Italia. Beta aperta dal 2025.
+        </p>
+      </div>
+      <nav aria-label="Prodotto">
+        <p class="footer-col-label">Prodotto</p>
+        <ul class="footer-links">
+          <li><a href="/#in-pratica">In pratica</a></li>
+          <li><a href="pricing.html">Prezzi</a></li>
+          <li><a href="mailto:supporto@concorso-ai.it">Contatti</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Legale">
+        <p class="footer-col-label">Legale</p>
+        <ul class="footer-links">
+          <li><a href="terms.html">Termini</a></li>
+          <li><a href="privacy.html">Privacy</a></li>
+          <li><a href="cookies.html">Cookie</a></li>
+          <li><a href="mailto:supporto@concorso-ai.it">supporto@concorso-ai.it</a></li>
+        </ul>
+      </nav>
     </div>
-  </main>
+    <div class="footer-legal">
+      <span>© 2026 ConcorsoAI.</span>
+      <span>Made in Italy. Beta aperta.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/legal.js" defer></script>
+
 </body>
 </html>
