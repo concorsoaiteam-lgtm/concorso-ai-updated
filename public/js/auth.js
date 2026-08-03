@@ -1,0 +1,638 @@
+/* =========================================================================
+   auth.js — ConcorsoAI
+   Sistema di autenticazione. Vanilla JS. Nessuna libreria oltre Supabase.
+   Obiettivo: massimizzare il completamento della registrazione.
+   Ogni funzione ha un motivo: validazione live (Baymard), anti-enumeration
+   (NN/g), skeleton invece di spinner (NN/g perceived performance).
+   ========================================================================= */
+(function () {
+  "use strict";
+
+  /* ------------------------------------------------------------------
+     Supabase — stesso progetto della landing/dashboard.
+     Override possibile via __SUPABASE_URL / __SUPABASE_ANON_KEY.
+     ------------------------------------------------------------------ */
+  var SUPABASE_URL = (typeof __SUPABASE_URL !== "undefined" && __SUPABASE_URL)
+    ? __SUPABASE_URL
+    : ["https://", "xhifnparcouxsypkjcmn", ".supabase.co"].join("");
+  var SUPABASE_ANON_KEY = (typeof __SUPABASE_ANON_KEY !== "undefined" && __SUPABASE_ANON_KEY)
+    ? __SUPABASE_ANON_KEY
+    : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM";
+
+  var supabaseClient = window.supabase
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+
+  // telemetry.js e auth-patch.js leggono window.supabaseClient
+  window.supabaseClient = supabaseClient;
+
+  var DASHBOARD_URL = "/dashboard.html";
+  var REDUCED_MOTION = window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Contesto del pannello "email inviata": signup vs recovery.
+  // Usato da handleResend per reinviare il tipo giusto di email.
+  var sentContext = "signup";
+
+  /* ------------------------------------------------------------------
+     Helpers
+     ------------------------------------------------------------------ */
+  function $(id) { return document.getElementById(id); }
+
+  function getParams() {
+    var out = {};
+    var search = new URLSearchParams(window.location.search);
+    search.forEach(function (v, k) { out[k] = v; });
+    // Supabase mette token_hash e type anche nell'hash (#...) dei deep link
+    try {
+      var hash = new URLSearchParams(window.location.hash.substring(1));
+      hash.forEach(function (v, k) { if (!out[k]) out[k] = v; });
+    } catch (e) { /* hash malformato: ignora */ }
+    return out;
+  }
+
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function isValidEmail(v) { return EMAIL_RE.test(String(v || "").trim()); }
+
+  function track(event, meta) {
+    try {
+      if (typeof window.telemetry === "function") {
+        window.telemetry(event, meta || {});
+      }
+    } catch (e) { /* telemetry fire-and-forget */ }
+  }
+
+  // Guard Supabase: se il CDN non è raggiungibile non blocchiamo il form
+  // in stato busy senza feedback (review fix).
+  function guardSupabase() {
+    if (supabaseClient) return true;
+    showAuthError("Servizio non raggiungibile. Controlla la connessione e riprova.");
+    return false;
+  }
+
+  /* ------------------------------------------------------------------
+     Errori: regione globale (role=alert) + field inline.
+     ------------------------------------------------------------------ */
+  var authErrTimer = null;
+
+  function showAuthError(msg) {
+    var box = $("auth-error");
+    if (!box) return;
+    box.textContent = msg;
+    box.classList.add("is-visible");
+    window.clearTimeout(authErrTimer);
+    authErrTimer = window.setTimeout(clearAuthError, 6000);
+  }
+
+  function clearAuthError() {
+    var box = $("auth-error");
+    if (!box) return;
+    box.textContent = "";
+    box.classList.remove("is-visible");
+    window.clearTimeout(authErrTimer);
+  }
+
+  function setFieldError(inputId, errorId, message) {
+    var input = $(inputId);
+    var err = $(errorId);
+    if (!input || !err) return;
+    if (message) {
+      input.setAttribute("aria-invalid", "true");
+      err.textContent = message;
+      err.classList.add("is-visible");
+    } else {
+      input.removeAttribute("aria-invalid");
+      err.textContent = "";
+      err.classList.remove("is-visible");
+    }
+  }
+
+  function translateAuthError(message) {
+    var msg = String(message || "").toLowerCase();
+    if (msg.indexOf("invalid login credentials") !== -1) {
+      return "Email o password non corretti. Riprova, o recupera la password.";
+    }
+    if (msg.indexOf("email not confirmed") !== -1) {
+      return "Conferma prima la tua email: trovi il link nella casella (o nello spam).";
+    }
+    if (msg.indexOf("already registered") !== -1) {
+      return "Esiste già un account con questa email. Prova ad accedere.";
+    }
+    if (msg.indexOf("password should be at least") !== -1 ||
+        msg.indexOf("at least 8 characters") !== -1) {
+      return "La password è troppo corta: servono almeno 8 caratteri.";
+    }
+    if (msg.indexOf("rate limit") !== -1) {
+      return "Troppi tentativi. Aspetta un minuto e riprova.";
+    }
+    if (msg.indexOf("failed to fetch") !== -1 ||
+        msg.indexOf("network") !== -1) {
+      return "Problema di connessione. Riprova tra qualche secondo.";
+    }
+    return "Qualcosa non ha funzionato. Riprova tra qualche secondo.";
+  }
+
+  /* ------------------------------------------------------------------
+     Pannelli: router + focus management
+     ------------------------------------------------------------------ */
+  var PANELS = ["login", "register", "forgot", "sent", "reset"];
+
+  function showPanel(name) {
+    PANELS.forEach(function (n) {
+      var p = $("panel-" + n);
+      if (!p) return;
+      if (n === name) {
+        p.hidden = false;
+        p.classList.remove("is-enter");
+        void p.offsetWidth; // reflow per riavviare l'animazione
+        p.classList.add("is-enter");
+      } else {
+        p.hidden = true;
+      }
+    });
+
+    // Tabs visibili solo nelle viste login/register
+    var tabs = $("auth-tabs");
+    if (tabs) {
+      tabs.style.display = (name === "login" || name === "register") ? "" : "none";
+    }
+
+    var isLogin = name === "login";
+    var tabL = $("tab-login");
+    var tabR = $("tab-register");
+    if (tabL) tabL.setAttribute("aria-selected", String(isLogin && name === "login"));
+    if (tabR) tabR.setAttribute("aria-selected", String(!isLogin && name === "register"));
+
+    clearAuthError();
+
+    // Focus: primo campo per i form, titolo per gli stati di conferma
+    window.setTimeout(function () {
+      var target = null;
+      if (name === "login") target = $("login-email");
+      else if (name === "register") target = $("register-email");
+      else if (name === "forgot") target = $("forgot-email");
+      else if (name === "sent") target = $("sent-title");
+      else if (name === "reset") target = $("reset-password");
+      if (target) target.focus({ preventScroll: true });
+    }, 260);
+  }
+
+  function setMode(mode) {
+    var isLogin = mode !== "register";
+    if (isLogin) {
+      showPanel("login");
+      try { history.replaceState(null, "", "/auth.html"); } catch (e) { /* ignora */ }
+    } else {
+      showPanel("register");
+      try { history.replaceState(null, "", "/auth.html?mode=register"); } catch (e) { /* ignora */ }
+    }
+  }
+
+  /* ------------------------------------------------------------------
+     Validazione live (Baymard: blur, poi live dopo il primo blur)
+     ------------------------------------------------------------------ */
+  var touched = {};
+
+  function validateEmailField(inputId, errorId) {
+    var v = String($(inputId).value || "").trim();
+    if (!v) return setFieldError(inputId, errorId, "Inserisci la tua email");
+    if (!isValidEmail(v)) {
+      return setFieldError(inputId, errorId, "L'email non è valida. Inserisci un indirizzo reale.");
+    }
+    return setFieldError(inputId, errorId, "");
+  }
+
+  function bindFieldValidation(inputId, errorId) {
+    var input = $(inputId);
+    if (!input) return;
+    input.addEventListener("blur", function () {
+      touched[inputId] = true;
+      validateEmailField(inputId, errorId);
+    });
+    input.addEventListener("input", function () {
+      clearAuthError();
+      if (touched[inputId]) validateEmailField(inputId, errorId);
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     Password strength — onesto (NIST: lunghezza > complessità)
+     ------------------------------------------------------------------ */
+  function passwordLevel(pw) {
+    pw = String(pw || "");
+    if (!pw) return { level: "empty", label: "Minimo 8 caratteri", width: 0, cls: "" };
+    if (pw.length < 8) {
+      return { level: "weak", label: "Servono almeno 8 caratteri", width: 33, cls: "is-weak" };
+    }
+    var hasUp = /[A-ZÀ-Ý]/.test(pw);
+    var hasNumSym = /[0-9\W_]/.test(pw);
+    var score = 0;
+    if (pw.length >= 10) score++;
+    if (pw.length >= 14) score++;
+    if (hasUp) score++;
+    if (hasNumSym) score++;
+    if (score >= 4) return { level: "strong", label: "Ottima", width: 100, cls: "is-strong" };
+    if (score >= 2) return { level: "medium", label: "Buona", width: 66, cls: "is-medium" };
+    return { level: "weak", label: "Aggiungi una maiuscola o un numero", width: 33, cls: "is-weak" };
+  }
+
+  function bindStrength(inputId, fillId, labelId, errorId) {
+    var input = $(inputId);
+    var fill = $(fillId);
+    var label = $(labelId);
+    if (!input || !fill || !label) return;
+    input.addEventListener("input", function () {
+      var r = passwordLevel(input.value);
+      fill.className = "pw-strength-fill " + r.cls;
+      fill.style.width = r.width + "%";
+      label.textContent = r.label;
+      if (errorId) setFieldError(inputId, errorId, "");
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     Toggle mostra/nascondi password
+     ------------------------------------------------------------------ */
+  function bindPasswordToggles() {
+    document.querySelectorAll(".pw-toggle").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var input = $(btn.getAttribute("data-target"));
+        if (!input) return;
+        var isPassword = input.type === "password";
+        input.type = isPassword ? "text" : "password";
+        btn.setAttribute("aria-label", isPassword ? "Nascondi password" : "Mostra password");
+        btn.setAttribute("aria-pressed", String(isPassword));
+        input.focus({ preventScroll: true });
+      });
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     Stato busy bottone — barra indeterminata 1px (mai spinner)
+     ------------------------------------------------------------------ */
+  function setBusy(btn, busy, busyLabel, idleLabel) {
+    if (!btn) return;
+    var label = btn.querySelector(".btn-label");
+    if (busy) {
+      btn.classList.add("is-busy");
+      btn.disabled = true;
+      if (label && busyLabel) label.textContent = busyLabel;
+    } else {
+      btn.classList.remove("is-busy");
+      btn.disabled = false;
+      if (label && idleLabel) label.textContent = idleLabel;
+    }
+  }
+
+  /* ------------------------------------------------------------------
+     Toast
+     ------------------------------------------------------------------ */
+  var toastTimer = null;
+  function showToast(msg) {
+    var t = document.createElement("div");
+    t.className = "auth-toast";
+    t.setAttribute("role", "status");
+    t.setAttribute("aria-live", "polite");
+    t.textContent = msg;
+    document.body.appendChild(t);
+    window.setTimeout(function () { t.classList.add("is-visible"); }, 20);
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function () {
+      t.classList.remove("is-visible");
+      window.setTimeout(function () { t.remove(); }, 250);
+    }, 3200);
+  }
+
+  /* ------------------------------------------------------------------
+     Handlers — Supabase
+     ------------------------------------------------------------------ */
+  var lastEmail = "";
+
+  function handleLogin(e) {
+    e.preventDefault();
+    if (!guardSupabase()) return;
+    var email = String($("login-email").value || "").trim();
+    var password = $("login-password").value || "";
+
+    if (!isValidEmail(email)) {
+      return setFieldError("login-email", "login-email-error", "Inserisci un indirizzo email valido");
+    }
+    if (!password) {
+      return setFieldError("login-password", "login-password-error", "Inserisci la password");
+    }
+
+    var btn = $("login-submit");
+    setBusy(btn, true, "Accesso in corso…", "Entra");
+    track("auth_submit", { mode: "login" });
+
+    supabaseClient.auth.signInWithPassword({ email: email, password: password })
+      .then(function (res) {
+        if (res.error) throw res.error;
+        track("auth_login_ok", {});
+        window.location.href = DASHBOARD_URL;
+      })
+      .catch(function (err) {
+        setBusy(btn, false, "", "Entra");
+        showAuthError(translateAuthError(err && err.message));
+      });
+  }
+
+  function handleRegister(e) {
+    e.preventDefault();
+    if (!guardSupabase()) return;
+    var email = String($("register-email").value || "").trim();
+    var password = $("register-password").value || "";
+    var terms = $("terms-checkbox").checked;
+
+    if (!isValidEmail(email)) {
+      return setFieldError("register-email", "register-email-error", "Inserisci un indirizzo email valido");
+    }
+    if (password.length < 8) {
+      return setFieldError("register-password", "register-password-error", "La password deve avere almeno 8 caratteri");
+    }
+    if (!terms) {
+      showAuthError("Accetta i termini per creare l'account.");
+      return;
+    }
+
+    lastEmail = email;
+    var btn = $("register-submit");
+    setBusy(btn, true, "Creazione account…", "Crea account gratis");
+    track("auth_submit", { mode: "register" });
+
+    // Solo email + password. Niente nome: verrà chiesto in onboarding.
+    supabaseClient.auth.signUp({ email: email, password: password })
+      .then(function (res) {
+        if (res.error) throw res.error;
+        if (!res.data.session) {
+          // Email confirmation attiva: stato "email inviata"
+          track("auth_register_pending", {});
+          setBusy(btn, false, "", "Crea account gratis");
+          sentContext = "signup";
+          $("sent-text").textContent =
+            "Ti abbiamo inviato un link di conferma. Aprilo per attivare l'account e iniziare le tue prime simulazioni.";
+          showPanel("sent");
+        } else {
+          track("auth_register_ok", {});
+          window.location.href = DASHBOARD_URL;
+        }
+      })
+      .catch(function (err) {
+        setBusy(btn, false, "", "Crea account gratis");
+        $("register-submit").disabled = !$("terms-checkbox").checked;
+        showAuthError(translateAuthError(err && err.message));
+      });
+  }
+
+  function handleForgot(e) {
+    e.preventDefault();
+    if (!guardSupabase()) return;
+    var email = String($("forgot-email").value || "").trim();
+    if (!isValidEmail(email)) {
+      return setFieldError("forgot-email", "forgot-email-error", "Inserisci un indirizzo email valido");
+    }
+
+    lastEmail = email;
+    var btn = $("forgot-submit");
+    setBusy(btn, true, "Invio…", "Invia il link");
+    track("auth_submit", { mode: "forgot" });
+
+    supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/auth.html?type=recovery"
+    })
+      .then(function () {
+        setBusy(btn, false, "", "Invia il link");
+        // Anti-enumeration: stesso messaggio in ogni caso
+        sentContext = "recovery";
+        $("sent-text").textContent =
+          "Se l'indirizzo è registrato, troverai il link per impostare una nuova password. Controlla anche lo spam.";
+        showPanel("sent");
+      })
+      .catch(function (err) {
+        setBusy(btn, false, "", "Invia il link");
+        // Privacy: non confermare lo stato dell'email, mostra comunque lo stato
+        sentContext = "recovery";
+        $("sent-text").textContent =
+          "Se l'indirizzo è registrato, troverai il link per impostare una nuova password. Controlla anche lo spam.";
+        showPanel("sent");
+        try { console.debug("[ConcorsoAI] reset error:", err && err.message); } catch (x) { /* noop */ }
+      });
+  }
+
+  function ensureRecoverySession() {
+    return supabaseClient.auth.getSession().then(function (res) {
+      if (res.data && res.data.session) return Promise.resolve(true);
+      var tokenHash = getParams().token_hash;
+      if (!tokenHash) return Promise.resolve(false);
+      return supabaseClient.auth.verifyOtp({ type: "recovery", token_hash: tokenHash })
+        .then(function (r) {
+          return !!(r.data && r.data.session);
+        })
+        .catch(function () { return false; });
+    });
+  }
+
+  function handleReset(e) {
+    e.preventDefault();
+    if (!guardSupabase()) return;
+    var password = $("reset-password").value || "";
+    if (password.length < 8) {
+      return setFieldError("reset-password", "reset-password-error", "La password deve avere almeno 8 caratteri");
+    }
+
+    var btn = $("reset-submit");
+    setBusy(btn, true, "Aggiornamento…", "Aggiorna password");
+    track("auth_submit", { mode: "reset" });
+
+    ensureRecoverySession().then(function (ok) {
+      if (!ok) {
+        setBusy(btn, false, "", "Aggiorna password");
+        showAuthError("Il link non è più valido. Richiedine uno nuovo.");
+        showPanel("forgot");
+        return;
+      }
+      return supabaseClient.auth.updateUser({ password: password }).then(function (res) {
+        if (res.error) throw res.error;
+        track("auth_reset_ok", {});
+        setBusy(btn, false, "", "Aggiorna password");
+        showToast("Password aggiornata. Stai entrando…");
+        window.setTimeout(function () { window.location.href = DASHBOARD_URL; }, 900);
+      }).catch(function (err) {
+        setBusy(btn, false, "", "Aggiorna password");
+        showAuthError(translateAuthError(err && err.message));
+      });
+    });
+  }
+
+  function handleResend() {
+    if (!lastEmail) return;
+    if (!guardSupabase()) return;
+    var btn = $("resend-btn");
+    btn.disabled = true;
+
+    if (sentContext === "recovery") {
+      // Nel contesto recovery va reinviato il link di reset, non quello di signup
+      supabaseClient.auth.resetPasswordForEmail(lastEmail, {
+        redirectTo: window.location.origin + "/auth.html?type=recovery"
+      }).catch(function () { /* silenzioso per privacy */ });
+    } else {
+      try {
+        if (supabaseClient.auth.resend) {
+          supabaseClient.auth.resend({ type: "signup", email: lastEmail })
+            .catch(function () { /* silenzioso per privacy */ });
+        }
+      } catch (e) { /* noop */ }
+    }
+
+    showToast("Nuovo link inviato. Controlla la casella.");
+    window.setTimeout(function () { btn.disabled = false; }, 4000);
+  }
+
+  function handleGoogle(btnLabel) {
+    if (!supabaseClient) return;
+    track("auth_submit", { mode: "google" });
+    supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin + DASHBOARD_URL }
+    }).catch(function (err) {
+      showAuthError(translateAuthError(err && err.message));
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     Preview viva — ciclo domanda → skeleton → feedback
+     ------------------------------------------------------------------ */
+  var PREVIEW = [
+    {
+      label: "Domanda 4 di 12",
+      question: "Come affronterebbe il primo mese di lavoro in un ufficio che non conosce?",
+      feedback: "Risposta solida. Raccordi la chiusura con i criteri del bando.",
+      confidence: "Confidence 92%"
+    },
+    {
+      label: "Domanda 5 di 12",
+      question: "Descriva una situazione complessa che ha gestito e come l'ha risolta.",
+      feedback: "Buona struttura. Aggiunga un esempio concreto dal suo percorso.",
+      confidence: "Confidence 88%"
+    },
+    {
+      label: "Domanda 6 di 12",
+      question: "Come organizzerebbe il lavoro dell'ufficio nei primi novanta giorni?",
+      feedback: "Risposta chiara. Potrebbe citare la normativa indicata nel programma.",
+      confidence: "Confidence 91%"
+    }
+  ];
+
+  function startPreviewLoop() {
+    var frame = $("auth-preview");
+    if (!frame || REDUCED_MOTION) {
+      // Reduced motion: stato statico già presente nell'HTML, niente ciclo
+      return;
+    }
+    var qSpan = $("preview-q-span");
+    var qLabel = $("preview-q-label");
+    var feedback = $("preview-feedback");
+    var feedbackText = $("preview-feedback-text");
+    var confidenceValue = $("preview-confidence-value");
+    var i = 0;
+
+    function cycle() {
+      var item = PREVIEW[i];
+      i = (i + 1) % PREVIEW.length;
+
+      // 1. nuova domanda + skeleton visibile
+      qLabel.textContent = item.label;
+      qSpan.textContent = item.question;
+      feedback.classList.remove("is-done");
+
+      // 2. dopo lo shimmer, feedback + confidence
+      window.setTimeout(function () {
+        feedbackText.textContent = item.feedback;
+        confidenceValue.textContent = item.confidence;
+        feedback.classList.add("is-done");
+      }, 1200);
+    }
+
+    window.setInterval(cycle, 7600);
+  }
+
+  /* ------------------------------------------------------------------
+     Init
+     ------------------------------------------------------------------ */
+  function init() {
+    var params = getParams();
+
+    // Bindings statici
+    bindFieldValidation("login-email", "login-email-error");
+    bindFieldValidation("register-email", "register-email-error");
+    bindFieldValidation("forgot-email", "forgot-email-error");
+    bindStrength("register-password", "register-strength-fill", "register-strength-label", "register-password-error");
+    bindStrength("reset-password", "reset-strength-fill", "reset-strength-label", "reset-password-error");
+    bindPasswordToggles();
+
+    // Tabs + switch
+    $("tab-login").addEventListener("click", function () { setMode("login"); });
+    $("tab-register").addEventListener("click", function () { setMode("register"); });
+
+    // Roving tabindex minimale per il tablist (freccia sinistra/destra)
+    $("auth-tabs").addEventListener("keydown", function (e) {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      var next = e.key === "ArrowRight" ? "register" : "login";
+      e.preventDefault();
+      setMode(next);
+      var tab = $(next === "register" ? "tab-register" : "tab-login");
+      if (tab) tab.focus({ preventScroll: true });
+    });
+    document.querySelectorAll("[data-goto]").forEach(function (btn) {
+      btn.addEventListener("click", function () { setMode(btn.getAttribute("data-goto")); });
+    });
+
+    // Forms
+    $("form-login").addEventListener("submit", handleLogin);
+    $("form-register").addEventListener("submit", handleRegister);
+    $("form-forgot").addEventListener("submit", handleForgot);
+    $("form-reset").addEventListener("submit", handleReset);
+    $("forgot-link").addEventListener("click", function (e) {
+      e.preventDefault();
+      showPanel("forgot");
+    });
+    $("resend-btn").addEventListener("click", handleResend);
+    $("google-btn").addEventListener("click", function () { handleGoogle(); });
+    $("google-btn-2").addEventListener("click", function () { handleGoogle(); });
+
+    // Gate terms → submit
+    $("terms-checkbox").addEventListener("change", function () {
+      $("register-submit").disabled = !$("terms-checkbox").checked;
+    });
+
+    // Clear globale errori su input
+    document.addEventListener("input", function (e) {
+      if (e.target && e.target.classList && e.target.classList.contains("field-input")) {
+        clearAuthError();
+      }
+    });
+
+    // Routing iniziale
+    if (params.type === "recovery") {
+      showPanel("reset");
+    } else if (params.mode === "register") {
+      showPanel("register");
+      $("tab-login").setAttribute("aria-selected", "false");
+      $("tab-register").setAttribute("aria-selected", "true");
+    } else {
+      showPanel("login");
+    }
+
+    track("auth_view", { mode: params.mode || "login" });
+
+    // Preview viva
+    startPreviewLoop();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

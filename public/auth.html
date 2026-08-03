@@ -1,129 +1,58 @@
 <!DOCTYPE html>
-<html lang="it" class="scroll-smooth">
+<html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Accedi o registrati — ConcorsoAI</title>
-  <meta name="description" content="Accedi o crea il tuo account ConcorsoAI per iniziare ad allenarti all'orale del concorso pubblico." />
-  <meta name="keywords" content="concorso pubblico, login, registrazione, account, preparazione orale" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FAF8F3" />
+  <title>Registrati o accedi — ConcorsoAI</title>
+  <meta name="description" content="Crea il tuo account gratis. Tre simulazioni con il tuo bando, nessuna carta richiesta." />
   <meta name="robots" content="noindex, nofollow" />
-  <meta name="theme-color" content="#F7FBFF" />
-
-  <!-- Font: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.3/index.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.0.3/index.min.css" rel="stylesheet" />
-
-  <!-- Tailwind CSS via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
-          colors: {
-            brand: {
-              50: '#F7FBFF',
-              100: '#EAF4FF',
-              200: '#D6E8FF',
-              300: '#A9CDF8',
-              400: '#5EA0E8',
-              500: '#2563EB',
-              600: '#0F4C81',
-              700: '#0B3A63',
-              800: '#0B2A4A',
-              900: '#071D33'
-            }
-          },
-          boxShadow: {
-            card: '0 24px 70px rgba(15,76,129,.12)',
-            glowBlue: '0 18px 45px rgba(37,99,235,.22)'
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- =========================================================
-       Animazione transizione accedi <-> registrati
-       (item 11 TODO: transizione semplice ma fatta bene)
-       ========================================================= -->
-  <style>
-    #login-panel, #register-panel {
-      transition: opacity .22s ease-out, transform .22s ease-out;
-    }
-    #login-panel.is-fading,
-    #register-panel.is-fading {
-      opacity: 0;
-      transform: translateY(6px);
-      pointer-events: none;
-    }
-    @media (prefers-reduced-motion: reduce) {
-      #login-panel, #register-panel { transition: none; }
-      #login-panel.is-fading, #register-panel.is-fading { transform: none; }
-    }
-  </style>
-
-  <!-- Supabase JS CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-
-  <link rel="stylesheet" href="/css/auth.css" />
-<script src="/js/telemetry.js"></script>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23FAF8F3'/%3E%3Ctext x='16' y='22' font-size='17' text-anchor='middle' fill='%230F1115' font-family='system-ui' font-weight='500'%3EC%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
+  <link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600&display=swap" />
+  <link rel="stylesheet" href="css/auth.css" />
 </head>
+<body>
+  <div class="auth-shell">
 
-<body class="font-sans antialiased selection:bg-brand-200 selection:text-brand-900">
-  <!-- =========================================================
-       PAGE WRAPPER
-       ========================================================= -->
-  <main class="flex min-h-screen flex-col px-4 py-6 sm:px-6">
-    <!-- Logo + back link -->
-    <div class="mx-auto mb-6 mt-2 flex w-full max-w-[480px] items-center justify-between sm:mb-8">
-      <a href="index.html" class="inline-flex rounded-lg px-2 py-1.5 text-sm font-bold text-brand-600 transition hover:text-brand-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
-        ← Torna alla landing
+    <!-- Barra superiore: brand + home. Niente nav, focus totale. -->
+    <header class="auth-top">
+      <a href="/" class="brand" aria-label="ConcorsoAI — torna alla home">
+        ConcorsoAI<span class="brand-dot" aria-hidden="true"></span>
       </a>
-      <a href="/" class="inline-flex rounded-xl text-2xl font-extrabold tracking-tight text-brand-900 outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-50" aria-label="Torna alla landing ConcorsoAI">
-        Concorso<span class="text-gradient">AI</span>
-      </a>
-    </div>
+      <a href="/" class="auth-back">← Torna alla home</a>
+    </header>
 
-    <div class="flex flex-1 items-center justify-center">
-      <!-- =========================================================
-           AUTH CARD
-           ========================================================= -->
-      <section class="auth-card w-full max-w-[480px] rounded-[2rem] p-5 sm:p-7" aria-label="Autenticazione ConcorsoAI">
-        <!-- Tab switcher -->
-        <div class="relative grid grid-cols-2 rounded-2xl border border-brand-200 bg-brand-50 p-1" role="tablist" aria-label="Scegli modalità autenticazione">
-          <span id="tab-indicator" class="tab-indicator absolute left-1 top-1 h-[calc(100%-0.5rem)] w-[calc(50%-0.25rem)] rounded-xl bg-white shadow-sm shadow-brand-200/70"></span>
-          <button id="login-tab" type="button" class="relative z-10 rounded-xl px-4 py-2.5 text-sm font-black text-brand-900 outline-none transition focus-visible:ring-2 focus-visible:ring-brand-500" role="tab" aria-selected="true" aria-controls="login-panel">
+    <div class="auth-layout">
+
+      <!-- ============================================================
+           COLONNA SINISTRA — form
+           ============================================================ -->
+      <div class="auth-form-col">
+
+        <!-- Tabs Accedi / Registrati -->
+        <nav class="auth-tabs" id="auth-tabs" role="tablist" aria-label="Accedi o registrati">
+          <button type="button" role="tab" id="tab-login" aria-selected="true" aria-controls="panel-login">
             Accedi
           </button>
-          <button id="register-tab" type="button" class="relative z-10 rounded-xl px-4 py-2.5 text-sm font-black text-brand-600 outline-none transition focus-visible:ring-2 focus-visible:ring-brand-500" role="tab" aria-selected="false" aria-controls="register-panel">
+          <button type="button" role="tab" id="tab-register" aria-selected="false" aria-controls="panel-register">
             Registrati
           </button>
-        </div>
+        </nav>
 
-        <!-- Error message -->
-        <div id="error-box" class="error-box mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 invisible min-h-[4rem]" role="alert" aria-live="polite">
-          <div class="flex gap-3">
-            <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 4.3 2.8 17.2A2 2 0 0 0 4.5 20h15a2 2 0 0 0 1.7-2.8L13.7 4.3a2 2 0 0 0-3.4 0Z" />
-            </svg>
-            <p id="error-text" class="font-semibold leading-6"></p>
-          </div>
-        </div>
+        <!-- Error region globale (role=alert) -->
+        <div class="auth-error" id="auth-error" role="alert" aria-live="polite"></div>
 
-        <!-- =====================================================
-             LOGIN PANEL
-             ===================================================== -->
-        <div id="login-panel" class="pt-7" role="tabpanel" aria-labelledby="login-tab">
-          <div class="text-center">
-            <h1 class="text-3xl font-bold tracking-[-0.035em] text-brand-900">Ricomincia ad allenarti</h1>
-            <p class="mt-2 text-sm leading-6 text-brand-700">Riprendi le tue simulazioni da dove hai lasciato.</p>
-          </div>
+        <!-- ==========================================================
+             PANEL: ACCEDI
+             ========================================================== -->
+        <section class="auth-panel is-enter" id="panel-login" role="tabpanel" aria-labelledby="tab-login" tabindex="-1">
+          <p class="auth-eyebrow">Accesso</p>
+          <h1 class="auth-title">Riprendi le tue simulazioni</h1>
+          <p class="auth-sub">Le tue sessioni ti aspettano. Accedi e continua da dove avevi lasciato.</p>
 
-          <button id="login-google" type="button" class="btn-google mt-7 flex w-full items-center justify-center gap-3 rounded-2xl border border-brand-200 bg-white px-4 py-3.5 text-sm font-black text-brand-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500" aria-label="Continua con Google">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+          <button type="button" class="btn-google" id="google-btn" data-label="Continua con Google">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="#4285F4" d="M21.805 12.23c0-.75-.067-1.47-.192-2.16H12v4.085h5.493a4.696 4.696 0 0 1-2.036 3.08v2.56h3.298c1.93-1.777 3.05-4.397 3.05-7.565Z" />
               <path fill="#34A853" d="M12 22c2.756 0 5.067-.913 6.755-2.205l-3.298-2.56c-.914.613-2.082.975-3.457.975-2.66 0-4.914-1.796-5.718-4.21H2.875v2.642A9.996 9.996 0 0 0 12 22Z" />
               <path fill="#FBBC05" d="M6.282 14A6.01 6.01 0 0 1 5.97 12c0-.693.112-1.365.312-2V7.358H2.875A9.996 9.996 0 0 0 2 12c0 1.613.386 3.138 1.075 4.642L6.282 14Z" />
@@ -131,516 +60,260 @@
             </svg>
             <span>Continua con Google</span>
           </button>
-          <p class="mt-2 text-center text-[11px] font-semibold text-brand-600/70">Non pubblichiamo nulla. Usiamo Google solo per l'accesso.</p>
+          <p class="auth-oauth-note">Usiamo Google solo per l'accesso. Non pubblichiamo nulla.</p>
 
-          <div class="my-6 flex items-center gap-4 text-xs font-bold uppercase tracking-[0.18em] text-brand-600/70">
-            <div class="h-px flex-1 bg-brand-200"></div>
-            <span>oppure con email</span>
-            <div class="h-px flex-1 bg-brand-200"></div>
-          </div>
+          <div class="auth-divider"><span>oppure con email</span></div>
 
-          <form id="login-form" novalidate class="space-y-4">
-            <div>
-              <label for="login-email" class="mb-2 block text-sm font-black text-brand-900">Email</label>
-              <input id="login-email" name="email" type="email" autocomplete="email" placeholder="tua@email.it" required class="field-input w-full rounded-2xl border border-brand-200 bg-white px-4 py-3.5 text-sm font-semibold text-brand-900 outline-none placeholder:text-brand-600/45" />
+          <form id="form-login" class="form" novalidate>
+            <div class="field">
+              <label class="field-label" for="login-email">Email</label>
+              <input class="field-input" id="login-email" name="email" type="email"
+                     autocomplete="email" inputmode="email" placeholder="nome@email.it" required />
+              <p class="field-error" id="login-email-error"></p>
             </div>
 
-            <div>
-              <label for="login-password" class="mb-2 block text-sm font-black text-brand-900">Password</label>
-              <div class="relative">
-                <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="La tua password" required class="field-input w-full rounded-2xl border border-brand-200 bg-white px-4 py-3.5 pr-12 text-sm font-semibold text-brand-900 outline-none placeholder:text-brand-600/45" />
-                <button type="button" class="password-toggle absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-brand-600 transition hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500" data-target="login-password" aria-label="Mostra password">
-                  <svg class="eye-open h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="3" /></svg>
-                  <svg class="eye-closed hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m3 3 18 18M10.6 10.6A2.9 2.9 0 0 0 12 15a3 3 0 0 0 2.7-1.7M7.5 7.8C4.3 9.5 2.5 12 2.5 12s3.5 6 9.5 6c1.5 0 2.8-.3 4-.8M19.2 15.2c1.5-1.4 2.3-3.2 2.3-3.2S18 6 12 6c-.8 0-1.6.1-2.3.3" /></svg>
+            <div class="field">
+              <label class="field-label" for="login-password">Password</label>
+              <div class="field-input-wrap">
+                <input class="field-input" id="login-password" name="password" type="password"
+                       autocomplete="current-password" placeholder="La tua password" required />
+                <button type="button" class="pw-toggle" data-target="login-password" aria-label="Mostra password" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
                 </button>
               </div>
-              <div class="mt-2 text-right">
-                <a href="#" id="forgot-password-link" class="text-xs font-bold text-brand-600 transition hover:text-brand-800 hover:underline">Non la ricordi? Nessun problema.</a>
+              <p class="field-error" id="login-password-error"></p>
+              <div class="field-actions">
+                <button type="button" class="field-link" id="forgot-link">Password dimenticata?</button>
               </div>
             </div>
 
-            <button id="login-submit" type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-60">
-              <span class="button-text">Entra e riprendi</span>
+            <button type="submit" class="btn-primary btn-block" id="login-submit">
+              <span class="btn-label">Entra</span>
+              <span class="btn-arrow" aria-hidden="true">→</span>
+              <span class="btn-busy-bar" aria-hidden="true"></span>
             </button>
           </form>
 
-          <p class="mt-6 text-center text-sm font-semibold text-brand-700">
-            Non hai un account?
-            <button type="button" class="switch-to-register font-black text-brand-600 hover:text-brand-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Prima volta qui? Registrati, è gratis.</button>
+          <p class="auth-switch">Non hai un account?
+            <button type="button" data-goto="register">Registrati gratis</button>
           </p>
-        </div>
+        </section>
 
-        <!-- =====================================================
-             REGISTER PANEL
-             ===================================================== -->
-        <div id="register-panel" class="hidden pt-7" role="tabpanel" aria-labelledby="register-tab">
-          <div class="text-center">
-            <h1 class="text-3xl font-bold tracking-[-0.035em] text-brand-900">Inizia a prepararti sul serio</h1>
-            <p class="mt-2 text-sm leading-6 text-brand-700">3 simulazioni gratis. Nessuna carta. Setup in 2 minuti.</p>
-          </div>
+        <!-- ==========================================================
+             PANEL: REGISTRAZIONE
+             ========================================================== -->
+        <section class="auth-panel" id="panel-register" role="tabpanel" aria-labelledby="tab-register" tabindex="-1" hidden>
+          <p class="auth-eyebrow">Registrazione</p>
+          <h1 class="auth-title">Crea il tuo account</h1>
+          <p class="auth-sub">Tre simulazioni gratis con il tuo bando. Nessuna carta richiesta.</p>
 
-          <button id="register-google" type="button" class="btn-google mt-7 flex w-full items-center justify-center gap-3 rounded-2xl border border-brand-200 bg-white px-4 py-3.5 text-sm font-black text-brand-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500" aria-label="Continua con Google">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+          <button type="button" class="btn-google" id="google-btn-2" data-label="Registrati con Google">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="#4285F4" d="M21.805 12.23c0-.75-.067-1.47-.192-2.16H12v4.085h5.493a4.696 4.696 0 0 1-2.036 3.08v2.56h3.298c1.93-1.777 3.05-4.397 3.05-7.565Z" />
               <path fill="#34A853" d="M12 22c2.756 0 5.067-.913 6.755-2.205l-3.298-2.56c-.914.613-2.082.975-3.457.975-2.66 0-4.914-1.796-5.718-4.21H2.875v2.642A9.996 9.996 0 0 0 12 22Z" />
               <path fill="#FBBC05" d="M6.282 14A6.01 6.01 0 0 1 5.97 12c0-.693.112-1.365.312-2V7.358H2.875A9.996 9.996 0 0 0 2 12c0 1.613.386 3.138 1.075 4.642L6.282 14Z" />
               <path fill="#EA4335" d="M12 5.79c1.498 0 2.844.515 3.904 1.526l2.927-2.927C17.062 2.74 14.751 2 12 2a9.996 9.996 0 0 0-9.125 5.358L6.282 10C7.086 7.586 9.34 5.79 12 5.79Z" />
             </svg>
-            <span>Continua con Google</span>
+            <span>Registrati con Google</span>
           </button>
-          <p class="mt-2 text-center text-[11px] font-semibold text-brand-600/70">Non pubblichiamo nulla. Usiamo Google solo per l'accesso.</p>
+          <p class="auth-oauth-note">Usiamo Google solo per l'accesso. Non pubblichiamo nulla.</p>
 
-          <div class="my-6 flex items-center gap-4 text-xs font-bold uppercase tracking-[0.18em] text-brand-600/70">
-            <div class="h-px flex-1 bg-brand-200"></div>
-            <span>oppure con email</span>
-            <div class="h-px flex-1 bg-brand-200"></div>
-          </div>
+          <div class="auth-divider"><span>oppure con email</span></div>
 
-          <form id="register-form" novalidate class="space-y-4">
-            <div>
-              <label for="register-name" class="mb-2 block text-sm font-black text-brand-900">Nome completo</label>
-              <input id="register-name" name="fullName" type="text" autocomplete="name" placeholder="Mario Rossi" required minlength="2" class="field-input w-full rounded-2xl border border-brand-200 bg-white px-4 py-3.5 text-sm font-semibold text-brand-900 outline-none placeholder:text-brand-600/45" />
+          <form id="form-register" class="form" novalidate>
+            <div class="field">
+              <label class="field-label" for="register-email">Email</label>
+              <input class="field-input" id="register-email" name="email" type="email"
+                     autocomplete="email" inputmode="email" placeholder="nome@email.it" required />
+              <p class="field-error" id="register-email-error"></p>
             </div>
 
-            <div>
-              <label for="register-email" class="mb-2 block text-sm font-black text-brand-900">Email</label>
-              <input id="register-email" name="email" type="email" autocomplete="email" placeholder="tua@email.it" required class="field-input w-full rounded-2xl border border-brand-200 bg-white px-4 py-3.5 text-sm font-semibold text-brand-900 outline-none placeholder:text-brand-600/45" />
-            </div>
-
-            <div>
-              <label for="register-password" class="mb-2 block text-sm font-black text-brand-900">Password</label>
-              <div class="relative">
-                <input id="register-password" name="password" type="password" autocomplete="new-password" placeholder="Almeno 8 caratteri" required minlength="8" class="field-input w-full rounded-2xl border border-brand-200 bg-white px-4 py-3.5 pr-12 text-sm font-semibold text-brand-900 outline-none placeholder:text-brand-600/45" />
-                <button type="button" class="password-toggle absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-brand-600 transition hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500" data-target="register-password" aria-label="Mostra password">
-                  <svg class="eye-open h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="3" /></svg>
-                  <svg class="eye-closed hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m3 3 18 18M10.6 10.6A2.9 2.9 0 0 0 12 15a3 3 0 0 0 2.7-1.7M7.5 7.8C4.3 9.5 2.5 12 2.5 12s3.5 6 9.5 6c1.5 0 2.8-.3 4-.8M19.2 15.2c1.5-1.4 2.3-3.2 2.3-3.2S18 6 12 6c-.8 0-1.6.1-2.3.3" /></svg>
+            <div class="field">
+              <label class="field-label" for="register-password">Password</label>
+              <div class="field-input-wrap">
+                <input class="field-input" id="register-password" name="password" type="password"
+                       autocomplete="new-password" placeholder="Minimo 8 caratteri" required />
+                <button type="button" class="pw-toggle" data-target="register-password" aria-label="Mostra password" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
                 </button>
               </div>
-              <div class="mt-3" aria-live="polite">
-                <div class="h-2 overflow-hidden rounded-full bg-brand-100">
-                  <div id="password-strength-bar" class="h-full w-0 rounded-full transition-all duration-300"></div>
-                </div>
-                <p id="password-strength-text" class="mt-1.5 text-xs font-bold text-brand-600">Inserisci una password</p>
+              <p class="field-error" id="register-password-error"></p>
+              <div class="pw-strength" aria-live="polite">
+                <div class="pw-strength-track"><div class="pw-strength-fill" id="register-strength-fill"></div></div>
+                <p class="pw-strength-label" id="register-strength-label">Minimo 8 caratteri</p>
               </div>
             </div>
 
-            <label class="flex cursor-pointer gap-3 rounded-2xl border border-brand-200 bg-brand-50/70 p-4 text-sm leading-6 text-brand-800 transition hover:bg-brand-50 focus-within:ring-2 focus-within:ring-brand-500 focus-within:ring-offset-2">
-              <input id="terms-checkbox" type="checkbox" class="mt-1 h-4 w-4 rounded border-brand-300 text-brand-600 focus:ring-brand-500" />
-              <span>Accetto i <a href="terms.html" class="font-black text-brand-600 hover:underline">termini</a> e la <a href="privacy.html" class="font-black text-brand-600 hover:underline">privacy</a>. Niente spam, promesso.</span>
+            <label class="terms">
+              <input type="checkbox" id="terms-checkbox" />
+              <span>Accetto i <a href="terms.html">termini</a> e la <a href="privacy.html">privacy</a>. Niente spam, promesso.</span>
             </label>
 
-            <button id="register-submit" type="submit" disabled class="btn-primary flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50">
-              <span class="button-text">Crea account e inizia gratis</span>
+            <button type="submit" class="btn-primary btn-block" id="register-submit" disabled>
+              <span class="btn-label">Crea account gratis</span>
+              <span class="btn-busy-bar" aria-hidden="true"></span>
             </button>
           </form>
 
-          <p class="mt-6 text-center text-sm font-semibold text-brand-700">
-            Hai già un account?
-            <button type="button" class="switch-to-login font-black text-brand-600 hover:text-brand-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Accedi</button>
+          <p class="auth-switch">Hai già un account?
+            <button type="button" data-goto="login">Accedi</button>
           </p>
-        <!-- =====================================================
-             VERIFICATION SUCCESS PANEL (hidden by default)
-             ===================================================== -->
-        <div id="verify-panel" class="hidden pt-7 text-center">
-          <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-            <svg class="h-8 w-8 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        </section>
+
+        <!-- ==========================================================
+             PANEL: RECUPERO PASSWORD
+             ========================================================== -->
+        <section class="auth-panel" id="panel-forgot" role="tabpanel" tabindex="-1" hidden>
+          <p class="auth-eyebrow">Recupero accesso</p>
+          <h1 class="auth-title">Recupera la password</h1>
+          <p class="auth-sub">Ti mandiamo un link per impostarne una nuova. Niente codici, niente attese.</p>
+
+          <form id="form-forgot" class="form" novalidate>
+            <div class="field">
+              <label class="field-label" for="forgot-email">Email</label>
+              <input class="field-input" id="forgot-email" name="email" type="email"
+                     autocomplete="email" inputmode="email" placeholder="nome@email.it" required />
+              <p class="field-error" id="forgot-email-error"></p>
+            </div>
+
+            <button type="submit" class="btn-primary btn-block" id="forgot-submit">
+              <span class="btn-label">Invia il link</span>
+              <span class="btn-busy-bar" aria-hidden="true"></span>
+            </button>
+          </form>
+
+          <p class="auth-switch">
+            <button type="button" data-goto="login">← Torna all'accesso</button>
+          </p>
+        </section>
+
+        <!-- ==========================================================
+             PANEL: EMAIL INVIATA (stato di conferma, anti-enumeration)
+             ========================================================== -->
+        <section class="auth-panel" id="panel-sent" role="status" tabindex="-1" hidden>
+          <div class="auth-success-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
           </div>
-          <h2 class="text-2xl font-black tracking-[-0.035em] text-brand-900">Verifica la tua email</h2>
-          <p class="mt-3 text-sm leading-7 text-brand-700">Ti abbiamo inviato un link di conferma! Controlla la tua casella di posta per attivare l'account ed effettuare il primo accesso.</p>
-          <p class="mt-4 text-xs font-semibold text-brand-600">Non hai ricevuto l'email? Controlla lo spam o <button type="button" id="resendVerifyBtn" class="font-black text-brand-600 hover:text-brand-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">richiedi un nuovo invio</button>.</p>
-          <a href="index.html" class="btn-primary mt-8 inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-black">Torna alla home</a>
+          <h1 class="auth-title" id="sent-title" tabindex="-1">Controlla la tua email</h1>
+          <p class="auth-success-text" id="sent-text">
+            Se l'indirizzo è registrato, troverai il link nella casella.
+            Controlla anche lo spam.
+          </p>
+          <button type="button" class="btn-ghost" id="resend-btn">Non è arrivata? Invia di nuovo</button>
+          <p class="auth-switch">
+            <button type="button" data-goto="login">← Torna all'accesso</button>
+          </p>
+        </section>
+
+        <!-- ==========================================================
+             PANEL: NUOVA PASSWORD (deep link type=recovery)
+             ========================================================== -->
+        <section class="auth-panel" id="panel-reset" role="tabpanel" tabindex="-1" hidden>
+          <p class="auth-eyebrow">Nuova password</p>
+          <h1 class="auth-title">Imposta la nuova password</h1>
+          <p class="auth-sub">Scegli una password di almeno 8 caratteri. La userai al prossimo accesso.</p>
+
+          <form id="form-reset" class="form" novalidate>
+            <div class="field">
+              <label class="field-label" for="reset-password">Nuova password</label>
+              <div class="field-input-wrap">
+                <input class="field-input" id="reset-password" name="password" type="password"
+                       autocomplete="new-password" placeholder="Minimo 8 caratteri" required />
+                <button type="button" class="pw-toggle" data-target="reset-password" aria-label="Mostra password" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </button>
+              </div>
+              <p class="field-error" id="reset-password-error"></p>
+              <div class="pw-strength" aria-live="polite">
+                <div class="pw-strength-track"><div class="pw-strength-fill" id="reset-strength-fill"></div></div>
+                <p class="pw-strength-label" id="reset-strength-label">Minimo 8 caratteri</p>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary btn-block" id="reset-submit">
+              <span class="btn-label">Aggiorna password</span>
+              <span class="btn-busy-bar" aria-hidden="true"></span>
+            </button>
+          </form>
+        </section>
+
+      </div>
+
+      <!-- ============================================================
+           COLONNA DESTRA — preview viva del prodotto (desktop)
+           ============================================================ -->
+      <aside class="auth-preview" id="auth-preview" aria-hidden="true">
+        <div class="preview-chrome">
+          <span class="preview-dots"><i></i><i></i><i class="is-ink"></i></span>
+          <span class="preview-tab">Simulazione orale</span>
+          <span class="preview-live"><span class="preview-live-dot"></span>Live</span>
         </div>
-      </section>
+
+        <div class="preview-progress">
+          <div class="preview-progress-head">
+            <span class="preview-progress-label">Preparazione bando</span>
+            <span class="preview-progress-pct">74%</span>
+          </div>
+          <div class="preview-progress-bar"><span class="preview-progress-fill"></span></div>
+        </div>
+
+        <div class="preview-question">
+          <span class="preview-q-label" id="preview-q-label">Domanda 4 di 12</span>
+          <p class="preview-q-text">
+            <span id="preview-q-span">Come affronterebbe il primo mese di lavoro in un ufficio che non conosce?</span><span class="preview-caret" aria-hidden="true"></span>
+          </p>
+        </div>
+
+        <div class="preview-feedback" id="preview-feedback">
+          <div class="preview-skeleton" aria-hidden="true">
+            <span class="preview-skeleton-bar"></span>
+            <span class="preview-skeleton-bar"></span>
+            <span class="preview-skeleton-bar"></span>
+            <span class="preview-skeleton-bar"></span>
+          </div>
+          <div class="preview-feedback-done">
+            <p class="preview-feedback-text" id="preview-feedback-text">
+              Risposta solida. Raccordi la chiusura con i criteri del bando.
+            </p>
+            <span class="preview-confidence">
+              <span class="preview-confidence-dot" aria-hidden="true"></span>
+              <span id="preview-confidence-value">Confidence 92%</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="preview-stats">
+          <span>Domande corrette <b>83%</b></span>
+          <span class="preview-stats-sep" aria-hidden="true">·</span>
+          <span>Argomenti <b>41/52</b></span>
+          <span class="preview-stats-sep" aria-hidden="true">·</span>
+          <span>Tempo medio <b>28s</b></span>
+        </div>
+
+        <p class="preview-note">Anteprima del prodotto. Nessun tuo dato viene mostrato qui.</p>
+      </aside>
+
     </div>
 
-    <!-- Trust signals -->
-    <div class="mx-auto mt-5 w-full max-w-[480px] pb-8 text-center">
-      <p class="text-[11px] font-semibold text-brand-600/70">
-        Dati cifrati · Server UE · 3 simulazioni gratis · Disdici quando vuoi
-      </p>
-    </div>
+    <!-- Trust line — rassicurazione sobria nel punto di decisione -->
+    <p class="auth-trust">Connessione cifrata · Password cifrata · Dati in Europa · Nessuna carta richiesta</p>
 
-  </main>
+  </div>
 
-  <!-- =========================================================
-       JAVASCRIPT: SUPABASE AUTH + UI LOGIC
-       ========================================================= -->
-  <script>
-    // Supabase configuration
-    const SUPABASE_URL = (typeof __SUPABASE_URL !== 'undefined' && __SUPABASE_URL)
-      ? __SUPABASE_URL
-      : ['https://','xhifnparcouxsypkjcmn','.supabase.co'].join('');
-    const SUPABASE_ANON_KEY = (typeof __SUPABASE_ANON_KEY !== 'undefined' && __SUPABASE_ANON_KEY)
-      ? __SUPABASE_ANON_KEY
-      : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
-    const SUPABASE_KEY = SUPABASE_ANON_KEY;
-    if (typeof __SUPABASE_URL === 'undefined' || !__SUPABASE_URL) {
-      console.warn('[ConcorsoAI] SUPABASE_URL non configurata. Definisci __SUPABASE_URL e __SUPABASE_ANON_KEY globali per override.');
-    }
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    const DASHBOARD_URL = '/dashboard.html';
-
-    // Item 12 TODO: parametro URL ?register=1 o ?mode=register
-    // apre direttamente la tab Registrati (i link "Registrati" dalla
-    // landing portano qui con questo parameto per non finire nel tab
-    // sbagliato).
-    (function () {
-      try {
-        var p = new URLSearchParams(window.location.search);
-        if (p.get('mode') === 'register' || p.get('register') === '1') {
-          var lp = document.getElementById('login-panel');
-          var rp = document.getElementById('register-panel');
-          if (lp) lp.classList.add('hidden');
-          if (rp) rp.classList.remove('hidden');
-          var lt = document.getElementById('login-tab');
-          var rt = document.getElementById('register-tab');
-          if (lt && rt) {
-            lt.setAttribute('aria-selected', 'false');
-            rt.setAttribute('aria-selected', 'true');
-            lt.classList.remove('text-brand-900');
-            lt.classList.add('text-brand-600');
-            rt.classList.remove('text-brand-600');
-            rt.classList.add('text-brand-900');
-          }
-          var ind = document.getElementById('tab-indicator');
-          if (ind) ind.style.transform = 'translateX(100%)';
-        }
-      } catch (e) { /* parametri URL assenti: lasciamo default login */ }
-    })();
-
-    const state = {
-      mode: new URLSearchParams(window.location.search).get('mode') === 'register' ? 'register' : 'login',
-      loading: false,
-      errorTimeout: null
-    };
-
-    const els = {
-      loginTab: document.getElementById('login-tab'),
-      registerTab: document.getElementById('register-tab'),
-      tabIndicator: document.getElementById('tab-indicator'),
-      loginPanel: document.getElementById('login-panel'),
-      registerPanel: document.getElementById('register-panel'),
-      verifyPanel: document.getElementById('verify-panel'),
-      errorBox: document.getElementById('error-box'),
-      errorText: document.getElementById('error-text'),
-      loginForm: document.getElementById('login-form'),
-      registerForm: document.getElementById('register-form'),
-      loginSubmit: document.getElementById('login-submit'),
-      registerSubmit: document.getElementById('register-submit'),
-      loginGoogle: document.getElementById('login-google'),
-      registerGoogle: document.getElementById('register-google'),
-      termsCheckbox: document.getElementById('terms-checkbox'),
-      registerPassword: document.getElementById('register-password'),
-      strengthBar: document.getElementById('password-strength-bar'),
-      strengthText: document.getElementById('password-strength-text'),
-      loginEmail: document.getElementById('login-email'),
-      loginPassword: document.getElementById('login-password'),
-      registerName: document.getElementById('register-name'),
-      registerEmail: document.getElementById('register-email'),
-      resendVerifyBtn: document.getElementById('resendVerifyBtn')
-    };
-
-    function setMode(mode) {
-      state.mode = mode;
-      clearError();
-
-      const isLogin = mode === 'login';
-      const outgoing = isLogin ? els.registerPanel : els.loginPanel;
-      const incoming = isLogin ? els.loginPanel : els.registerPanel;
-
-      // Animazione "fade + slide" (item 11): il pannello uscente svanisce,
-      // quello entrante prende il posto con traduzioncina. Rispetta
-      // prefers-reduced-motion via CSS.
-      if (outgoing && incoming && !outgoing.classList.contains('hidden')) {
-        outgoing.classList.add('is-fading');
-        window.setTimeout(function () {
-          outgoing.classList.add('hidden');
-          outgoing.classList.remove('is-fading');
-          incoming.classList.remove('hidden');
-          incoming.classList.add('is-fading');
-          // force reflow per far partire il fade-in in modo affidabile
-          void incoming.offsetWidth;
-          incoming.classList.remove('is-fading');
-        }, 200);
-      } else {
-        els.loginPanel.classList.toggle('hidden', !isLogin);
-        els.registerPanel.classList.toggle('hidden', isLogin);
-      }
-      els.tabIndicator.style.transform = isLogin ? 'translateX(0)' : 'translateX(100%)';
-
-      els.loginTab.setAttribute('aria-selected', String(isLogin));
-      els.registerTab.setAttribute('aria-selected', String(!isLogin));
-      els.loginTab.classList.toggle('text-brand-900', isLogin);
-      els.loginTab.classList.toggle('text-brand-600', !isLogin);
-      els.registerTab.classList.toggle('text-brand-900', !isLogin);
-      els.registerTab.classList.toggle('text-brand-600', isLogin);
-
-      // Autofocus on email input
-      window.setTimeout(function () {
-        var target = isLogin ? els.loginEmail : els.registerEmail;
-        if (target) target.focus();
-      }, 250);
-    }
-
-    function isValidEmail(email) {
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
-    }
-
-    function translateAuthError(message) {
-      const msg = String(message || '').toLowerCase();
-      if (msg.includes('invalid login credentials')) return 'Email o password non corretti';
-      if (msg.includes('email not confirmed')) return 'Conferma la tua email prima di accedere';
-      if (msg.includes('user already registered') || msg.includes('already registered')) return 'Un account con questa email esiste già';
-      if (msg.includes('password should be at least') || msg.includes('password')) return 'Password troppo corta (minimo 8 caratteri)';
-      if (msg.includes('failed to fetch') || msg.includes('network')) return 'Problema di connessione. Riprova tra qualche secondo.';
-      return 'Si è verificato un errore. Riprova tra qualche secondo.';
-    }
-
-    function showError(message) {
-      window.clearTimeout(state.errorTimeout);
-      els.errorText.textContent = message;
-      els.errorBox.classList.remove('invisible');
-      els.errorBox.classList.add('visible');
-      state.errorTimeout = window.setTimeout(clearError, 5000);
-    }
-
-    function clearError() {
-      window.clearTimeout(state.errorTimeout);
-      els.errorBox.classList.remove('visible');
-      els.errorBox.classList.add('invisible');
-      els.errorText.textContent = '';
-    }
-
-    function spinnerSvg() {
-      return '<svg class="spinner h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z"></path></svg>';
-    }
-
-    function setButtonLoading(button, loading, loadingText, defaultText) {
-      button.disabled = loading;
-      button.innerHTML = loading ? spinnerSvg() + '<span>' + loadingText + '</span>' : '<span class="button-text">' + defaultText + '</span>';
-    }
-
-    function setAllInteractiveDisabled(disabled) {
-      els.loginGoogle.disabled = disabled;
-      els.registerGoogle.disabled = disabled;
-      els.loginTab.disabled = disabled;
-      els.registerTab.disabled = disabled;
-      document.querySelectorAll('.password-toggle').forEach(btn => btn.disabled = disabled);
-      document.querySelectorAll('.field-input').forEach(input => input.disabled = disabled);
-      document.getElementById('terms-checkbox').disabled = disabled;
-      document.getElementById('forgot-password-link').style.pointerEvents = disabled ? 'none' : '';
-    }
-
-    function passwordStrength(password) {
-      const hasUppercase = /[A-ZÀ-Ý]/.test(password);
-      const hasNumberOrSymbol = /[0-9\W_]/.test(password);
-
-      if (!password) {
-        return { level: 'empty', label: 'Inserisci una password', width: '0%', color: 'bg-transparent', textColor: 'text-brand-600' };
-      }
-
-      // Guard di lunghezza: la registrazione richiede minlength="8".
-      // Qualsiasi password < 8 caratteri è Debole a prescindere dalla
-      // varietà (es. "aB3!" +=4 char con up+sym NON può essere Media):
-      // darebbe false sense of security.
-      if (password.length < 8) {
-        return { level: 'weak', label: 'Aggiungi altri caratteri', width: '33%', color: 'bg-red-500', textColor: 'text-red-600' };
-      }
-
-      // Score base: lunghezza + varietà. Il ladder deve restituire
-      // sempre un livello coerente: niente password di 12 caratteri
-      // con simboli classificata come "Debole" solo perché manca una
-      // maiuscola.
-      let score = 0;
-      if (password.length >= 10) score++;
-      if (password.length >= 14) score++;
-      if (hasUppercase)          score++;
-      if (hasNumberOrSymbol)     score++;
-
-      if (score >= 4) {
-        return { level: 'strong', label: 'Ottima', width: '100%', color: 'bg-emerald-500', textColor: 'text-emerald-700' };
-      }
-      if (score >= 3) {
-        return { level: 'medium', label: 'Quasi pronta — aggiungi un simbolo', width: '66%', color: 'bg-amber-500', textColor: 'text-amber-700' };
-      }
-      return { level: 'weak', label: 'Aggiungi una maiuscola o un numero', width: '33%', color: 'bg-red-500', textColor: 'text-red-600' };
-    }
-
-    function updatePasswordStrength() {
-      const result = passwordStrength(els.registerPassword.value);
-      els.strengthBar.className = 'h-full rounded-full transition-all duration-300 ' + result.color;
-      els.strengthBar.style.width = result.width;
-      els.strengthText.className = 'mt-1.5 text-xs font-bold ' + result.textColor;
-      els.strengthText.textContent = result.label;
-    }
-
-    async function handleGoogleAuth() {
-      clearError();
-      try {
-        const { error } = await supabaseClient.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.location.origin + DASHBOARD_URL
-          }
-        });
-        if (error) showError(translateAuthError(error.message));
-      } catch (error) {
-        showError(translateAuthError(error.message));
-      }
-    }
-
-    async function handleLogin(event) {
-      event.preventDefault();
-      clearError();
-
-      const email = document.getElementById('login-email').value.trim();
-      const password = document.getElementById('login-password').value;
-
-      if (!isValidEmail(email)) return showError('Inserisci un indirizzo email valido');
-      if (!password) return showError('Inserisci la password');
-
-      state.loading = true;
-      setAllInteractiveDisabled(true);
-      setButtonLoading(els.loginSubmit, true, 'Accesso in corso...', 'Entra e riprendi');
-
-      try {
-        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) {
-          showError(translateAuthError(error.message));
-          return;
-        }
-        window.location.href = DASHBOARD_URL;
-      } catch (error) {
-        showError(translateAuthError(error.message));
-      } finally {
-        state.loading = false;
-        setAllInteractiveDisabled(false);
-        setButtonLoading(els.loginSubmit, false, 'Accesso in corso...', 'Entra e riprendi');
-      }
-    }
-
-    async function handleRegister(event) {
-      event.preventDefault();
-      clearError();
-
-      const fullName = document.getElementById('register-name').value.trim();
-      const email = document.getElementById('register-email').value.trim();
-      const password = els.registerPassword.value;
-      const acceptedTerms = els.termsCheckbox.checked;
-
-      if (fullName.length < 2) return showError('Inserisci il tuo nome completo');
-      if (!isValidEmail(email)) return showError('Inserisci un indirizzo email valido');
-      if (password.length < 8) return showError('Password troppo corta (minimo 8 caratteri)');
-      if (!acceptedTerms) return showError('Accetta i Termini di Servizio e la Privacy Policy');
-
-      state.loading = true;
-      setAllInteractiveDisabled(true);
-      setButtonLoading(els.registerSubmit, true, 'Creazione account...', 'Crea account e inizia gratis');
-
-      try {
-        const { data, error } = await supabaseClient.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: fullName }
-          }
-        });
-        if (error) {
-          showError(translateAuthError(error.message));
-          return;
-        }
-        // If no session -> email confirmation required
-        if (!data.session) {
-          els.loginPanel.classList.add('hidden');
-          els.registerPanel.classList.add('hidden');
-          els.errorBox.classList.add('invisible');
-          els.verifyPanel.classList.remove('hidden');
-          return;
-        }
-        window.location.href = DASHBOARD_URL;
-      } catch (error) {
-        showError(translateAuthError(error.message));
-      } finally {
-        state.loading = false;
-        setAllInteractiveDisabled(false);
-        els.registerSubmit.disabled = !els.termsCheckbox.checked;
-        setButtonLoading(els.registerSubmit, false, 'Creazione account...', 'Crea account e inizia gratis');
-        els.registerSubmit.disabled = !els.termsCheckbox.checked;
-      }
-    }
-
-    // Init mode from URL param
-    setMode(state.mode);
-
-    // Autofocus on page load
-    window.setTimeout(function () {
-      var target = state.mode === 'register' ? els.registerEmail : els.loginEmail;
-      if (target) target.focus();
-    }, 350);
-
-    // Event listeners: tabs
-    els.loginTab.addEventListener('click', () => setMode('login'));
-    els.registerTab.addEventListener('click', () => setMode('register'));
-    document.querySelectorAll('.switch-to-register').forEach(btn => btn.addEventListener('click', () => setMode('register')));
-    document.querySelectorAll('.switch-to-login').forEach(btn => btn.addEventListener('click', () => setMode('login')));
-
-    // Event listeners: forms and OAuth
-    els.loginForm.addEventListener('submit', handleLogin);
-    els.registerForm.addEventListener('submit', handleRegister);
-    els.loginGoogle.addEventListener('click', handleGoogleAuth);
-    els.registerGoogle.addEventListener('click', handleGoogleAuth);
-
-    // Event listeners: password visibility
-    document.querySelectorAll('.password-toggle').forEach(button => {
-      button.addEventListener('click', () => {
-        const input = document.getElementById(button.dataset.target);
-        const isPassword = input.type === 'password';
-        input.type = isPassword ? 'text' : 'password';
-        button.setAttribute('aria-label', isPassword ? 'Nascondi password' : 'Mostra password');
-        button.querySelector('.eye-open').classList.toggle('hidden', isPassword);
-        button.querySelector('.eye-closed').classList.toggle('hidden', !isPassword);
-      });
-    });
-
-    // Event listeners: validation UI
-    els.termsCheckbox.addEventListener('change', () => {
-      if (!state.loading) els.registerSubmit.disabled = !els.termsCheckbox.checked;
-    });
-
-    els.registerPassword.addEventListener('input', updatePasswordStrength);
-
-document.querySelectorAll('input').forEach(input => {
-      input.addEventListener('input', clearError);
-    });
-
-    // Password reset handler
-    document.getElementById('forgot-password-link').addEventListener('click', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('login-email').value.trim();
-      if (!email) {
-        showError('Inserisci prima la tua email nel campo sopra');
-        return;
-      }
-      try {
-        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + '/dashboard.html'
-        });
-        if (error) throw error;
-        showToast('Email di reset inviata. Controlla la tua casella di posta.', 'success');
-      } catch (err) {
-        showError(translateAuthError(err.message));
-      }
-    });
-
-    function showToast(msg, type) {
-      const toast = document.createElement('div');
-      toast.className = 'toast toast-' + (type || 'success');
-      toast.textContent = msg;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 4000);
-    }
-  </script>
+  <!-- Supabase JS (stesso progetto della landing) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/telemetry.js"></script>
+  <script src="js/auth.js"></script>
 </body>
 </html>
-
