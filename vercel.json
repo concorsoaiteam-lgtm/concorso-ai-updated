@@ -5,6 +5,7 @@
     { "source": "/simulation", "destination": "/simulation.html" },
     { "source": "/terms",      "destination": "/terms.html" },
     { "source": "/privacy",    "destination": "/privacy.html" },
+    { "source": "/cookies",    "destination": "/cookies.html" },
     { "source": "/blog",       "destination": "/blog.html" },
     { "source": "/blog/come-superare-orale-concorso", "destination": "/blog/come-superare-orale-concorso.html" },
     { "source": "/blog/concorso-ai-vs-ripetizioni-private", "destination": "/blog/concorso-ai-vs-ripetizioni-private.html" },
