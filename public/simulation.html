@@ -5,16 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Simulazione — ConcorsoAI</title>
   <meta name="description" content="Simulazione orale ConcorsoAI: esercitati con un commissario virtuale e ricevi feedback live." />
-  <meta name="theme-color" content="#F7FBFF" />
+  <meta name="theme-color" content="#FAF8F3" />
 
   <!-- ============================================================
-       FONT: Geist (sans UI) + Geist Mono (numeri/dati)
-       Perché non Inter: Geist è disegnato per tool professionali,
-       ha personalità più verticale e autorevole (DESIGN.MD).
+       FONT: Inter (sans UI) — stesso font di landing, auth e dashboard.
+       Numeri/dati: monospace di sistema (ui-monospace).
        ============================================================ -->
+  <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
+  <link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600&display=swap" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.3/index.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.0.3/index.min.css" rel="stylesheet" />
 
   <!-- GSAP per entrate messaggi e micro-animazioni -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
@@ -41,31 +40,31 @@
        RESET + TOKENS
        ============================================================ */
     :root {
-      --bg: #F7FBFF;
+      --bg: #FAF8F3;
       --surface: #FFFFFF;
-      --surface-secondary: #F0F6FF;
-      --border: #E2EEFF;
-      --border-strong: #C5D8F5;
-      --text: #0A1628;
-      --text-secondary: #3D5A8A;
-      --text-muted: #7B93B8;
-      --accent: #2563EB;
-      --accent-ring: #0F4C81;
-      --success: #16A34A;
-      --warning: #D97706;
-      --error: #DC2626;
-      --streak-orange: #F97316;
-      --chat-bg: #F7FBFF;
+      --surface-secondary: #F2EDE2;
+      --border: #E6DFD2;
+      --border-strong: #D5CCBA;
+      --text: #0F1115;
+      --text-secondary: #2A2D34;
+      --text-muted: #8A8E96;
+      --accent: #0F1115;
+      --accent-ring: #2A2D34;
+      --success: #1E9E5C;
+      --warning: #8A6D1F;
+      --error: #A4472E;
+      --streak-orange: #8A6D1F;
+      --chat-bg: #FAF8F3;
       /* SPEC shadow tokens — 2 livelli: stretto scuro (contatto) + ampio chiarissimo (elevazione) */
-      --shadow-sm: 0 1px 2px rgba(15,76,129,0.06), 0 4px 12px rgba(15,76,129,0.04);
-      --shadow-md: 0 1px 2px rgba(15,76,129,0.07), 0 12px 28px rgba(15,76,129,0.06);
-      --shadow-lg: 0 2px 6px rgba(15,76,129,0.08), 0 20px 50px rgba(15,76,129,0.10);
+      --shadow-sm: 0 1px 2px rgba(15,17,21,0.06), 0 4px 12px rgba(15,17,21,0.04);
+      --shadow-md: 0 1px 2px rgba(15,17,21,0.07), 0 12px 28px rgba(15,17,21,0.06);
+      --shadow-lg: 0 2px 6px rgba(15,17,21,0.08), 0 20px 50px rgba(15,17,21,0.10);
       /* SPEC inner border per Double Border: 1px bianco al 40% sul lato superiore */
       --shadow-inner-highlight: inset 0 1px 0 0 rgba(255,255,255,0.4);
       /* SPEC text-emphasis per la domanda del commissario */
-      --text-emphasis: #06101F;
+      --text-emphasis: #0F1115;
       /* SPEC recording glow su input card */
-      --recording-glow: 0 0 28px 4px rgba(37,99,235,0.18), 0 0 0 1px rgba(37,99,235,0.20);
+      --recording-glow: 0 0 28px 4px rgba(15,17,21,0.18), 0 0 0 1px rgba(15,17,21,0.20);
       --radius: 16px;
       --radius-lg: 20px;
       --radius-sm: 10px;
@@ -73,7 +72,7 @@
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
     body {
-      font-family: 'Geist', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
@@ -113,7 +112,7 @@
       flex: 1;
     }
     .nav-brand {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 16px;
       font-weight: 700;
       color: var(--text);
@@ -126,7 +125,7 @@
       opacity: 0.6; /* SPEC Stripe: secondari al 60% */
     }
     .nav-session {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 13px;
       font-weight: 500;
       color: var(--text-muted);
@@ -149,7 +148,7 @@
       background: var(--surface-secondary);
       border: 1px solid var(--border-strong);
       color: var(--accent-ring);
-      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 13px;
       font-weight: 600;
       padding: 4px 12px;
@@ -176,7 +175,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 18px;
       font-weight: 700;
       color: var(--text);
@@ -284,27 +283,27 @@
       border-radius: 50%;
       background: linear-gradient(135deg, var(--accent-ring), var(--accent));
       color: #FFFFFF;
-      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 14px;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 10px rgba(37,99,235,0.20);
+      box-shadow: 0 4px 10px rgba(15,17,21,0.20);
     }
 
     .bubble {
       padding: 14px 16px;
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 15px;
       line-height: 1.6;
       letter-spacing: -0.005em;
       box-shadow: var(--shadow-sm), var(--shadow-inner-highlight);
     }
-    /* SPEC Double Border layer 1: 1px solid rgba(15,76,129,0.08) — sostituisce il vecchio --border */
+    /* SPEC Double Border layer 1: 1px solid rgba(15,17,21,0.08) — sostituisce il vecchio --border */
     .bubble-commissario {
       background: var(--surface);
-      border: 1px solid rgba(15,76,129,0.08);
+      border: 1px solid rgba(15,17,21,0.08);
       border-radius: 4px 16px 16px 16px;
       color: var(--text-emphasis);
       /* SPEC density: padding 32px per leggibilità della domanda */
@@ -315,7 +314,7 @@
     .bubble-commissario .bubble-text { color: var(--text-emphasis); }
     .bubble-utente {
       background: var(--surface-secondary);
-      border: 1px solid rgba(15,76,129,0.08);
+      border: 1px solid rgba(15,17,21,0.08);
       border-radius: 16px 4px 16px 16px;
       color: var(--text);
       box-shadow: var(--shadow-sm), var(--shadow-inner-highlight);
@@ -323,7 +322,7 @@
     .bubble-utente .bubble-meta {
       display: block;
       margin-top: 6px;
-      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 11px;
       color: var(--text-muted);
       letter-spacing: 0;
@@ -357,7 +356,7 @@
       text-align: center;
       padding: 36px 16px;
       color: var(--text-muted);
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 14px;
     }
     .chat-empty.is-hidden { display: none; }
@@ -380,10 +379,10 @@
       overflow-y: auto;
       padding: 14px 16px; /* SPEC density: feedback = strumento di controllo denso */
       scrollbar-width: thin;
-      scrollbar-color: rgba(15,76,129,0.18) transparent;
+      scrollbar-color: rgba(15,17,21,0.18) transparent;
     }
     .feedback-scroll::-webkit-scrollbar { width: 8px; }
-    .feedback-scroll::-webkit-scrollbar-thumb { background: rgba(15,76,129,0.18); border-radius: 4px; }
+    .feedback-scroll::-webkit-scrollbar-thumb { background: rgba(15,17,21,0.18); border-radius: 4px; }
     @media (max-width: 640px) {
       .feedback-scroll { padding: 12px 14px; }
     }
@@ -395,7 +394,7 @@
       margin-bottom: 24px;
     }
     .feedback-title {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 15px;
       font-weight: 600;
       color: var(--text);
@@ -413,7 +412,7 @@
       50%      { transform: scale(1.4); opacity: 0.5; }
     }
     .live-text {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 12px;
       font-weight: 500;
       color: var(--text-muted);
@@ -431,7 +430,7 @@
       margin-bottom: 6px;
     }
     .metric-name {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 13px;
       font-weight: 600;
       color: var(--text-secondary);
@@ -439,7 +438,7 @@
       letter-spacing: 0.06em;
     }
     .metric-score {
-      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 28px;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
@@ -464,7 +463,7 @@
       75%      { transform: translateX(-1px); }
     }
     .metric-comment {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 12px;
       line-height: 1.45;
       color: var(--text-muted);
@@ -488,7 +487,7 @@
     }
     .metric-divider {
       height: 1px;
-      background: #F0F6FF;
+      background: #F2EDE2;
       margin: 10px 0; /* SPEC density: strumento di controllo */
     }
     .metric.exiting .metric-score { opacity: 0; transform: translateY(-4px); transition: opacity 0.2s ease, transform 0.2s ease; }
@@ -505,7 +504,7 @@
       margin: 4px 0 16px;
       padding: 10px 14px;
       text-align: center;
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 13px;
       font-weight: 600;
       color: var(--accent);
@@ -536,11 +535,11 @@
     #disagreeBtn {
       width: 100%;
       background: transparent;
-      border: 2px solid #F59E0B;
-      color: #D97706;
+      border: 2px solid #8A6D1F;
+      color: #8A6D1F;
       border-radius: 10px;
       padding: 10px 16px;
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 13px;
       font-weight: 700;
       cursor: pointer;
@@ -548,10 +547,10 @@
     }
     #disagreeBtn:hover {
       background: rgba(245,158,11,0.08);
-      border-color: #D97706;
+      border-color: #8A6D1F;
     }
     #disagreeBtn:active { transform: scale(0.97); }
-    #disagreeBtn:focus-visible { outline: 2px solid #F59E0B; outline-offset: 2px; }
+    #disagreeBtn:focus-visible { outline: 2px solid #8A6D1F; outline-offset: 2px; }
 
     #correctionPanel {
       margin-top: 10px;
@@ -563,7 +562,7 @@
     #correctionPanel[hidden] { display: none; }
     .correction-label {
       display: block;
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 12px;
       font-weight: 600;
       color: var(--text-secondary);
@@ -574,7 +573,7 @@
       min-height: 56px;
       resize: vertical;
       padding: 10px 12px;
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 14px;
       color: var(--text);
       background: #FFFFFF;
@@ -584,7 +583,7 @@
     }
     #correctionInput:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+      box-shadow: 0 0 0 3px rgba(15,17,21,0.15);
     }
     .correction-actions {
       display: flex;
@@ -631,8 +630,8 @@
       animation: inputBreatheGlow 2.4s ease-in-out infinite;
     }
     @keyframes inputBreatheGlow {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(37,99,235,0), var(--shadow-inner-highlight); }
-      50%      { box-shadow: 0 0 28px 4px rgba(37,99,235,0.18), 0 0 0 1px rgba(37,99,235,0.20), var(--shadow-inner-highlight); }
+      0%, 100% { box-shadow: 0 0 0 0 rgba(15,17,21,0), var(--shadow-inner-highlight); }
+      50%      { box-shadow: 0 0 28px 4px rgba(15,17,21,0.18), 0 0 0 1px rgba(15,17,21,0.20), var(--shadow-inner-highlight); }
     }
     @media (max-width: 640px) {
       .sim-input { padding: 10px 14px; gap: 8px; }
@@ -722,7 +721,7 @@
       background: var(--chat-bg);
       border: 1.5px solid var(--border-strong);
       border-radius: 12px;
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 15px;
       line-height: 1.45;
       color: var(--text);
@@ -733,7 +732,7 @@
     }
     #answerInput:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+      box-shadow: 0 0 0 3px rgba(15,17,21,0.15);
     }
     /* SPEC Zander/Chase: il bordo "si accende" con blu elettrico (brand-accent) quando l'utente scrive */
     #answerInput.is-typing-active {
@@ -741,8 +740,8 @@
       border-width: 2px;
       padding: 11px 15px; /* compensa il border-width increased di 0.5px */
       box-shadow:
-        0 0 0 4px rgba(37,99,235,0.16),
-        0 0 20px rgba(37,99,235,0.18);
+        0 0 0 4px rgba(15,17,21,0.16),
+        0 0 20px rgba(15,17,21,0.18);
     }
     #answerInput.is-thinking {
       opacity: 0.6;
@@ -801,7 +800,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 12px;
       font-weight: 600;
       color: var(--text-secondary);
@@ -822,7 +821,7 @@
         z-index: 45;
         border-top: 1px solid var(--border-strong);
         border-left: none;
-        box-shadow: 0 -8px 24px rgba(15,76,129,0.08);
+        box-shadow: 0 -8px 24px rgba(15,17,21,0.08);
       }
       .sim-feedback.is-open { transform: translateY(0); }
       .feedback-scroll { max-height: 50vh; }
@@ -854,7 +853,7 @@
       margin: 0 auto;
     }
     .end-overlay h2 {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 28px;
       font-weight: 700;
       letter-spacing: -0.03em;
@@ -862,7 +861,7 @@
       color: var(--text);
     }
     .end-overlay .end-subtitle {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 14px;
       color: var(--text-muted);
       margin-bottom: 24px;
@@ -899,7 +898,7 @@
       justify-content: center;
     }
     .end-gauge-val {
-      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 32px;
       font-weight: 700;
       letter-spacing: -0.03em;
@@ -908,7 +907,7 @@
       font-variant-numeric: tabular-nums;
     }
     .end-gauge-label {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.06em;
@@ -931,7 +930,7 @@
     }
     .end-score-row:last-child { border-bottom: none; }
     .end-score-name {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 13px;
       font-weight: 600;
       color: var(--text-secondary);
@@ -939,7 +938,7 @@
       letter-spacing: 0.06em;
     }
     .end-score-val {
-      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 18px;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
@@ -954,7 +953,7 @@
     }
     .end-btn-primary {
       flex: 1;
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 15px;
       font-weight: 700;
       color: #FFFFFF;
@@ -967,7 +966,7 @@
     }
     .end-btn-primary:hover { background: var(--accent); }
     .end-btn-secondary {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 15px;
       font-weight: 700;
       color: var(--accent-ring);
@@ -986,7 +985,7 @@
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(15,76,129,0.32);
+      background: rgba(15,17,21,0.32);
       backdrop-filter: blur(4px);
       display: none;
       align-items: center;
@@ -1005,7 +1004,7 @@
       box-shadow: var(--shadow-lg);
     }
     .modal-card h3 {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 20px;
       font-weight: 700;
       color: var(--text);
@@ -1013,7 +1012,7 @@
       margin: 0 0 8px;
     }
     .modal-card p {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 14px;
       color: var(--text-secondary);
       line-height: 1.5;
@@ -1049,7 +1048,7 @@
       border: 1px solid var(--border-strong);
       border-radius: 999px;
       box-shadow: var(--shadow-md);
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 14px;
       font-weight: 600;
       color: var(--text-secondary);
@@ -1081,7 +1080,7 @@
     }
     body.tier-free .summary-pro-cta { display: block; }
     .summary-pro-cta-title {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 15px;
       font-weight: 700;
       letter-spacing: -0.01em;
@@ -1089,7 +1088,7 @@
       margin: 0 0 4px;
     }
     .summary-pro-cta-text {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 13px;
       color: var(--text-secondary);
       line-height: 1.55;
@@ -1099,7 +1098,7 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 14px;
       font-weight: 700;
       color: var(--accent-ring);
@@ -1147,14 +1146,14 @@
     }
     .quota-modal-icon svg { width: 24px; height: 24px; }
     .quota-modal-title {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 18px;
       font-weight: 700;
       letter-spacing: -0.02em;
       margin: 0;
     }
     .quota-modal-text {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 14px;
       color: var(--text-secondary);
       line-height: 1.55;
@@ -1173,7 +1172,7 @@
       height: 44px;
       padding: 0 18px;
       border-radius: 10px;
-      font-family: 'Geist', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 15px;
       font-weight: 700;
       text-decoration: none;
@@ -1644,9 +1643,9 @@
       return 'color-success';
     }
     function feedbackColorHex(value) {
-      if (value < 5) return '#DC2626';
-      if (value <= 7) return '#D97706';
-      return '#16A34A';
+      if (value < 5) return '#A4472E';
+      if (value <= 7) return '#8A6D1F';
+      return '#1E9E5C';
     }
 
     // ----- TOAST -----
@@ -1934,7 +1933,7 @@
         '<div class="avatar-c" aria-hidden="true">C</div>' +
         '<div class="bubble bubble-commissario">' +
           '<div class="bubble-text">' + escapeHtml(text || '') + '</div>' +
-          (isOpen ? '<span class="typewriter-caret" aria-hidden="true" style="display:inline-block;width:8px;height:14px;background:#2563EB;margin-left:2px;animation:caretBlink 0.85s steps(2) infinite;vertical-align:-2px;"></span>' : '') +
+          (isOpen ? '<span class="typewriter-caret" aria-hidden="true" style="display:inline-block;width:8px;height:14px;background:#0F1115;margin-left:2px;animation:caretBlink 0.85s steps(2) infinite;vertical-align:-2px;"></span>' : '') +
         '</div>';
       chatArea.appendChild(msg);
       chatArea.appendChild(msg);
@@ -2211,7 +2210,7 @@
       var m = (feedback.clarity + feedback.structure + feedback.content + feedback.lessico + feedback.pertinenza) / 5;
       endGaugeVal.textContent = m.toFixed(1);
       endGaugeLabel.textContent = m < 6 ? 'DA MIGLIORARE' : (m < 8 ? 'SUFFICIENTE' : 'ECCELLENTE');
-      var hex = m < 6 ? '#DC2626' : (m < 8 ? '#D97706' : '#16A34A');
+      var hex = m < 6 ? '#A4472E' : (m < 8 ? '#8A6D1F' : '#1E9E5C');
       if (endGaugeFill) endGaugeFill.style.stroke = hex;
       // Animazione disegno arco
       var circ = 314.159;

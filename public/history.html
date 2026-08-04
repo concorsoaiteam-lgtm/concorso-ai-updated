@@ -1,272 +1,350 @@
 <!DOCTYPE html>
-<html lang="it" class="scroll-smooth">
+<html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Storico simulazioni — ConcorsoAI</title>
-  <meta name="description" content="Lo storico completo delle tue simulazioni. Progressi, punteggi, aree deboli nel tempo." />
-  <meta name="theme-color" content="#F7FBFF" />
-  <link rel="canonical" href="https://concorso-ai.vercel.app/history" />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.3/index.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.0.3/index.min.css" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] }, colors: { brand: { 50:'#F7FBFF',100:'#EAF4FF',200:'#D6E8FF',300:'#A9CDF8',400:'#5EA0E8',500:'#2563EB',600:'#0F4C81',700:'#0B3A63',800:'#0B2A4A',900:'#071D33' } }, boxShadow: { card: '0 24px 70px rgba(15,76,129,.12)', glowBlue: '0 18px 45px rgba(37,99,235,.22)' } } }
-    }
-  </script>
-
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-
-  <link rel="stylesheet" href="/css/landing.css" />
-<script src="/js/telemetry.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FAF8F3" />
+  <title>Storico — ConcorsoAI</title>
+  <meta name="description" content="Lo storico completo delle tue simulazioni: punteggi, tempi e andamento nel tempo." />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23FAF8F3'/%3E%3Ctext x='16' y='22' font-size='17' text-anchor='middle' fill='%230F1115' font-family='system-ui' font-weight='500'%3EC%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
+  <link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600&display=swap" />
+  <link rel="stylesheet" href="css/dashboard.css" />
 </head>
-<body class="font-sans antialiased selection:bg-brand-200 selection:text-brand-900">
+<body>
 
-  <div id="loader" class="fixed inset-0 z-50 flex items-center justify-center bg-white">
-    <div class="flex items-center gap-3 rounded-2xl border border-brand-200 bg-white px-5 py-4 shadow-card">
-      <span class="loader-dot"></span>
-      <span class="text-sm font-bold text-brand-700">Caricamento storico</span>
+  <div class="app" id="app">
+
+    <!-- ============================================================
+         SIDEBAR — identica a dashboard.html (shell condivisa)
+         ============================================================ -->
+    <aside class="side" aria-label="Navigazione">
+      <a href="/" class="side-brand" aria-label="ConcorsoAI — torna alla home">
+        ConcorsoAI<span class="brand-dot" aria-hidden="true"></span>
+      </a>
+
+      <div class="side-bando" id="side-bando"></div>
+
+      <nav class="side-nav" aria-label="Sezioni">
+        <a href="dashboard.html#panoramica" class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.75A1.75 1.75 0 0 1 4.75 3h5.5A1.75 1.75 0 0 1 12 4.75v5.5A1.75 1.75 0 0 1 10.25 12h-5.5A1.75 1.75 0 0 1 3 10.25v-5.5ZM3 17.75A1.75 1.75 0 0 1 4.75 16h5.5A1.75 1.75 0 0 1 12 17.75v1.5A1.75 1.75 0 0 1 10.25 21h-5.5A1.75 1.75 0 0 1 3 19.25v-1.5ZM14.25 4.75A1.75 1.75 0 0 1 16 3h3.25A1.75 1.75 0 0 1 21 4.75v5.5A1.75 1.75 0 0 1 19.25 12H16a1.75 1.75 0 0 1-1.75-1.75v-5.5ZM14.25 15.5a1.75 1.75 0 0 1 1.75-1.75h3.25A1.75 1.75 0 0 1 21 15.5v3.75A1.75 1.75 0 0 1 19.25 21H16a1.75 1.75 0 0 1-1.75-1.75V15.5Z"/>
+          </svg>
+          <span class="nav-label">Panoramica</span>
+        </a>
+        <a href="dashboard.html#bandi" class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 2.75h9.75L19.5 6.5V21.25a.75.75 0 0 1-.75.75H6a.75.75 0 0 1-.75-.75V3.5A.75.75 0 0 1 6 2.75Z"/>
+            <path stroke-linecap="round" d="M9 14h6M9 17.5h4"/>
+          </svg>
+          <span class="nav-label">Bandi</span>
+        </a>
+        <a href="dashboard.html#piano" class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <rect x="3" y="4.5" width="18" height="16" rx="2"/>
+            <path stroke-linecap="round" d="M3 9.5h18M8 4.5V8M12 4.5V8M16 4.5V8"/>
+          </svg>
+          <span class="nav-label">Piano settimanale</span>
+          <span class="nav-badge">Pro</span>
+        </a>
+        <a href="simulation.html" class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.5 11.5v5m7-5v5M3 4.75h18v14.5H3z"/>
+          </svg>
+          <span class="nav-label">Simulazioni</span>
+        </a>
+        <a href="history.html" class="nav-item is-active" aria-current="page">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <circle cx="12" cy="12" r="8.5"/>
+            <path stroke-linecap="round" d="M12 7.5V12l3 2"/>
+          </svg>
+          <span class="nav-label">Storico</span>
+        </a>
+      </nav>
+
+      <div class="side-usage" id="side-usage"></div>
+
+      <div class="side-foot">
+        <button type="button" class="cmdk-hint" id="cmdk-open">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5"/><path stroke-linecap="round" d="M20 20l-3.8-3.8"/>
+          </svg>
+          <span>Comandi</span>
+          <kbd>⌘K</kbd>
+        </button>
+        <div class="side-user">
+          <span class="side-user-avatar" id="user-avatar" aria-hidden="true">C</span>
+          <span class="side-user-name" id="user-name">Candidato</span>
+          <button type="button" class="side-user-out" id="logout-btn" title="Esci">Esci</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============================================================
+         MAIN
+         ============================================================ -->
+    <div class="main">
+      <header class="topbar">
+        <button type="button" class="side-toggle" id="side-toggle" aria-label="Apri il menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+        </button>
+        <span class="top-eyebrow" id="top-eyebrow">Storico</span>
+        <div class="top-actions">
+          <span class="streak-chip" id="streak-chip" title="Giorni di fila"></span>
+          <button type="button" class="cmdk-btn" id="cmdk-btn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <circle cx="11" cy="11" r="6.5"/><path stroke-linecap="round" d="M20 20l-3.8-3.8"/>
+            </svg>
+            <span>Comandi</span>
+            <kbd>⌘K</kbd>
+          </button>
+        </div>
+      </header>
+
+      <main class="content">
+
+        <section class="view is-active" aria-label="Storico simulazioni">
+          <p class="eyebrow">Storico</p>
+          <h1 class="view-title">Le tue simulazioni</h1>
+          <p class="view-sub">Tutte le sessioni in ordine cronologico: punteggi, tempi e andamento nel tempo.</p>
+
+          <div class="section-gap">
+            <div class="stats" id="summaryStats"></div>
+          </div>
+
+          <div class="section-gap">
+            <div class="card">
+              <div class="card-head">
+                <h2 class="card-title">Evoluzione punteggi</h2>
+                <span class="card-link" id="trendLabel">—</span>
+              </div>
+              <div class="spark-wrap">
+                <svg id="sparkSvg" viewBox="0 0 600 180" class="spark-svg" preserveAspectRatio="none" aria-label="Grafico evoluzione punteggi" role="img"></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-gap">
+            <div class="card">
+              <div class="card-head">
+                <h2 class="card-title">Tutte le simulazioni</h2>
+              </div>
+              <div class="hist-list" id="fullList">
+                <div class="hist-row is-muted">Caricamento…</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-gap">
+            <div class="empty" id="emptyState" hidden>
+              <h3 class="empty-title">Nessuna simulazione ancora</h3>
+              <p class="empty-text">Inizia la tua prima simulazione: lo storico si popola automaticamente dopo ogni sessione.</p>
+              <div class="empty-actions">
+                <a href="simulation.html" class="btn btn-primary">Inizia una simulazione</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-gap">
+            <div class="empty is-error" id="errorState" hidden>
+              <h3 class="empty-title">Errore di caricamento</h3>
+              <p class="empty-text">Non riusciamo a leggere lo storico. Riprova tra qualche secondo.</p>
+              <div class="empty-actions">
+                <button type="button" class="btn btn-primary" id="retry-btn">Riprova</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
     </div>
   </div>
 
-  <div id="app" class="hidden">
-
-    <header class="sticky top-0 z-40 border-b border-brand-200/80 bg-white/86 backdrop-blur-xl shadow-sm">
-      <nav class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <a href="dashboard.html" class="rounded-xl text-xl font-extrabold tracking-tight text-brand-900">Concorso<span class="text-gradient">AI</span></a>
-        <div class="flex items-center gap-3">
-          <a href="dashboard.html" class="rounded-xl border border-brand-200 bg-white px-4 py-2 text-sm font-bold text-brand-700 hover:bg-brand-50 transition">← Dashboard</a>
-          <span id="planBadge" class="hidden rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-black uppercase tracking-wider text-amber-700 sm:inline-block">Free</span>
-        </div>
-      </nav>
-    </header>
-
-    <main class="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-
-      <div class="reveal flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p class="section-eyebrow">STORICO</p>
-          <h1 class="mt-3 text-3xl font-black tracking-[-0.035em] text-brand-900 sm:text-4xl">Le tue simulazioni.</h1>
-          <p class="mt-3 text-base leading-7 text-brand-700">Tutte le sessioni in ordine cronologico. Score, difficoltà, tempo usato.</p>
-        </div>
-        <div id="summaryStats" class="flex gap-3 flex-wrap"></div>
-      </div>
-
-      <!-- Grafico evoluzione -->
-      <section class="mt-10 reveal rounded-3xl border border-brand-200 bg-white p-6 shadow-card sm:p-8">
-        <div class="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 class="text-lg font-black text-brand-900">Evoluzione punteggi</h2>
-            <p class="mt-1 text-sm text-brand-600">Chiarezza, struttura e contenuto nelle ultime simulazioni.</p>
-          </div>
-          <div class="text-xs font-bold text-brand-600" id="trendLabel">—</div>
-        </div>
-        <div id="sparkline" class="mt-6 overflow-hidden">
-          <svg id="sparkSvg" viewBox="0 0 600 180" class="w-full h-44" preserveAspectRatio="none" aria-label="Grafico evoluzione punteggi"></svg>
-        </div>
-      </section>
-
-      <!-- Lista completa -->
-      <section class="mt-10 reveal rounded-3xl border border-brand-200 bg-white shadow-card overflow-hidden">
-        <div class="border-b border-brand-200 bg-brand-50 px-6 py-4 sm:px-8">
-          <h2 class="text-lg font-black text-brand-900">Tutte le simulazioni</h2>
-        </div>
-        <div id="fullList" class="divide-y divide-brand-100">
-          <div class="px-6 py-12 sm:px-8 text-center">
-            <p class="text-sm font-semibold text-brand-600">Caricamento...</p>
-          </div>
-        </div>
-      </section>
-
-      <section id="emptyState" class="mt-10 hidden reveal rounded-3xl border border-brand-200 bg-white p-10 shadow-card text-center">
-        <h2 class="text-xl font-black text-brand-900">Nessuna simulazione ancora</h2>
-        <p class="mt-3 text-base text-brand-700">Inizia la tua prima simulazione. Lo storico si popola automaticamente dopo ogni sessione.</p>
-        <a href="simulation.html" class="btn-primary shine mt-6 inline-flex items-center justify-center rounded-2xl px-6 py-3.5 text-sm font-black">Inizia simulazione →</a>
-      </section>
-
-      <section id="errorState" class="mt-10 hidden reveal rounded-3xl border border-red-200 bg-red-50 p-8 text-center">
-        <h2 class="text-xl font-black text-red-800">Errore di caricamento</h2>
-        <p class="mt-3 text-sm text-red-700">Non riesco a leggere lo storico. Riprova tra qualche secondo.</p>
-      </section>
-
-    </main>
-
-    <footer class="border-t border-brand-200 bg-white/70 py-8 mt-12">
-      <div class="mx-auto max-w-6xl px-4 sm:px-6 text-center text-sm font-semibold text-brand-700">
-        ConcorsoAI · Made in Italy · <a href="privacy.html" class="footer-link">Privacy</a> · <a href="terms.html" class="footer-link">Termini</a>
-      </div>
-    </footer>
+  <!-- Modal + palette + toast condivisi -->
+  <div class="modal-backdrop" id="modal-backdrop" hidden></div>
+  <div class="palette" id="palette" hidden>
+    <input class="palette-input" id="palette-input" type="text" placeholder="Cosa vuoi fare?" aria-label="Cerca comandi" />
+    <div class="palette-list" id="palette-list"></div>
   </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.0/dist/umd/supabase.min.js"></script>
+  <script src="js/telemetry.js"></script>
+  <script src="js/dash-common.js"></script>
   <script>
-    const SUPABASE_URL = (typeof __SUPABASE_URL !== 'undefined' && __SUPABASE_URL)
-      ? __SUPABASE_URL
-      : ['https://','xhifnparcouxsypkjcmn','.supabase.co'].join('');
-    const SUPABASE_ANON_KEY = (typeof __SUPABASE_ANON_KEY !== 'undefined' && __SUPABASE_ANON_KEY)
-      ? __SUPABASE_ANON_KEY
-      : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
-    let supabaseClient = null;
-    try { supabaseClient = window.supabase && window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch (_) {}
+    (function () {
+      "use strict";
+      var supabaseClient = window.Dash ? Dash.supabase : null;
+      var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    function escapeHtml(value) {
-      return String(value).replace(/[&<>"]/g, function (c) { return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' })[c]; });
-    }
-    function relativeDate(iso) {
-      if (!iso) return '';
-      const diff = Date.now() - new Date(iso).getTime();
-      const days = Math.floor(diff / 86400000);
-      if (days <= 0) return 'oggi';
-      if (days === 1) return 'ieri';
-      return days + ' giorni fa';
-    }
-    function scoreColor(score) {
-      if (score < 5) return '#DC2626';
-      if (score <= 7) return '#2563EB';
-      return '#16A34A';
-    }
-    function renderSparkline(rows) {
-      const svg = document.getElementById('sparkSvg');
-      if (!svg) return;
-      // ultime 12 simulazioni in ordine cronologico
-      const recent = rows.slice(-12);
-      if (!recent.length) { svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" font-size="14" fill="#94A3B8">Nessun dato</text>'; return; }
-      const W = 600, H = 180, PAD = 20;
-      const cx = i => PAD + (i / Math.max(1, recent.length - 1)) * (W - PAD * 2);
-      const cy = (val, j) => PAD + (1 - val / 10) * (H - PAD * 2);
-      const series = [
-        { key: 'clarity_score', color: '#2563EB', label: 'Chiarezza' },
-        { key: 'structure_score', color: '#0F4C81', label: 'Struttura' },
-        { key: 'content_score', color: '#16A34A', label: 'Contenuto' }
-      ];
-      let svgContent = '';
-      // gridlines
-      for (let g = 0; g <= 4; g++) {
-        const y = PAD + (g / 4) * (H - PAD * 2);
-        svgContent += `<line x1="${PAD}" y1="${y}" x2="${W - PAD}" y2="${y}" stroke="#EAF4FF" stroke-width="1"/>`;
-        svgContent += `<text x="2" y="${y + 3}" font-size="10" fill="#94A3B8">${10 - g * 2.5}</text>`;
+      function esc(v) { return Dash.escapeHtml(v); }
+
+      function scoreColor(score) {
+        if (score < 5) return "#A4472E";
+        if (score <= 7) return "#8A6D1F";
+        return "#1E9E5C";
       }
-      series.forEach(s => {
-        const points = recent.map((r, i) => cx(i) + ',' + cy(typeof r[s.key] === 'number' ? r[s.key] : 0, i)).join(' ');
-        if (points) svgContent += `<polyline fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="${points}" />`;
-        recent.forEach((r, i) => {
-          const val = typeof r[s.key] === 'number' ? r[s.key] : 0;
-          svgContent += `<circle cx="${cx(i)}" cy="${cy(val, i)}" r="3.5" fill="${s.color}"><title>${s.label}: ${val}/10</title></circle>`;
+
+      function relativeDate(iso) {
+        if (!iso) return "";
+        var diff = Date.now() - new Date(iso).getTime();
+        var days = Math.floor(diff / 86400000);
+        if (days <= 0) return "oggi";
+        if (days === 1) return "ieri";
+        return days + " giorni fa";
+      }
+
+      function renderSparkline(rows) {
+        var svg = document.getElementById("sparkSvg");
+        if (!svg) return;
+        var recent = rows.slice(-12);
+        if (!recent.length) {
+          svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" font-size="13" fill="#8A8E96">Nessun dato</text>';
+          return;
+        }
+        var W = 600, H = 180, PAD = 20;
+        function cx(i) { return PAD + (i / Math.max(1, recent.length - 1)) * (W - PAD * 2); }
+        function cy(val, j) { return PAD + (1 - val / 10) * (H - PAD * 2); }
+        var series = [
+          { key: "clarity_score", color: "#0F1115", label: "Chiarezza" },
+          { key: "structure_score", color: "#8A6D1F", label: "Struttura" },
+          { key: "content_score", color: "#1E9E5C", label: "Contenuto" }
+        ];
+        var out = "";
+        for (var g = 0; g <= 4; g++) {
+          var y = PAD + (g / 4) * (H - PAD * 2);
+          out += '<line x1="' + PAD + '" y1="' + y + '" x2="' + (W - PAD) + '" y2="' + y + '" stroke="#F2EDE2" stroke-width="1"/>';
+          out += '<text x="2" y="' + (y + 3) + '" font-size="10" fill="#8A8E96">' + (10 - g * 2.5) + "</text>";
+        }
+        series.forEach(function (s) {
+          var pts = recent.map(function (r, i) {
+            return cx(i) + "," + cy(typeof r[s.key] === "number" ? r[s.key] : 0, i);
+          }).join(" ");
+          if (pts) out += '<polyline fill="none" stroke="' + s.color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="' + pts + '"/>';
+          recent.forEach(function (r, i) {
+            var val = typeof r[s.key] === "number" ? r[s.key] : 0;
+            out += '<circle cx="' + cx(i) + '" cy="' + cy(val, i) + '" r="3" fill="' + s.color + '"><title>' + s.label + ": " + val + "/10</title></circle>";
+          });
         });
+        svg.innerHTML = out;
+
+        var trend = document.getElementById("trendLabel");
+        if (trend && recent.length >= 2) {
+          var first = recent[0], last = recent[recent.length - 1];
+          function avg(r) { return ((r.clarity_score || 0) + (r.structure_score || 0) + (r.content_score || 0)) / 3; }
+          var delta = avg(last) - avg(first);
+          trend.textContent = (delta >= 0 ? "↑ +" : "↓ ") + delta.toFixed(1) + " pt nelle ultime sessioni";
+          trend.style.color = delta >= 0 ? "#1E9E5C" : "#A4472E";
+        }
+      }
+
+      function renderList(rows) {
+        var list = document.getElementById("fullList");
+        if (!rows.length) {
+          list.innerHTML = '<div class="hist-row is-muted">Nessuna simulazione ancora</div>';
+          document.getElementById("emptyState").hidden = false;
+          return;
+        }
+        list.innerHTML = rows.slice().reverse().map(function (r) {
+          var hasScores = (r.clarity_score != null && r.structure_score != null && r.content_score != null);
+          var score = hasScores ? ((r.clarity_score + r.structure_score + r.content_score) / 3) : null;
+          var color = score === null ? "#8A8E96" : scoreColor(score);
+          var mins = r.ended_at && r.started_at
+            ? Math.round((new Date(r.ended_at) - new Date(r.started_at)) / 60000)
+            : null;
+          return (
+            '<div class="hist-row">' +
+              '<div class="hist-main">' +
+                '<p class="hist-title">' + esc("Simulazione " + (r.modalita || "orale")) + "</p>" +
+                '<p class="hist-meta">' + relativeDate(r.started_at || r.created_at) +
+                  (mins !== null ? " · " + mins + " min" : "") + "</p>" +
+              "</div>" +
+              '<div class="hist-side">' +
+                '<span class="chip">' + esc(r.modalita || "orale") + "</span>" +
+                '<span class="hist-score" style="color:' + color + '">' + (score === null ? "—" : score.toFixed(1)) + "</span>" +
+              "</div>" +
+            "</div>"
+          );
+        }).join("");
+      }
+
+      function renderSummary(rows) {
+        var container = document.getElementById("summaryStats");
+        if (!container) return;
+        var total = rows.length;
+        var avg = total
+          ? rows.reduce(function (s, r) {
+              return s + ((r.clarity_score || 0) + (r.structure_score || 0) + (r.content_score || 0)) / 3;
+            }, 0) / total
+          : 0;
+        container.innerHTML =
+          statCard("Sessioni", String(total)) +
+          statCard("Media", avg ? avg.toFixed(1) : "—", scoreColor(avg));
+      }
+
+      function statCard(label, value, color) {
+        return (
+          '<div class="stat">' +
+            '<span class="stat-label">' + esc(label) + "</span>" +
+            '<span class="stat-value" style="' + (color ? "color:" + color : "") + '">' + esc(value) + "</span>" +
+          "</div>"
+        );
+      }
+
+      function load() {
+        Dash.guard().then(function (ok) {
+          if (!ok) return;
+          Dash.loadUser().then(function (user) {
+            if (!user) return;
+            var bando = Dash.getActiveBando() || {};
+            Dash.renderUser(user);
+            Dash.renderBandoSwitch(bando.filename || "", !!bando);
+            Dash.loadCommon(user);
+            return fetchRows(user.id);
+          });
+        });
+      }
+
+      function fetchRows(userId) {
+        return supabaseClient.from("simulazioni")
+          .select("clarity_score, structure_score, content_score, modalita, started_at, ended_at, created_at")
+          .eq("user_id", userId)
+          .order("started_at", { ascending: true })
+          .then(function (res) {
+            if (res.error) throw res.error;
+            var rows = res.data || [];
+            renderSummary(rows);
+            renderSparkline(rows);
+            renderList(rows);
+          })
+          .catch(function (e) {
+            console.warn("[ConcorsoAI] history load error:", e);
+            document.getElementById("errorState").hidden = false;
+          });
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        Dash.initShell({
+          paletteActions: [
+            { label: "Nuova simulazione", icon: "", run: function () { window.location.href = "simulation.html"; } },
+            { label: "Panoramica", icon: "", run: function () { window.location.href = "dashboard.html#panoramica"; } },
+            { label: "Bandi", icon: "", run: function () { window.location.href = "dashboard.html#bandi"; } },
+            { label: "Piano settimanale", icon: "", run: function () { window.location.href = "dashboard.html#piano"; } },
+            { label: "Torna alla home", icon: "", run: function () { window.location.href = "/"; } }
+          ]
+        });
+        var retry = document.getElementById("retry-btn");
+        if (retry) retry.addEventListener("click", function () {
+          document.getElementById("errorState").hidden = true;
+          load();
+        });
+        load();
       });
-      svg.innerHTML = svgContent;
-
-      // Trend label
-      const trend = document.getElementById('trendLabel');
-      if (trend && recent.length >= 2) {
-        const first = recent[0], last = recent[recent.length - 1];
-        const delta = (((last.clarity_score || 0) + (last.structure_score || 0) + (last.content_score || 0)) / 3) - (((first.clarity_score || 0) + (first.structure_score || 0) + (first.content_score || 0)) / 3);
-        trend.textContent = (delta >= 0 ? '↑ +' : '↓ ') + delta.toFixed(1) + ' pt nelle ultime sessioni';
-        trend.style.color = delta >= 0 ? '#16A34A' : '#DC2626';
-      }
-    }
-    function renderList(rows) {
-      const list = document.getElementById('fullList');
-      if (!rows.length) {
-        document.getElementById('emptyState').classList.remove('hidden');
-        return;
-      }
-      list.innerHTML = rows.slice().reverse().map(r => {
-        const score = (r.clarity_score && r.structure_score && r.content_score)
-          ? ((r.clarity_score + r.structure_score + r.content_score) / 3).toFixed(1)
-          : null;
-        const color = score === null ? '#94A3B8' : scoreColor(parseFloat(score));
-        const mins = r.ended_at && r.started_at
-          ? Math.round((new Date(r.ended_at) - new Date(r.started_at)) / 60000)
-          : null;
-        return `
-          <div class="flex flex-wrap items-center justify-between gap-3 px-6 py-4 sm:px-8">
-            <div class="min-w-0">
-              <p class="text-sm font-black text-brand-900">${escapeHtml('Simulazione ' + (r.modalita || 'orale'))}</p>
-              <p class="mt-0.5 text-xs font-semibold text-brand-600">${relativeDate(r.started_at || r.created_at)} · ${mins !== null ? mins + ' min' : 'tempo n/d'}</p>
-            </div>
-            <div class="flex items-center gap-4">
-              <span class="text-xs font-bold text-brand-700">Difficoltà: <strong>${escapeHtml(r.modalita || '—')}</strong></span>
-              <span class="text-2xl font-black" style="color: ${color}; font-variant-numeric: tabular-nums;">${score === null ? '—' : score}</span>
-              <a href="simulation.html" class="rounded-full border border-brand-200 bg-white px-3 py-1.5 text-xs font-bold text-brand-700 hover:bg-brand-50 transition">Riprova</a>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-    function renderSummary(rows) {
-      const container = document.getElementById('summaryStats');
-      if (!container) return;
-      const total = rows.length;
-      const avg = total ? rows.reduce((s, r) => s + ((r.clarity_score || 0) + (r.structure_score || 0) + (r.content_score || 0)) / 3, 0) / total : 0;
-      container.innerHTML = `
-        <div class="rounded-2xl border border-brand-200 bg-white px-4 py-3 shadow-sm">
-          <p class="text-[10px] font-black uppercase tracking-widest text-brand-500">Sessioni</p>
-          <p class="mt-1 text-xl font-black text-brand-900" style="font-variant-numeric: tabular-nums;">${total}</p>
-        </div>
-        <div class="rounded-2xl border border-brand-200 bg-white px-4 py-3 shadow-sm">
-          <p class="text-[10px] font-black uppercase tracking-widest text-brand-500">Media</p>
-          <p class="mt-1 text-xl font-black" style="color: ${scoreColor(avg)}; font-variant-numeric: tabular-nums;">${avg ? avg.toFixed(1) : '—'}</p>
-        </div>
-      `;
-    }
-    async function load() {
-      if (!supabaseClient) {
-        document.getElementById('loader').classList.add('hidden');
-        document.getElementById('errorState').classList.remove('hidden');
-        return;
-      }
-      const { data: { user }, error: authErr } = await supabaseClient.auth.getUser();
-      if (authErr || !user) {
-        window.location.href = 'auth.html';
-        return;
-      }
-      // Plan badge
-      const plan = user?.user_metadata?.plan || 'free';
-      const badge = document.getElementById('planBadge');
-      if (badge) {
-        badge.textContent = plan === 'pro' ? 'Pro' : 'Free';
-        badge.classList.remove('hidden');
-      }
-      // Fetch rows from simulazioni
-      try {
-        const { data, error } = await supabaseClient
-          .from('simulazioni')
-          .select('clarity_score, structure_score, content_score, modalita, started_at, ended_at, created_at')
-          .eq('user_id', user.id)
-          .order('started_at', { ascending: true });
-        if (error) throw error;
-        const rows = data || [];
-        renderSummary(rows);
-        renderSparkline(rows);
-        renderList(rows);
-      } catch (e) {
-        console.warn('[ConcorsoAI] history load error:', e);
-        document.getElementById('errorState').classList.remove('hidden');
-      }
-      document.getElementById('loader').classList.add('hidden');
-      document.getElementById('app').classList.remove('hidden');
-      if (window.gsap) {
-        gsap.from('.reveal', { opacity: 0, y: 18, duration: 0.5, ease: 'power3.out', stagger: 0.08 });
-      }
-    }
-    if ('IntersectionObserver' in window) {
-      const obs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); obs.unobserve(e.target); } }), { threshold: 0.12 });
-      document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
-    }
-    window.addEventListener('DOMContentLoaded', load);
+    })();
   </script>
-
-  <style>
-    .loader-dot { width: 9px; height: 9px; border-radius: 999px; background: #2563EB; animation: loaderPulse 1s ease-in-out infinite; }
-    @keyframes loaderPulse { 0%,100%{opacity:.35;transform:scale(1);}50%{opacity:1;transform:scale(1.5);} }
-    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .72s cubic-bezier(.2,.8,.2,1), transform .72s cubic-bezier(.2,.8,.2,1); }
-    .reveal.is-visible { opacity: 1; transform: translateY(0); }
-  </style>
 </body>
 </html>
