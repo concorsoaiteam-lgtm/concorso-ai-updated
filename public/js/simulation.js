@@ -19,6 +19,7 @@
     phase: "boot",              // boot|gate|setup|briefing|running|paused|report
     user: null,                 // {id, email, displayName, plan}
     bando: null,                // bando attivo da localStorage
+    subject: null,              // materia dell'allenamento libero (senza bando)
     used: 0,                    // simulazioni usate questo mese
     mode: "standard",           // standard|rapida|difficile|ripasso
     questions: [],              // [{id, testo, argomento}]
@@ -35,8 +36,7 @@
     feedbackDone: false,
     streamCtrl: null,           // AbortController del fetch corrente
     resumeData: null,           // sessione da riprendere
-    bankLoading: null,          // Promise generazione bank
-    bankTimer: null
+    bankLoading: null           // Promise generazione bank
   };
 
   /* ------------------------------------------------------------------
@@ -64,6 +64,62 @@
   };
 
   /* ------------------------------------------------------------------
+     Materie per l'allenamento libero (senza bando caricato).
+     Sono le materie più ricorrenti negli orali dei concorsi pubblici
+     italiani (Comuni, Regioni, Ministeri, ASL, Agenzie fiscali).
+     L'utente ne estrae una a caso e può cambiarla prima di iniziare.
+     ------------------------------------------------------------------ */
+  var FREE_SUBJECTS = [
+    { id: "diritto-amministrativo", name: "Diritto amministrativo",
+      hint: "procedimento amministrativo, legge 241/1990, nullità e annullabilità, discrezionalità, diritti del cittadino" },
+    { id: "diritto-costituzionale", name: "Diritto costituzionale",
+      hint: "principi della Costituzione, art. 3 e 97, formazione delle leggi, decreti-legge, diritti fondamentali" },
+    { id: "enti-locali", name: "Ordinamento degli enti locali (TUEL)",
+      hint: "organi del Comune, Consiglio e Giunta, delibere, rapporto politica-gestione, Segretario comunale" },
+    { id: "contabilita-pubblica", name: "Contabilità pubblica e degli enti locali",
+      hint: "bilancio di previsione, rendiconto, principi di veridicità e pareggio, fasi di entrata e di spesa" },
+    { id: "contratti-pubblici", name: "Contratti pubblici",
+      hint: "codice dei contratti (d.lgs. 36/2023), soglie europee, affidamento diretto, principi del risultato e della fiducia" },
+    { id: "legislazione-sanitaria", name: "Legislazione sanitaria e organizzazione ASL",
+      hint: "organizzazione dell'ASL, SSN, principi di universalità uguaglianza ed equità, d.lgs. 502/1992" },
+    { id: "lavoro-pubblico", name: "Diritto del lavoro e pubblico impiego",
+      hint: "privatizzazione del pubblico impiego, d.lgs. 165/2001, doveri del dipendente, codice di comportamento, sanzioni disciplinari" },
+    { id: "anticorruzione", name: "Anticorruzione e trasparenza",
+      hint: "legge 190/2012, d.lgs. 33/2013, PIAO, accesso civico semplice e generalizzato (FOIA), codice di comportamento" },
+    { id: "privacy", name: "Privacy e protezione dei dati (GDPR)",
+      hint: "principi del trattamento dati, regolamento UE 2016/679, ruolo del DPO, diritti dell'interessato" },
+    { id: "organizzazione-pa", name: "Organizzazione e gestione della PA",
+      hint: "misurazione della performance, cittadinanza digitale, CAD, qualità dei servizi pubblici" },
+    { id: "informatica", name: "Informatica di base",
+      hint: "hardware e software, reti LAN/WAN, sicurezza informatica, phishing, firma digitale, PEC, fogli di calcolo" },
+    { id: "inglese", name: "Lingua inglese",
+      hint: "presentazione personale, conversazione su lavoro e pubblica amministrazione, traduzione di brevi testi" }
+  ];
+
+  var bankGen = 0; // generazione della bank: invalida le promise vecchie
+
+  /* Cambia materia: la bank precedente NON vale più. La promise LLM in volo
+     viene invalidata via generazione (bankGen): al resolve scrive solo se la
+     sua generazione è ancora l'ultima. */
+  function pickRandomSubject() {
+    var idx = Math.floor(Math.random() * FREE_SUBJECTS.length);
+    if (FREE_SUBJECTS.length > 1 && S.subject) {
+      var cur = FREE_SUBJECTS.indexOf(S.subject);
+      if (idx === cur) idx = (idx + 1) % FREE_SUBJECTS.length;
+    }
+    S.subject = FREE_SUBJECTS[idx];
+    invalidateBank();
+    return S.subject;
+  }
+
+  function invalidateBank() {
+    bankGen += 1;
+    S.qBankReady = false;
+    S.questions = [];
+    S.bankLoading = null;
+  }
+
+  /* ------------------------------------------------------------------
      Persistenza locale
      ------------------------------------------------------------------ */
   function lsGet(k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } }
@@ -78,6 +134,7 @@
         return { id: q.id, testo: q.testo, argomento: q.argomento };
       }),
       bandoId: S.bando ? S.bando.id : null,
+      subjectId: S.subject ? S.subject.id : null,
       draftAnswer: (S.phase === "session") ? ($("answer-textarea").value || "") : ""
     };
     if (S.simId) lsSet(K_DRAFT + S.simId, payload);
@@ -132,18 +189,21 @@
   }
 
   function beginSessionDb() {
-    if (!S.bando) return;
     persistWrite({
       type: "insert_sim",
       data: {
         user_id: S.user.id,
-        bando_id: Number(S.bando.id) || null,
+        bando_id: S.bando ? (Number(S.bando.id) || null) : null,
         modalita: S.mode,
         status: "in_progress",
         started_at: new Date(S.startedAt).toISOString()
       }
     });
-    if (D) D.track("sim_started", { bando_id: S.bando.id, mode: S.mode });
+    if (D) D.track("sim_started", {
+      bando_id: S.bando ? S.bando.id : null,
+      subject_id: S.subject ? S.subject.id : null,
+      mode: S.mode
+    });
   }
 
   function updateSessionDb(fields) {
@@ -166,12 +226,15 @@
      Question bank — cache 7gg + fallback LLM onesto
      ------------------------------------------------------------------ */
   function bankCacheKey() {
-    return S.bando ? K_BANK + S.bando.id : null;
+    if (S.bando) return K_BANK + S.bando.id;
+    if (S.subject) return K_BANK + "subj-" + S.subject.id;
+    return null;
   }
 
   function loadBankFromCache() {
-    if (!S.bando) return null;
-    var c = lsGet(bankCacheKey());
+    var key = bankCacheKey();
+    if (!key) return null;
+    var c = lsGet(key);
     if (c && c.domande && Array.isArray(c.domande) && c.domande.length) {
       if (!c.ts || (Date.now() - c.ts) < BANK_TTL) {
         return c.domande;
@@ -181,9 +244,11 @@
   }
 
   /* Genera la bank via /api/chat (fallback onesto: la tabella question_bank
-     non esiste ancora nel progetto). Non blocca mai la UI. */
+     non esiste ancora nel progetto). Non blocca mai la UI.
+     Funziona in due modalità: con bando attivo (domande dal bando) oppure
+     in allenamento libero (materia estratta a caso, senza bando). */
   function ensureBank() {
-    if (!S.bando) return Promise.resolve(null);
+    if (!S.bando && !S.subject) return Promise.resolve(null);
     if (S.qBankReady || S.bankLoading) return S.bankLoading || Promise.resolve(null);
 
     var cached = loadBankFromCache();
@@ -193,7 +258,8 @@
       return Promise.resolve(cached);
     }
 
-    // 1) Tenta la tabella reale (quando esisterà): lettura nativa.
+    // 1) Tenta la tabella reale (solo con bando: la question_bank è legata
+    //    al bando; in allenamento libero si va direttamente alla LLM).
     var nativePromise = null;
     if (D && D.supabase && S.bando) {
       nativePromise = D.supabase
@@ -215,18 +281,21 @@
     }
 
     // 2) Se la tabella non c'è o è vuota → generazione LLM + cache.
+    var gen = bankGen;
     S.bankLoading = Promise.resolve(nativePromise).then(function (native) {
       if (native && native.length) return native;
       return generateBankViaLlm();
     }).then(function (qs) {
+      if (gen !== bankGen) return null; // materia cambiata nel frattempo
       S.bankLoading = null;
       if (qs && qs.length) {
         S.questions = qs;
         S.qBankReady = true;
-        if (S.bando) lsSet(bankCacheKey(), { ts: Date.now(), domande: qs });
+        lsSet(bankCacheKey(), { ts: Date.now(), domande: qs });
       }
       return qs;
     }).catch(function () {
+      if (gen !== bankGen) return null;
       S.bankLoading = null;
       return null;
     });
@@ -234,16 +303,30 @@
   }
 
   function generateBankViaLlm() {
-    var bandoName = S.bando ? (S.bando.filename || "il tuo bando") : "il tuo bando";
     var n = 14; // generiamo un surplus: standard/difficile ne usano 12
-    var sys = "Sei il preparatore di un candidato a un concorso pubblico italiano. " +
-      "Il candidato ha caricato il bando: «" + bandoName + "». " +
-      "Genera " + n + " domande orali tipiche per un concorso pubblico: materie giuridiche " +
-      "(diritto amministrativo, costituzionale, degli enti locali, contratti pubblici, privacy, " +
-      "organizzazione, trasparenza), senza inventare leggi specifiche del bando non note. " +
-      "Ogni domanda deve essere una richiesta aperta di esposizione (mai a scelta multipla), " +
-      "come le farebbe una commissione. Rispondi SOLO con un array JSON senza markdown: " +
-      '[{"testo":"Domanda?","argomento":"Materia"}]';
+    var sys;
+    if (S.subject) {
+      // Allenamento libero: domande sulla materia estratta a caso.
+      sys = "Sei il preparatore di un candidato a un concorso pubblico italiano. " +
+        "Il candidato si sta allenando sulla materia: «" + S.subject.name + "». " +
+        "Argomenti di riferimento: " + S.subject.hint + ". " +
+        "Genera " + n + " domande orali tipiche per un concorso pubblico su QUESTA materia. " +
+        "Ogni domanda deve essere una richiesta aperta di esposizione (mai a scelta multipla), " +
+        "come le farebbe una commissione, e deve restare in italiano; per la materia " +
+        "«Lingua inglese» chiedi una breve conversazione o presentazione in inglese. " +
+        "Rispondi SOLO con un array JSON senza markdown: " +
+        '[{"testo":"Domanda?","argomento":"' + S.subject.name + '"}]';
+    } else {
+      var bandoName = S.bando ? (S.bando.filename || "il tuo bando") : "il tuo bando";
+      sys = "Sei il preparatore di un candidato a un concorso pubblico italiano. " +
+        "Il candidato ha caricato il bando: «" + bandoName + "». " +
+        "Genera " + n + " domande orali tipiche per un concorso pubblico: materie giuridiche " +
+        "(diritto amministrativo, costituzionale, degli enti locali, contratti pubblici, privacy, " +
+        "organizzazione, trasparenza), senza inventare leggi specifiche del bando non note. " +
+        "Ogni domanda deve essere una richiesta aperta di esposizione (mai a scelta multipla), " +
+        "come le farebbe una commissione. Rispondi SOLO con un array JSON senza markdown: " +
+        '[{"testo":"Domanda?","argomento":"Materia"}]';
+    }
     return llmJson(sys, [], 8000).then(function (parsed) {
       if (!parsed || !Array.isArray(parsed)) return null;
       var out = [];
@@ -333,12 +416,26 @@
 
     var rd = S.resumeData;
     if (!S.bando && !rd) {
-      title.textContent = "Serve il bando del tuo concorso.";
-      text.textContent = "Per simulare l'orale serve il bando del tuo concorso. Da lì nascono le domande.";
+      // Niente bando: il gate NON è un muro. Offri l'allenamento libero su
+      // una materia da concorso estratta a caso (master §10.3: mai un muro).
+      title.textContent = "Non hai ancora caricato un bando.";
+      text.textContent = "Puoi comunque allenarti subito: scegliamo per te una materia da concorso, a caso.";
       actions.innerHTML =
-        '<a class="btn btn-primary btn-block" href="dashboard.html#bandi">Carica il bando</a>' +
+        '<button type="button" class="btn btn-primary btn-block" id="gate-free">Simula con una materia a caso</button>' +
+        '<a class="btn btn-ghost btn-block" href="dashboard.html#bandi">Carica il bando</a>' +
         '<a class="btn btn-ghost btn-block" href="dashboard.html">Torna alla dashboard</a>';
       resume.classList.add("hidden");
+      var free = $("gate-free");
+      if (free) {
+        free.addEventListener("click", function () {
+          pickRandomSubject();
+          S.mode = "standard";
+          if (D) D.track("sim_gate_free_subject", { subject: S.subject.id });
+          showPhase("setup");
+          renderSetup();
+        });
+        free.focus({ preventScroll: true });
+      }
       if (D) D.track("sim_gate_nobando", {});
       return;
     }
@@ -371,17 +468,34 @@
   function renderSetup() {
     showPhase("setup");
 
-    // Card bando
+    // Card bando / materia (allenamento libero)
+    var icon = $("setup-bando-icon");
+    var tag = $("setup-bando-tag");
     if (S.bando) {
+      $("setup-bando-card").classList.remove("is-free");
       $("setup-bando-name").textContent = String(S.bando.filename || "Bando").replace(/\.pdf$/i, "");
       var meta = [];
       if (S.bando.total_pages) meta.push(S.bando.total_pages + " pagine");
       if (S.bando.created_at) meta.push("caricato il " + D.fmtDateShortIT(S.bando.created_at));
       meta.push("domande dal bando");
       $("setup-bando-meta").textContent = meta.join(" · ");
+      $("setup-bando-change").textContent = "Cambia";
+      if (tag) tag.classList.add("hidden");
+      if (icon) icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.75h9.75L19.5 6.5V21.25a.75.75 0 0 1-.75.75H6a.75.75 0 0 1-.75-.75V3.5A.75.75 0 0 1 6 2.75Z"/><path d="M9 14h6M9 17.5h4"/></svg>';
+      var sub = $("setup-sub");
+      if (sub) sub.textContent = "Ogni sessione è completa: domande dal tuo bando, risposta libera e correzione della commissione.";
     } else {
-      $("setup-bando-name").textContent = "Nessun bando attivo";
-      $("setup-bando-meta").textContent = "Carica il bando per iniziare";
+      // Allenamento libero: materia estratta a caso, cambiabile.
+      if (!S.subject) pickRandomSubject();
+      $("setup-bando-card").classList.add("is-free");
+      $("setup-bando-name").textContent = S.subject.name;
+      $("setup-bando-meta").textContent = "Materia da concorso, estratta a caso";
+      $("setup-bando-change").textContent = "Cambia materia";
+      if (tag) tag.classList.remove("hidden");
+      if (icon) icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>';
+      var sub2 = $("setup-sub");
+      if (sub2) sub2.textContent = "Ogni sessione è completa: domande su " + S.subject.name +
+        ", risposta libera e correzione della commissione.";
     }
 
     // Modalità — radiogroup
@@ -434,7 +548,7 @@
     // CTA
     var start = $("setup-start");
     start.onclick = null;
-    if (!S.bando) {
+    if (!S.bando && !S.subject) {
       start.disabled = true;
       start.textContent = "Carica il bando per iniziare";
       start.onclick = function () { window.location.href = "dashboard.html#bandi"; };
@@ -475,7 +589,7 @@
     // Anteprima Pro / springboard si aggiornano al click su Inizia, non qui.
     if (!skipRender) {
       var start = $("setup-start");
-      start.disabled = !S.bando;
+      start.disabled = !(S.bando || S.subject);
       if (isQuotaExhausted()) {
         start.textContent = "Quota del mese usata — vedi le opzioni";
         start.onclick = function () { renderSpringboard(); };
@@ -564,33 +678,15 @@
   function beginSession() {
     if (isQuotaExhausted()) { renderSpringboard(); return; }
     if (S.mode === "difficile" && !isPro()) { renderProPreview(); return; }
-    if (!S.bando) { renderGate(); return; }
+    if (!S.bando && !S.subject) { renderGate(); return; }
 
     // La bank è già stata precaricata a init (path critico <1s se pronta).
-    // Il briefing (2.6s, skippabile) copre il caso in cui sia ancora in
+    // In allenamento libero la bank si genera sulla materia scelta. Il
+    // briefing (2.6s, skippabile) copre il caso in cui sia ancora in
     // generazione: startSessionSoon partirà appena pronta o col fallback onesto.
+    ensureBank();
     showPhase("briefing");
     runBriefing();
-  }
-
-  function fallbackQuestions() {
-    var base = [
-      "Mi illustri il principio di legalità dell'azione amministrativa.",
-      "Quali sono i principi dell'attività amministrativa ai sensi della legge 241/1990?",
-      "Mi parli della trasparenza amministrativa e degli obblighi di pubblicazione.",
-      "Come si articola il procedimento amministrativo nelle sue fasi principali?",
-      "Cosa distingue un atto discrezionale da uno vincolato?",
-      "Mi spieghi la differenza tra vizi di legittimità e vizi di merito.",
-      "Quali sono i diritti del cittadino nel procedimento amministrativo?",
-      "Mi illustri la responsabilità della pubblica amministrazione.",
-      "Come funziona il ricorso amministrativo e giurisdizionale?",
-      "Mi parli dell'organizzazione degli enti locali: organi e funzioni.",
-      "Cosa sono i contratti pubblici e quali principi li governano?",
-      "Mi spieghi il ruolo della privacy nel trattamento di dati da parte della PA."
-    ];
-    return base.map(function (t, i) {
-      return { id: "fb-" + (i + 1), testo: t, argomento: "Diritto amministrativo" };
-    });
   }
 
   function startSession() {
@@ -778,11 +874,14 @@
     S.streamCtrl = new AbortController();
 
     var q = S.questions[S.idx];
-    var sys = "Sei un commissario di un concorso pubblico italiano. Stai interrogando " +
-      "un candidato sulla domanda: «" + q.testo + "». " +
-      "Il candidato ha risposto: «" + risposta.slice(0, 4000) + "». " +
+    var ctx = "Sei un commissario di un concorso pubblico italiano. ";
+    if (S.subject) ctx += "La prova è di «" + S.subject.name + "». ";
+    ctx += "Stai interrogando un candidato sulla domanda: «" + q.testo + "». " +
+      "Il candidato ha risposto: «" + risposta.slice(0, 4000) + "». ";
+    var sys = ctx +
       "Valuta con precisione su 5 dimensioni (0-10, massimo 1 decimale): chiarezza, struttura, " +
-      "contenuto, lessico, pertinenza. Poi scrivi un feedback di max 90 parole in italiano: " +
+      "contenuto, lessico, pertinenza. Poi scrivi un feedback di max 90 parole in italiano " +
+      "(se la materia è «Lingua inglese», scrivi il feedback in inglese): " +
       "1 frase che cita la risposta, 1-2 di correzione specifica, un suggerimento concreto. " +
       "Rispondi SOLO con JSON valido senza markdown: " +
       '{"chiarezza":7,"struttura":6,"contenuto":5,"lessico":7,"pertinenza":6,' +
@@ -1492,7 +1591,7 @@
     S.simCreated = false;
     S.resumeData = null;
     S.mode = "standard";
-    S.used = (D && D.loadCommon) ? S.used : S.used; // quota aggiornata dal gate
+    if (S.bando) S.subject = null;
     showPhase("setup");
     renderSetup();
     ensureBank();
@@ -1553,6 +1652,12 @@
   function resumeSession(rd) {
     if (!rd || !rd.questions || !rd.questions.length) return;
     S.mode = rd.mode || "standard";
+    S.subject = null;
+    if (rd.subjectId) {
+      for (var si = 0; si < FREE_SUBJECTS.length; si += 1) {
+        if (FREE_SUBJECTS[si].id === rd.subjectId) { S.subject = FREE_SUBJECTS[si]; break; }
+      }
+    }
     S.questions = rd.questions;
     S.answers = rd.answers || [];
     S.idx = Math.min(rd.idx || 0, S.questions.length - 1);
@@ -1590,11 +1695,23 @@
         S.bando = D.getActiveBando();
         return D.loadCommon(user).then(function (c) {
           S.used = c.used;
-          // Ripresa: ultimo draft di sessione incompleta
+          // Priorità assoluta: se c'è un bando attivo, il subject libero è null.
+          if (S.bando) S.subject = null;
+          // Ripresa: ultimo draft di sessione incompleta. Se ora c'è un bando
+          // attivo, la sessione libera NON si ripropone: il bando ha priorità
+          // e l'utente partirà dal setup con il bando.
           var last = lsGet(K_LAST_SIM);
-          if (last && last.questions && last.answers && last.answers.length < last.questions.length) {
+          if (last && !S.bando && last.questions && last.answers &&
+              last.answers.length < last.questions.length) {
             S.resumeData = last;
+            if (last.subjectId) {
+              for (var si = 0; si < FREE_SUBJECTS.length; si += 1) {
+                if (FREE_SUBJECTS[si].id === last.subjectId) { S.subject = FREE_SUBJECTS[si]; break; }
+              }
+            }
           }
+          // Arrivo in allenamento libero dalla dashboard (senza bando attivo)
+          if (!S.bando && !S.subject) pickRandomSubject();
           // Media voti delle simulazioni precedenti (per i confronti del report).
           // Non deve MAI bloccare l'init: un fallimento qui è non critico.
           try { loadHistoryAvg(user); } catch (e) { /* non critico */ }
@@ -1686,9 +1803,15 @@
       this.setAttribute("aria-expanded", String(open));
     });
 
-    // Cambia bando
+    // Cambia bando / cambia materia (allenamento libero)
     var change = $("setup-bando-change");
     if (change) change.addEventListener("click", function () {
+      if (!S.bando) {
+        pickRandomSubject();
+        if (D) D.track("sim_subject_changed", { subject: S.subject.id });
+        renderSetup();
+        return;
+      }
       window.location.href = "dashboard.html#bandi";
     });
 
@@ -1726,6 +1849,15 @@
   var briefingTimer = null;
 
   function runBriefing() {
+    // Adatta la prima card al contesto (bando vs allenamento libero)
+    var b1 = $("briefing-1");
+    if (b1) {
+      if (S.subject) {
+        b1.textContent = "Ti alleni su «" + S.subject.name + "». Le domande arriveranno da lì.";
+      } else if (!S.bando) {
+        b1.textContent = "Hai davanti il tuo bando. Le domande arriveranno da lì.";
+      }
+    }
     var cards = ["briefing-1", "briefing-2", "briefing-3"];
     cards.forEach(function (id, i) {
       var el = $(id);
@@ -1758,6 +1890,44 @@
         startSession();
       }, 3000);
     }
+  }
+
+  /* Fallback onesto quando la generazione LLM non arriva: domande generiche
+     della materia scelta (o di diritto amministrativo senza materia). */
+  function fallbackQuestions() {
+    var base = S.subject
+      ? [
+          "Mi illustri i principi fondamentali di «" + S.subject.name + "».",
+          "Quali sono gli istituti principali di «" + S.subject.name + "» che un candidato deve conoscere?",
+          "Mi spieghi, con un esempio concreto, come si applica «" + S.subject.name + "» nell'attività della pubblica amministrazione.",
+          "Cosa distingue un profilo teorico da uno pratico nello studio di «" + S.subject.name + "»?",
+          "Quali riferimenti normativi o fonti sono centrali in «" + S.subject.name + "»?",
+          "Mi parli di un caso tipico che un concorsista deve saper inquadrare in «" + S.subject.name + "».",
+          "Come si collega «" + S.subject.name + "» agli altri istituti del diritto pubblico?",
+          "Mi indichi i punti da approfondire per una risposta eccellente in «" + S.subject.name + "».",
+          "Quali errori commette spesso un candidato quando espone «" + S.subject.name + "»?",
+          "Mi illustri come imposterebbe una risposta completa su un tema di «" + S.subject.name + "».",
+          "Quali aggiornamenti normativi recenti riguardano «" + S.subject.name + "»?",
+          "Mi parli della rilevanza pratica di «" + S.subject.name + "» per il lavoro nella pubblica amministrazione."
+        ]
+      : [
+          "Mi illustri il principio di legalità dell'azione amministrativa.",
+          "Quali sono i principi dell'attività amministrativa ai sensi della legge 241/1990?",
+          "Mi parli della trasparenza amministrativa e degli obblighi di pubblicazione.",
+          "Come si articola il procedimento amministrativo nelle sue fasi principali?",
+          "Cosa distingue un atto discrezionale da uno vincolato?",
+          "Mi spieghi la differenza tra vizi di legittimità e vizi di merito.",
+          "Quali sono i diritti del cittadino nel procedimento amministrativo?",
+          "Mi illustri la responsabilità della pubblica amministrazione.",
+          "Come funziona il ricorso amministrativo e giurisdizionale?",
+          "Mi parli dell'organizzazione degli enti locali: organi e funzioni.",
+          "Cosa sono i contratti pubblici e quali principi li governano?",
+          "Mi spieghi il ruolo della privacy nel trattamento di dati da parte della PA."
+        ];
+    var arg = S.subject ? S.subject.name : "Diritto amministrativo";
+    return base.map(function (t, i) {
+      return { id: "fb-" + (i + 1), testo: t, argomento: arg };
+    });
   }
 
   // Boot → init

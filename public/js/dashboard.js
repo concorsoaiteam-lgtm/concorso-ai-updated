@@ -46,8 +46,13 @@
     // Handoff retro-compatibile con simulation.html (legge localStorage).
     var bando = Dash.getActiveBando();
     if (!bando) {
-      Dash.toast("Carica un bando prima di iniziare una simulazione.");
-      goView("bandi");
+      // Nessun bando: il gate di simulation.html offre l'allenamento libero
+      // su una materia da concorso estratta a caso (mai un muro).
+      try {
+        localStorage.setItem("cai_input_method", "libero");
+      } catch (e) { /* noop */ }
+      Dash.track("dash_start_sim", { bando: null, free: true });
+      window.location.href = "simulation.html";
       return;
     }
     try {
