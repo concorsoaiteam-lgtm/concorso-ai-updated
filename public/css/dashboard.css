@@ -187,10 +187,6 @@ select:focus-visible,
   white-space: nowrap;
 }
 
-.bando-switch .bando-switch-none {
-  color: var(--ink-faint);
-}
-
 /* Nav */
 .side-nav {
   display: flex;
@@ -236,7 +232,10 @@ select:focus-visible,
   color: var(--ink-faint);
 }
 
-/* Usage meter (quota simulazioni) */
+/* Usage meter (quota simulazioni) — componente premium:
+   numero grande 2 / 3 con count-up, barra 2px animata, data di rinnovo
+   reale. Mai colori aggressivi: a quota esaurita solo --warn + respiro
+   sottile (feedback di stato, non allarme). */
 .side-usage {
   margin-top: auto;
   padding: var(--s-3) 10px;
@@ -248,7 +247,7 @@ select:focus-visible,
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .usage-label {
@@ -259,12 +258,34 @@ select:focus-visible,
   color: var(--ink-faint);
 }
 
-.usage-value {
-  font-size: 12.5px;
-  font-weight: 500;
+.usage-num {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 0 0 8px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
+
+.usage-num .usage-sep {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-faint);
+}
+
+.usage-num .usage-total {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* Pro: "Illimitate" su sidebar piena, "∞" quando la sidebar è collassata */
+.usage-num.is-pro .usage-infinity { display: none; }
+.usage-num.is-pro .usage-pro-text { display: block; }
 
 .usage-track {
   height: 2px;
@@ -277,15 +298,24 @@ select:focus-visible,
   height: 100%;
   background: var(--ink);
   border-radius: 999px;
-  transition: width 260ms var(--ease);
+  transform-origin: left center;
+  transition: width 420ms var(--ease);
 }
 
-.usage-fill.is-full { background: var(--warn); }
+.usage-fill.is-full {
+  background: var(--warn);
+  animation: usage-breathe 2.4s ease-in-out infinite;
+}
 
 .usage-note {
   margin: 6px 0 0;
   font-size: 11.5px;
   color: var(--ink-faint);
+}
+
+@keyframes usage-breathe {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
 }
 
 /* Foot: account + cmdk */
@@ -415,6 +445,15 @@ select:focus-visible,
 }
 
 .streak-chip svg { color: var(--warn); }
+
+.streak-chip.has-streak svg {
+  animation: streak-pulse 2.2s var(--ease) infinite;
+}
+
+@keyframes streak-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.12); }
+}
 
 .cmdk-btn {
   display: inline-flex;
@@ -548,8 +587,6 @@ select:focus-visible,
 
 .btn-soft:hover:not(:disabled) { background: var(--line); color: var(--ink); }
 
-.btn-block { width: 100%; }
-
 .btn-sm { height: 32px; padding: 0 12px; font-size: 13px; }
 
 .btn { position: relative; overflow: hidden; }
@@ -608,35 +645,6 @@ select:focus-visible,
 }
 
 .card-link:hover { color: var(--ink); text-decoration: underline; }
-
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: var(--s-4) var(--s-5);
-}
-
-.panel-eyebrow {
-  margin: 0 0 var(--s-1);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: var(--tracking);
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.panel-title {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.panel-sub {
-  margin: var(--s-1) 0 0;
-  font-size: 13px;
-  color: var(--muted);
-}
 
 /* =========================================================================
    Statistiche (numeri reali, mai inventati)
@@ -704,52 +712,62 @@ select:focus-visible,
   color: var(--ink-faint);
 }
 
-.progress-pct {
-  font-size: 13px;
-  font-weight: 500;
+.progress-fill.is-full { background: var(--warn); }
+
+/* Quota card (Panoramica) — "3 / 3 simulazioni" con barra 2px animata */
+.quota-main {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-4);
+}
+
+.quota-num {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 
-/* =========================================================================
-   Tabs
-   ========================================================================= */
-
-.tabs {
-  display: inline-flex;
-  gap: var(--s-5);
-  border-bottom: 1px solid var(--line);
-  padding-bottom: var(--s-2);
+.quota-num .quota-sep {
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--ink-faint);
 }
 
-.tab {
-  appearance: none;
-  background: none;
-  border: 0;
-  padding: 4px 0;
-  font-family: inherit;
-  font-size: 14px;
+.quota-num .quota-total {
+  font-size: 19px;
   font-weight: 500;
   color: var(--muted);
-  cursor: pointer;
-  position: relative;
-  transition: color var(--t-base) ease;
 }
 
-.tab::after {
-  content: "";
-  position: absolute;
-  left: 0; right: 0; bottom: -9px;
-  height: 1px;
-  background: var(--ink);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 280ms var(--ease);
+.quota-state {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
 }
 
-.tab:hover { color: var(--ink); }
-.tab[aria-selected="true"] { color: var(--ink); }
-.tab[aria-selected="true"]::after { transform: scaleX(1); }
+.quota-renew {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.quota-foot {
+  margin: 10px 0 0;
+  max-width: 56ch;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
 
 /* =========================================================================
    Tabella (storico/lista) — sticky header
@@ -812,7 +830,6 @@ select:focus-visible,
 }
 
 .chip.is-active { border-color: var(--ink); color: var(--ink); }
-.chip.is-ok { border-color: rgba(63,107,79,0.35); color: var(--ok); }
 .chip.is-pro { border-color: var(--line-2); color: var(--ink); }
 
 /* =========================================================================
@@ -1027,13 +1044,6 @@ select:focus-visible,
   100% { background-position: -200% 0; }
 }
 
-.skeleton-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: var(--s-5);
-}
-
 /* =========================================================================
    Empty state — azioni chiare, mai illustrazioni stock
    ========================================================================= */
@@ -1063,51 +1073,21 @@ select:focus-visible,
 
 .empty-actions { margin-top: var(--s-2); }
 
-/* =========================================================================
-   Form fields
-   ========================================================================= */
-
-.field { display: flex; flex-direction: column; gap: 6px; }
-
-.field-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ink-soft);
-}
-
-.input,
-.textarea {
-  width: 100%;
-  padding: 0 12px;
-  height: 42px;
-  background: var(--bg);
-  border: 1px solid var(--line-2);
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 14px;
+/* Empty state mark — icona tipografica condivisa (mai illustrazioni stock) */
+.empty-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: var(--s-3);
+  border-radius: 50%;
+  background: var(--bg-2);
   color: var(--ink);
-  transition: border-color var(--t-base) ease, box-shadow var(--t-base) ease;
+  flex-shrink: 0;
 }
 
-.textarea {
-  height: auto;
-  padding: 10px 12px;
-  line-height: 1.6;
-  resize: vertical;
-}
-
-.input::placeholder,
-.textarea::placeholder { color: var(--ink-faint); }
-.input:hover { border-color: var(--ink-faint); }
-
-.input:focus,
-.textarea:focus {
-  outline: none;
-  border-color: var(--ink);
-  box-shadow: 0 0 0 3px rgba(15, 17, 21, 0.06);
-}
-
-.input[aria-invalid="true"] { border-color: var(--error); }
+.empty-mark svg { width: 20px; height: 20px; }
 
 /* =========================================================================
    Notice (errori/successo non bloccanti)
@@ -1400,11 +1380,16 @@ select:focus-visible,
   .side-brand span:not(.brand-dot) { display: none; }
 
   .bando-switch { justify-content: center; padding: 10px 0; }
-  .bando-switch-label, .bando-switch-none { display: none; }
+  .bando-switch-label { display: none; }
 
   .usage-head, .usage-note, .usage-track { display: none; }
   .side-usage { padding: var(--s-2) 0; text-align: center; }
-  .usage-value { font-size: 12px; }
+  .usage-num { justify-content: center; font-size: 15px; margin: 0; }
+  .usage-num .usage-sep { font-size: 12px; }
+  .usage-num .usage-total { font-size: 12px; }
+  /* Pro in sidebar collassata: "∞" ("Illimitate" non ci sta in 64px) */
+  .usage-num.is-pro .usage-pro-text { display: none; }
+  .usage-num.is-pro .usage-infinity { display: block; font-size: 15px; }
 
   .side-foot { padding: var(--s-2) 0; align-items: center; }
   .cmdk-hint { padding: 8px; }
@@ -1432,7 +1417,12 @@ select:focus-visible,
     padding: 4px 8px calc(4px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--line);
     border-right: 0;
+    transition: transform 240ms var(--ease);
   }
+
+  /* Il toggle in topbar nasconde/mostra la bottom-nav (focus sul contenuto) */
+  .app.is-nav-hidden .side { transform: translateY(110%); }
+  .app.is-nav-hidden .main { padding-bottom: 0; }
 
   .side-brand, .side-bando, .side-usage, .side-foot .cmdk-hint { display: none; }
 

@@ -89,6 +89,10 @@
     if (!bandi.length) {
       el.innerHTML =
         '<div class="card">' +
+          '<div class="empty-mark" aria-hidden="true">' +
+            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">' +
+            '<path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0 4 4m-4-4L8 8M4 16v3.25A.75.75 0 0 0 4.75 20h14.5a.75.75 0 0 0 .75-.75V16"/></svg>' +
+          '</div>' +
           '<div class="card-head"><h2 class="card-title">Inizia da qui</h2></div>' +
           '<p style="margin:0 0 16px;font-size:13.5px;color:var(--muted);max-width:52ch;">' +
           "Non serve preparare nulla. Carica il PDF del bando e ConcorsoAI estrae i programmi, " +
@@ -123,15 +127,46 @@
       ? sims.reduce(function (a, s) { return a + (Number(s.voto_finale) || 0); }, 0) / sims.length
       : 0;
     el.innerHTML =
-      statBox(total, "Simulazioni totali") +
-      statBox(avg ? Dash.fmtVoto(avg) : "—", "Voto medio", true) +
-      statBox(common.streak, common.streak === 1 ? "Giorno di fila" : "Giorni di fila") +
-      statBox(common.record, "Record personale");
+      statBox(total, "Simulazioni totali", false, String(total)) +
+      statBox(avg ? Dash.fmtVoto(avg) : "—", "Voto medio", true, avg ? String(avg) : null) +
+      statBox(common.streak, common.streak === 1 ? "Giorno di fila" : "Giorni di fila", false, String(common.streak || 0)) +
+      statBox(common.record, "Record personale", false, String(common.record || 0));
+    // Count-up dei numeri (microinterazione premium, rispetta reduced-motion)
+    el.querySelectorAll("[data-count]").forEach(function (node) {
+      var to = Number(node.getAttribute("data-count"));
+      var dec = String(to).indexOf(".") !== -1;
+      node.textContent = dec ? "0,0" : "0";
+      animateStat(node, to, dec ? 1 : 0);
+    });
   }
 
-  function statBox(value, label, accent) {
-    return '<div class="stat"><div class="stat-value' + (accent ? " is-accent" : "") + '">' +
-      Dash.escapeHtml(String(value)) + '</div><div class="stat-label">' +
+  function animateStat(node, to, decimals) {
+    var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var d = reduced ? 0 : 460;
+    var start = null;
+    function step(ts) {
+      if (start === null) start = ts;
+      var p = d === 0 ? 1 : Math.min(1, (ts - start) / d);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var val = to * eased;
+      node.textContent = decimals
+        ? val.toLocaleString("it-IT", { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+        : String(Math.round(val));
+      if (p < 1) window.requestAnimationFrame(step);
+    }
+    window.requestAnimationFrame(step);
+  }
+
+  function statBox(value, label, accent, raw) {
+    // `raw` è il numero non formattato (punto decimale); `value` è la stringa
+    // già formattata (es. "7,4" da fmtVoto). Se raw esiste, il numero parte
+    // da 0 e fa count-up con la virgola italiana (animateStat).
+    var r = raw != null && /^-?\d+(\.\d+)?$/.test(String(raw)) ? String(raw) : null;
+    var dec = r != null && r.indexOf(".") !== -1;
+    var initial = r != null ? (dec ? "0,0" : "0") : Dash.escapeHtml(String(value));
+    return '<div class="stat"><div class="stat-value' + (accent ? " is-accent" : "") + '"' +
+      (r != null ? ' data-count="' + r + '"' : "") + ">" + initial +
+      '</div><div class="stat-label">' +
       Dash.escapeHtml(label) + "</div></div>";
   }
 
@@ -142,6 +177,10 @@
     if (!sims.length) {
       el.innerHTML =
         '<div class="empty" style="padding:var(--s-6) 0;">' +
+          '<div class="empty-mark" aria-hidden="true">' +
+            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">' +
+            '<circle cx="12" cy="12" r="8.5"/><path stroke-linecap="round" d="M12 7.5V12l3 2"/></svg>' +
+          '</div>' +
           '<h3 class="empty-title">Nessuna simulazione ancora</h3>' +
           '<p class="empty-text">La tua prima sessione scriverà qui la prima riga del tuo storico.</p>' +
           '<div class="empty-actions"><button type="button" class="btn btn-primary" id="pano-first-sim">Inizia ora</button></div>' +
@@ -173,20 +212,41 @@
       el.innerHTML = "";
       return;
     }
-    var used = Math.min(common.used, Dash.FREE_SIM_LIMIT);
-    var left = Math.max(0, Dash.FREE_SIM_LIMIT - common.used);
+    var used = Math.max(0, Math.min(Dash.FREE_SIM_LIMIT, Number(common.used) || 0));
+    var left = Math.max(0, Dash.FREE_SIM_LIMIT - used);
     var pct = Math.round((used / Dash.FREE_SIM_LIMIT) * 100);
+    var full = used >= Dash.FREE_SIM_LIMIT;
+    var renew = Dash.nextRenewalLabel();
     el.innerHTML =
-      '<div class="card">' +
-        '<div class="progress-head">' +
-          '<span class="progress-label">Simulazioni questo mese</span>' +
-          '<span class="progress-pct">' + left + ' rimaste</span>' +
-        "</div>" +
-        '<div class="progress"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
-        '<p style="margin:8px 0 0;font-size:12px;color:var(--ink-faint);">' +
-        "Le simulazioni gratuite si rinnovano ogni mese. Quando finisci, la dashboard resta " +
-        "completamente utilizzabile: puoi vedere storico, progressi e report.</p>" +
+      '<div class="card quota-card">' +
+        '<div class="quota-main">' +
+          '<div>' +
+            '<div class="progress-label">Simulazioni questo mese</div>' +
+            '<div class="quota-num">' +
+              '<span class="quota-count">0</span>' +
+              '<span class="quota-sep" aria-hidden="true">/</span>' +
+              '<span class="quota-total" aria-hidden="true">' + Dash.FREE_SIM_LIMIT + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div style="text-align:right">' +
+            '<div class="quota-state">' +
+              (full ? "Quota del mese usata" : left + (left === 1 ? " simulazione rimasta" : " simulazioni rimaste")) +
+            '</div>' +
+            '<div class="quota-renew">Rinnovo il ' + renew + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="progress" role="progressbar" aria-label="Simulazioni usate questo mese" ' +
+          'aria-valuemin="0" aria-valuemax="' + Dash.FREE_SIM_LIMIT + '" aria-valuenow="' + used + '">' +
+          '<div class="progress-fill' + (full ? " is-full" : "") + '" style="width:0%"></div>' +
+        '</div>' +
+        '<p class="quota-foot">' +
+          (full
+            ? "La dashboard resta completamente utilizzabile: storico, progressi e report restano aperti. Le simulazioni ripartono il " + renew + "."
+            : "Ogni simulazione è completa: domande dal tuo bando, risposta libera e correzione. Le gratuite si rinnovano il " + renew + ".") +
+        '</p>' +
       "</div>";
+    Dash.animateCount(el.querySelector(".quota-count"), 0, used);
+    Dash.animateFill(el.querySelector(".progress-fill"), pct);
   }
 
   function renderPianoTeaser() {
@@ -441,7 +501,12 @@
     btn.classList.toggle("is-busy", busy);
     btn.disabled = busy;
     var label = btn.querySelector(".btn-label");
-    if (label) label.textContent = busy ? "Caricamento…" : "Genera il piano";
+    if (label) {
+      label.textContent = busy ? "Caricamento…" : "Genera il piano";
+    } else {
+      // Bottone senza span label (es. "Genera il piano"): aggiorna il testo.
+      btn.textContent = busy ? "Caricamento…" : "Genera il piano";
+    }
   }
 
   function setUploadBusy(zone, busy) {
@@ -574,6 +639,10 @@
     if (!body) return;
     body.innerHTML =
       '<div class="empty">' +
+        '<div class="empty-mark" aria-hidden="true">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">' +
+          '<rect x="3" y="4.5" width="18" height="16" rx="2"/><path stroke-linecap="round" d="M3 9.5h18M8 4.5V8M12 4.5V8M16 4.5V8"/></svg>' +
+        '</div>' +
         '<h3 class="empty-title">Nessun piano per questa settimana</h3>' +
         '<p class="empty-text">Il piano settimanale viene generato dal tuo bando e dal tuo storico: ' +
         "sai ogni giorno cosa ripassare e quante domande fare. La generazione avviene lato server.</p>" +

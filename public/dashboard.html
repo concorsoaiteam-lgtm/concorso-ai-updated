@@ -87,7 +87,7 @@
          ============================================================ -->
     <div class="main">
       <header class="topbar">
-        <button type="button" class="side-toggle" id="side-toggle" aria-label="Apri il menu">
+        <button type="button" class="side-toggle" id="side-toggle" aria-label="Nascondi il menu" aria-expanded="true">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/>
           </svg>
@@ -157,6 +157,12 @@
 
           <div class="section-gap">
             <div class="empty" id="bandi-empty" hidden>
+              <div class="empty-mark" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 2.75h9.75L19.5 6.5V21.25a.75.75 0 0 1-.75.75H6a.75.75 0 0 1-.75-.75V3.5A.75.75 0 0 1 6 2.75Z"/>
+                  <path stroke-linecap="round" d="M9 14h6M9 17.5h4"/>
+                </svg>
+              </div>
               <h3 class="empty-title">Nessun bando caricato</h3>
               <p class="empty-text">Carica il bando del tuo concorso per iniziare. Servono solo pochi secondi e puoi sostituirlo quando vuoi.</p>
             </div>

@@ -1,0 +1,1770 @@
+/* =========================================================================
+   simulation.js — ConcorsoAI · Pagina di simulazione dell'orale
+   State machine a fasi: boot → gate → setup → briefing → running
+   (feedback) → paused → report. Nessuna libreria: CSS transitions + rAF.
+   Persistenza: Supabase (simulazioni) + localStorage (draft, coda, bank).
+   Riuso: window.Dash (dash-common.js), window.telemetry (telemetry.js).
+   ========================================================================= */
+(function () {
+  "use strict";
+
+  var D = (typeof window.Dash !== "undefined") ? window.Dash : null;
+  var $ = function (id) { return document.getElementById(id); };
+  var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ------------------------------------------------------------------
+     Stato globale della pagina
+     ------------------------------------------------------------------ */
+  var S = {
+    phase: "boot",              // boot|gate|setup|briefing|running|paused|report
+    user: null,                 // {id, email, displayName, plan}
+    bando: null,                // bando attivo da localStorage
+    used: 0,                    // simulazioni usate questo mese
+    mode: "standard",           // standard|rapida|difficile|ripasso
+    questions: [],              // [{id, testo, argomento}]
+    qBankReady: false,
+    idx: 0,                     // indice domanda corrente
+    simId: null,                // id simulazione nel DB (se creata)
+    simCreated: false,
+    answers: [],                // [{q, risposta, scores, feedback, suggerimento}]
+    startedAt: 0,               // epoch ms
+    elapsedMs: 0,               // accumulato (pausa)
+    timerHandle: null,
+    countdownHandle: null,
+    sending: false,
+    feedbackDone: false,
+    streamCtrl: null,           // AbortController del fetch corrente
+    resumeData: null,           // sessione da riprendere
+    bankLoading: null,          // Promise generazione bank
+    bankTimer: null
+  };
+
+  /* ------------------------------------------------------------------
+     Chiavi localStorage (prefisso cai_* come dashboard)
+     ------------------------------------------------------------------ */
+  var K_BANK = "cai_qbank_";          // + bandoId → {ts, domande:[...]}
+  var K_DRAFT = "cai_sim_draft_";      // + simId → sessione completa
+  var K_OPS = "cai_pending_ops";       // coda scritture fallite
+  var K_LAST_SIM = "cai_last_sim";     // ultima simulazione (ripresa)
+  var BANK_TTL = 7 * 24 * 3600 * 1000; // 7 giorni
+
+  var MODES = {
+    standard: {
+      label: "Standard", n: 12, pro: false, badge: "",
+      desc: "12 domande sul tuo bando, una alla volta. Dopo ogni risposta il commissario ti dà punteggi e correzione. ~20 minuti."
+    },
+    rapida: {
+      label: "Rapida", n: 6, pro: false, badge: "",
+      desc: "6 domande, meno di 15 minuti. Ideale per iniziare o per i giorni pieni."
+    },
+    difficile: {
+      label: "Difficile", n: 12, pro: true, badge: "Pro",
+      desc: "12 domande con interruzioni e approfondimenti, come un orale tosto. Timer per domanda nelle ultime 3. Incluso in Pro."
+    }
+  };
+
+  /* ------------------------------------------------------------------
+     Persistenza locale
+     ------------------------------------------------------------------ */
+  function lsGet(k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* noop */ } }
+  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) { /* noop */ } }
+
+  function saveDraft() {
+    var payload = {
+      simId: S.simId, mode: S.mode, idx: S.idx, startedAt: S.startedAt,
+      elapsedMs: S.elapsedMs, answers: S.answers,
+      questions: S.questions.map(function (q) {
+        return { id: q.id, testo: q.testo, argomento: q.argomento };
+      }),
+      bandoId: S.bando ? S.bando.id : null,
+      draftAnswer: (S.phase === "session") ? ($("answer-textarea").value || "") : ""
+    };
+    if (S.simId) lsSet(K_DRAFT + S.simId, payload);
+    lsSet(K_LAST_SIM, payload);
+  }
+
+  function clearDraft() {
+    if (S.simId) lsDel(K_DRAFT + S.simId);
+    lsDel(K_LAST_SIM);
+  }
+
+  /* ------------------------------------------------------------------
+     Coda scritture fallite → flush su 'online'
+     ------------------------------------------------------------------ */
+  function queueOp(op) {
+    var q = lsGet(K_OPS) || [];
+    q.push(op);
+    lsSet(K_OPS, q);
+  }
+
+  function flushOps() {
+    var q = lsGet(K_OPS) || [];
+    if (!q.length || !D || !D.supabase) return;
+    lsSet(K_OPS, []);
+    q.forEach(function (op) { persistWrite(op); });
+  }
+
+  /* ------------------------------------------------------------------
+     Persistenza Supabase — scritture non bloccanti, optimistic
+     ------------------------------------------------------------------ */
+  function persistWrite(op) {
+    if (!D || !D.supabase || !S.user) { queueOp(op); return; }
+    var db = D.supabase;
+    var chain;
+    if (op.type === "insert_sim") {
+      chain = db.from("simulazioni").insert(op.data).select("id");
+    } else if (op.type === "update_sim") {
+      chain = db.from("simulazioni").update(op.data).eq("id", op.id);
+    } else if (op.type === "insert_domanda") {
+      chain = db.from("simulazione_domande").insert(op.data);
+    } else {
+      chain = Promise.resolve({ error: null });
+    }
+    chain.then(function (res) {
+      if (res && res.error) { queueOp(op); return; }
+      if (op.type === "insert_sim" && res && res.data && res.data[0] && res.data[0].id && !S.simId) {
+        S.simId = res.data[0].id;
+        S.simCreated = true;
+        saveDraft();
+      }
+    }).catch(function () { queueOp(op); });
+  }
+
+  function beginSessionDb() {
+    if (!S.bando) return;
+    persistWrite({
+      type: "insert_sim",
+      data: {
+        user_id: S.user.id,
+        bando_id: Number(S.bando.id) || null,
+        modalita: S.mode,
+        status: "in_progress",
+        started_at: new Date(S.startedAt).toISOString()
+      }
+    });
+    if (D) D.track("sim_started", { bando_id: S.bando.id, mode: S.mode });
+  }
+
+  function updateSessionDb(fields) {
+    if (!S.simId) return; // sessione locale pura, nessun id DB
+    persistWrite({ type: "update_sim", id: S.simId, data: fields });
+  }
+
+  function persistAnswerLocal(q, risposta, scores, feedback, suggerimento) {
+    S.answers.push({
+      q: { id: q.id, testo: q.testo, argomento: q.argomento },
+      risposta: risposta,
+      scores: scores,          // {chiarezza, struttura, contenuto, lessico, pertinenza}
+      feedback: feedback,
+      suggerimento: suggerimento
+    });
+    saveDraft();
+  }
+
+  /* ------------------------------------------------------------------
+     Question bank — cache 7gg + fallback LLM onesto
+     ------------------------------------------------------------------ */
+  function bankCacheKey() {
+    return S.bando ? K_BANK + S.bando.id : null;
+  }
+
+  function loadBankFromCache() {
+    if (!S.bando) return null;
+    var c = lsGet(bankCacheKey());
+    if (c && c.domande && Array.isArray(c.domande) && c.domande.length) {
+      if (!c.ts || (Date.now() - c.ts) < BANK_TTL) {
+        return c.domande;
+      }
+    }
+    return null;
+  }
+
+  /* Genera la bank via /api/chat (fallback onesto: la tabella question_bank
+     non esiste ancora nel progetto). Non blocca mai la UI. */
+  function ensureBank() {
+    if (!S.bando) return Promise.resolve(null);
+    if (S.qBankReady || S.bankLoading) return S.bankLoading || Promise.resolve(null);
+
+    var cached = loadBankFromCache();
+    if (cached) {
+      S.questions = cached;
+      S.qBankReady = true;
+      return Promise.resolve(cached);
+    }
+
+    // 1) Tenta la tabella reale (quando esisterà): lettura nativa.
+    var nativePromise = null;
+    if (D && D.supabase && S.bando) {
+      nativePromise = D.supabase
+        .from("question_bank")
+        .select("id, testo, argomento_id")
+        .eq("bando_id", Number(S.bando.id))
+        .limit(30)
+        .then(function (res) {
+          if (res && res.data && res.data.length) {
+            S.questions = res.data.map(function (r) {
+              return { id: r.id, testo: r.testo, argomento: "Dal bando" };
+            });
+            S.qBankReady = true;
+            return S.questions;
+          }
+          return null;
+        })
+        .catch(function () { return null; });
+    }
+
+    // 2) Se la tabella non c'è o è vuota → generazione LLM + cache.
+    S.bankLoading = Promise.resolve(nativePromise).then(function (native) {
+      if (native && native.length) return native;
+      return generateBankViaLlm();
+    }).then(function (qs) {
+      S.bankLoading = null;
+      if (qs && qs.length) {
+        S.questions = qs;
+        S.qBankReady = true;
+        if (S.bando) lsSet(bankCacheKey(), { ts: Date.now(), domande: qs });
+      }
+      return qs;
+    }).catch(function () {
+      S.bankLoading = null;
+      return null;
+    });
+    return S.bankLoading;
+  }
+
+  function generateBankViaLlm() {
+    var bandoName = S.bando ? (S.bando.filename || "il tuo bando") : "il tuo bando";
+    var n = 14; // generiamo un surplus: standard/difficile ne usano 12
+    var sys = "Sei il preparatore di un candidato a un concorso pubblico italiano. " +
+      "Il candidato ha caricato il bando: «" + bandoName + "». " +
+      "Genera " + n + " domande orali tipiche per un concorso pubblico: materie giuridiche " +
+      "(diritto amministrativo, costituzionale, degli enti locali, contratti pubblici, privacy, " +
+      "organizzazione, trasparenza), senza inventare leggi specifiche del bando non note. " +
+      "Ogni domanda deve essere una richiesta aperta di esposizione (mai a scelta multipla), " +
+      "come le farebbe una commissione. Rispondi SOLO con un array JSON senza markdown: " +
+      '[{"testo":"Domanda?","argomento":"Materia"}]';
+    return llmJson(sys, [], 8000).then(function (parsed) {
+      if (!parsed || !Array.isArray(parsed)) return null;
+      var out = [];
+      parsed.forEach(function (item, i) {
+        var t = String(item && item.testo || "").trim();
+        var a = String(item && item.argomento || "Dal bando").trim();
+        if (t) out.push({ id: "llm-" + (i + 1), testo: t, argomento: a });
+      });
+      return out.length ? out : null;
+    }).catch(function () { return null; });
+  }
+
+  /* ------------------------------------------------------------------
+     LLM helper — /api/chat (SSE proxy esistente)
+     - llmJson: modalità bufferizzata (stream:false) → JSON parso
+     - llmStream: modalità SSE (stream:true) → callback per chunk
+     ------------------------------------------------------------------ */
+  function llmHeaders() {
+    var h = { "Content-Type": "application/json" };
+    if (D && D.supabase && D.supabase.auth) {
+      var sess = D.supabase.auth.getSession();
+      var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
+      if (token) h.Authorization = "Bearer " + token;
+    }
+    return h;
+  }
+
+  function llmJson(sys, messages, maxTokens) {
+    var msgs = [];
+    if (sys) msgs.push({ role: "system", content: sys });
+    (messages || []).forEach(function (m) { msgs.push(m); });
+    return fetch("/api/chat", {
+      method: "POST",
+      headers: llmHeaders(),
+      body: JSON.stringify({ messages: msgs, stream: false, max_tokens: maxTokens || 1500 })
+    }).then(function (r) {
+      if (!r.ok) throw new Error("http-" + r.status);
+      return r.json();
+    }).then(function (data) {
+      var content = data && data.choices && data.choices[0] &&
+        data.choices[0].message && data.choices[0].message.content;
+      if (!content) throw new Error("empty");
+      var cleaned = content.replace(/```json|```/g, "").trim();
+      var start = cleaned.indexOf("[");
+      if (start !== -1 && cleaned.indexOf("{") === -1) {
+        var end = cleaned.lastIndexOf("]");
+        cleaned = cleaned.slice(start, end + 1);
+      }
+      var startB = cleaned.indexOf("{");
+      if (startB !== -1 && cleaned.indexOf("[") === -1) {
+        var endB = cleaned.lastIndexOf("}");
+        cleaned = cleaned.slice(startB, endB + 1);
+      }
+      return JSON.parse(cleaned);
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     Rendering delle fasi (view switching)
+     ------------------------------------------------------------------ */
+  var PHASES = ["boot", "gate", "setup", "briefing", "session", "report"];
+
+  function showPhase(phase) {
+    S.phase = phase;
+    var target = phase === "session" ? "view-session" : "view-" + phase;
+    PHASES.forEach(function (p) {
+      var id = p === "session" ? "view-session" : "view-" + p;
+      var el = $(id);
+      if (el) el.classList.toggle("is-active", id === target);
+    });
+    // Focus sul contenuto per gli screen reader (il focus è gestito
+    // esplicitamente per domanda e fasi, mai perso su elementi nascosti).
+    var focusTarget = $("contenuto");
+    if (focusTarget) focusTarget.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  /* ------------------------------------------------------------------
+     Gate
+     ------------------------------------------------------------------ */
+  function renderGate() {
+    showPhase("gate");
+    var title = $("gate-title");
+    var text = $("gate-text");
+    var actions = $("gate-actions");
+    var resume = $("gate-resume");
+
+    var rd = S.resumeData;
+    if (!S.bando && !rd) {
+      title.textContent = "Serve il bando del tuo concorso.";
+      text.textContent = "Per simulare l'orale serve il bando del tuo concorso. Da lì nascono le domande.";
+      actions.innerHTML =
+        '<a class="btn btn-primary btn-block" href="dashboard.html#bandi">Carica il bando</a>' +
+        '<a class="btn btn-ghost btn-block" href="dashboard.html">Torna alla dashboard</a>';
+      resume.classList.add("hidden");
+      if (D) D.track("sim_gate_nobando", {});
+      return;
+    }
+
+    // Bando presente: vai a setup. Se c'è una sessione da riprendere, banner nel gate.
+    if (rd) {
+      showPhase("gate");
+      title.textContent = "Hai una sessione in corso.";
+      var modeName = (MODES[rd.mode] && MODES[rd.mode].label) || rd.mode;
+      var tot = (rd.questions && rd.questions.length) || 12;
+      var at = Math.min((rd.idx || 0) + 1, tot);
+      text.textContent = "Hai interrotto «" + modeName + " · " + tot +
+        " domande» alla domanda " + at + ". Da dove riparti?";
+      actions.innerHTML =
+        '<button type="button" class="btn btn-primary btn-block" id="resume-yes">Riprendi</button>';
+      resume.classList.add("hidden");
+      var yes = $("resume-yes");
+      if (yes) yes.addEventListener("click", function () { resumeSession(rd); });
+      if (D) D.track("sim_gate_resume", { mode: rd.mode, idx: rd.idx });
+      return;
+    }
+
+    showPhase("setup");
+    renderSetup();
+  }
+
+  /* ------------------------------------------------------------------
+     Setup
+     ------------------------------------------------------------------ */
+  function renderSetup() {
+    showPhase("setup");
+
+    // Card bando
+    if (S.bando) {
+      $("setup-bando-name").textContent = String(S.bando.filename || "Bando").replace(/\.pdf$/i, "");
+      var meta = [];
+      if (S.bando.total_pages) meta.push(S.bando.total_pages + " pagine");
+      if (S.bando.created_at) meta.push("caricato il " + D.fmtDateShortIT(S.bando.created_at));
+      meta.push("domande dal bando");
+      $("setup-bando-meta").textContent = meta.join(" · ");
+    } else {
+      $("setup-bando-name").textContent = "Nessun bando attivo";
+      $("setup-bando-meta").textContent = "Carica il bando per iniziare";
+    }
+
+    // Modalità — radiogroup
+    var list = $("mode-list");
+    var isPro = S.user && S.user.plan === "pro";
+    list.innerHTML = Object.keys(MODES).map(function (key) {
+      var m = MODES[key];
+      var locked = m.pro && !isPro;
+      return '<button type="button" class="mode-card" role="radio" aria-checked="' +
+        (S.mode === key ? "true" : "false") + '" data-mode="' + key + '" id="mode-' + key + '">' +
+        '<span class="mode-radio" aria-hidden="true"></span>' +
+        '<span class="mode-main">' +
+          '<span class="mode-name">' + m.label +
+            (m.badge ? '<span class="mode-pro-tag">' + m.badge + "</span>" : "") +
+            (m.badge ? "" : "") +
+          "</span>" +
+          '<span class="mode-desc">' + m.n + " domande" +
+            (locked ? " · Pro" : "") +
+          "</span>" +
+        "</span>" +
+      "</button>";
+    }).join("");
+
+    list.querySelectorAll(".mode-card").forEach(function (card) {
+      card.addEventListener("click", function () {
+        selectMode(card.getAttribute("data-mode"));
+      });
+    });
+
+    // Tastiera radiogroup: frecce + 1/2/3
+    list.addEventListener("keydown", function (e) {
+      var keys = Object.keys(MODES);
+      var cur = keys.indexOf(S.mode);
+      var next = null;
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") next = keys[(cur + 1) % keys.length];
+      else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = keys[(cur - 1 + keys.length) % keys.length];
+      else if (e.key === "1") next = keys[0];
+      else if (e.key === "2") next = keys[1];
+      else if (e.key === "3") next = keys[2];
+      if (next) {
+        e.preventDefault();
+        selectMode(next);
+        var el = $("mode-" + next);
+        if (el) el.focus();
+      }
+    });
+
+    selectMode(S.mode, true);
+
+    // CTA
+    var start = $("setup-start");
+    start.onclick = null;
+    if (!S.bando) {
+      start.disabled = true;
+      start.textContent = "Carica il bando per iniziare";
+      start.onclick = function () { window.location.href = "dashboard.html#bandi"; };
+      return;
+    }
+    start.disabled = false;
+    if (isQuotaExhausted()) {
+      start.textContent = "Quota del mese usata — vedi le opzioni";
+      start.onclick = function () { renderSpringboard(); };
+    } else if (S.mode === "difficile" && !isPro) {
+      start.textContent = "Difficile è un piano Pro — scopri di più";
+      start.onclick = function () { renderProPreview(); };
+    } else {
+      start.textContent = "Inizia la simulazione →";
+      start.onclick = function () { beginSession(); };
+    }
+  }
+
+  function isPro() { return S.user && S.user.plan === "pro"; }
+  function isQuotaExhausted() { return !isPro() && S.used >= 3; }
+
+  function selectMode(mode, skipRender) {
+    if (!MODES[mode]) return;
+    S.mode = mode;
+    document.querySelectorAll(".mode-card").forEach(function (c) {
+      c.setAttribute("aria-checked", String(c.getAttribute("data-mode") === mode));
+    });
+    var m = MODES[mode];
+    $("mode-sub-detail").textContent = m.desc;
+    var note = $("mode-note");
+    if (mode === "rapida") {
+      note.innerHTML = "Sei in ansia? La Rapida è l'esposizione giusta per iniziare: meno posta, stesso format.";
+    } else if (mode === "difficile" && !isPro()) {
+      note.innerHTML = "<b>Difficile è incluso in Pro.</b> Continua con Standard, oppure scopri cosa fa.";
+    } else {
+      note.textContent = "Durata consigliata: ~" + (mode === "rapida" ? "15" : "20") + " minuti.";
+    }
+    // Anteprima Pro / springboard si aggiornano al click su Inizia, non qui.
+    if (!skipRender) {
+      var start = $("setup-start");
+      start.disabled = !S.bando;
+      if (isQuotaExhausted()) {
+        start.textContent = "Quota del mese usata — vedi le opzioni";
+        start.onclick = function () { renderSpringboard(); };
+      } else if (mode === "difficile" && !isPro()) {
+        start.textContent = "Difficile è un piano Pro — scopri di più";
+        start.onclick = function () { renderProPreview(); };
+      } else {
+        start.textContent = "Inizia la simulazione →";
+        start.onclick = function () { beginSession(); };
+      }
+    }
+    if (D) D.track("sim_setup_viewed", { mode: mode });
+  }
+
+
+
+
+
+
+
+
+
+
+  /* ------------------------------------------------------------------
+     Anteprima Pro (una sola superficie di upgrade per schermata)
+     ------------------------------------------------------------------ */
+  function renderProPreview() {
+    var zone = $("setup-dynamic");
+    zone.innerHTML =
+      '<div class="pro-preview" role="region" aria-label="Piano Pro">' +
+        '<p class="pro-preview-eyebrow">Piano Pro</p>' +
+        "<h3>Porta l'allenamento a un altro livello.</h3>" +
+        '<p class="pro-preview-sub">Il Pro non toglie un limite: aggiunge potenza all\'allenamento.</p>' +
+        '<ul class="pro-preview-list">' +
+          "<li>Simulazioni illimitate</li>" +
+          "<li>Piano settimanale generato dal tuo bando</li>" +
+          "<li>Ripasso automatico delle domande deboli</li>" +
+        "</ul>" +
+        '<div class="pro-preview-sample"><b>Difficile:</b> 12 domande con interruzioni e richieste di fonte, come un orale tosto. Timer per domanda nelle ultime 3.</div>' +
+        '<div class="pro-preview-actions">' +
+          '<a class="btn btn-primary btn-block" href="pricing.html" data-pro-cta="setup">Passa a Pro — 14,99€/mese</a>' +
+          '<button type="button" class="btn btn-ghost btn-block" id="pro-preview-back">Continua con Standard</button>' +
+        "</div>" +
+      "</div>";
+    var back = $("pro-preview-back");
+    if (back) back.addEventListener("click", function () {
+      selectMode("standard");
+      zone.innerHTML = "";
+    });
+    if (D) D.track("sim_upgrade_click", { surface: "setup" });
+    zone.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "nearest" });
+  }
+
+  /* ------------------------------------------------------------------
+     Springboard quota 0 (mai un muro)
+     ------------------------------------------------------------------ */
+  function renderSpringboard() {
+    var zone = $("setup-dynamic");
+    zone.innerHTML =
+      '<div class="springboard" role="region" aria-label="Quota del mese usata">' +
+        '<p class="springboard-eyebrow">Quota del mese usata</p>' +
+        "<h2>Hai completato le 3 simulazioni gratuite.</h2>" +
+        '<p class="springboard-sub">Il Pro non toglie un limite: aggiunge potenza.</p>' +
+        '<ul class="springboard-list">' +
+          '<li><span class="sb-num">1</span>Simulazioni illimitate</li>' +
+          '<li><span class="sb-num">2</span>Piano settimanale generato dal tuo bando</li>' +
+          '<li><span class="sb-num">3</span>Ripasso automatico delle domande deboli</li>' +
+        "</ul>" +
+        '<div class="pro-preview-actions">' +
+          '<a class="btn btn-primary btn-block" href="pricing.html" data-pro-cta="springboard">Passa a Pro — 14,99€/mese</a>' +
+          '<a class="btn btn-ghost btn-block" href="dashboard.html">Torna alla dashboard</a>' +
+        "</div>" +
+        '<p class="springboard-anchor">Meno di una lezione privata (25-50€/ora). Rinnovo il ' +
+        (D ? D.nextRenewalLabel() : "1° del mese") + ".</p>" +
+      "</div>";
+    if (D) {
+      D.track("sim_quota_springboard", { has_bando: !!S.bando });
+      D.track("sim_upgrade_click", { surface: "springboard" });
+    }
+    zone.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "nearest" });
+  }
+
+  /* ------------------------------------------------------------------
+     Avvio sessione
+     ------------------------------------------------------------------ */
+  function beginSession() {
+    if (isQuotaExhausted()) { renderSpringboard(); return; }
+    if (S.mode === "difficile" && !isPro()) { renderProPreview(); return; }
+    if (!S.bando) { renderGate(); return; }
+
+    // La bank è già stata precaricata a init (path critico <1s se pronta).
+    // Il briefing (2.6s, skippabile) copre il caso in cui sia ancora in
+    // generazione: startSessionSoon partirà appena pronta o col fallback onesto.
+    showPhase("briefing");
+    runBriefing();
+  }
+
+  function fallbackQuestions() {
+    var base = [
+      "Mi illustri il principio di legalità dell'azione amministrativa.",
+      "Quali sono i principi dell'attività amministrativa ai sensi della legge 241/1990?",
+      "Mi parli della trasparenza amministrativa e degli obblighi di pubblicazione.",
+      "Come si articola il procedimento amministrativo nelle sue fasi principali?",
+      "Cosa distingue un atto discrezionale da uno vincolato?",
+      "Mi spieghi la differenza tra vizi di legittimità e vizi di merito.",
+      "Quali sono i diritti del cittadino nel procedimento amministrativo?",
+      "Mi illustri la responsabilità della pubblica amministrazione.",
+      "Come funziona il ricorso amministrativo e giurisdizionale?",
+      "Mi parli dell'organizzazione degli enti locali: organi e funzioni.",
+      "Cosa sono i contratti pubblici e quali principi li governano?",
+      "Mi spieghi il ruolo della privacy nel trattamento di dati da parte della PA."
+    ];
+    return base.map(function (t, i) {
+      return { id: "fb-" + (i + 1), testo: t, argomento: "Diritto amministrativo" };
+    });
+  }
+
+  function startSession() {
+    // Numero domande della modalità, con edge case bank piccola.
+    // In modalità "ripasso" le domande sono GIÀ state selezionate dal
+    // chiamante (retryWeak/retryTopic): non rifiltrarle qui.
+    var wanted = MODES[S.mode] ? MODES[S.mode].n : 12;
+    if (S.mode !== "ripasso") {
+      var n = Math.min(wanted, S.questions.length);
+      S.questions = S.questions.slice(0, n);
+      wanted = n;
+    }
+    if (!S.questions.length) S.questions = fallbackQuestions();
+    S.idx = 0;
+    S.answers = [];
+    S.simId = null;
+    S.simCreated = false;
+    S.startedAt = Date.now();
+    S.elapsedMs = 0;
+    S.sending = false;
+    S.feedbackDone = false;
+    feedbackRetries = 0;
+
+    beginSessionDb();
+    showPhase("session");
+    renderQuestion();
+    startTimer();
+  }
+
+  /* ------------------------------------------------------------------
+     Timer cronometro (puramente informativo) + countdown Difficile
+     ------------------------------------------------------------------ */
+  function startTimer() {
+    stopTimer();
+    var last = Date.now();
+    S.timerHandle = window.setInterval(function () {
+      var now = Date.now();
+      S.elapsedMs += now - last;
+      last = now;
+      $("sess-timer-value").textContent = fmtClock(S.elapsedMs);
+    }, 1000);
+    $("sess-timer-value").textContent = fmtClock(0);
+  }
+
+  function stopTimer() {
+    if (S.timerHandle) { window.clearInterval(S.timerHandle); S.timerHandle = null; }
+    if (S.countdownHandle) { window.clearInterval(S.countdownHandle); S.countdownHandle = null; }
+  }
+
+  function fmtClock(ms) {
+    var s = Math.floor(ms / 1000);
+    var m = Math.floor(s / 60);
+    return String(m).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+  }
+
+  function startCountdown() {
+    stopCountdown();
+    var total = 90;
+    var left = total;
+    var el = $("sess-countdown");
+    el.classList.remove("hidden");
+    el.classList.remove("is-warn");
+    el.textContent = fmtClock(left * 1000);
+    S.countdownHandle = window.setInterval(function () {
+      left -= 1;
+      if (left <= 0) {
+        stopCountdown();
+        el.textContent = "00:00";
+        var ta = $("answer-textarea");
+        if (ta.value.trim()) {
+          // Tempo scaduto: la risposta si invia automaticamente.
+          submitAnswer(true);
+        }
+        return;
+      }
+      el.textContent = fmtClock(left * 1000);
+      el.classList.toggle("is-warn", left <= 15);
+      if (left <= 60) {
+        el.setAttribute("aria-label", "Tempo rimasto " + left + " secondi");
+      }
+    }, 1000);
+  }
+
+  function stopCountdown() {
+    if (S.countdownHandle) { window.clearInterval(S.countdownHandle); S.countdownHandle = null; }
+    var el = $("sess-countdown");
+    if (el) el.classList.add("hidden");
+  }
+
+  /* ------------------------------------------------------------------
+     Rendering domanda corrente
+     ------------------------------------------------------------------ */
+  function renderQuestion() {
+    if (!S.questions.length) return;
+    var q = S.questions[S.idx];
+    var tot = S.questions.length;
+
+    $("sess-progress-label").textContent = "Domanda " + (S.idx + 1) + " di " + tot;
+    var prog = $("sess-progress-fill");
+    prog.style.width = "0%";
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(function () {
+        prog.style.width = Math.round(((S.idx + (S.feedbackDone ? 1 : 0)) / tot) * 100) + "%";
+      });
+    });
+    var track = $("sess-progress-track");
+    track.setAttribute("aria-valuenow", String(Math.round(((S.idx + 1) / tot) * 100)));
+
+    var chip = $("q-chip");
+    chip.textContent = q.argomento || "Dal bando";
+    chip.classList.remove("hidden");
+    var qt = $("q-text");
+    qt.textContent = "«" + q.testo + "»";
+    qt.classList.remove("hidden");
+    $("q-skeleton").classList.remove("is-on");
+
+    // Reset area risposta
+    var ta = $("answer-textarea");
+    ta.value = "";
+    ta.disabled = false;
+    $("answer-box").classList.remove("is-disabled");
+    $("send-btn").disabled = true;
+    $("send-btn").classList.remove("is-busy");
+    $("word-count").textContent = "0 parole";
+    $("volume-hint").classList.remove("is-on");
+    S.sending = false;
+    S.feedbackDone = false;
+    feedbackRetries = 0;
+    hideFeedback();
+    hidePrevFeedback();
+    ta.focus();
+
+    if (S.mode === "difficile" && tot - S.idx <= 3) {
+      startCountdown();
+    } else {
+      stopCountdown();
+    }
+
+    if (D) D.track("sim_question_viewed", { sim_id: S.simId, idx: S.idx });
+  }
+  /* ------------------------------------------------------------------
+     Invio risposta
+     ------------------------------------------------------------------ */
+  function submitAnswer(auto) {
+    if (S.sending || S.phase !== "session") return;
+    var ta = $("answer-textarea");
+    var risposta = ta.value.trim();
+    if (!risposta) return;
+
+    S.sending = true;
+    ta.disabled = true;
+    $("answer-box").classList.add("is-disabled");
+    var send = $("send-btn");
+    send.classList.add("is-busy");
+    send.disabled = true;
+
+    // Hint volume non bloccante
+    var words = countWords(risposta);
+    var vh = $("volume-hint");
+    if (words < 40) {
+      vh.textContent = "Hai scritto " + words + " parole. Un orale vero vuole sostanza: prova ad argomentare di più, poi invia.";
+      vh.classList.add("is-on");
+    } else {
+      vh.classList.remove("is-on");
+    }
+
+    showFeedbackSkeleton();
+    if (D) D.track("sim_answer_sent", { sim_id: S.simId, idx: S.idx, words: words });
+
+    var t0 = Date.now();
+    requestFeedback(risposta, t0);
+  }
+
+  function countWords(text) {
+    return String(text || "").trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  /* ------------------------------------------------------------------
+     Feedback — SSE via /api/chat (streaming con caret)
+     Chiediamo al modello un JSON {chiarezza, struttura, contenuto, lessico,
+     pertinenza, feedback, suggerimento} e streammamo il testo del feedback.
+     ------------------------------------------------------------------ */
+  function requestFeedback(risposta, t0) {
+    if (S.streamCtrl) S.streamCtrl.abort();
+    S.streamCtrl = new AbortController();
+
+    var q = S.questions[S.idx];
+    var sys = "Sei un commissario di un concorso pubblico italiano. Stai interrogando " +
+      "un candidato sulla domanda: «" + q.testo + "». " +
+      "Il candidato ha risposto: «" + risposta.slice(0, 4000) + "». " +
+      "Valuta con precisione su 5 dimensioni (0-10, massimo 1 decimale): chiarezza, struttura, " +
+      "contenuto, lessico, pertinenza. Poi scrivi un feedback di max 90 parole in italiano: " +
+      "1 frase che cita la risposta, 1-2 di correzione specifica, un suggerimento concreto. " +
+      "Rispondi SOLO con JSON valido senza markdown: " +
+      '{"chiarezza":7,"struttura":6,"contenuto":5,"lessico":7,"pertinenza":6,' +
+      '"feedback":"testo del feedback","suggerimento":"la prossima volta prova a…"}';
+
+    fetch("/api/chat", {
+      method: "POST",
+      headers: llmHeaders(),
+      body: JSON.stringify({ messages: [
+        { role: "system", content: sys },
+        { role: "user", content: "Valuta la risposta del candidato." }
+      ], stream: true, max_tokens: 900 })
+    }).then(function (r) {
+      if (!r.ok) throw new Error("http-" + r.status);
+      return streamSse(r);
+    }).then(function (json) {
+      S.streamCtrl = null;
+      var scores = normalizeScores(json);
+      var feedback = String(json.feedback || "").trim();
+      var sugg = String(json.suggerimento || "").trim();
+      if (!feedback) feedback = fallbackFeedback(risposta, q);
+      finishFeedback(scores, feedback, sugg, t0);
+    }).catch(function (err) {
+      S.streamCtrl = null;
+      if (err && err.name === "AbortError") return;
+      // Output malformato → correzione parziale onesta (punteggi euristici),
+      // mai lasciare l'utente senza risposta (matrice errori master §13).
+      var code = (err && err.message) || "";
+      if (code === "no-json" || code === "empty") {
+        var scores = heuristicScores(risposta);
+        var feedback = fallbackFeedback(risposta, q);
+        finishFeedback(scores, feedback, "Riprova la prossima domanda con una struttura più marcata.", t0);
+        return;
+      }
+      onFeedbackError(err);
+    });
+  }
+
+  function heuristicScores(risposta) {
+    var words = countWords(risposta);
+    var hasLaw = /art\.|legge|decreto|l\.\s?\d+/i.test(risposta);
+    var opens = /^(in|secondo|il|la|gli|le|per|come|a|di)/i.test(risposta.trim());
+    var closes = /\.$/.test(risposta.trim());
+    var chiarezza = words >= 60 ? 7 : (words >= 30 ? 5.5 : 3.5);
+    var struttura = (opens ? 2 : 0) + (closes ? 1.5 : 0) + (words >= 40 ? 2.5 : 1) + 1;
+    var contenuto = (hasLaw ? 6 : 3.5) + (words >= 80 ? 2 : 0);
+    return {
+      chiarezza: Math.min(10, chiarezza),
+      struttura: Math.min(10, struttura),
+      contenuto: Math.min(10, contenuto),
+      lessico: Math.min(10, chiarezza + 0.5),
+      pertinenza: Math.min(10, contenuto + 0.5)
+    };
+  }
+
+  /* Streaming SSE (formato OpenAI-compat passato da api/chat.js) → JSON.
+     Accumula i delta e mostra il testo del feedback in streaming. */
+  function streamSse(resp) {
+    return new Promise(function (resolve, reject) {
+      var reader = resp.body.getReader();
+      var decoder = new TextDecoder();
+      var buffer = "";
+
+      function pump() {
+        reader.read().then(function (r) {
+          if (r.done) {
+            try {
+              resolve(extractJson(buffer));
+            } catch (e) { reject(e); }
+            return;
+          }
+          buffer += decoder.decode(r.value, { stream: true });
+          pump();
+        }).catch(reject);
+      }
+      pump();
+    });
+  }
+
+  function extractJson(buf) {
+    var cleaned = buf.replace(/^data:\s*/gm, "").split("\n").map(function (l) {
+      return l.replace(/^data:\s*/, "");
+    }).filter(function (l) {
+      return l && l !== "[DONE]" && l.indexOf(": hb") === -1;
+    }).join(" ");
+    // Il proxy passa i delta OpenAI: il campo "content" di ogni delta è un
+    // frammento del JSON del feedback. I contenuti possono contenere JSON
+    // annidato (virgolette escaped), quindi estraiamo in modo robusto.
+    var contents = [];
+    var re = /"content"\s*:\s*"((?:[^"\\]|\\.)*)"/g;
+    var mm;
+    while ((mm = re.exec(cleaned)) !== null) contents.push(mm[1]);
+    if (contents.length) {
+      // Il delta.content è il frammento di un JSON il cui testo è stato
+      // serializzato dentro il payload SSE: le virgolette interne sono
+      // escaped (\") e vanno ripristinate prima del parse.
+      var full = contents.map(function (c) {
+        return c.replace(/\\n/g, "");
+      }).join("");
+      full = full.replace(/\\"/g, "\"");
+      full = full.replace(/\\\\/g, "\\");
+      return extractJsonFromText(full);
+    }
+    return extractJsonFromText(cleaned);
+  }
+
+  function extractJsonFromText(text) {
+    var s = text.indexOf("{");
+    var e = text.lastIndexOf("}");
+    if (s === -1 || e === -1 || e < s) throw new Error("no-json");
+    var json = text.slice(s, e + 1);
+    return JSON.parse(json);
+  }
+
+  function normalizeScores(json) {
+    function n(v) {
+      var x = Number(v);
+      if (!isFinite(x)) return null;
+      return Math.max(0, Math.min(10, x));
+    }
+    return {
+      chiarezza: n(json.chiarezza),
+      struttura: n(json.struttura),
+      contenuto: n(json.contenuto),
+      lessico: n(json.lessico) != null ? n(json.lessico) : n(json.chiarezza),
+      pertinenza: n(json.pertinenza) != null ? n(json.pertinenza) : n(json.contenuto)
+    };
+  }
+
+  function fallbackFeedback(risposta, q) {
+    var words = countWords(risposta);
+    var hasLaw = /art\.|legge|decreto|l\.\s?\d+/i.test(risposta);
+    if (words < 40) {
+      return "La risposta è troppo breve per l'orale. La commissione si aspetta argomentazione: " +
+        "apri con la tesi, sviluppa con un esempio e chiudi. Cita almeno una fonte normativa.";
+    }
+    if (!hasLaw) {
+      return "La risposta espone il ragionamento ma non cita fonti. " +
+        "Aggiungi il riferimento normativo: legge, articolo, principio.";
+    }
+    return "Risposta strutturata e con fonti. Rafforza il passaggio finale: " +
+      "chiudi riagganciando esplicitamente alla domanda della commissione.";
+  }
+
+  /* ------------------------------------------------------------------
+     Fine feedback: punteggi + testo + bottone successiva
+     ------------------------------------------------------------------ */
+  function finishFeedback(scores, feedback, suggerimento, t0) {
+    var q = S.questions[S.idx];
+    persistAnswerLocal(q, $("answer-textarea").value.trim(), scores, feedback, suggerimento);
+    updateSessionDb({
+      clarity_score: scores.chiarezza != null ? Math.round(scores.chiarezza) : null,
+      structure_score: scores.struttura != null ? Math.round(scores.struttura) : null,
+      content_score: scores.contenuto != null ? Math.round(scores.contenuto) : null
+    });
+    persistWrite({
+      type: "insert_domanda",
+      data: {
+        simulazione_id: S.simId,
+        question_bank_id: q.id,
+        risposta: $("answer-textarea").value.trim(),
+        clarity: scores.chiarezza, structure: scores.struttura, content: scores.contenuto,
+        lessico: scores.lessico, pertinenza: scores.pertinenza,
+        feedback: feedback
+      }
+    });
+
+    hideFeedbackSkeleton();
+    var content = $("feedback-content");
+    content.classList.add("is-on");
+    renderMetrics(scores);
+    renderPrevFeedback();
+
+    // Testo con typewriter e caret
+    var fbEl = $("feedback-text");
+    fbEl.classList.add("is-streaming");
+    fbEl.textContent = "";
+    var words = feedback.split(/(\s+)/);
+    var i = 0;
+    function type() {
+      if (i >= words.length) {
+        fbEl.classList.remove("is-streaming");
+        var suggEl = $("feedback-suggestion");
+        if (suggerimento) {
+          suggEl.textContent = suggerimento;
+          suggEl.classList.add("is-on");
+        }
+        S.feedbackDone = true;
+        S.sending = false;
+        if (D) D.track("sim_feedback_received", {
+          sim_id: S.simId, idx: S.idx,
+          latency_ms: Date.now() - t0, scores: scores
+        });
+        scheduleNext();
+        return;
+      }
+      fbEl.textContent += words[i];
+      i += 1;
+      window.setTimeout(type, REDUCED ? 0 : 14);
+    }
+    type();
+  }
+
+  function scheduleNext() {
+    var btn = $("next-btn");
+    var isLast = S.idx >= S.questions.length - 1;
+    btn.textContent = isLast ? "Vedi il risultato →" : "Domanda successiva →";
+    // Compare dopo 2.5s (tempo di lettura del feedback = parte del valore)
+    window.setTimeout(function () {
+      if (S.phase !== "session") return;
+      btn.classList.add("is-on");
+      btn.onclick = function () {
+        if (isLast) { completeSession(); }
+        else { nextQuestion(); }
+      };
+      btn.focus({ preventScroll: true });
+    }, 2500);
+  }
+
+  function nextQuestion() {
+    hidePrevFeedback();
+    S.idx += 1;
+    renderQuestion();
+  }
+
+  /* ------------------------------------------------------------------
+     Metriche (3 + 2 avanzate)
+     ------------------------------------------------------------------ */
+  var METRIC_LABELS = [
+    ["chiarezza", "Chiarezza"],
+    ["struttura", "Struttura"],
+    ["contenuto", "Contenuto"],
+    ["lessico", "Lessico"],
+    ["pertinenza", "Pertinenza"]
+  ];
+
+  function renderMetrics(scores) {
+    var main = $("metrics-main");
+    main.innerHTML = METRIC_LABELS.slice(0, 3).map(function (pair) {
+      return metricRow(pair[0], pair[1], scores[pair[0]]);
+    }).join("");
+    var extra = $("metrics-extra");
+    extra.innerHTML = METRIC_LABELS.slice(3).map(function (pair) {
+      return metricRow(pair[0], pair[1], scores[pair[0]]);
+    }).join("");
+    animateMetrics(main);
+  }
+
+  function metricRow(key, label, val) {
+    var v = val != null ? val : 0;
+    var cls = v >= 7 ? "is-ok" : (v >= 5 ? "is-warn" : "");
+    return '<div class="metric">' +
+      '<span class="metric-label">' + label + "</span>" +
+      '<span class="metric-num" id="mnum-' + key + '">0</span>' +
+      '<span class="metric-track"><span class="metric-fill ' + cls + '" id="mfill-' + key + '" style="width:0%"></span></span>' +
+      "</div>";
+  }
+
+  function animateMetrics(scope) {
+    window.setTimeout(function () {
+      METRIC_LABELS.forEach(function (pair) {
+        var key = pair[0];
+        var num = $(scope ? "mnum-" + key : "mnum-" + key);
+        var fill = $(scope ? "mfill-" + key : "mfill-" + key);
+        if (!num || !fill) return;
+        // valore già salvato in answers (ultimo)
+        var last = S.answers.length ? S.answers[S.answers.length - 1].scores : null;
+        var v = last ? last[key] : 0;
+        num.textContent = (v != null ? v : 0).toLocaleString("it-IT", { maximumFractionDigits: 1 });
+        fill.style.width = (v != null ? v : 0) * 10 + "%";
+      });
+    }, 60);
+  }
+
+  function hideFeedback() {
+    $("feedback-skeleton").classList.remove("is-on");
+    $("feedback-content").classList.remove("is-on");
+    $("feedback-error").classList.remove("is-on");
+    $("next-btn").classList.remove("is-on");
+    $("feedback-text").classList.remove("is-streaming");
+    $("feedback-suggestion").classList.remove("is-on");
+    $("metrics-extra").classList.remove("is-open");
+  }
+
+  function showFeedbackSkeleton() {
+    $("feedback-skeleton").classList.add("is-on");
+    $("feedback-content").classList.remove("is-on");
+    $("feedback-error").classList.remove("is-on");
+  }
+
+  function hideFeedbackSkeleton() {
+    $("feedback-skeleton").classList.remove("is-on");
+  }
+
+
+  /* ------------------------------------------------------------------
+     Errore feedback — mai un vicolo cieco
+     ------------------------------------------------------------------ */
+  var feedbackRetries = 0;
+
+  function onFeedbackError(err) {
+    feedbackRetries += 1;
+    hideFeedbackSkeleton();
+    $("feedback-content").classList.remove("is-on");
+    var box = $("feedback-error");
+    var code = (err && err.message) || "";
+    var text = "La connessione è caduta. La tua risposta è al sicuro: riprova.";
+    if (code.indexOf("http-429") !== -1 || code.indexOf("http-402") !== -1) {
+      text = "Non riusciamo a verificare la quota. Riprova.";
+    } else if (code.indexOf("http-5") !== -1 || code.indexOf("http-502") !== -1 ||
+               code.indexOf("http-503") !== -1 || code.indexOf("http-504") !== -1) {
+      text = "Il commissario è in ritardo. Riprova tra un momento.";
+    } else if (code === "no-json" || code === "empty") {
+      text = "La correzione è arrivata incompleta. Riprova.";
+    }
+    $("feedback-error-text").textContent = text;
+    box.classList.add("is-on");
+
+    var retry = $("feedback-retry");
+    retry.onclick = null;
+    if (feedbackRetries >= 3) {
+      retry.textContent = "Salva e riprendi";
+      retry.onclick = function () { openPause(); };
+    } else {
+      retry.textContent = "Riprova";
+      retry.onclick = function () {
+        box.classList.remove("is-on");
+        submitAnswer(false);
+      };
+    }
+
+    // Riabilita l'area risposta: la risposta NON si perde mai
+    var ta = $("answer-textarea");
+    ta.disabled = false;
+    $("answer-box").classList.remove("is-disabled");
+    var send = $("send-btn");
+    send.classList.remove("is-busy");
+    send.disabled = !ta.value.trim();
+    S.sending = false;
+  }
+
+  /* ------------------------------------------------------------------
+     Accordion feedback precedente
+     ------------------------------------------------------------------ */
+  function renderPrevFeedback() {
+    if (S.answers.length < 2) { hidePrevFeedback(); return; }
+    var prev = S.answers[S.answers.length - 2];
+    var box = $("prev-feedback");
+    box.classList.remove("hidden");
+    $("prev-feedback-label").textContent = "Feedback domanda " + (S.answers.length - 1) + " · " +
+      (prev.scores && prev.scores.contenuto != null
+        ? prev.scores.contenuto.toLocaleString("it-IT", { maximumFractionDigits: 1 })
+        : "—");
+    var inner = $("prev-feedback-inner");
+    var sc = prev.scores || {};
+    var chips = METRIC_LABELS.map(function (pair) {
+      return '<span class="pf-metric">' + pair[1] + " <b>" +
+        ((sc[pair[0]] != null ? sc[pair[0]] : 0).toLocaleString("it-IT", { maximumFractionDigits: 1 })) +
+        "</b></span>";
+    }).join("");
+    inner.innerHTML = '<div class="pf-metrics">' + chips + "</div>" +
+      "<p>" + (D ? D.escapeHtml(prev.feedback || "") : (prev.feedback || "")) + "</p>";
+  }
+
+  function hidePrevFeedback() {
+    var box = $("prev-feedback");
+    box.classList.add("hidden");
+  }
+
+  /* ------------------------------------------------------------------
+     Pausa / ripresa / termina
+     ------------------------------------------------------------------ */
+  function openPause() {
+    if (S.phase !== "session") return;
+    S.phase = "paused";
+    stopTimer();
+    stopCountdown();
+    saveDraft();
+    if (D) D.track("sim_paused", { sim_id: S.simId });
+    var overlay = $("pause-overlay");
+    overlay.classList.add("is-on");
+    var tot = S.questions.length;
+    $("pause-meta").textContent = "«" + (MODES[S.mode] ? MODES[S.mode].label : S.mode) +
+      " · " + tot + " domande» · domanda " + (S.idx + 1) + " di " + tot +
+      " · " + fmtClock(S.elapsedMs);
+    $("pause-resume").focus();
+  }
+
+  function closePause() {
+    $("pause-overlay").classList.remove("is-on");
+    if (S.phase === "paused") S.phase = "session";
+    startTimer();
+    if (D) D.track("sim_resumed", { sim_id: S.simId });
+  }
+
+  function saveAndExit() {
+    $("pause-overlay").classList.remove("is-on");
+    stopTimer();
+    stopCountdown();
+    saveDraft();
+    // La sessione resta in_progress nel DB; il gate la ripropone.
+    window.location.href = "dashboard.html";
+  }
+
+  function terminateSession() {
+    var html = "<h2>Vuoi terminare?</h2>" +
+      "<p>Le risposte già date restano nello storico.</p>" +
+      '<div class="modal-actions">' +
+      '<button type="button" class="btn btn-primary" data-close>Continua</button>' +
+      '<button type="button" class="btn btn-danger" id="term-confirm">Termina</button>' +
+      "</div>";
+    var closeFn = D ? D.openModal(html) : function () {};
+    var btn = $("term-confirm");
+    if (btn) btn.addEventListener("click", function () {
+      completeSession(true);
+      if (closeFn) closeFn();
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     Completamento sessione → report
+     ------------------------------------------------------------------ */
+  function completeSession(abandoned) {
+    stopTimer();
+    stopCountdown();
+    $("pause-overlay").classList.remove("is-on");
+    // La sessione si chiude sempre (anche se abbandonata): le risposte già
+    // date restano nello storico, mai un blocco orfano in_progress.
+    updateSessionDb({
+      status: "completata",
+      voto_finale: Math.round(averageVoto() * 10) / 10,
+      ended_at: new Date().toISOString(),
+      durata_minuti: Math.max(1, Math.round(S.elapsedMs / 60000))
+    });
+    clearDraft();
+    if (D) D.track(abandoned ? "sim_abandoned" : "sim_completed", {
+      sim_id: S.simId, voto: averageVoto(), duration_min: Math.round(S.elapsedMs / 60000)
+    });
+    renderReport();
+  }
+
+  function averageVoto() {
+    var scored = S.answers.filter(function (a) { return a.scores; });
+    if (!scored.length) return 0;
+    var sum = 0;
+    var count = 0;
+    scored.forEach(function (a) {
+      ["chiarezza", "struttura", "contenuto"].forEach(function (k) {
+        if (a.scores[k] != null) { sum += a.scores[k]; count += 1; }
+      });
+    });
+    return count ? sum / count : 0;
+  }
+
+  /* ------------------------------------------------------------------
+     Report — peak-end rule
+     ------------------------------------------------------------------ */
+  function renderReport() {
+    showPhase("report");
+    var voto = averageVoto();
+    var wrap = $("report-wrap");
+    var durata = Math.max(1, Math.round(S.elapsedMs / 60000));
+    var modeLabel = (MODES[S.mode] && MODES[S.mode].label) || "Ripasso";
+    var etaLabel = voto < 6 ? "Da lavorare" : (voto < 8 ? "Solido" : "Forte");
+    var avg3 = avgDimension("chiarezza", "struttura", "contenuto");
+
+    // Confronto SOLO con il proprio storico (mai norme inventate, master §5.10)
+    var compare = null;
+    if (S.historyAvg != null) {
+      compare = Math.round((voto - S.historyAvg) * 10) / 10;
+    }
+
+    var punti = buildPuntiForza();
+    var deboli = buildDaLavorare();
+    var topics = buildArgomentiDeboli();
+
+    var html = "";
+    html += '<p class="report-eyebrow">Simulazione completata · ' + modeLabel + " · " + durata + " min</p>";
+    html += '<h1 class="report-h1">Hai chiuso la sessione con ' + fmtVoto(voto) + ".</h1>";
+    html += '<p class="report-sub">' + reportSub(voto, avg3) + "</p>";
+
+    // Gauge
+    var stroke = 377 * (1 - voto / 10);
+    var gcls = voto >= 7 ? "is-ok" : (voto >= 5 ? "is-warn" : "");
+    html += '<div class="gauge-row">' +
+      '<div class="gauge-wrap" role="img" aria-label="Voto medio ' + fmtVoto(voto) + " su 10\">" +
+        '<svg viewBox="0 0 140 140" aria-hidden="true">' +
+          '<circle class="gauge-bg" cx="70" cy="70" r="60"></circle>' +
+          '<circle class="gauge-fill ' + gcls + '" cx="70" cy="70" r="60"></circle>' +
+        "</svg>" +
+        '<div class="gauge-num"><span id="gauge-num-val">0</span><small>su 10</small></div>' +
+      "</div>" +
+      '<div class="gauge-side">' +
+        '<div class="gauge-label">' + etaLabel + "</div>" +
+        '<p class="gauge-note">Media delle tre dimensioni principali: chiarezza, struttura, contenuto.</p>' +
+        (compare != null
+          ? '<span class="gauge-badge ' + (compare >= 0 ? "" : "is-neutral") + '">' +
+            (compare >= 0 ? "+" : "") + fmtVoto(Math.abs(compare)) + " vs la tua media</span>"
+          : "") +
+      "</div>" +
+    "</div>";
+
+    // Dimensioni
+    html += '<div class="report-metrics">' +
+      METRIC_LABELS.slice(0, 3).map(function (pair) {
+        var v = avgDimension(pair[0]);
+        var cls = v >= 7 ? "is-ok" : (v >= 5 ? "is-warn" : "");
+        return '<div class="rm-row">' +
+          '<span class="rm-label">' + pair[1] + "</span>" +
+          '<span class="rm-track"><span class="rm-fill ' + cls + '" id="rm-' + pair[0] + '" style="width:0%"></span></span>' +
+          '<span class="rm-num" id="rmn-' + pair[0] + '">' + fmtVoto(v) + "</span>" +
+        "</div>";
+      }).join("") +
+    "</div>";
+
+    // Punti forti / da lavorare
+    if (punti.length) {
+      html += '<div class="report-card"><h3>I tuoi punti forti</h3><ul>' +
+        punti.map(function (p) {
+          return '<li><span class="dot is-ok"></span>' + D.escapeHtml(p.text) +
+            ' <span class="tag">' + D.escapeHtml(p.tag) + "</span></li>";
+        }).join("") + "</ul></div>";
+    }
+    if (deboli.length) {
+      html += '<div class="report-card"><h3>Da lavorare</h3><ul>' +
+        deboli.map(function (p) {
+          return '<li><span class="dot is-warn"></span>' + D.escapeHtml(p.text) +
+            ' <span class="tag">' + D.escapeHtml(p.tag) + "</span></li>";
+        }).join("") + "</ul></div>";
+    }
+
+    // Argomenti deboli
+    if (topics.length) {
+      html += '<div class="report-card"><h3>Ripassa questi argomenti</h3>' +
+        topics.map(function (t) {
+          return '<div class="topic-row">' +
+            '<div><div class="topic-name">' + D.escapeHtml(t.argomento) + "</div>" +
+            '<div class="topic-meta">media ' + fmtVoto(t.media) + "</div></div>" +
+            '<button type="button" class="btn btn-soft" data-ripassa="' + D.escapeHtml(t.argomento) + '">Rifai</button>' +
+          "</div>";
+        }).join("") + "</div>";
+    }
+
+    // Rivedi le domande
+    html += '<div class="report-card"><h3>Rivedi le domande</h3><div class="review-list">' +
+      S.answers.map(function (a, i) {
+        var v = a.scores && a.scores.contenuto != null ? a.scores.contenuto : 0;
+        return '<div class="review-item">' +
+          '<button type="button" class="review-toggle" aria-expanded="false" data-rev="' + i + '">' +
+            '<span class="rev-q">' + (i + 1) + ". " + D.escapeHtml(a.q.testo) + "</span>" +
+            '<span class="rev-score">' + fmtVoto(v) + "</span>" +
+            '<svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
+          "</button>" +
+          '<div class="review-panel" data-rev-panel="' + i + '">' +
+            '<div class="review-inner">' +
+              '<div class="rev-block"><span class="rev-label">La tua risposta</span>' +
+                D.escapeHtml(a.risposta || "—") + "</div>" +
+              '<div class="rev-block"><span class="rev-label">Feedback</span>' +
+                D.escapeHtml(a.feedback || "—") + "</div>" +
+            "</div>" +
+          "</div>" +
+        "</div>";
+      }).join("") + "</div></div>";
+
+    // CTA
+    var hasWeak = deboli.length > 0;
+    html += '<div class="report-actions">' +
+      (hasWeak
+        ? '<button type="button" class="btn btn-primary btn-lg btn-block" id="report-retry-weak">Rifai le domande deboli</button>'
+        : '<button type="button" class="btn btn-primary btn-lg btn-block" id="report-new">Nuova simulazione</button>') +
+      '<button type="button" class="btn btn-ghost btn-lg btn-block" id="report-new2">Nuova simulazione</button>' +
+      (isPro()
+        ? '<button type="button" class="btn btn-soft btn-lg btn-block" id="report-piano">Piano settimanale</button>'
+        : '<div class="report-teaser"><h3>Il piano settimanale.</h3>' +
+          '<p>Un piano di allenamento generato dal tuo bando, con ripasso automatico delle domande deboli. ' +
+          "Il trend di questa sessione è il primo punto che il piano sfrutta.</p>" +
+          '<a class="btn btn-primary btn-block" href="pricing.html" data-pro-cta="report">Passa a Pro — 14,99€/mese</a></div>') +
+    "</div>";
+
+    wrap.innerHTML = html;
+
+    // Animazioni report
+    animateGauge(voto);
+    window.setTimeout(function () {
+      METRIC_LABELS.slice(0, 3).forEach(function (pair) {
+        var fill = $("rm-" + pair[0]);
+        if (fill) fill.style.width = avgDimension(pair[0]) * 10 + "%";
+      });
+    }, 200);
+
+    // Accordion rivedi domande
+    wrap.querySelectorAll(".review-toggle").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var i = btn.getAttribute("data-rev");
+        var panel = wrap.querySelector('[data-rev-panel="' + i + '"]');
+        var open = btn.getAttribute("aria-expanded") === "true";
+        btn.setAttribute("aria-expanded", String(!open));
+        if (panel) panel.classList.toggle("is-open", !open);
+      });
+    });
+
+    // CTA
+    var weakBtn = $("report-retry-weak");
+    if (weakBtn) weakBtn.addEventListener("click", function () { retryWeak(); });
+    var newBtn = $("report-new");
+    if (newBtn) newBtn.addEventListener("click", function () { newSimulation(); });
+    var new2 = $("report-new2");
+    if (new2) new2.addEventListener("click", function () { newSimulation(); });
+    var piano = $("report-piano");
+    if (piano) piano.addEventListener("click", function () { window.location.href = "dashboard.html#piano"; });
+    wrap.querySelectorAll("[data-ripassa]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        retryTopic(btn.getAttribute("data-ripassa"));
+      });
+    });
+
+    if (D) D.track("sim_report_action", { action: "viewed" });
+  }
+
+  function fmtVoto(v) {
+    var n = Number(v);
+    if (!isFinite(n)) return "—";
+    return n.toLocaleString("it-IT", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  }
+
+  function avgDimension() {
+    var keys = Array.prototype.slice.call(arguments);
+    var sum = 0, count = 0;
+    S.answers.forEach(function (a) {
+      if (!a.scores) return;
+      keys.forEach(function (k) {
+        if (a.scores[k] != null) { sum += a.scores[k]; count += 1; }
+      });
+    });
+    return count ? sum / count : 0;
+  }
+
+  function buildPuntiForza() {
+    var out = [];
+    var chi = avgDimension("chiarezza");
+    var str = avgDimension("struttura");
+    if (chi >= 6) out.push({ text: "Rispondere con chiarezza espositiva", tag: "Chiarezza" });
+    if (str >= 6) out.push({ text: "Strutturare la risposta con apertura e chiusura", tag: "Struttura" });
+    return out.slice(0, 2);
+  }
+
+  function buildDaLavorare() {
+    var out = [];
+    var con = avgDimension("contenuto");
+    var chi = avgDimension("chiarezza");
+    if (con < 6) out.push({ text: "Citare le fonti normative e approfondire il contenuto", tag: "Contenuto" });
+    if (chi < 6) out.push({ text: "Rendere la risposta più diretta e meno dispersiva", tag: "Chiarezza" });
+    return out.slice(0, 2);
+  }
+
+  function buildArgomentiDeboli() {
+    var byTopic = {};
+    S.answers.forEach(function (a) {
+      if (!a.scores) return;
+      var key = a.q.argomento || "Dal bando";
+      if (!byTopic[key]) byTopic[key] = { sum: 0, count: 0 };
+      byTopic[key].sum += a.scores.contenuto != null ? a.scores.contenuto : 0;
+      byTopic[key].count += 1;
+    });
+    return Object.keys(byTopic).map(function (k) {
+      return { argomento: k, media: byTopic[k].sum / byTopic[k].count };
+    }).filter(function (t) { return t.media < 6; })
+      .sort(function (a, b) { return a.media - b.media; }).slice(0, 2);
+  }
+
+  function reportSub(voto, avg3) {
+    if (avg3 == null) return "Ogni risposta ha ricevuto una correzione. Rivedi le domande qui sotto.";
+    if (voto >= 7) return "Un esito solido. I punti forti li trovi qui sotto, e la prossima volta prova a citare le fonti prima.";
+    if (voto >= 5) return "Sei sulla strada giusta. Concentrati sulle aree segnalate e la prossima sessione andrà meglio.";
+    return "Oggi il materiale non è uscito bene. È normale: la simulazione serve proprio a questo. Riparti dalle aree segnalate.";
+  }
+
+  function animateGauge(voto) {
+    var num = $("gauge-num-val");
+    var fill = document.querySelector(".gauge-fill");
+    if (REDUCED) {
+      num.textContent = fmtVoto(voto);
+      if (fill) fill.style.strokeDashoffset = String(377 * (1 - voto / 10));
+      return;
+    }
+    // count-up
+    var t0 = null;
+    function step(ts) {
+      if (t0 === null) t0 = ts;
+      var p = Math.min(1, (ts - t0) / 600);
+      var eased = 1 - Math.pow(1 - p, 3);
+      num.textContent = fmtVoto(voto * eased);
+      if (fill) fill.style.strokeDashoffset = String(377 * (1 - (voto / 10) * eased));
+      if (p < 1) window.requestAnimationFrame(step);
+    }
+    window.requestAnimationFrame(step);
+  }
+
+  /* ------------------------------------------------------------------
+     Azioni report
+     ------------------------------------------------------------------ */
+  function newSimulation() {
+    S.answers = [];
+    S.questions = [];
+    S.qBankReady = false;
+    S.simId = null;
+    S.simCreated = false;
+    S.resumeData = null;
+    S.mode = "standard";
+    S.used = (D && D.loadCommon) ? S.used : S.used; // quota aggiornata dal gate
+    showPhase("setup");
+    renderSetup();
+    ensureBank();
+    if (D) D.track("sim_report_action", { action: "new" });
+  }
+
+  function retryWeak() {
+    // Nuova sessione con le domande deboli (voto <6 su una dimensione)
+    var weak = S.answers.map(function (a, i) {
+      return { a: a, i: i };
+    }).filter(function (x) {
+      return x.a.scores && (x.a.scores.chiarezza < 6 || x.a.scores.struttura < 6 || x.a.scores.contenuto < 6);
+    });
+    if (!weak.length) {
+      if (D) D.toast("Nessuna domanda sotto la soglia in questa sessione.");
+      return;
+    }
+    S.mode = "ripasso";
+    S.questions = weak.map(function (x) { return x.a.q; });
+    S.answers = [];
+    S.idx = 0;
+    S.simId = null;
+    S.simCreated = false;
+    S.startedAt = Date.now();
+    S.elapsedMs = 0;
+    S.sending = false;
+    S.feedbackDone = false;
+    beginSessionDb();
+    showPhase("session");
+    renderQuestion();
+    startTimer();
+    if (D) D.track("sim_report_action", { action: "retry_weak" });
+  }
+
+  function retryTopic(argomento) {
+    var qs = S.questions.filter(function (q) { return (q.argomento || "") === argomento; });
+    if (!qs.length) return;
+    S.mode = "ripasso";
+    S.questions = qs;
+    S.answers = [];
+    S.idx = 0;
+    S.simId = null;
+    S.simCreated = false;
+    S.startedAt = Date.now();
+    S.elapsedMs = 0;
+    S.sending = false;
+    S.feedbackDone = false;
+    beginSessionDb();
+    showPhase("session");
+    renderQuestion();
+    startTimer();
+    if (D) D.track("sim_report_action", { action: "retry_topic" });
+  }
+
+  /* ------------------------------------------------------------------
+     Ripresa sessione dal draft
+     ------------------------------------------------------------------ */
+  function resumeSession(rd) {
+    if (!rd || !rd.questions || !rd.questions.length) return;
+    S.mode = rd.mode || "standard";
+    S.questions = rd.questions;
+    S.answers = rd.answers || [];
+    S.idx = Math.min(rd.idx || 0, S.questions.length - 1);
+    S.simId = rd.simId || null;
+    S.simCreated = !!S.simId;
+    S.startedAt = rd.startedAt || Date.now();
+    S.elapsedMs = rd.elapsedMs || 0;
+    S.sending = false;
+    S.feedbackDone = false;
+    S.resumeData = null;
+    showPhase("session");
+    renderQuestion();
+    startTimer();
+    // Ripristina la risposta in corso se c'era (draft preservato)
+    var ta = $("answer-textarea");
+    if (rd.draftAnswer) {
+      ta.value = rd.draftAnswer;
+      updateWordCount();
+      var send = $("send-btn");
+      if (send) send.disabled = !ta.value.trim();
+      autoSize(ta);
+    }
+  }
+
+  /* ------------------------------------------------------------------
+     Init
+     ------------------------------------------------------------------ */
+  function init() {
+    if (!D || !D.supabase) { showPhase("gate"); return; }
+
+    D.guard().then(function (ok) {
+      if (!ok) return;
+      return D.loadUser().then(function (user) {
+        S.user = user;
+        S.bando = D.getActiveBando();
+        return D.loadCommon(user).then(function (c) {
+          S.used = c.used;
+          // Ripresa: ultimo draft di sessione incompleta
+          var last = lsGet(K_LAST_SIM);
+          if (last && last.questions && last.answers && last.answers.length < last.questions.length) {
+            S.resumeData = last;
+          }
+          // Media voti delle simulazioni precedenti (per i confronti del report).
+          // Non deve MAI bloccare l'init: un fallimento qui è non critico.
+          try { loadHistoryAvg(user); } catch (e) { /* non critico */ }
+          // Precarica la bank in background (path critico <1s al click)
+          ensureBank();
+          renderGate();
+        });
+      }).catch(function () {
+        renderGate();
+      });
+    });
+  }
+
+  /* Media dei voti delle simulazioni precedenti (confronti reali nel report).
+     Mai norme inventate: se non c'è storico, il report non mostra confronti. */
+  function loadHistoryAvg(user) {
+    S.historyAvg = null;
+    if (!D || !D.supabase || !user) return;
+    D.supabase.from("simulazioni")
+      .select("voto_finale")
+      .eq("user_id", user.id)
+      .not("voto_finale", "is", null)
+      .limit(100)
+      .then(function (res) {
+        if (!res || res.error || !res.data || !res.data.length) return;
+        var sum = 0, n = 0;
+        res.data.forEach(function (r) {
+          var v = Number(r.voto_finale);
+          if (isFinite(v)) { sum += v; n += 1; }
+        });
+        if (n) S.historyAvg = sum / n;
+      }).catch(function () { /* niente confronti, ok */ });
+  }
+
+  /* ------------------------------------------------------------------
+     Event listeners globali
+     ------------------------------------------------------------------ */
+  function bindEvents() {
+    // Ctrl/⌘+Invio per inviare
+    document.addEventListener("keydown", function (e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        if (S.phase === "session" && !S.sending && S.feedbackDone !== true) {
+          e.preventDefault();
+          var ta = $("answer-textarea");
+          if (ta && ta.value.trim()) submitAnswer(false);
+        }
+      }
+      // Esc: pausa (o chiude overlay se aperto)
+      if (e.key === "Escape") {
+        var overlay = $("pause-overlay");
+        if (overlay && overlay.classList.contains("is-on")) { closePause(); return; }
+        if (S.phase === "session" && !S.sending) openPause();
+      }
+    });
+
+    // Textarea: autosize + word count + abilita invio
+    var ta = $("answer-textarea");
+    ta.addEventListener("input", function () {
+      autoSize(ta);
+      updateWordCount();
+      var send = $("send-btn");
+      send.disabled = !ta.value.trim();
+    });
+
+    // Hint accordion
+    $("answer-hint-btn").addEventListener("click", function () {
+      var panel = $("answer-hint-panel");
+      var open = panel.classList.toggle("is-open");
+      this.setAttribute("aria-expanded", String(open));
+    });
+
+    // Invia
+    $("send-btn").addEventListener("click", function () { submitAnswer(false); });
+
+    // Pausa
+    $("sess-pause").addEventListener("click", openPause);
+    $("pause-resume").addEventListener("click", closePause);
+    $("pause-save-exit").addEventListener("click", saveAndExit);
+    $("pause-terminate").addEventListener("click", terminateSession);
+
+    // Briefing
+    $("briefing-skip").addEventListener("click", skipBriefing);
+    $("briefing-start").addEventListener("click", skipBriefing);
+
+    // Metrics extra toggle
+    $("metrics-extra-toggle").addEventListener("click", function () {
+      var extra = $("metrics-extra");
+      var open = extra.classList.toggle("is-open");
+      this.setAttribute("aria-expanded", String(open));
+    });
+
+    // Cambia bando
+    var change = $("setup-bando-change");
+    if (change) change.addEventListener("click", function () {
+      window.location.href = "dashboard.html#bandi";
+    });
+
+    // Draft su beforeunload: la risposta in corso non si perde mai.
+    window.addEventListener("beforeunload", function () {
+      if (S.phase === "session") saveDraft();
+    });
+
+    // Flush coda su online
+    window.addEventListener("online", flushOps);
+
+    // Prev feedback accordion
+    $("prev-feedback-toggle").addEventListener("click", function () {
+      var panel = $("prev-feedback-panel");
+      var open = panel.classList.toggle("is-open");
+      this.setAttribute("aria-expanded", String(open));
+    });
+  }
+
+  function updateWordCount() {
+    var ta = $("answer-textarea");
+    var n = countWords(ta.value);
+    $("word-count").textContent = n + (n === 1 ? " parola" : " parole");
+  }
+
+  function autoSize(ta) {
+    ta.style.height = "auto";
+    var h = Math.min(ta.scrollHeight, 12 * 26);
+    ta.style.height = Math.max(96, h) + "px";
+  }
+
+  /* ------------------------------------------------------------------
+     Briefing — 3 card, 800ms l'una, skippabile
+     ------------------------------------------------------------------ */
+  var briefingTimer = null;
+
+  function runBriefing() {
+    var cards = ["briefing-1", "briefing-2", "briefing-3"];
+    cards.forEach(function (id, i) {
+      var el = $(id);
+      el.classList.remove("is-in");
+      window.setTimeout(function () {
+        el.classList.add("is-in");
+      }, i * (REDUCED ? 0 : 800));
+    });
+    if (REDUCED) { startSessionSoon(); return; }
+    briefingTimer = window.setTimeout(startSessionSoon, 2600);
+  }
+
+  function skipBriefing() {
+    if (briefingTimer) { window.clearTimeout(briefingTimer); briefingTimer = null; }
+    startSessionSoon();
+  }
+
+  function startSessionSoon() {
+    // La sessione parte quando la bank è pronta (o con il fallback onesto).
+    // ensureBank() è già stata lanciata a init: se pronta, parte subito.
+    if (S.qBankReady || S.questions.length) {
+      startSession();
+    } else {
+      // Attesa breve: se dopo 3s la bank non c'è, fallback onesto.
+      window.setTimeout(function () {
+        if (!S.qBankReady && !S.questions.length) {
+          S.questions = fallbackQuestions();
+          S.qBankReady = true;
+        }
+        startSession();
+      }, 3000);
+    }
+  }
+
+  // Boot → init
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { bindEvents(); init(); });
+  } else {
+    bindEvents();
+    init();
+  }
+})();

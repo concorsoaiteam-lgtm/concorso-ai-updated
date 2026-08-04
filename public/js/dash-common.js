@@ -94,6 +94,49 @@
     return d.getFullYear() + "-" + m + "-01";
   }
 
+  /* Data di rinnovo della quota (primo del mese prossimo, in italiano). */
+  function nextRenewalLabel() {
+    try {
+      var now = new Date();
+      var next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      return next.toLocaleDateString("it-IT", { day: "numeric", month: "long" });
+    } catch (e) { return "a inizio mese"; }
+  }
+
+  /* Count-up dei numeri (microinterazione premium). Rispetta reduced-motion:
+     a (prefers-reduced-motion: reduce) il valore viene impostato subito. */
+  function animateCount(el, from, to, durMs) {
+    if (!el) return;
+    var d = REDUCED_MOTION ? 0 : (durMs == null ? 420 : durMs);
+    var start = null;
+    function step(ts) {
+      if (start === null) start = ts;
+      var p = d === 0 ? 1 : Math.min(1, (ts - start) / d);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(from + (to - from) * eased);
+      if (p < 1) window.requestAnimationFrame(step);
+    }
+    window.requestAnimationFrame(step);
+  }
+
+  /* Animazione del fill delle barre: parte da 0% e arriva a target con la
+     transizione CSS (420ms --ease). Necessaria perché il markup viene
+     ricostruito a ogni render: senza questo, la larghezza finale verrebbe
+     applicata istantaneamente e la transizione non partirebbe mai. */
+  function animateFill(el, pct) {
+    if (!el) return;
+    el.style.width = "0%";
+    if (REDUCED_MOTION) {
+      el.style.width = pct + "%";
+      return;
+    }
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(function () {
+        el.style.width = pct + "%";
+      });
+    });
+  }
+
   /* ------------------------------------------------------------------
      Toast
      ------------------------------------------------------------------ */
@@ -162,34 +205,55 @@
     var n = Math.max(0, Number(days) || 0);
     el.innerHTML = streakSvg() + '<span>' + n + ' giorni</span>';
     el.title = n === 1 ? "1 giorno di fila" : n + " giorni di fila";
+    el.classList.toggle("has-streak", n > 0);
   }
 
   /* ------------------------------------------------------------------
      Usage meter — quota simulazioni del mese (server-side rispecchiato:
-     il contatore è calcolato su dati reali; la verità rimane lato server)
+     il contatore è calcolato su dati reali; la verità rimane lato server).
+     Componente premium: numero grande "2 / 3" con count-up, barra 2px
+     animata, data di rinnovo reale. Mai colori aggressivi (dashboard-master
+     §5.3): copy fattuale, mai "ti restano solo…".
      ------------------------------------------------------------------ */
+  var usagePrev = null;
+
   function renderUsage(used, plan) {
     var el = $("side-usage");
     if (!el) return;
     if (plan === "pro") {
+      usagePrev = null;
       el.innerHTML =
-        '<div class="usage-value" id="usage-value">Pro</div>' +
-        '<p class="usage-note">Simulazioni illimitate</p>';
+        '<div class="usage-head"><span class="usage-label">Piano Pro</span></div>' +
+        '<div class="usage-num is-pro" aria-label="Simulazioni illimitate">' +
+          '<span class="usage-infinity" aria-hidden="true">∞</span>' +
+          '<span class="usage-pro-text">Illimitate</span>' +
+        '</div>' +
+        '<p class="usage-note">Simulazioni senza limite</p>';
       return;
     }
-    var left = Math.max(0, FREE_SIM_LIMIT - used);
-    var pct = Math.min(100, Math.round((used / FREE_SIM_LIMIT) * 100));
-    var full = used >= FREE_SIM_LIMIT;
+    var u = Math.max(0, Math.min(FREE_SIM_LIMIT, Number(used) || 0));
+    var left = FREE_SIM_LIMIT - u;
+    var pct = Math.round((u / FREE_SIM_LIMIT) * 100);
+    var full = u >= FREE_SIM_LIMIT;
+    var renew = nextRenewalLabel();
+    var note = full
+      ? "Quota del mese usata · rinnovo il " + renew
+      : left + (left === 1 ? " simulazione rimasta" : " simulazioni rimaste") + " · rinnovo il " + renew;
     el.innerHTML =
-      '<div class="usage-head">' +
-        '<span class="usage-label">Simulazioni questo mese</span>' +
-        '<span class="usage-value">' + left + ' di ' + FREE_SIM_LIMIT + '</span>' +
+      '<div class="usage-head"><span class="usage-label">Simulazioni questo mese</span></div>' +
+      '<div class="usage-num" aria-label="' + u + ' di ' + FREE_SIM_LIMIT + ' simulazioni usate">' +
+        '<span class="usage-count">0</span>' +
+        '<span class="usage-sep" aria-hidden="true">/</span>' +
+        '<span class="usage-total" aria-hidden="true">' + FREE_SIM_LIMIT + '</span>' +
       '</div>' +
-      '<div class="usage-track"><div class="usage-fill' + (full ? " is-full" : "") +
-        '" style="width:' + pct + '%"></div></div>' +
-      '<p class="usage-note">' + (full
-        ? "Quota esaurita — si rinnova a inizio mese"
-        : "Si rinnova a inizio mese") + '</p>';
+      '<div class="usage-track" role="progressbar" aria-label="Simulazioni usate questo mese" ' +
+        'aria-valuemin="0" aria-valuemax="' + FREE_SIM_LIMIT + '" aria-valuenow="' + u + '">' +
+        '<div class="usage-fill' + (full ? " is-full" : "") + '" style="width:0%"></div>' +
+      '</div>' +
+      '<p class="usage-note">' + note + '</p>';
+    animateCount(el.querySelector(".usage-count"), usagePrev == null ? 0 : usagePrev, u);
+    animateFill(el.querySelector(".usage-fill"), pct);
+    usagePrev = u;
   }
 
   /* ------------------------------------------------------------------
@@ -450,12 +514,13 @@
     initLogout();
     var toggle = $("side-toggle");
     if (toggle) {
+      // Mobile: la bottom-nav si può nascondere per leggere i contenuti.
       toggle.addEventListener("click", function () {
         var app = $("app");
         if (!app) return;
-        var collapsed = app.classList.toggle("is-nav-open");
-        // Mobile: la sidebar è bottom-nav, il toggle la mostra/nasconde
-        app.setAttribute("data-nav", collapsed ? "open" : "closed");
+        var hidden = app.classList.toggle("is-nav-hidden");
+        toggle.setAttribute("aria-expanded", hidden ? "false" : "true");
+        toggle.title = hidden ? "Mostra il menu" : "Nascondi il menu";
       });
     }
     // Chiusura palette con Escape già gestita; chiusura modal con Escape:
@@ -485,6 +550,9 @@
     fmtVoto: fmtVoto,
     todayISO: todayISO,
     firstOfMonthISO: firstOfMonthISO,
+    nextRenewalLabel: nextRenewalLabel,
+    animateCount: animateCount,
+    animateFill: animateFill,
     guard: guard,
     loadUser: loadUser,
     renderUser: renderUser,

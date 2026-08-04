@@ -87,7 +87,7 @@
          ============================================================ -->
     <div class="main">
       <header class="topbar">
-        <button type="button" class="side-toggle" id="side-toggle" aria-label="Apri il menu">
+        <button type="button" class="side-toggle" id="side-toggle" aria-label="Nascondi il menu" aria-expanded="true">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/>
           </svg>
@@ -287,10 +287,11 @@
       }
 
       function statCard(label, value, color) {
+        // Allineato alla dashboard: numero sopra, label sotto.
         return (
           '<div class="stat">' +
-            '<span class="stat-label">' + esc(label) + "</span>" +
             '<span class="stat-value" style="' + (color ? "color:" + color : "") + '">' + esc(value) + "</span>" +
+            '<span class="stat-label">' + esc(label) + "</span>" +
           "</div>"
         );
       }
