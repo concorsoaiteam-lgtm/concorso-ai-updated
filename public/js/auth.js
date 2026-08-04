@@ -79,7 +79,7 @@
   // in stato busy senza feedback (review fix).
   function guardSupabase() {
     if (supabaseClient) return true;
-    showAuthError("Servizio non raggiungibile. Controlla la connessione e riprova.");
+    showAuthError("Non riusciamo a raggiungere il server. Controlla la connessione e riprova.");
     return false;
   }
 
@@ -148,23 +148,23 @@
 
     if (c.indexOf("invalid_credentials") !== -1 ||
         msg.indexOf("invalid login credentials") !== -1) {
-      return "Email o password non corretti. Riprova, o recupera la password.";
+      return "Email o password non giusti. Riprova, oppure recupera la password.";
     }
     if (c.indexOf("email_not_confirmed") !== -1 ||
         msg.indexOf("email not confirmed") !== -1) {
-      return "Conferma prima la tua email: trovi il link nella casella (o nello spam).";
+      return "Prima conferma la tua email: trovi il link nella casella (o nello spam).";
     }
     if (c.indexOf("over_email_send_rate_limit") !== -1 ||
         msg.indexOf("email rate limit") !== -1 ||
         msg.indexOf("rate limit") !== -1) {
-      return "Troppe email in poco tempo. Aspetta qualche minuto e riprova.";
+      return "Troppe email in poco tempo. Aspetta un minuto e riprova.";
     }
     if (c.indexOf("over_request_rate_limit") !== -1 ||
         msg.indexOf("too many requests") !== -1) {
-      return "Troppi tentativi. Aspetta un minuto e riprova.";
+      return "Troppi tentativi. Aspetta un momento e riprova.";
     }
     if (c.indexOf("user_banned") !== -1) {
-      return "Questo account è stato sospeso. Scrivici per maggiori informazioni.";
+      return "Questo account è stato sospeso. Scrivici e ti aiutiamo.";
     }
     if (c.indexOf("captcha_failed") !== -1) {
       return "Verifica non superata. Riprova.";
@@ -177,7 +177,7 @@
     if (c.indexOf("otp_expired") !== -1 ||
         msg.indexOf("token has expired") !== -1 ||
         msg.indexOf("expired") !== -1) {
-      return "Il link o il codice è scaduto. Richiedine uno nuovo.";
+      return "Il codice è scaduto. Richiedine uno nuovo.";
     }
     if (c.indexOf("invalid_token") !== -1 ||
         msg.indexOf("invalid token") !== -1) {
@@ -186,7 +186,7 @@
     if (c.indexOf("timeout") !== -1 ||
         msg.indexOf("timeout") !== -1 ||
         msg.indexOf("timed out") !== -1) {
-      return "Il server ha impiegato troppo tempo a rispondere. Riprova tra qualche secondo.";
+      return "Il server ha tardato a rispondere. Riprova tra un attimo.";
     }
     if (c.indexOf("internal server error") !== -1 ||
         c === "500" || c === "502" || c === "503" ||
@@ -197,20 +197,20 @@
     if (c.indexOf("user_already_exists") !== -1 ||
         c.indexOf("already_registered") !== -1 ||
         msg.indexOf("already registered") !== -1) {
-      return "Esiste già un account con questa email. Prova ad accedere.";
+      return "Questa email è già registrata. Se è la tua, accedi.";
     }
     if (c.indexOf("email_provider_disabled") !== -1) {
-      return "L'accesso con email non è disponibile in questo momento. Riprova più tardi.";
+      return "L'accesso con email è in pausa. Riprova più tardi.";
     }
     if (c.indexOf("signup_disabled") !== -1) {
-      return "La registrazione è temporaneamente chiusa. Riprova più tardi.";
+      return "La registrazione è chiusa per ora. Riprova più tardi.";
     }
     if (c.indexOf("failed to fetch") !== -1 ||
         msg.indexOf("failed to fetch") !== -1 ||
         msg.indexOf("network") !== -1) {
       return "Problema di connessione. Riprova tra qualche secondo.";
     }
-    return "Qualcosa non ha funzionato. Riprova tra qualche secondo.";
+    return "Qualcosa è andato storto. Riprova tra qualche secondo.";
   }
 
   /* ------------------------------------------------------------------
@@ -247,9 +247,16 @@
     activePanel = name;
     clearAuthError();
 
-    // Turnstile si attiva solo quando serve: primo ingresso nel pannello
-    // Registrati (script + widget lazy, zero costo al load della pagina).
-    if (name === "register") initTurnstile();
+    // Turnstile si attiva solo quando serve: primo ingresso nei pannelli
+    // Accedi/Registrati (script + widget lazy, zero costo al load).
+    if (name === "register") initTurnstile("register");
+    else if (name === "login") initTurnstile("login");
+
+    // Pannello verifica: caselle pulite, focus sulla prima, countdown resend
+    if (name === "verify") {
+      clearOtp();
+      startOtpResendTimer();
+    }
 
     // Focus: primo campo per i form, titolo per gli stati di conferma
     window.setTimeout(function () {
@@ -258,7 +265,7 @@
       else if (name === "register") target = $("register-email");
       else if (name === "forgot") target = $("forgot-email");
       else if (name === "sent") target = $("sent-title");
-      else if (name === "verify") target = $("verify-code");
+      else if (name === "verify") target = otpBoxes.length ? otpBoxes[0] : null;
       else if (name === "reset") target = $("reset-password");
       if (target) target.focus({ preventScroll: true });
     }, 260);
@@ -284,8 +291,15 @@
     var v = String($(inputId).value || "").trim();
     if (!v) return setFieldError(inputId, errorId, "Inserisci la tua email");
     if (!isValidEmail(v)) {
-      return setFieldError(inputId, errorId, "L'email non è valida. Inserisci un indirizzo reale.");
+      return setFieldError(inputId, errorId, "Questo indirizzo non sembra corretto. Ricontrolla.");
     }
+    return setFieldError(inputId, errorId, "");
+  }
+
+  function validateNameField(inputId, errorId) {
+    var v = String($(inputId).value || "").trim();
+    if (!v) return setFieldError(inputId, errorId, "Inserisci il tuo nome");
+    if (v.length < 2) return setFieldError(inputId, errorId, "Il nome deve avere almeno 2 caratteri");
     return setFieldError(inputId, errorId, "");
   }
 
@@ -410,7 +424,7 @@
       return setFieldError("login-email", "login-email-error", "Inserisci la tua email");
     }
     if (!isValidEmail(email)) {
-      return setFieldError("login-email", "login-email-error", "L'email non è valida. Inserisci un indirizzo reale.");
+      return setFieldError("login-email", "login-email-error", "Questo indirizzo non sembra corretto. Ricontrolla.");
     }
     if (!password) {
       return setFieldError("login-password", "login-password-error", "Inserisci la password");
@@ -420,7 +434,13 @@
     setBusy(btn, true, "Accesso in corso…", "Entra");
     track("auth_submit", { mode: "login" });
 
-    supabaseClient.auth.signInWithPassword({ email: email, password: password })
+    // Turnstile invisibile anche sull'accesso: token incluso solo se
+    // configurato (vedi initTurnstile). Stessa protezione di registrazione.
+    var signInOptions = {};
+    var captchaToken = getCaptchaToken("login");
+    if (captchaToken) signInOptions.captchaToken = captchaToken;
+
+    supabaseClient.auth.signInWithPassword({ email: email, password: password, options: signInOptions })
       .then(function (res) {
         if (res.error) throw res.error;
         track("auth_login_ok", {});
@@ -440,21 +460,28 @@
     var hp = $("hp-field");
     if (hp && String(hp.value || "").trim() !== "") return;
 
+    var name = String($("register-name").value || "").trim();
     var email = String($("register-email").value || "").trim();
     var password = $("register-password").value || "";
     var terms = $("terms-checkbox").checked;
 
+    if (!name) {
+      return setFieldError("register-name", "register-name-error", "Inserisci il tuo nome");
+    }
+    if (name.length < 2) {
+      return setFieldError("register-name", "register-name-error", "Il nome deve avere almeno 2 caratteri");
+    }
     if (!email) {
       return setFieldError("register-email", "register-email-error", "Inserisci la tua email");
     }
     if (!isValidEmail(email)) {
-      return setFieldError("register-email", "register-email-error", "L'email non è valida. Inserisci un indirizzo reale.");
+      return setFieldError("register-email", "register-email-error", "Questo indirizzo non sembra corretto. Ricontrolla.");
     }
     if (password.length < 8) {
       return setFieldError("register-password", "register-password-error", "La password deve avere almeno 8 caratteri");
     }
     if (!terms) {
-      showAuthError("Accetta i termini per creare l'account.");
+      showAuthError("Per continuare, accetta i termini e la privacy.");
       return;
     }
 
@@ -463,14 +490,17 @@
     setBusy(btn, true, "Creazione account…", "Crea account gratis");
     track("auth_submit", { mode: "register" });
 
-    // Solo email + password. Niente nome: verrà chiesto in onboarding.
+    // Solo nome (first name), email e password. Niente cognome, niente
+    // dati superflui: si chiede solo ciò che serve per personalizzare
+    // l'esperienza (full_name arriva al trigger handle_new_user in Supabase).
     // emailRedirectTo: il link di conferma atterra su una pagina del nostro
     // dominio (mai sul default del progetto). captchaToken: Turnstile —
     // incluso solo se configurato (vedi initTurnstile).
     var signupOptions = {
+      data: { full_name: name },
       emailRedirectTo: window.location.origin + "/auth.html?mode=login"
     };
-    var captchaToken = getCaptchaToken();
+    var captchaToken = getCaptchaToken("register");
     if (captchaToken) signupOptions.captchaToken = captchaToken;
 
     supabaseClient.auth.signUp({ email: email, password: password, options: signupOptions })
@@ -484,7 +514,7 @@
         var identities = user && user.identities;
         if (user && Array.isArray(identities) && identities.length === 0) {
           setBusy(btn, false, "", "Crea account gratis");
-          showAuthError("Esiste già un account con questa email. Prova ad accedere.");
+          showAuthError("Questa email è già registrata. Se è la tua, accedi.");
           return;
         }
 
@@ -529,24 +559,24 @@
       return setFieldError("forgot-email", "forgot-email-error", "Inserisci la tua email");
     }
     if (!isValidEmail(email)) {
-      return setFieldError("forgot-email", "forgot-email-error", "L'email non è valida. Inserisci un indirizzo reale.");
+      return setFieldError("forgot-email", "forgot-email-error", "Questo indirizzo non sembra corretto. Ricontrolla.");
     }
 
     lastEmail = email;
     var btn = $("forgot-submit");
-    setBusy(btn, true, "Invio…", "Invia il link");
+    setBusy(btn, true, "Invio…", "Mandami il link");
     track("auth_submit", { mode: "forgot" });
 
     supabaseClient.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + "/auth.html?type=recovery"
     })
       .then(function () {
-        setBusy(btn, false, "", "Invia il link");
+        setBusy(btn, false, "", "Mandami il link");
         // Anti-enumeration: stessa schermata in ogni caso
         showPanel("sent");
       })
       .catch(function (err) {
-        setBusy(btn, false, "", "Invia il link");
+        setBusy(btn, false, "", "Mandami il link");
         // Privacy: mai confermare lo stato dell'email. Stessa schermata.
         showPanel("sent");
         try { console.debug("[ConcorsoAI] reset error:", err && err.message); } catch (x) { /* noop */ }
@@ -575,12 +605,12 @@
     }
 
     var btn = $("reset-submit");
-    setBusy(btn, true, "Aggiornamento…", "Aggiorna password");
+    setBusy(btn, true, "Aggiornamento…", "Salva la nuova password");
     track("auth_submit", { mode: "reset" });
 
     ensureRecoverySession().then(function (ok) {
       if (!ok) {
-        setBusy(btn, false, "", "Aggiorna password");
+        setBusy(btn, false, "", "Salva la nuova password");
         showAuthError("Il link non è più valido. Richiedine uno nuovo.");
         showPanel("forgot");
         return;
@@ -588,34 +618,116 @@
       return supabaseClient.auth.updateUser({ password: password }).then(function (res) {
         if (res.error) throw res.error;
         track("auth_reset_ok", {});
-        setBusy(btn, false, "", "Aggiorna password");
+        setBusy(btn, false, "", "Salva la nuova password");
         showToast("Password aggiornata. Stai entrando…");
         window.setTimeout(function () { window.location.href = DASHBOARD_URL; }, 900);
       })      .catch(function (err) {
-        setBusy(btn, false, "", "Aggiorna password");
+        setBusy(btn, false, "", "Salva la nuova password");
         showAuthError(translateAuthError(err && err.message, errCode(err)));
       });
     });
   }
 
   /* ------------------------------------------------------------------
-     Verifica email OTP (signup) — pannello verify
+     Verifica email OTP (signup) — pannello verify, sei caselle
      ------------------------------------------------------------------ */
+  var otpBoxes = [];
+
+  function otpValue() {
+    return otpBoxes.map(function (b) { return b.value; }).join("");
+  }
+
+  function clearOtp() {
+    otpBoxes.forEach(function (b) { b.value = ""; });
+    clearOtpError();
+    if (otpBoxes.length) otpBoxes[0].focus({ preventScroll: true });
+  }
+
+  function setOtpInvalid() {
+    otpBoxes.forEach(function (b) { b.setAttribute("aria-invalid", "true"); });
+  }
+
+  function clearOtpInvalid() {
+    otpBoxes.forEach(function (b) { b.removeAttribute("aria-invalid"); });
+  }
+
+  // L'input #verify-code non esiste più (sostituito dalle sei caselle): gli
+  // errori del campo OTP si gestiscono con helper dedicati, perché
+  // setFieldError() richiede un input reale e qui fallirebbe in silenzio.
+  function setOtpError(msg) {
+    var err = $("verify-code-error");
+    if (err) {
+      err.textContent = msg;
+      err.classList.add("is-visible");
+    }
+    setOtpInvalid();
+  }
+
+  function clearOtpError() {
+    var err = $("verify-code-error");
+    if (err) {
+      err.textContent = "";
+      err.classList.remove("is-visible");
+    }
+    clearOtpInvalid();
+  }
+
+  // Legatura delle sei caselle: avanzamento automatico, backspace che torna
+  // indietro, frecce, paste dell'intero codice (pattern Stripe/Linear).
+  function bindOtpBoxes() {
+    otpBoxes = Array.prototype.slice.call(document.querySelectorAll(".otp-box"));
+    if (!otpBoxes.length) return;
+    var last = otpBoxes.length - 1;
+
+    otpBoxes.forEach(function (box, i) {
+      box.addEventListener("input", function () {
+        box.value = box.value.replace(/\D/g, "").slice(0, 1);
+        clearOtpError();
+        clearAuthError();
+        if (box.value && i < last) otpBoxes[i + 1].focus();
+      });
+
+      box.addEventListener("keydown", function (e) {
+        if (e.key === "Backspace" && !box.value && i > 0) {
+          e.preventDefault();
+          otpBoxes[i - 1].value = "";
+          otpBoxes[i - 1].focus();
+        }
+        if (e.key === "ArrowLeft" && i > 0) otpBoxes[i - 1].focus();
+        if (e.key === "ArrowRight" && i < last) otpBoxes[i + 1].focus();
+      });
+
+      box.addEventListener("paste", function (e) {
+        e.preventDefault();
+        var digits = ((e.clipboardData && e.clipboardData.getData("text")) || "")
+          .replace(/\D/g, "").slice(0, 6);
+        digits.split("").forEach(function (d, j) {
+          if (i + j <= last) otpBoxes[i + j].value = d;
+        });
+        clearOtpError();
+        clearAuthError();
+        var next = Math.min(i + digits.length, last);
+        otpBoxes[next].focus();
+      });
+    });
+  }
+
   function handleVerifySubmit(e) {
     e.preventDefault();
     if (!guardSupabase()) return;
     if (!pendingEmail) {
-      showAuthError("La sessione di registrazione è scaduta. Riparti dalla registrazione.");
+      showAuthError("La registrazione è scaduta. Riparti da capo.");
       return;
     }
 
-    var code = String($("verify-code").value || "").trim();
+    var code = otpValue();
     if (!/^\d{6}$/.test(code)) {
-      return setFieldError("verify-code", "verify-code-error", "Il codice ha 6 cifre. Controlla l'email.");
+      setOtpError("Il codice ha 6 cifre. Controlla l'email.");
+      return;
     }
 
     var btn = $("verify-submit");
-    setBusy(btn, true, "Verifica…", "Verifica e inizia");
+    setBusy(btn, true, "Verifica…", "Continua");
     track("auth_submit", { mode: "verify_otp" });
 
     supabaseClient.auth.verifyOtp({ email: pendingEmail, token: code, type: "signup" })
@@ -625,14 +737,41 @@
         window.location.href = DASHBOARD_URL;
       })
       .catch(function (err) {
-        setBusy(btn, false, "", "Verifica e inizia");
+        setBusy(btn, false, "", "Continua");
         showAuthError(translateAuthError(err && err.message, errCode(err)));
-        var input = $("verify-code");
-        if (input) {
-          input.value = "";
-          input.focus({ preventScroll: true });
-        }
+        clearOtp();
       });
+  }
+
+  // Countdown di 60s per il resend: allineato al rate limit email di
+  // Supabase (over_email_send_rate_limit). Il bottone si riabilita a zero.
+  var otpResendTimer = null;
+  var OTP_RESEND_SECONDS = 60;
+
+  function startOtpResendTimer() {
+    var btn = $("verify-resend");
+    var timer = $("verify-resend-timer");
+    if (!btn || !timer) return;
+    window.clearInterval(otpResendTimer);
+    btn.disabled = true;
+    var left = OTP_RESEND_SECONDS;
+    function render() {
+      var m = Math.floor(left / 60);
+      var s = left % 60;
+      timer.innerHTML = "Puoi reinviarlo tra <b>" + m + ":" +
+        String(s).padStart(2, "0") + "</b>";
+    }
+    render();
+    otpResendTimer = window.setInterval(function () {
+      left--;
+      if (left <= 0) {
+        window.clearInterval(otpResendTimer);
+        btn.disabled = false;
+        timer.textContent = "Non è arrivato? Reinvia pure.";
+        return;
+      }
+      render();
+    }, 1000);
   }
 
   function handleVerifyResend() {
@@ -651,8 +790,8 @@
         }).catch(function () { /* silenzioso per privacy */ });
       }
     } catch (e) { /* noop */ }
-    showToast("Nuovo codice inviato. Controlla la casella.");
-    window.setTimeout(function () { btn.disabled = false; }, 4000);
+    showToast("Nuovo codice inviato. Controlla la posta.");
+    startOtpResendTimer();
   }
 
   function handleResend() {
@@ -665,7 +804,7 @@
     supabaseClient.auth.resetPasswordForEmail(lastEmail, {
       redirectTo: window.location.origin + "/auth.html?type=recovery"
     }).catch(function () { /* silenzioso per privacy */ });
-    showToast("Nuovo link inviato. Controlla la casella.");
+    showToast("Nuovo link inviato. Controlla la posta.");
     window.setTimeout(function () { btn.disabled = false; }, 4000);
   }
 
@@ -687,55 +826,79 @@
      (Auth → Bot and Abuse Protection). Senza configurazione ritorna "".
      ------------------------------------------------------------------ */
   // Turnstile (Cloudflare) — inattivo finché non configuri
-  // window.__SUPABASE_CAPTCHA = { siteKey }. Lo script e il widget si
-  // caricano SOLO quando il pannello Registrati viene mostrato (zero costo
-  // finché non serve) e si rende dentro #turnstile-slot, visibile solo allora.
-  var turnstileState = "off"; // off | loading | ready | rendered
+  // window.__SUPABASE_CAPTCHA = { siteKey }. Lo script e i widget si
+  // caricano SOLO quando i pannelli Accedi/Registrati vengono mostrati
+  // (zero costo finché non serve). Un widget per pannello: ogni token è
+  // monouso e tracciato per-slot, così il submit legge quello del pannello
+  // visibile (mai quello dell'altro pannello, che è nascosto).
+  var TURNSTILE_SLOTS = {
+    login: "turnstile-slot-login",
+    register: "turnstile-slot"
+  };
+  var turnstileState = "off"; // off | loading | ready
+  var turnstileRendered = {};
+  var pendingTurnstile = [];
 
-  function initTurnstile() {
+  function initTurnstile(panel) {
     try {
       var cfg = window.__SUPABASE_CAPTCHA;
-      if (!cfg || !cfg.siteKey || turnstileState !== "off") return;
-      turnstileState = "loading";
-      function onReady() {
-        turnstileState = "ready";
-        renderTurnstile();
+      if (!cfg || !cfg.siteKey || !TURNSTILE_SLOTS[panel]) return;
+      if (turnstileState === "off") {
+        turnstileState = "loading";
+        pendingTurnstile = [panel];
+        function onReady() {
+          turnstileState = "ready";
+          // Rende TUTTI i pannelli visitati durante il load: se l'utente è
+          // passato ad Accedi prima che lo script finisse, lo slot login
+          // non deve restare vuoto.
+          var pending = pendingTurnstile.slice();
+          pendingTurnstile = [];
+          pending.forEach(function (p) { renderTurnstile(p); });
+        }
+        if (typeof window.turnstile === "object") { onReady(); return; }
+        var s = document.createElement("script");
+        s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+        s.async = true;
+        s.onload = onReady;
+        document.head.appendChild(s);
+      } else if (turnstileState === "loading") {
+        if (pendingTurnstile.indexOf(panel) === -1) pendingTurnstile.push(panel);
+      } else if (turnstileState === "ready") {
+        renderTurnstile(panel);
       }
-      if (typeof window.turnstile === "object") { onReady(); return; }
-      var s = document.createElement("script");
-      s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-      s.async = true;
-      s.onload = onReady;
-      document.head.appendChild(s);
     } catch (e) { /* noop */ }
   }
 
-  function renderTurnstile() {
+  function renderTurnstile(panel) {
     try {
       var cfg = window.__SUPABASE_CAPTCHA;
       if (!cfg || !cfg.siteKey || turnstileState !== "ready") return;
-      var slot = $("turnstile-slot");
-      if (!slot || slot.querySelector("iframe")) return;
+      var slot = $(TURNSTILE_SLOTS[panel]);
+      if (!slot || slot.querySelector("iframe") || turnstileRendered[panel]) return;
       window.turnstile.render(slot, {
         sitekey: cfg.siteKey,
         theme: "light",
-        callback: function (token) { window.__TURNSTILE_TOKEN = token; }
+        callback: function (token) { window["__TURNSTILE_TOKEN_" + panel] = token; }
       });
       slot.classList.add("is-active");
-      turnstileState = "rendered";
+      turnstileRendered[panel] = true;
     } catch (e) { /* noop */ }
   }
 
-  function getCaptchaToken() {
+  function getCaptchaToken(panel) {
     try {
       var cfg = window.__SUPABASE_CAPTCHA;
       if (!cfg || !cfg.siteKey) return "";
       // I token Turnstile sono monouso: li consumiamo subito, così un retry
       // dopo un errore non riusa un token già validato (captcha_failed).
-      var t = window.__TURNSTILE_TOKEN || "";
-      window.__TURNSTILE_TOKEN = "";
+      var key = panel === "login" ? "login" : "register";
+      var t = window["__TURNSTILE_TOKEN_" + key] || "";
+      window["__TURNSTILE_TOKEN_" + key] = "";
       if (t) return t;
-      if (typeof window.turnstile === "object") return window.turnstile.getResponse() || "";
+      if (typeof window.turnstile === "object") {
+        var slot = $(TURNSTILE_SLOTS[key]);
+        if (slot) return window.turnstile.getResponse(slot) || "";
+      }
       return "";
     } catch (e) { return ""; }
   }
@@ -781,6 +944,49 @@
       confidence: "Confidence 91%"
     }
   ];
+
+  // Orologio reale del dispositivo (HH:MM). Aggiornato ogni 15s: basta,
+  // e non disturba. Nessuna animazione: è informazione, non decorazione.
+  function startPreviewClock() {
+    var el = $("preview-time");
+    if (!el) return;
+    function tick() {
+      var d = new Date();
+      el.textContent =
+        String(d.getHours()).padStart(2, "0") + ":" +
+        String(d.getMinutes()).padStart(2, "0");
+    }
+    tick();
+    window.setInterval(tick, 15000);
+  }
+
+  // Progress "Preparazione bando": ciclo continuo 0→100 (easeOutCubic,
+  // ~22s), poi riparte. La percentuale e la barra si muovono insieme.
+  // Sotto reduced-motion resta fermo al valore statico dell'HTML (74%).
+  function startPreviewProgress() {
+    var pctEl = $("preview-progress-pct");
+    var fillEl = document.querySelector(".preview-progress-fill");
+    // La preview è display:none sotto 920px: niente rAF su elementi nascosti.
+    var wide = window.matchMedia && window.matchMedia("(min-width: 921px)").matches;
+    if (!pctEl || REDUCED_MOTION || !wide) return;
+    var duration = 22000;
+    var start = null;
+    function frame(ts) {
+      if (start === null) start = ts;
+      var t = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - t, 3);
+      var v = Math.round(eased * 100);
+      pctEl.textContent = v + "%";
+      if (fillEl) fillEl.style.width = v + "%";
+      if (t < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        start = null;
+        requestAnimationFrame(frame);
+      }
+    }
+    requestAnimationFrame(frame);
+  }
 
   function startPreviewLoop() {
     var frame = $("auth-preview");
@@ -828,6 +1034,17 @@
     bindStrength("register-password", "register-strength-fill", "register-strength-label", "register-password-error");
     bindStrength("reset-password", "reset-strength-fill", "reset-strength-label", "reset-password-error");
     bindPasswordToggles();
+    bindOtpBoxes();
+
+    // Validazione live del nome (solo first name): blur, poi live
+    $("register-name").addEventListener("blur", function () {
+      touched["register-name"] = true;
+      validateNameField("register-name", "register-name-error");
+    });
+    $("register-name").addEventListener("input", function () {
+      clearAuthError();
+      if (touched["register-name"]) validateNameField("register-name", "register-name-error");
+    });
 
     // Tabs + switch
     $("tab-login").addEventListener("click", function () { setMode("login"); });
@@ -869,14 +1086,6 @@
       $("register-submit").disabled = !$("terms-checkbox").checked;
     });
 
-    // Input OTP: solo cifre, max 6, errore che sparisce mentre digita
-    var otpInput = $("verify-code");
-    otpInput.addEventListener("input", function () {
-      otpInput.value = otpInput.value.replace(/\D/g, "").slice(0, 6);
-      setFieldError("verify-code", "verify-code-error", "");
-      clearAuthError();
-    });
-
     // Clear globale errori su input
     document.addEventListener("input", function (e) {
       if (e.target && e.target.classList && e.target.classList.contains("field-input")) {
@@ -905,7 +1114,9 @@
       guardAuthenticated();
     }
 
-    // Preview viva
+    // Preview viva: orologio reale, progress 0→100, ciclo domande
+    startPreviewClock();
+    startPreviewProgress();
     startPreviewLoop();
   }
 

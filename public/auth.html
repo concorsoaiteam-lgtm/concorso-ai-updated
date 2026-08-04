@@ -46,8 +46,8 @@
              ========================================================== -->
         <section class="auth-panel is-enter" id="panel-login" role="tabpanel" aria-labelledby="tab-login" tabindex="-1">
           <p class="auth-eyebrow">Accesso</p>
-          <h1 class="auth-title">Riprendi le tue simulazioni</h1>
-          <p class="auth-sub">Le tue sessioni ti aspettano. Accedi e continua da dove avevi lasciato.</p>
+          <h1 class="auth-title">Bentornato</h1>
+          <p class="auth-sub">Le tue simulazioni sono ancora lì. Accedi e riparti da dove avevi lasciato.</p>
 
           <button type="button" class="btn-google" id="google-btn" data-label="Continua con Google">
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
@@ -70,7 +70,7 @@
               <label class="field-label" for="login-email">Email</label>
               <input class="field-input" id="login-email" name="email" type="email"
                      autocomplete="email" inputmode="email" autocapitalize="off"
-                     autocorrect="off" spellcheck="false" placeholder="nome@email.it" required />
+                     autocorrect="off" spellcheck="false" placeholder="nome@esempio.it" required />
               <p class="field-error" id="login-email-error"></p>
             </div>
 
@@ -91,6 +91,11 @@
                 <button type="button" class="field-link" id="forgot-link">Password dimenticata?</button>
               </div>
             </div>
+
+            <!-- Turnstile (Cloudflare): slot inattivo finché non configuri
+                 window.__SUPABASE_CAPTCHA = { siteKey }. Managed mode:
+                 appare solo quando Cloudflare lo ritiene necessario. -->
+            <div class="turnstile-slot" id="turnstile-slot-login"></div>
 
             <button type="submit" class="btn-primary btn-block" id="login-submit">
               <span class="btn-label">Entra</span>
@@ -113,7 +118,7 @@
         <section class="auth-panel" id="panel-register" role="tabpanel" aria-labelledby="tab-register" tabindex="-1" hidden>
           <p class="auth-eyebrow">Registrazione</p>
           <h1 class="auth-title">Crea il tuo account</h1>
-          <p class="auth-sub">Tre simulazioni gratis con il tuo bando. Nessuna carta richiesta.</p>
+          <p class="auth-sub">Tre simulazioni col tuo bando, gratis. Nessuna carta richiesta.</p>
 
           <button type="button" class="btn-google" id="google-btn-2" data-label="Registrati con Google">
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
@@ -124,19 +129,27 @@
             </svg>
             <span>Registrati con Google</span>
           </button>
-          <p class="auth-oauth-note">Usiamo Google solo per l'accesso. Non pubblichiamo nulla.</p>
+          <p class="auth-oauth-note">Usiamo Google solo per farti accedere. Non pubblichiamo nulla.</p>
 
-          <div class="auth-divider"><span>oppure con email</span></div>
+          <div class="auth-divider"><span>oppure con la tua email</span></div>
 
           <form id="form-register" class="form" novalidate>
             <!-- Honeypot anti-bot: nascosto a utenti e screen reader. -->
             <input type="text" name="website" id="hp-field" class="hp-field"
                    tabindex="-1" autocomplete="off" aria-hidden="true" />
             <div class="field">
+              <label class="field-label" for="register-name">Nome</label>
+              <input class="field-input" id="register-name" name="name" type="text"
+                     autocomplete="given-name" autocapitalize="words"
+                     autocorrect="off" spellcheck="false" placeholder="Il tuo nome" maxlength="40" required />
+              <p class="field-error" id="register-name-error"></p>
+            </div>
+
+            <div class="field">
               <label class="field-label" for="register-email">Email</label>
               <input class="field-input" id="register-email" name="email" type="email"
                      autocomplete="email" inputmode="email" autocapitalize="off"
-                     autocorrect="off" spellcheck="false" placeholder="nome@email.it" required />
+                     autocorrect="off" spellcheck="false" placeholder="nome@esempio.it" required />
               <p class="field-error" id="register-email-error"></p>
             </div>
 
@@ -144,7 +157,7 @@
               <label class="field-label" for="register-password">Password</label>
               <div class="field-input-wrap">
                 <input class="field-input" id="register-password" name="password" type="password"
-                       autocomplete="new-password" placeholder="Minimo 8 caratteri" required />
+                       autocomplete="new-password" placeholder="Almeno 8 caratteri" required />
                 <button type="button" class="pw-toggle" data-target="register-password" aria-label="Mostra password" aria-pressed="false">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
@@ -186,8 +199,8 @@
              ========================================================== -->
         <section class="auth-panel" id="panel-forgot" role="tabpanel" tabindex="-1" hidden>
           <p class="auth-eyebrow">Recupero accesso</p>
-          <h1 class="auth-title">Recupera la password</h1>
-          <p class="auth-sub">Ti mandiamo un link per impostarne una nuova. Niente codici, niente attese.</p>
+          <h1 class="auth-title">Tranquillo, la ritrovi</h1>
+          <p class="auth-sub">Ti mandiamo un'email con un link per crearne una nuova. Ci mette un paio di minuti ad arrivare.</p>
 
           <form id="form-forgot" class="form" novalidate>
             <!-- Honeypot anti-bot: il recovery è un vettore di email-bombing. -->
@@ -196,12 +209,12 @@
             <div class="field">
               <label class="field-label" for="forgot-email">Email</label>
               <input class="field-input" id="forgot-email" name="email" type="email"
-                     autocomplete="email" inputmode="email" placeholder="nome@email.it" required />
+                     autocomplete="email" inputmode="email" placeholder="nome@esempio.it" required />
               <p class="field-error" id="forgot-email-error"></p>
             </div>
 
             <button type="submit" class="btn-primary btn-block" id="forgot-submit">
-              <span class="btn-label">Invia il link</span>
+              <span class="btn-label">Mandami il link</span>
               <span class="btn-busy-bar" aria-hidden="true"></span>
             </button>
             <p class="form-error" id="form-error-forgot" role="alert"></p>
@@ -222,17 +235,16 @@
               <path stroke-linecap="round" stroke-linejoin="round" pathLength="1" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           </div>
-          <h1 class="auth-title" id="sent-title" tabindex="-1">Email inviata</h1>
+          <h1 class="auth-title" id="sent-title" tabindex="-1">Controlla la posta</h1>
           <p class="auth-success-text" id="sent-text">
-            Se l'indirizzo è registrato, riceverai un'email entro pochi minuti.
+            Se l'indirizzo è registrato, l'email arriva entro pochi minuti.
           </p>
           <ul class="auth-checklist">
-            <li>Controlla la cartella <b>Spam</b></li>
-            <li>Controlla la cartella <b>Promozioni</b></li>
-            <li>Attendi qualche minuto: a volte le email arrivano in ritardo</li>
-            <li>Verifica di aver scritto bene l'indirizzo</li>
+            <li>Dai un'occhiata anche a <b>Spam</b> e <b>Promozioni</b></li>
+            <li>A volte le email ci mettono qualche minuto in più</li>
+            <li>Controlla di aver scritto bene l'indirizzo</li>
           </ul>
-          <button type="button" class="btn-ghost" id="resend-btn">Invia di nuovo</button>
+          <button type="button" class="btn-ghost" id="resend-btn">Non è arrivata? Invia di nuovo</button>
           <p class="auth-switch">
             <button type="button" data-goto="login">← Torna all'accesso</button>
           </p>
@@ -245,30 +257,45 @@
              ========================================================== -->
         <section class="auth-panel" id="panel-verify" tabindex="-1" hidden>
           <p class="auth-eyebrow">Verifica email</p>
-          <h1 class="auth-title">Controlla la tua email</h1>
-          <p class="auth-sub">Ti abbiamo inviato un codice a
+          <h1 class="auth-title">Quasi fatto</h1>
+          <p class="auth-sub">Ti abbiamo mandato un codice a
             <span class="auth-email-chip" id="verify-email"></span>.
-            Aprila e inserisci il codice qui sotto.
+            Controlla la posta — anche lo spam.
           </p>
 
           <form id="form-verify" class="form" novalidate>
             <div class="field">
-              <label class="field-label" for="verify-code">Codice di verifica</label>
-              <input class="field-input otp-input" id="verify-code" name="code" type="text"
-                     inputmode="numeric" autocomplete="one-time-code" maxlength="6"
-                     pattern="[0-9]{6}" placeholder="••••••" required />
-              <p class="field-hint" id="verify-hint">6 cifre. Controlla anche lo spam.</p>
-              <p class="field-error" id="verify-code-error"></p>
+              <span class="field-label" id="otp-label">Codice di verifica</span>
+              <div class="otp-group" id="otp-group" role="group" aria-labelledby="otp-label">
+                <input class="otp-box" id="otp-0" type="text" inputmode="numeric"
+                       autocomplete="one-time-code" maxlength="1" pattern="[0-9]"
+                       aria-label="Prima cifra" aria-describedby="verify-hint" />
+                <input class="otp-box" id="otp-1" type="text" inputmode="numeric"
+                       maxlength="1" pattern="[0-9]" aria-label="Seconda cifra" />
+                <input class="otp-box" id="otp-2" type="text" inputmode="numeric"
+                       maxlength="1" pattern="[0-9]" aria-label="Terza cifra" />
+                <input class="otp-box" id="otp-3" type="text" inputmode="numeric"
+                       maxlength="1" pattern="[0-9]" aria-label="Quarta cifra" />
+                <input class="otp-box" id="otp-4" type="text" inputmode="numeric"
+                       maxlength="1" pattern="[0-9]" aria-label="Quinta cifra" />
+                <input class="otp-box" id="otp-5" type="text" inputmode="numeric"
+                       maxlength="1" pattern="[0-9]" aria-label="Sesta cifra" />
+              </div>
+              <p class="field-hint" id="verify-hint">6 cifre. Se non trovi il messaggio, guarda nello spam.</p>
+              <p class="field-error" id="verify-code-error" role="alert"></p>
             </div>
 
             <button type="submit" class="btn-primary btn-block" id="verify-submit">
-              <span class="btn-label">Verifica e inizia</span>
+              <span class="btn-label">Continua</span>
               <span class="btn-busy-bar" aria-hidden="true"></span>
             </button>
             <p class="form-error" id="form-error-verify" role="alert"></p>
           </form>
 
-          <button type="button" class="btn-ghost" id="verify-resend">Non è arrivato? Invia di nuovo</button>
+          <div class="verify-resend">
+            <button type="button" class="btn-ghost" id="verify-resend" disabled>Reinvia il codice</button>
+            <p class="verify-resend-timer" id="verify-resend-timer" aria-live="polite">Puoi reinviarlo tra <b>0:60</b></p>
+          </div>
           <p class="auth-switch">
             <button type="button" data-goto="register">← Usa un'altra email</button>
           </p>
@@ -280,14 +307,14 @@
         <section class="auth-panel" id="panel-reset" role="tabpanel" tabindex="-1" hidden>
           <p class="auth-eyebrow">Nuova password</p>
           <h1 class="auth-title">Imposta la nuova password</h1>
-          <p class="auth-sub">Scegli una password di almeno 8 caratteri. La userai al prossimo accesso.</p>
+          <p class="auth-sub">Almeno 8 caratteri. La userai al prossimo accesso.</p>
 
           <form id="form-reset" class="form" novalidate>
             <div class="field">
               <label class="field-label" for="reset-password">Nuova password</label>
               <div class="field-input-wrap">
                 <input class="field-input" id="reset-password" name="password" type="password"
-                       autocomplete="new-password" placeholder="Minimo 8 caratteri" required />
+                       autocomplete="new-password" placeholder="Almeno 8 caratteri" required />
                 <button type="button" class="pw-toggle" data-target="reset-password" aria-label="Mostra password" aria-pressed="false">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
@@ -303,7 +330,7 @@
             </div>
 
             <button type="submit" class="btn-primary btn-block" id="reset-submit">
-              <span class="btn-label">Aggiorna password</span>
+              <span class="btn-label">Salva la nuova password</span>
               <span class="btn-busy-bar" aria-hidden="true"></span>
             </button>
             <p class="form-error" id="form-error-reset" role="alert"></p>
@@ -320,6 +347,7 @@
           <span class="preview-dots"><i></i><i></i><i class="is-ink"></i></span>
           <span class="preview-tab">Simulazione orale</span>
           <span class="preview-live"><span class="preview-live-dot"></span>Live</span>
+          <span class="preview-time" id="preview-time" aria-hidden="true"></span>
         </div>
 
         <div class="preview-progress">

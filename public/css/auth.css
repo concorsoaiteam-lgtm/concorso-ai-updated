@@ -22,6 +22,8 @@
   --error:      #A4472E;
   --error-bg:   #F4E8E1;
   --ok:         #3F6B4F;
+  --ok-bright:  #1E9E5C; /* verde vivo SOLO per il feedback positivo forte
+                            (password ottima): il rinforzo deve essere immediato. */
   --warn:       #8A6D1F;
 
   /* Font */
@@ -455,7 +457,7 @@ body {
 
 .pw-strength-fill.is-weak   { background: var(--error); }
 .pw-strength-fill.is-medium { background: var(--warn); }
-.pw-strength-fill.is-strong { background: var(--ok); }
+.pw-strength-fill.is-strong { background: var(--ok-bright); }
 
 .pw-strength-label {
   margin: 6px 0 0;
@@ -695,16 +697,64 @@ body {
   word-break: break-all;
 }
 
-/* Input OTP a 6 cifre — tipografia dedicata, niente spinner numerici */
-.otp-input {
-  font-size: 20px;
-  letter-spacing: 10px;
+/* Pannello verifica — resend con countdown (allineato al rate limit email
+   di Supabase: 60s). Il bottone si abilita quando il timer arriva a zero. */
+.verify-resend {
+  margin-top: var(--s-4);
   text-align: center;
-  font-variant-numeric: tabular-nums;
-  padding: 0 12px;
 }
 
-.otp-input::placeholder { letter-spacing: 10px; }
+.verify-resend .btn-ghost {
+  margin-top: 0;
+}
+
+.verify-resend-timer {
+  margin: var(--s-2) 0 0;
+  font-size: 12px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.verify-resend-timer b { font-weight: 500; color: var(--ink-soft); }
+
+/* Input OTP — sei caselle singole (pattern Stripe/Linear): una cifra per
+   casella, avanzamento automatico, paste supportato da JS. */
+.otp-group {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.otp-box {
+  flex: 1;
+  min-width: 0;
+  height: 52px;
+  background: var(--bg);
+  border: 1px solid var(--line-2);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 500;
+  text-align: center;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  caret-color: var(--ink);
+  transition: border-color var(--t-base) ease,
+              box-shadow var(--t-base) ease;
+}
+
+.otp-box:hover { border-color: var(--ink-faint); }
+
+.otp-box:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(15, 17, 21, 0.06);
+}
+
+.otp-box[aria-invalid="true"] { border-color: var(--error); }
+
+.otp-box[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px rgba(164, 71, 46, 0.10);
+}
 
 /* =========================================================================
    Turnstile (Cloudflare) — slot inattivo finché non configurato.
@@ -804,6 +854,16 @@ body {
   50%      { opacity: 0.45; transform: scale(0.92); }
 }
 
+/* Orologio reale del dispositivo (aggiornato da JS) */
+.preview-time {
+  margin-left: var(--s-3);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
 /* Progress preparazione */
 .preview-progress {
   padding: var(--s-4) var(--s-5) var(--s-3);
@@ -844,12 +904,9 @@ body {
   left: 0; top: 0; bottom: 0;
   width: 74%;
   background: var(--ink);
-  animation: preview-breathe 6s ease-in-out infinite;
-}
-
-@keyframes preview-breathe {
-  0%, 100% { width: 74%; }
-  50%      { width: 77%; }
+  /* La larghezza è guidata da JS: ciclo continuo 0→100 (startPreviewProgress).
+     Nessuna animazione CSS qui, per non combattere con il valore JS. */
+  transition: width 120ms linear;
 }
 
 /* Domanda corrente */
@@ -1073,7 +1130,6 @@ button:focus-visible,
   .auth-panel.is-enter { animation: none; }
   .preview-live-dot { animation: none; }
   .preview-caret { animation: none; opacity: 0.85; }
-  .preview-progress-fill { animation: none; }
   .preview-skeleton-bar::after { animation: none; opacity: 0; }
   .btn-primary.is-busy .btn-busy-bar { animation: none; opacity: 0; }
 }
