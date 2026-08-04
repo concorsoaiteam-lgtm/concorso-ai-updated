@@ -808,17 +808,15 @@
     window.setTimeout(function () { btn.disabled = false; }, 4000);
   }
 
-  // OAuth condiviso (Google e Apple): stesso flusso ufficiale Supabase,
-  // stesso redirectTo, stesso comportamento. Il bottone viene disabilitato
-  // durante la richiesta e si riabilita solo se la chiamata fallisce
-  // (il successo fa redirect al provider). Google e Apple devono sembrare
-  // due opzioni native dello stesso prodotto.
-  function handleOAuth(provider, btn) {
+  // OAuth Google: flusso ufficiale Supabase, stesso redirectTo di sempre.
+  // Il bottone viene disabilitato durante la richiesta e si riabilita solo
+  // se la chiamata fallisce (il successo fa redirect al provider).
+  function handleGoogle(btn) {
     if (!guardSupabase()) return;
     if (btn) btn.disabled = true;
-    track("auth_submit", { mode: provider });
+    track("auth_submit", { mode: "google" });
     supabaseClient.auth.signInWithOAuth({
-      provider: provider,
+      provider: "google",
       options: { redirectTo: window.location.origin + DASHBOARD_URL }
     }).catch(function (err) {
       if (btn) btn.disabled = false;
@@ -1085,10 +1083,8 @@
     $("resend-btn").addEventListener("click", handleResend);
     $("form-verify").addEventListener("submit", handleVerifySubmit);
     $("verify-resend").addEventListener("click", handleVerifyResend);
-    $("google-btn").addEventListener("click", function () { handleOAuth("google", this); });
-    $("google-btn-2").addEventListener("click", function () { handleOAuth("google", this); });
-    $("apple-btn").addEventListener("click", function () { handleOAuth("apple", this); });
-    $("apple-btn-2").addEventListener("click", function () { handleOAuth("apple", this); });
+    $("google-btn").addEventListener("click", function () { handleGoogle(this); });
+    $("google-btn-2").addEventListener("click", function () { handleGoogle(this); });
 
     // Gate terms → submit
     $("terms-checkbox").addEventListener("change", function () {
