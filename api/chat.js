@@ -34,6 +34,47 @@ function resolveSupabaseUrl() {
 
 const SUPABASE_URL = resolveSupabaseUrl();
 const SUPABASE_ANON_KEY = resolveAnonKey();
+
+// --- Verifica token resiliente -------------------------------------------
+// Le env vars di Vercel possono puntare a un progetto Supabase vecchio
+// (stale) mentre il client usa il progetto corrente. In quel caso
+// auth.getUser() rifiuta il JWT → 401 anche con utente loggato.
+// Strategia: prova prima la config da env; se fallisce, deriva il progetto
+// dal JWT stesso (il payload contiene il `ref`) e riprova con la anon key
+// del progetto corrente. Così l'auth funziona in entrambi i casi e le env
+// restano la fonte primaria quando sono corrette.
+function projectRefOf(jwt) {
+  try {
+    var parts = String(jwt || '').split('.');
+    if (parts.length !== 3) return null;
+    var payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
+    return (payload && typeof payload.ref === 'string' && payload.ref) ? payload.ref : null;
+  } catch (_) { return null; }
+}
+
+async function verifySupabaseToken(jwt) {
+  var candidates = [];
+  candidates.push({ url: SUPABASE_URL, key: SUPABASE_ANON_KEY, source: 'env' });
+  var ref = projectRefOf(jwt);
+  if (ref && /^[a-z0-9]{16,32}$/.test(ref)) {
+    var urlFromRef = 'https://' + ref + '.supabase.co';
+    var keyForRef = (SUPABASE_URL === urlFromRef) ? SUPABASE_ANON_KEY : HARDCODED_ANON_CHAT;
+    var already = candidates.some(function (c) { return c.url === urlFromRef && c.key === keyForRef; });
+    if (!already) candidates.push({ url: urlFromRef, key: keyForRef, source: 'jwt-ref' });
+  }
+  var lastError = null;
+  for (var i = 0; i < candidates.length; i++) {
+    try {
+      var sb = createClient(candidates[i].url, candidates[i].key, { auth: { persistSession: false } });
+      var res = await sb.auth.getUser(jwt);
+      if (res && res.data && res.data.user && !res.error) {
+        return { user: res.data.user, source: candidates[i].source };
+      }
+      lastError = (res && res.error) || new Error('no user');
+    } catch (e) { lastError = e; }
+  }
+  return { error: lastError };
+}
 // Provider AI configurabile via env var (default: OpenRouter OpenAI-compatible API)
 const AI_API_URL = process.env.AI_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
 const AI_MODEL = process.env.AI_MODEL || 'google/gemini-2.5-flash';
@@ -264,15 +305,12 @@ async function handleRequest(req, res) {
 
   let supabaseUser = null;
   try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: false }
-    });
-    const { data, error } = await supabase.auth.getUser(userJwt);
-    if (error || !data || !data.user) {
+    const authRes = await verifySupabaseToken(userJwt);
+    if (authRes.error || !authRes.user) {
       logMetric('auth_fail', { reason: 'supabase_rejected' });
       return res.status(401).json({ error: 'Token non valido o scaduto' });
     }
-    supabaseUser = data.user;
+    supabaseUser = authRes.user;
   } catch (authErr) {
     const errType = (authErr && (authErr.name || authErr.code)) || 'unknown';
     logMetric('auth_fail', { reason: 'supabase_throw', errType: errType });

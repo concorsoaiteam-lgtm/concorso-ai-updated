@@ -33,6 +33,40 @@ function resolveSupabaseUrl() {
 const SUPABASE_URL = resolveSupabaseUrl();
 const SUPABASE_ANON_KEY = resolveAnonKey();
 
+// --- Verifica token resiliente (stesso pattern di api/chat.js) -----------
+// Le env vars di Vercel possono puntare a un progetto Supabase vecchio;
+// in quel caso auth.getUser() rifiuta il JWT → 401 anche da loggati.
+// Prova prima la config da env; se fallisce deriva il progetto dal ref
+// contenuto nel JWT e riprova con l'anon key del progetto corrente.
+function projectRefOf(jwt) {
+  try {
+    var parts = String(jwt || '').split('.');
+    if (parts.length !== 3) return null;
+    var payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
+    return (payload && typeof payload.ref === 'string' && payload.ref) ? payload.ref : null;
+  } catch (_) { return null; }
+}
+
+async function verifySupabaseToken(jwt) {
+  var candidates = [
+    { url: SUPABASE_URL, key: SUPABASE_ANON_KEY },
+    { url: 'https://' + projectRefOf(jwt) + '.supabase.co', key: HARDCODED_ANON }
+  ];
+  if (!projectRefOf(jwt)) candidates.pop();
+  var lastError = null;
+  for (var i = 0; i < candidates.length; i++) {
+    try {
+      var sb = createClient(candidates[i].url, candidates[i].key, { auth: { persistSession: false } });
+      var res = await sb.auth.getUser(jwt);
+      if (res && res.data && res.data.user && !res.error) {
+        return { user: res.data.user };
+      }
+      lastError = (res && res.error) || new Error('no user');
+    } catch (e) { lastError = e; }
+  }
+  return { error: lastError };
+}
+
 const FREE_PLAN_QUOTA_MONTHLY = 5;
 
 const CRITICAL_PROJECT_REF = SUPABASE_URL
@@ -81,14 +115,11 @@ module.exports = async function handler(req, res) {
 
     let supabaseUser = null;
     try {
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: { persistSession: false }
-      });
-      const { data, error } = await supabase.auth.getUser(jwt);
-      if (error || !data || !data.user) {
+      const authRes = await verifySupabaseToken(jwt);
+      if (authRes.error || !authRes.user) {
         return res.status(401).json({ error: 'Token non valido' });
       }
-      supabaseUser = data.user;
+      supabaseUser = authRes.user;
     } catch (e) {
       const msg = String(e && e.message || e);
       console.error('[quota] auth error:', msg);
