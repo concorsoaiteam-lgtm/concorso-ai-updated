@@ -1066,6 +1066,19 @@ a { color: inherit; }
 .feedback-error { display: none; }
 .feedback-error.is-on { display: block; animation: view-in 200ms var(--ease); }
 
+.feedback-error-text {
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+
+.feedback-error-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 /* =========================================================================
    PAUSA — overlay leggero
    ========================================================================= */
@@ -1440,7 +1453,7 @@ a { color: inherit; }
   .sess-progress-label { order: 1; }
   .sess-timer { order: 2; margin-left: auto; }
   .sess-pause-btn { order: 3; width: 100%; justify-content: flex-start; margin-left: 0; padding: 8px 0; }
-  .sess-body { padding: 22px 16px 140px; }
+  .sess-body { padding: 22px 16px calc(140px + env(safe-area-inset-bottom)); }
   .question-text { font-size: 15.5px; }
   .answer-textarea { min-height: 108px; }
 

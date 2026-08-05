@@ -1,62 +1,35 @@
 // ============================================================
-// ConcorsoAI — Proxy serverless verso BluesMinds (v4)
+// ConcorsoAI — Proxy serverless verso il provider AI (OpenAI-compatible)
 // ============================================================
-// Cambiamenti rispetto a v3:
-//   1) SUPABASE_ANON_KEY: fallback hardcoded con chiave reale.
-//      Env var resta prioritaria (rotazione 1-click da Vercel).
-// ============================================================
-// Cambiamenti rispetto a v2:
-//   1) Rispetta la preferenza di stream del client:
-//      - stream: true (o non specificato) -> SSE forward
-//      - stream: false                    -> bufferizza upstream SSE
-//                                            e ritorna JSON OpenAI-compat
-//   [Nota: la SUPABASE_ANON_KEY fail-closed di v2 è stata sostituita
-//    dal fallback hardcoded introdotto in v4 — vedi sopra.]
-//   2) Rate limit Map: sweep periodica ogni 60s rimuove record scaduti
-//      per evitare memory leak su istanze warm.
-//   3) Auth check + body validation identici a v2 (mantiene sicurezza).
+// Configurazione interamente via env vars (vedi .env.example):
+//   SUPABASE_URL / SUPABASE_ANON_KEY  — progetto Supabase (auth utenti)
+//   AI_API_URL / AI_MODEL / AI_API_KEY — provider AI (default OpenRouter)
+//   AI_REFERRER / AI_TITLE            — metadati OpenRouter
+// Comportamento:
+//   - stream: true (o non specificato) -> SSE forward
+//   - stream: false                    -> bufferizza upstream SSE
+//                                         e ritorna JSON OpenAI-compat
+//   - Rate limit per IP + per utente, con sweep periodica.
 // ============================================================
 
 const { createClient } = require('@supabase/supabase-js');
 // Safety: ws non piu' passato al client, ma lo teniamo per eventuali
 // dipendenze transitive di @supabase/realtime-js in Node.js
 try { require('ws'); } catch (_) { /* opzionale */ }
-const crypto = require('crypto'); // TURNO 33: hash per log metric (no PII)
+const crypto = require('crypto'); // hash per log metric (no PII)
 
-// --- Chiave hardcoded di fallback (progetto xhifnparcouxsypkjcmn) ---
+// --- Chiave pubblica (anon) di fallback se le env vars mancano.
+// NB: la anon key è pubblica per design (RLS protegge i dati); in
+// produzione le env vars SUPABASE_URL / SUPABASE_ANON_KEY hanno
+// sempre priorità e si ruotano da Vercel senza toccare il codice.
 var HARDCODED_ANON_CHAT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
 var HARDCODED_URL_CHAT = 'https://xhifnparcouxsypkjcmn.supabase.co';
-// --- Fallback AI key (se env var mancante/stale su Vercel) ---
-var HARDCODED_AI_KEY = process.env.AI_API_KEY;
 
-function extractProjectRef(jwt) {
-  try {
-    var p = jwt.split('.');
-    if (p.length !== 3) return 'INVALID_JWT';
-    var payload = JSON.parse(Buffer.from(p[1], 'base64url').toString());
-    return payload.ref || 'NO_REF';
-  } catch (_) { return 'PARSE_ERROR'; }
-}
-
-// [TEST TEMPORANEO] Usa HARDCODED anziché ENV_VAR per bypassare env var stale di Vercel.
-// Se il test funziona, il problema è confermato: Vercel ha env var vecchie.
-// FIX DEFINITIVO: entrare in Vercel Dashboard → Project Settings → Environment Variables
-// e aggiornare/rimuovere le variabili SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_KEY.
 function resolveAnonKey() {
-  // COMMENTATO in produzione: var fromEnv = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
-  var source, key;
-  // Usa SEMPRE l'hardcoded per il test
-  source = 'HARDCODED_TEST';
-  key = HARDCODED_ANON_CHAT;
-  var ref = extractProjectRef(key);
-  console.log('[chat] ANON_KEY source:', source, '| project ref:', ref, '| length:', key.length);
-  return key;
+  return process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY || HARDCODED_ANON_CHAT;
 }
 function resolveSupabaseUrl() {
-  // COMMENTATO in produzione: var fromEnv = process.env.SUPABASE_URL;
-  // Usa SEMPRE l'hardcoded per il test
-  console.log('[chat] SUPABASE_URL source: HARDCODED_TEST | value:', HARDCODED_URL_CHAT.slice(0, 25) + '...');
-  return HARDCODED_URL_CHAT;
+  return process.env.SUPABASE_URL || HARDCODED_URL_CHAT;
 }
 
 const SUPABASE_URL = resolveSupabaseUrl();
@@ -130,7 +103,7 @@ function checkRateLimit(ip) {
 // perché un utente legittimo puó trovarsi dietro NAT condiviso con altri.
 // Previene abusi da singolo account anche se bypassa il limite per-IP.
 function checkUserRateLimit(userId) {
-  userRateLimits; userRateLimits; return checkRateLimitMap(userRateLimits, userId, RATE_LIMIT_MAX_PER_WINDOW_PER_USER);
+  return checkRateLimitMap(userRateLimits, userId, RATE_LIMIT_MAX_PER_WINDOW_PER_USER);
 }
 
 // TURNO 33 (Fase 5): rate limit giornaliero per la chat del piano.
@@ -223,8 +196,10 @@ function validateBody(body) {
   }
   if (body.max_tokens !== undefined) {
     const m = Number(body.max_tokens);
-    if (!Number.isFinite(m) || m < 50 || m > 800) {
-      return { ok: false, status: 400, error: 'max_tokens fuori range [50, 800]' };
+    // Range ampio perché i client usano 900 (feedback) e fino a 8000
+    // (generazione question bank). Il provider applica i suoi limiti.
+    if (!Number.isFinite(m) || m < 1 || m > 8000) {
+      return { ok: false, status: 400, error: 'max_tokens fuori range [1, 8000]' };
     }
     // pure check: req.body resta immutato, forwardBody usa spread
   }
@@ -243,10 +218,7 @@ function getClientIp(req) {
 // Handler principale (v3: dual-mode)
 // ============================================================
 // === DEBUG: log all'avvio del modulo ===
-console.log('[chat] MODULE LOADED', { url: (SUPABASE_URL || '').slice(0, 20) + '...', keyLength: (SUPABASE_ANON_KEY || '').length });
-
 module.exports = async function handler(req, res) {
-  console.log('[chat] HANDLER CALLED', req.method, req.url, 'auth:', (req.headers.authorization || 'MISSING').slice(0, 20) + '...');
   try {
     return await handleRequest(req, res);
   } catch (e) {
@@ -348,17 +320,15 @@ async function handleRequest(req, res) {
     }
   }
 
-  // 4) API key AI — controlla AI_API_KEY, poi BLUESMINDS_API_KEY, poi fallback hardcoded
-  const rawKey = String(process.env.AI_API_KEY || HARDCODED_AI_KEY || process.env.BLUESMINDS_API_KEY || '');
+  // 4) API key AI — AI_API_KEY (preferito) o BLUESMINDS_API_KEY (legacy)
+  const rawKey = String(process.env.AI_API_KEY || process.env.BLUESMINDS_API_KEY || '');
   const apiKey = rawKey.trim();
-  var keySource = process.env.AI_API_KEY ? 'AI_API_KEY' : (process.env.BLUESMINDS_API_KEY ? 'BLUESMINDS_API_KEY' : 'HARDCODED');
-  console.log('[chat] AI key source:', keySource, '| raw length:', rawKey.length, '| prefix:', apiKey.slice(0, 6) + '...', '| URL:', AI_API_URL, '| model:', AI_MODEL, '| timeout ms:', UPSTREAM_TIMEOUT_MS);
+  var keySource = process.env.AI_API_KEY ? 'AI_API_KEY' : 'BLUESMINDS_API_KEY';
   if (!apiKey || apiKey.length < 10) {
-    console.error('[chat] AI_API_KEY non valida:', { source: keySource, rawLength: rawKey.length, trimmedLength: apiKey.length });
     logMetric('config_error', { reason: 'ai_api_key_invalid', source: keySource });
     return res.status(500).json({
       error: 'Configurazione server incompleta',
-      details: 'Chiave API AI mancante o troppo corta (env: ' + keySource + ', lunghezza: ' + apiKey.length + ')'
+      details: 'Chiave API AI mancante o troppo corta (env: ' + keySource + '). Controlla .env.example.'
     });
   }
 
@@ -406,7 +376,6 @@ async function handleRequest(req, res) {
     activeController = ctrl;
     activeTimeoutId = tId;
     var tStart = Date.now();
-    console.log('[chat] AI attempt ' + attempt + '/' + MAX_RETRIES + ' at', new Date(tStart).toISOString(), '| model:', AI_MODEL, '| messages:', (req.body.messages || []).length);
 
     try {
       upstream = await fetch(AI_API_URL, {
@@ -421,7 +390,6 @@ async function handleRequest(req, res) {
         signal: ctrl.signal
       });
       var tElapsed = Date.now() - tStart;
-      console.log('[chat] AI attempt ' + attempt + ' status:', upstream.status, '| elapsed ms:', tElapsed);
 
       if (upstream.ok) {
         // SUCCESSO — esce dal loop
@@ -435,13 +403,13 @@ async function handleRequest(req, res) {
         try { rawBody503 = await upstream.text(); } catch (_) { rawBody503 = '(unreadable)'; }
         lastRetryableErr = { status: 503, body: rawBody503, elapsedMs: tElapsed };
         if (attempt < MAX_RETRIES) {
-          console.warn('[chat] AI 503 attempt ' + attempt + ' — retrying in ' + backoffMs(attempt) + 'ms | body:', rawBody503.slice(0, 300));
+          logMetric('upstream_503_retry', { userId: hashUserId(supabaseUser.id), attempt: attempt });
           clearTimeout(tId);
           await new Promise(function (r) { setTimeout(r, backoffMs(attempt)); });
           continue;
         }
         // Ultimo tentativo: esce dal loop verso exhausted handler
-        console.warn('[chat] AI 503 attempt ' + attempt + '/' + MAX_RETRIES + ' — exhausted');
+        logMetric('upstream_503_exhausted', { userId: hashUserId(supabaseUser.id), attempts: attempt });
         clearTimeout(tId);
         break;
       }
@@ -452,7 +420,6 @@ async function handleRequest(req, res) {
       try { rawBodyFail = await upstream.text(); } catch (_) { rawBodyFail = '(unreadable)'; }
       var parsedFail;
       try { parsedFail = JSON.parse(rawBodyFail); } catch (_) { parsedFail = { raw_text: rawBodyFail.slice(0, 2000) }; }
-      console.error('[chat] AI NON-RETRYABLE status:', upstream.status, '| elapsed ms:', tElapsed, '| body:', JSON.stringify(parsedFail).slice(0, 1000));
       logMetric('upstream_status_error', { userId: hashUserId(supabaseUser.id), status: upstream.status, elapsedMs: tElapsed });
       return res.status(upstream.status).json({ error: 'Upstream error', upstream_status: upstream.status, upstream_body: parsedFail });
 
@@ -463,7 +430,6 @@ async function handleRequest(req, res) {
       var errMsg = fetchErr ? (fetchErr.message || String(fetchErr)) : 'null';
 
       if (errName === 'AbortError') {
-        console.warn('[chat] AI timeout attempt ' + attempt + ' after ' + tCatch + 'ms' + (attempt < MAX_RETRIES ? ' — retrying' : ''));
         lastRetryableErr = { name: 'AbortError', message: errMsg, elapsedMs: tCatch };
         if (attempt < MAX_RETRIES) {
           await new Promise(function (r) { setTimeout(r, backoffMs(attempt)); });
@@ -474,11 +440,8 @@ async function handleRequest(req, res) {
       }
 
       // Errore di rete — retry
-      console.error('[chat] AI fetch error attempt ' + attempt + ':', errMsg, attempt < MAX_RETRIES ? '— retrying' : '');
-      if (fetchErr && fetchErr.cause) {
-        console.error('[chat] AI fetch CAUSE:', String(fetchErr.cause));
-      }
-      lastRetryableErr = { name: errName, message: errMsg, elapsedMs: tCatch, cause: fetchErr && String(fetchErr.cause) };
+      logMetric('upstream_fetch_retry', { userId: hashUserId(supabaseUser.id), errType: errName, attempts: attempt });
+      lastRetryableErr = { name: errName, message: errMsg, elapsedMs: tCatch };
       if (attempt < MAX_RETRIES) {
         await new Promise(function (r) { setTimeout(r, backoffMs(attempt)); });
         continue;
@@ -490,7 +453,6 @@ async function handleRequest(req, res) {
 
   // Se arriviamo qui senza upstream.ok, ultimo errore era 503 esaurito
   if (!upstream || !upstream.ok) {
-    console.error('[chat] AI tutti i tentativi falliti — lastRetryableErr:', lastRetryableErr ? JSON.stringify(lastRetryableErr).slice(0, 500) : 'null');
     logMetric('upstream_retries_exhausted', { userId: hashUserId(supabaseUser.id), attempts: attemptsMade, overallMs: Date.now() - overallStart });
     return res.status(503).json({ error: 'Servizio di generazione temporaneamente sovraccarico', details: 'I server AI non rispondono dopo ' + attemptsMade + ' tentativi. Riprova tra qualche istante.', attempts: attemptsMade });
   }

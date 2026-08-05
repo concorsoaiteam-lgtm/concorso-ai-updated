@@ -1045,6 +1045,107 @@ select:focus-visible,
 }
 
 /* =========================================================================
+   Skeleton `.sk` — occupa esattamente lo spazio del contenuto reale
+   (stessa struttura: stat/card/table/bando/day), mai layout shift.
+   ========================================================================= */
+
+.sk {
+  display: inline-block;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  position: relative;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.sk::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s linear infinite;
+}
+
+/* Pill sidebar (bando switch) — altezza uguale al bottone reale */
+.sk-pill {
+  display: block;
+  width: 100%;
+  height: 34px;
+  border-radius: 4px;
+}
+
+/* Chip streak — pill coerente con il chip reale (12.5px + padding) */
+.sk-chip {
+  height: 26px;
+  min-width: 76px;
+  border-radius: 999px;
+}
+
+/* Bottone placeholder (altezza btn standard) */
+.sk-btn {
+  display: block;
+  width: 168px;
+  max-width: 100%;
+  height: 36px;
+  border-radius: 4px;
+}
+
+/* Track di progresso 2px (quota) */
+.sk-track {
+  display: block;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+  position: relative;
+}
+
+.sk-track::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.7) 50%,
+    transparent 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s linear infinite;
+}
+
+/* Grafico sparkline — stesso frame dello svg reale (600x180 a ratio) */
+.sk-spark {
+  display: block;
+  width: 100%;
+  height: 180px;
+  border-radius: 6px;
+}
+
+/* =========================================================================
+   Skip link (a11y) — visibile solo su focus
+   ========================================================================= */
+
+.skip-link {
+  position: fixed;
+  top: 8px; left: 8px;
+  z-index: 300;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  transform: translateY(-200%);
+  transition: transform var(--t-base) var(--ease);
+}
+
+.skip-link:focus { transform: translateY(0); }
+
+/* =========================================================================
    Empty state — azioni chiare, mai illustrazioni stock
    ========================================================================= */
 
@@ -1340,6 +1441,14 @@ select:focus-visible,
   transition: all var(--t-fast) ease;
 }
 
+/* Area di tocco generosa (≥40px) senza cambiare il disegno del check */
+.day-check::before {
+  content: "";
+  position: absolute;
+  inset: -11px;
+  border-radius: 50%;
+}
+
 .day-card.is-done .day-check {
   background: var(--ok);
   border-color: var(--ok);
@@ -1473,6 +1582,8 @@ select:focus-visible,
     transition-duration: 0.001ms !important;
   }
 
-  .skeleton-line::after { animation: none; opacity: 0; }
+  .skeleton-line::after,
+  .sk::after,
+  .sk-track::after { animation: none; opacity: 0; }
   .view.is-active { animation: none; }
 }

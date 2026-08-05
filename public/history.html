@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css/dashboard.css" />
 </head>
 <body>
+<a class="skip-link" href="#content">Salta al contenuto</a>
 
   <div class="app" id="app">
 
@@ -105,7 +106,7 @@
         </div>
       </header>
 
-      <main class="content">
+      <main class="content" id="content" tabindex="-1">
 
         <section class="view is-active" aria-label="Storico simulazioni">
           <p class="eyebrow">Storico</p>
@@ -113,7 +114,10 @@
           <p class="view-sub">Tutte le sessioni in ordine cronologico: punteggi, tempi e andamento nel tempo.</p>
 
           <div class="section-gap">
-            <div class="stats" id="summaryStats"></div>
+            <div class="stats" id="summaryStats">
+              <div class="stat" aria-hidden="true"><span class="sk sk-line" style="display:block;width:38%;height:24px"></span><span class="sk sk-line" style="display:block;width:55%;height:10px;margin-top:10px"></span></div>
+              <div class="stat" aria-hidden="true"><span class="sk sk-line" style="display:block;width:38%;height:24px"></span><span class="sk sk-line" style="display:block;width:55%;height:10px;margin-top:10px"></span></div>
+            </div>
           </div>
 
           <div class="section-gap">
@@ -123,7 +127,8 @@
                 <span class="card-link" id="trendLabel">—</span>
               </div>
               <div class="spark-wrap">
-                <svg id="sparkSvg" viewBox="0 0 600 180" class="spark-svg" preserveAspectRatio="none" aria-label="Grafico evoluzione punteggi" role="img"></svg>
+                <div class="sk sk-spark" aria-hidden="true"></div>
+                <svg id="sparkSvg" viewBox="0 0 600 180" class="spark-svg" preserveAspectRatio="none" aria-label="Grafico evoluzione punteggi" role="img" hidden></svg>
               </div>
             </div>
           </div>
@@ -134,7 +139,10 @@
                 <h2 class="card-title">Tutte le simulazioni</h2>
               </div>
               <div class="hist-list" id="fullList">
-                <div class="hist-row is-muted">Caricamento…</div>
+                <div class="hist-row" aria-hidden="true"><div class="hist-main"><span class="sk sk-line" style="display:block;width:52%;height:13px"></span><span class="sk sk-line" style="display:block;width:34%;height:10px;margin-top:7px"></span></div><div class="hist-side"><span class="sk sk-chip" style="width:56px;height:22px"></span><span class="sk sk-line" style="width:30px;height:14px"></span></div></div>
+                <div class="hist-row" aria-hidden="true"><div class="hist-main"><span class="sk sk-line" style="display:block;width:48%;height:13px"></span><span class="sk sk-line" style="display:block;width:36%;height:10px;margin-top:7px"></span></div><div class="hist-side"><span class="sk sk-chip" style="width:56px;height:22px"></span><span class="sk sk-line" style="width:30px;height:14px"></span></div></div>
+                <div class="hist-row" aria-hidden="true"><div class="hist-main"><span class="sk sk-line" style="display:block;width:56%;height:13px"></span><span class="sk sk-line" style="display:block;width:32%;height:10px;margin-top:7px"></span></div><div class="hist-side"><span class="sk sk-chip" style="width:56px;height:22px"></span><span class="sk sk-line" style="width:30px;height:14px"></span></div></div>
+                <div class="hist-row" aria-hidden="true"><div class="hist-main"><span class="sk sk-line" style="display:block;width:50%;height:13px"></span><span class="sk sk-line" style="display:block;width:35%;height:10px;margin-top:7px"></span></div><div class="hist-side"><span class="sk sk-chip" style="width:56px;height:22px"></span><span class="sk sk-line" style="width:30px;height:14px"></span></div></div>
               </div>
             </div>
           </div>
@@ -201,6 +209,10 @@
       function renderSparkline(rows) {
         var svg = document.getElementById("sparkSvg");
         if (!svg) return;
+        // Skeleton sparito: mostra il grafico reale.
+        svg.hidden = false;
+        var skSpark = document.querySelector(".sk-spark");
+        if (skSpark) skSpark.remove();
         var recent = rows.slice(-12);
         if (!recent.length) {
           svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" font-size="13" fill="#8A8E96">Nessun dato</text>';
@@ -296,7 +308,36 @@
         );
       }
 
+      // Ripristina gli skeleton dopo un errore + retry (mai un frame vuoto).
+      function showSkeletons() {
+        var stats = document.getElementById("summaryStats");
+        if (stats && !stats.querySelector(".stat")) {
+          stats.innerHTML =
+            statSkel() + statSkel();
+        }
+        var spark = document.querySelector(".sk-spark");
+        var wrap = document.querySelector(".spark-wrap");
+        if (!spark && wrap) {
+          var svg = document.getElementById("sparkSvg");
+          if (svg) svg.hidden = true;
+          wrap.insertAdjacentHTML("afterbegin", '<div class="sk sk-spark" aria-hidden="true"></div>');
+        }
+        var list = document.getElementById("fullList");
+        if (list && !list.querySelector(".hist-row")) {
+          list.innerHTML = histSkel() + histSkel() + histSkel() + histSkel();
+        }
+      }
+
+      function statSkel() {
+        return '<div class="stat" aria-hidden="true"><span class="sk sk-line" style="display:block;width:38%;height:24px"></span><span class="sk sk-line" style="display:block;width:55%;height:10px;margin-top:10px"></span></div>';
+      }
+
+      function histSkel() {
+        return '<div class="hist-row" aria-hidden="true"><div class="hist-main"><span class="sk sk-line" style="display:block;width:52%;height:13px"></span><span class="sk sk-line" style="display:block;width:34%;height:10px;margin-top:7px"></span></div><div class="hist-side"><span class="sk sk-chip" style="width:56px;height:22px"></span><span class="sk sk-line" style="width:30px;height:14px"></span></div></div>';
+      }
+
       function load() {
+        showSkeletons();
         Dash.guard().then(function (ok) {
           if (!ok) return;
           Dash.loadUser().then(function (user) {
@@ -322,8 +363,12 @@
             renderSparkline(rows);
             renderList(rows);
           })
-          .catch(function (e) {
-            console.warn("[ConcorsoAI] history load error:", e);
+          .catch(function () {
+            // Nasconde gli skeleton e mostra lo stato di errore con retry.
+            var skEls = document.querySelectorAll(".sk");
+            for (var i = 0; i < skEls.length; i++) skEls[i].remove();
+            var list = document.getElementById("fullList");
+            if (list) list.innerHTML = "";
             document.getElementById("errorState").hidden = false;
           });
       }

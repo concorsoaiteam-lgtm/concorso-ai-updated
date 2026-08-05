@@ -28,7 +28,11 @@
       var sec = $("view-" + v);
       if (sec) sec.classList.toggle("is-active", v === name);
       var nav = document.querySelector('.nav-item[data-view="' + v + '"]');
-      if (nav) nav.classList.toggle("is-active", v === name);
+      if (nav) {
+        nav.classList.toggle("is-active", v === name);
+        if (v === name) nav.setAttribute("aria-current", "page");
+        else nav.removeAttribute("aria-current");
+      }
     });
     var eyebrow = $("top-eyebrow");
     if (eyebrow) {

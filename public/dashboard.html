@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css/dashboard.css" />
 </head>
 <body>
+<a class="skip-link" href="#content">Salta al contenuto</a>
 
   <div class="app" id="app">
 
@@ -25,7 +26,9 @@
         ConcorsoAI<span class="brand-dot" aria-hidden="true"></span>
       </a>
 
-      <div class="side-bando" id="side-bando"></div>
+      <div class="side-bando" id="side-bando">
+        <div class="sk sk-pill" aria-hidden="true"></div>
+      </div>
 
       <nav class="side-nav" aria-label="Sezioni">
         <a href="#panoramica" class="nav-item is-active" data-view="panoramica" aria-current="page">
@@ -94,7 +97,9 @@
         </button>
         <span class="top-eyebrow" id="top-eyebrow">Panoramica</span>
         <div class="top-actions">
-          <span class="streak-chip" id="streak-chip" title="Giorni di fila"></span>
+          <span class="streak-chip" id="streak-chip" title="Giorni di fila">
+            <span class="sk sk-chip" aria-hidden="true"></span>
+          </span>
           <button type="button" class="cmdk-btn" id="cmdk-btn">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
               <circle cx="11" cy="11" r="6.5"/><path stroke-linecap="round" d="M20 20l-3.8-3.8"/>
@@ -105,7 +110,7 @@
         </div>
       </header>
 
-      <main class="content" id="content">
+      <main class="content" id="content" tabindex="-1">
 
         <!-- ==========================================================
              VIEW: PANORAMICA
@@ -115,10 +120,22 @@
           <h1 class="view-title" id="pano-title">Ciao</h1>
           <p class="view-sub" id="pano-sub"></p>
 
-          <div class="section-gap" id="riprendi-card"></div>
+          <div class="section-gap" id="riprendi-card">
+            <div class="card" aria-hidden="true">
+              <div class="card-head"><div class="sk sk-line" style="width:30%;height:17px"></div></div>
+              <div class="sk sk-line" style="width:72%;height:12px;margin-top:4px"></div>
+              <div class="sk sk-line" style="width:58%;height:12px;margin-top:8px"></div>
+              <div class="sk sk-btn" style="margin-top:14px"></div>
+            </div>
+          </div>
 
           <div class="section-gap">
-            <div class="stats" id="pano-stats"></div>
+            <div class="stats" id="pano-stats">
+              <div class="stat" aria-hidden="true"><span class="sk sk-line" style="display:block;width:38%;height:24px"></span><span class="sk sk-line" style="display:block;width:55%;height:10px;margin-top:10px"></span></div>
+              <div class="stat" aria-hidden="true"><span class="sk sk-line" style="display:block;width:38%;height:24px"></span><span class="sk sk-line" style="display:block;width:55%;height:10px;margin-top:10px"></span></div>
+              <div class="stat" aria-hidden="true"><span class="sk sk-line" style="display:block;width:38%;height:24px"></span><span class="sk sk-line" style="display:block;width:55%;height:10px;margin-top:10px"></span></div>
+              <div class="stat" aria-hidden="true"><span class="sk sk-line" style="display:block;width:38%;height:24px"></span><span class="sk sk-line" style="display:block;width:55%;height:10px;margin-top:10px"></span></div>
+            </div>
           </div>
 
           <div class="section-gap">
@@ -127,13 +144,45 @@
                 <h2 class="card-title">Ultime simulazioni</h2>
                 <a class="card-link" href="history.html">Vedi tutto</a>
               </div>
-              <div id="pano-last-list"></div>
+              <div id="pano-last-list">
+                <div class="table-wrap" aria-hidden="true">
+                  <table class="table">
+                    <thead><tr><th>Sessione</th><th>Data</th><th>Voto</th></tr></thead>
+                    <tbody>
+                      <tr><td><span class="sk sk-line" style="display:block;width:62%"></span></td><td><span class="sk sk-line" style="display:block;width:40%"></span></td><td><span class="sk sk-line" style="display:block;width:28%"></span></td></tr>
+                      <tr><td><span class="sk sk-line" style="display:block;width:55%"></span></td><td><span class="sk sk-line" style="display:block;width:42%"></span></td><td><span class="sk sk-line" style="display:block;width:26%"></span></td></tr>
+                      <tr><td><span class="sk sk-line" style="display:block;width:64%"></span></td><td><span class="sk sk-line" style="display:block;width:38%"></span></td><td><span class="sk sk-line" style="display:block;width:30%"></span></td></tr>
+                      <tr><td><span class="sk sk-line" style="display:block;width:58%"></span></td><td><span class="sk sk-line" style="display:block;width:44%"></span></td><td><span class="sk sk-line" style="display:block;width:27%"></span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="section-gap" id="pano-quota"></div>
+          <div class="section-gap" id="pano-quota">
+            <div class="card quota-card" aria-hidden="true">
+              <div class="quota-main">
+                <div style="flex:1">
+                  <div class="sk sk-line" style="width:45%;height:11px"></div>
+                  <div class="sk sk-line" style="width:28%;height:22px;margin-top:10px"></div>
+                </div>
+                <div style="text-align:right;flex:1">
+                  <div class="sk sk-line" style="width:55%;height:11px;margin-left:auto"></div>
+                  <div class="sk sk-line" style="width:40%;height:10px;margin-left:auto;margin-top:10px"></div>
+                </div>
+              </div>
+              <div class="sk sk-track" style="margin-top:16px"></div>
+              <div class="sk sk-line" style="width:88%;height:10px;margin-top:14px"></div>
+            </div>
+          </div>
 
-          <div class="section-gap" id="pano-piano-teaser"></div>
+          <div class="section-gap" id="pano-piano-teaser">
+            <div class="card" aria-hidden="true">
+              <div class="sk sk-line" style="width:34%;height:15px"></div>
+              <div class="sk sk-line" style="width:58%;height:11px;margin-top:8px"></div>
+            </div>
+          </div>
         </section>
 
         <!-- ==========================================================
@@ -166,7 +215,10 @@
               <h3 class="empty-title">Nessun bando caricato</h3>
               <p class="empty-text">Carica il bando del tuo concorso per iniziare. Servono solo pochi secondi e puoi sostituirlo quando vuoi.</p>
             </div>
-            <div class="bando-list" id="bandi-list"></div>
+            <div class="bando-list" id="bandi-list">
+              <div class="bando-card" aria-hidden="true"><div style="min-width:0;flex:1"><div class="sk sk-line" style="width:68%;height:14px"></div><div class="sk sk-line" style="width:44%;height:10px;margin-top:8px"></div></div><div class="sk sk-btn" style="width:64px"></div></div>
+              <div class="bando-card" aria-hidden="true"><div style="min-width:0;flex:1"><div class="sk sk-line" style="width:58%;height:14px"></div><div class="sk sk-line" style="width:40%;height:10px;margin-top:8px"></div></div><div class="sk sk-btn" style="width:64px"></div></div>
+            </div>
           </div>
         </section>
 
@@ -177,7 +229,17 @@
           <p class="eyebrow">Piano settimanale</p>
           <h1 class="view-title">La tua settimana</h1>
           <p class="view-sub">Un piano di studio generato dal tuo bando e dal tuo storico. Ogni giorno: cosa ripassare e quante domande fare.</p>
-          <div class="section-gap" id="piano-body"></div>
+          <div class="section-gap" id="piano-body">
+            <div class="week-grid" aria-hidden="true">
+              <div class="day-card"><span class="sk sk-line" style="display:block;width:55%;height:9px"></span><span class="sk sk-line" style="display:block;width:75%;height:13px;margin-top:12px"></span><span class="sk sk-line" style="display:block;width:60%;height:10px;margin-top:8px"></span></div>
+              <div class="day-card"><span class="sk sk-line" style="display:block;width:55%;height:9px"></span><span class="sk sk-line" style="display:block;width:75%;height:13px;margin-top:12px"></span><span class="sk sk-line" style="display:block;width:60%;height:10px;margin-top:8px"></span></div>
+              <div class="day-card"><span class="sk sk-line" style="display:block;width:55%;height:9px"></span><span class="sk sk-line" style="display:block;width:75%;height:13px;margin-top:12px"></span><span class="sk sk-line" style="display:block;width:60%;height:10px;margin-top:8px"></span></div>
+              <div class="day-card"><span class="sk sk-line" style="display:block;width:55%;height:9px"></span><span class="sk sk-line" style="display:block;width:75%;height:13px;margin-top:12px"></span><span class="sk sk-line" style="display:block;width:60%;height:10px;margin-top:8px"></span></div>
+              <div class="day-card"><span class="sk sk-line" style="display:block;width:55%;height:9px"></span><span class="sk sk-line" style="display:block;width:75%;height:13px;margin-top:12px"></span><span class="sk sk-line" style="display:block;width:60%;height:10px;margin-top:8px"></span></div>
+              <div class="day-card"><span class="sk sk-line" style="display:block;width:55%;height:9px"></span><span class="sk sk-line" style="display:block;width:75%;height:13px;margin-top:12px"></span><span class="sk sk-line" style="display:block;width:60%;height:10px;margin-top:8px"></span></div>
+              <div class="day-card"><span class="sk sk-line" style="display:block;width:55%;height:9px"></span><span class="sk sk-line" style="display:block;width:75%;height:13px;margin-top:12px"></span><span class="sk sk-line" style="display:block;width:60%;height:10px;margin-top:8px"></span></div>
+            </div>
+          </div>
         </section>
 
       </main>

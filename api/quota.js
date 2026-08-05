@@ -1,5 +1,5 @@
 // ============================================================
-// ConcorsoAI — Quota simulazioni utente (v1 stub)
+// ConcorsoAI — Quota simulazioni utente
 // ============================================================
 // Ritorna il numero di simulazioni usate nel mese corrente
 // da un utente autenticato via Supabase JWT.
@@ -7,13 +7,8 @@
 // Piano Free → 5 simulazioni / mese (sliding window da giorno 1).
 // Piano Pro / Coaching → illimitato (quota = null).
 //
-// Il client può chiamare /api/quota per decidere se mostrare
-// il paywall (TODO 5.3).
-//
-// Env vars richieste (fail-closed come api/chat.js):
-//   BLUESMINDS_API_KEY NON richiesta (questo endpoint non chiama AI)
-//   SUPABASE_URL          (se non presente fallback hardcoded)
-//   SUPABASE_ANON_KEY     (se non presente fallback hardcoded)
+// Configurazione via env vars (vedi .env.example):
+//   SUPABASE_URL / SUPABASE_ANON_KEY — progetto Supabase
 // ============================================================
 
 const { createClient } = require('@supabase/supabase-js');
@@ -21,37 +16,18 @@ const { createClient } = require('@supabase/supabase-js');
 // dipendenze transitive di @supabase/realtime-js in Node.js
 try { require('ws'); } catch (_) { /* opzionale */ }
 
-// Chiave hardcoded di fallback (progetto xhifnparcouxsypkjcmn)
-function extractProjectRef(jwt) {
-  try {
-    var p = jwt.split('.');
-    if (p.length !== 3) return 'INVALID_JWT';
-    var payload = JSON.parse(Buffer.from(p[1], 'base64url').toString());
-    return payload.ref || 'NO_REF';
-  } catch (_) { return 'PARSE_ERROR'; }
-}
+// Chiave pubblica (anon) di fallback se le env vars mancano.
+// NB: la anon key è pubblica per design (RLS protegge i dati); in
+// produzione le env vars SUPABASE_URL / SUPABASE_ANON_KEY hanno
+// sempre priorità e si ruotano da Vercel senza toccare il codice.
 var HARDCODED_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
 var HARDCODED_URL = 'https://xhifnparcouxsypkjcmn.supabase.co';
 
-// [TEST TEMPORANEO] Usa HARDCODED anziché ENV_VAR per bypassare env var stale di Vercel.
-// Se il test funziona, il problema è confermato: Vercel ha env var vecchie.
-// FIX DEFINITIVO: entrare in Vercel Dashboard → Project Settings → Environment Variables
-// e aggiornare/rimuovere le variabili SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_KEY.
 function resolveAnonKey() {
-  // COMMENTATO in produzione: var fromEnv = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
-  var source, key;
-  // Usa SEMPRE l'hardcoded per il test
-  source = 'HARDCODED_TEST';
-  key = HARDCODED_ANON;
-  var ref = extractProjectRef(key);
-  console.log('[quota] ANON_KEY source:', source, '| project ref:', ref, '| length:', key.length);
-  return key;
+  return process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY || HARDCODED_ANON;
 }
 function resolveSupabaseUrl() {
-  // COMMENTATO in produzione: var fromEnv = process.env.SUPABASE_URL;
-  // Usa SEMPRE l'hardcoded per il test
-  console.log('[quota] SUPABASE_URL source: HARDCODED_TEST | value:', HARDCODED_URL.slice(0, 25) + '...');
-  return HARDCODED_URL;
+  return process.env.SUPABASE_URL || HARDCODED_URL;
 }
 
 const SUPABASE_URL = resolveSupabaseUrl();
@@ -78,10 +54,8 @@ function extractProjectRefFromJwt(jwt) {
 }
 
 // === DEBUG: log all'avvio del modulo ===
-console.log('[quota] MODULE LOADED', { url: (SUPABASE_URL || '').slice(0, 20) + '...', keyLength: (SUPABASE_ANON_KEY || '').length });
 
 module.exports = async function handler(req, res) {
-  console.log('[quota] HANDLER CALLED', req.method, req.url, 'auth:', (req.headers.authorization || '').slice(0, 20) + '...');
   try {
     // CORS preflight
     if (req.method === 'OPTIONS') {
@@ -139,7 +113,6 @@ module.exports = async function handler(req, res) {
         global: { headers: { Authorization: 'Bearer ' + jwt } }
       });
       const since = getStartOfMonthUTC();
-      console.log('[quota] query params | user_id:', supabaseUser.id, '| since:', since, '| plan:', plan);
       const { count, error } = await supabase2
         .from('simulazioni')
         .select('id', { count: 'exact', head: true })

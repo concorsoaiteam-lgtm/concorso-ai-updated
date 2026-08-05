@@ -579,7 +579,6 @@
         setBusy(btn, false, "", "Mandami il link");
         // Privacy: mai confermare lo stato dell'email. Stessa schermata.
         showPanel("sent");
-        try { console.debug("[ConcorsoAI] reset error:", err && err.message); } catch (x) { /* noop */ }
       });
   }
 
