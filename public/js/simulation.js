@@ -47,6 +47,7 @@
   var K_DRAFT = "cai_sim_draft_";      // + simId → sessione completa
   var K_OPS = "cai_pending_ops";       // coda scritture fallite
   var K_LAST_SIM = "cai_last_sim";     // ultima simulazione (ripresa)
+  var K_ONBOARD = "cai_onboard_choice"; // micro-decisione di ingresso: "demo" | "bando"
   var BANK_TTL = 7 * 24 * 3600 * 1000; // 7 giorni
 
   var MODES = {
@@ -156,6 +157,20 @@
     lsSet(K_OPS, q);
   }
 
+  /* Un errore DB è "permanente" quando riprovare non può funzionare:
+     tabella/colonna mancante (PGRST2xx), vincolo, permessi (SQLSTATE 42*)
+     o 4xx definitivi. In quei casi l'op viene scartata una volta, senza
+     riaccodarla all'infinito (che sporca la console e cresce la coda). */
+  function isPermanentDbError(err) {
+    if (!err) return false;
+    var code = String(err.code || "");
+    var status = Number(err.status || err.statusCode || 0);
+    if (code.indexOf("PGRST") === 0) return true;            // schema/relation/column
+    if (/^42/.test(code)) return true;                        // SQLSTATE 42* (RLS inclusa)
+    if (status >= 400 && status < 500 && status !== 429 && status !== 408) return true; // 4xx definitivi
+    return false;
+  }
+
   function flushOps() {
     var q = lsGet(K_OPS) || [];
     if (!q.length || !D || !D.supabase) return;
@@ -175,18 +190,57 @@
     } else if (op.type === "update_sim") {
       chain = db.from("simulazioni").update(op.data).eq("id", op.id);
     } else if (op.type === "insert_domanda") {
+      // La domanda ha bisogno dell'id della simulazione: se l'insert_sim è
+      // ancora in volo (S.simId nullo), attende in memoria e parte al flush.
+      if (!S.simId) {
+        S.pendingDomande = S.pendingDomande || [];
+        S.pendingDomande.push(op.data);
+        return;
+      }
       chain = db.from("simulazione_domande").insert(op.data);
     } else {
       chain = Promise.resolve({ error: null });
     }
     chain.then(function (res) {
-      if (res && res.error) { queueOp(op); return; }
+      if (res && res.error) {
+        if (isPermanentDbError(res.error)) {
+          // Mai un retry infinito: la sessione resta comunque in localStorage
+          // (draft), quindi nessun dato va perso per l'utente.
+          if (D) D.track("sim_persist_dropped", {
+            type: op.type, code: res.error.code || String(res.error.status || "")
+          });
+          return;
+        }
+        queueOp(op);
+        return;
+      }
       if (op.type === "insert_sim" && res && res.data && res.data[0] && res.data[0].id && !S.simId) {
         S.simId = res.data[0].id;
         S.simCreated = true;
         saveDraft();
+        flushPendingDomande();
       }
     }).catch(function () { queueOp(op); });
+  }
+
+  /* Scrive le domande arrivate prima che l'id della simulazione esistesse.
+     Mai bloccante: se il write fallisce vale la stessa logica di persistWrite. */
+  function flushPendingDomande() {
+    var q = S.pendingDomande || [];
+    S.pendingDomande = [];
+    q.forEach(function (data) {
+      if (!S.simId || !D || !D.supabase) return;
+      // La riga è stata messa in coda quando S.simId era ancora nullo:
+      // la copia con l'id reale evita un insert con FK/RLS null.
+      var row = Object.assign({}, data, { simulazione_id: S.simId });
+      D.supabase.from("simulazione_domande").insert(row)
+        .then(function (res) {
+          if (res && res.error && !isPermanentDbError(res.error)) {
+            queueOp({ type: "insert_domanda", data: data });
+          }
+        })
+        .catch(function () { queueOp({ type: "insert_domanda", data: data }); });
+    });
   }
 
   function beginSessionDb() {
@@ -417,35 +471,83 @@
       renderSetup();
       return;
     }
+
+    var rd = S.resumeData;
+    // Chi ha già scelto la demo non rivive la domanda: va dritto al setup
+    // con una materia a caso (mai ripetere una micro-decisione già presa).
+    if (!S.bando && !rd && lsGet(K_ONBOARD) === "demo") {
+      if (!S.subject) pickRandomSubject();
+      showPhase("setup");
+      renderSetup();
+      return;
+    }
+
     showPhase("gate");
     var title = $("gate-title");
     var text = $("gate-text");
     var actions = $("gate-actions");
     var resume = $("gate-resume");
 
-    var rd = S.resumeData;
     if (!S.bando && !rd) {
-      // Niente bando: il gate NON è un muro. Offri l'allenamento libero su
-      // una materia da concorso estratta a caso (master §10.3: mai un muro).
-      title.textContent = "Non hai ancora caricato un bando.";
-      text.textContent = "Puoi comunque allenarti subito: scegliamo per te una materia da concorso, a caso.";
+      // Micro-decisione di ingresso (onboarding round 55): un solo punto di
+      // scelta, due strade spiegate in una riga ciascuna, mai un muro.
+      var chosenBando = lsGet(K_ONBOARD) === "bando";
+      title.textContent = "Da qui iniziamo.";
+      text.textContent = chosenBando
+        ? "Hai scelto di partire dal tuo bando. Caricane uno, oppure inizia subito con una materia a caso."
+        : "Due strade per arrivare preparato all\u2019orale. Puoi cambiare strada quando vuoi: qui non si sbaglia.";
       actions.innerHTML =
-        '<button type="button" class="btn btn-primary btn-block" id="gate-free">Simula con una materia a caso</button>' +
-        '<a class="btn btn-ghost btn-block" href="dashboard.html#bandi">Carica il bando</a>' +
+        '<div class="gate-path is-primary" id="gate-path-demo" role="button" tabindex="0">' +
+          '<span class="gate-path-icon" aria-hidden="true">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>' +
+          '</span>' +
+          '<span class="gate-path-main">' +
+            '<span class="gate-path-name">Subito con una materia a caso</span>' +
+            '<span class="gate-path-desc">Prova il format adesso, senza preparare nulla: ti assegniamo una materia da concorso.</span>' +
+          '</span>' +
+          '<span class="gate-path-cta">Simula ora<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>' +
+        '</div>' +
+        '<div class="gate-path" id="gate-path-bando" role="button" tabindex="0">' +
+          '<span class="gate-path-icon" aria-hidden="true">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.75h9.75L19.5 6.5V21.25a.75.75 0 0 1-.75.75H6a.75.75 0 0 1-.75-.75V3.5A.75.75 0 0 1 6 2.75Z"/><path d="M9 14h6M9 17.5h4"/></svg>' +
+          '</span>' +
+          '<span class="gate-path-main">' +
+            '<span class="gate-path-name">Con il tuo bando</span>' +
+            '<span class="gate-path-desc">Le domande nasceranno dal PDF che carichi: il programma reale del tuo concorso.</span>' +
+          '</span>' +
+          '<span class="gate-path-cta">Carica il bando<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>' +
+        '</div>' +
         '<a class="btn btn-ghost btn-block" href="dashboard.html">Torna alla dashboard</a>';
       resume.classList.add("hidden");
-      var free = $("gate-free");
-      if (free) {
-        free.addEventListener("click", function () {
+
+      var demo = $("gate-path-demo");
+      if (demo) {
+        var goDemo = function () {
+          lsSet(K_ONBOARD, "demo");
           pickRandomSubject();
           S.mode = "standard";
-          if (D) D.track("sim_gate_free_subject", { subject: S.subject.id });
+          if (D) D.track("sim_onboard_choice", { choice: "demo", subject: S.subject.id });
           showPhase("setup");
           renderSetup();
+        };
+        demo.addEventListener("click", goDemo);
+        demo.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goDemo(); }
         });
-        free.focus({ preventScroll: true });
       }
-      if (D) D.track("sim_gate_nobando", {});
+      var bando = $("gate-path-bando");
+      if (bando) {
+        var goBando = function () {
+          lsSet(K_ONBOARD, "bando");
+          if (D) D.track("sim_onboard_choice", { choice: "bando" });
+          window.location.href = "dashboard.html#bandi";
+        };
+        bando.addEventListener("click", goBando);
+        bando.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goBando(); }
+        });
+      }
+      if (D) D.track("sim_gate_nobando", { onboard: lsGet(K_ONBOARD) || null });
       return;
     }
 
@@ -480,6 +582,7 @@
     // Card bando / materia (allenamento libero)
     var icon = $("setup-bando-icon");
     var tag = $("setup-bando-tag");
+    var altBando = $("setup-alt-bando");
     if (S.bando) {
       $("setup-bando-card").classList.remove("is-free");
       $("setup-bando-name").textContent = String(S.bando.filename || "Bando").replace(/\.pdf$/i, "");
@@ -490,6 +593,7 @@
       $("setup-bando-meta").textContent = meta.join(" · ");
       $("setup-bando-change").textContent = "Cambia";
       if (tag) tag.classList.add("hidden");
+      if (altBando) altBando.classList.add("hidden");
       if (icon) icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.75h9.75L19.5 6.5V21.25a.75.75 0 0 1-.75.75H6a.75.75 0 0 1-.75-.75V3.5A.75.75 0 0 1 6 2.75Z"/><path d="M9 14h6M9 17.5h4"/></svg>';
       var sub = $("setup-sub");
       if (sub) sub.textContent = "Ogni sessione è completa: domande dal tuo bando, risposta libera e correzione della commissione.";
@@ -500,7 +604,10 @@
       $("setup-bando-name").textContent = S.subject.name;
       $("setup-bando-meta").textContent = "Materia da concorso, estratta a caso";
       $("setup-bando-change").textContent = "Cambia materia";
+      // Via d'uscita dalla demo: chi ha scelto la materia a caso può sempre
+      // passare al bando (la promessa del gate: "puoi cambiare strada quando vuoi").
       if (tag) tag.classList.remove("hidden");
+      if (altBando) altBando.classList.remove("hidden");
       if (icon) icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>';
       var sub2 = $("setup-sub");
       if (sub2) sub2.textContent = "Ogni sessione è completa: domande su " + S.subject.name +
@@ -731,6 +838,7 @@
     S.answers = [];
     S.simId = null;
     S.simCreated = false;
+    S.pendingDomande = [];
     S.startedAt = Date.now();
     S.elapsedMs = 0;
     S.sending = false;
@@ -1216,7 +1324,11 @@
     var box = $("feedback-error");
     var code = (err && err.message) || "";
     var text = "La connessione è caduta. La tua risposta è al sicuro: riprova.";
-    if (code.indexOf("http-429") !== -1 || code.indexOf("http-402") !== -1) {
+    var authError = false;
+    if (code.indexOf("http-401") !== -1 || code.indexOf("http-403") !== -1) {
+      authError = true;
+      text = "La sessione è scaduta. La tua risposta è al sicuro: accedi di nuovo e riprendi.";
+    } else if (code.indexOf("http-429") !== -1 || code.indexOf("http-402") !== -1) {
       text = "Non riusciamo a verificare la quota. Riprova.";
     } else if (code.indexOf("http-5") !== -1 || code.indexOf("http-502") !== -1 ||
                code.indexOf("http-503") !== -1 || code.indexOf("http-504") !== -1) {
@@ -1229,7 +1341,15 @@
 
     var retry = $("feedback-retry");
     retry.onclick = null;
-    if (feedbackRetries >= 3) {
+    if (authError) {
+      // Sessione scaduta: un retry non basta, serve rientrare. Il draft
+      // locale preserva la risposta, quindi il re-login non perde nulla.
+      retry.textContent = "Accedi di nuovo";
+      retry.onclick = function () {
+        saveDraft();
+        window.location.href = "auth.html?mode=login&next=simulation.html";
+      };
+    } else if (feedbackRetries >= 3) {
       retry.textContent = "Salva e riprendi";
       retry.onclick = function () { openPause(); };
     } else {
@@ -1647,6 +1767,7 @@
     S.idx = 0;
     S.simId = null;
     S.simCreated = false;
+    S.pendingDomande = [];
     S.startedAt = Date.now();
     S.elapsedMs = 0;
     S.sending = false;
@@ -1667,6 +1788,7 @@
     S.idx = 0;
     S.simId = null;
     S.simCreated = false;
+    S.pendingDomande = [];
     S.startedAt = Date.now();
     S.elapsedMs = 0;
     S.sending = false;
@@ -1764,6 +1886,7 @@
     S.idx = 0;
     S.simId = null;
     S.simCreated = false;
+    S.pendingDomande = [];
     S.startedAt = Date.now();
     S.elapsedMs = 0;
     S.sending = false;
@@ -1830,6 +1953,7 @@
     S.idx = Math.min(rd.idx || 0, S.questions.length - 1);
     S.simId = rd.simId || null;
     S.simCreated = !!S.simId;
+    S.pendingDomande = [];
     S.startedAt = rd.startedAt || Date.now();
     S.elapsedMs = rd.elapsedMs || 0;
     S.sending = false;

@@ -1079,6 +1079,9 @@ select:focus-visible,
   border-radius: 4px;
 }
 
+/* Azioni in riga dentro una card (onboarding: due strade, mai un muro) */
+.card-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+
 /* Chip streak — pill coerente con il chip reale (12.5px + padding) */
 .sk-chip {
   height: 26px;
@@ -1554,6 +1557,10 @@ select:focus-visible,
   .topbar { height: 52px; }
   .side-toggle { display: inline-flex; }
   .streak-chip { padding: 4px 8px; }
+
+  /* Su mobile le due strade della card si impilano: più area di tocco */
+  .card-actions { flex-direction: column; }
+  .card-actions .btn { width: 100%; }
   .cmdk-btn span { display: none; }
 
   .content { padding: var(--s-5) var(--s-4) var(--s-6); }

@@ -46,6 +46,21 @@
     Dash.track("dash_view", { view: name });
   }
 
+  function startFreeDemo() {
+    // Seconda strada dell'onboarding (round 55): stessa micro-decisione del
+    // gate di simulation.html. 'cai_onboard_choice=demo' fa saltare la scelta
+    // al prossimo accesso: si va dritti alla materia a caso.
+    try {
+      localStorage.setItem("cai_input_method", "libero");
+      localStorage.setItem("cai_onboard_choice", "demo");
+      // Un bando attivo residuo (stale da localStorage) farebbe ripartire
+      // simulation.js con il bando invece che con la demo: lo azzeriamo.
+      Dash.setActiveBando(null);
+    } catch (e) { /* noop */ }
+    Dash.track("dash_start_free", { bando: null });
+    window.location.href = "simulation.html";
+  }
+
   function startSimulation() {
     // Handoff retro-compatibile con simulation.html (legge localStorage).
     var bando = Dash.getActiveBando();
@@ -106,11 +121,17 @@
           '<div class="card-head"><h2 class="card-title">Inizia da qui</h2></div>' +
           '<p style="margin:0 0 16px;font-size:13.5px;color:var(--muted);max-width:52ch;">' +
           "Non serve preparare nulla. Carica il PDF del bando e ConcorsoAI estrae i programmi, " +
-          "genera le domande e ti corregge come farebbe la commissione.</p>" +
-          '<button type="button" class="btn btn-primary" id="goto-upload">Carica il bando</button>' +
+          "genera le domande e ti corregge come farebbe la commissione. Oppure prova il format " +
+          "subito, con una materia da concorso estratta a caso.</p>" +
+          '<div class="card-actions">' +
+            '<button type="button" class="btn btn-primary" id="goto-upload">Carica il bando</button>' +
+            '<button type="button" class="btn btn-ghost" id="goto-demo">Prova con una materia a caso</button>' +
+          '</div>' +
         "</div>";
       var btn = $("goto-upload");
       if (btn) btn.addEventListener("click", function () { goView("bandi"); });
+      var demo = $("goto-demo");
+      if (demo) demo.addEventListener("click", startFreeDemo);
       return;
     }
     el.innerHTML =
@@ -244,8 +265,8 @@
               '<div class="diario-name">' + Dash.escapeHtml(t.tema) + "</div>" +
               (note ? '<div class="diario-note">' + Dash.escapeHtml(note) + (String(t.note).length > 64 ? "…" : "") + "</div>" : "") +
             "</div>" +
-            '<div class="diario-stars" aria-label="Debolezza ' + (t.livello || 0) + " su 5" +
-              ' su 5" title="Debolezza ' + (t.livello || 0) + ' su 5">' + starRow(t.livello) + '</div>' +
+            '<div class="diario-stars" aria-label="Debolezza ' + (t.livello || 0) + ' su 5"' +
+              ' title="Debolezza ' + (t.livello || 0) + ' su 5">' + starRow(t.livello) + '</div>' +
           "</div>";
         }).join("") +
       "</div>";

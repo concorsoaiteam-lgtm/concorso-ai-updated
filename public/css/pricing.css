@@ -348,6 +348,10 @@
 }
 .pro-dialog-confirm svg { flex-shrink: 0; }
 
+/* Utility condivisa: senza questa regola il messaggio di conferma del dialog
+   (class="hidden" gestita da pricing.js) resta sempre visibile. */
+.hidden { display: none !important; }
+
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   .tier-card,

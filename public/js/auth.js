@@ -43,6 +43,19 @@
   var REDUCED_MOTION = window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  // Dopo il login si torna dove l'utente stava andando (es. simulation.html
+  // quando la sessione scadeva durante una simulazione, round 54). `next`
+  // è accettato SOLO come percorso relativo dello stesso sito (mai URL
+  // esterni: previene open redirect). Se assente o non valido → dashboard.
+  function postAuthUrl() {
+    var params = getParams();
+    var next = params.next;
+    if (typeof next === "string" && next.charAt(0) === "/" && next.charAt(1) !== "/") {
+      return next;
+    }
+    return DASHBOARD_URL;
+  }
+
   // Email della registrazione in attesa di verifica OTP (pannello verify).
   var pendingEmail = "";
 
@@ -444,7 +457,7 @@
       .then(function (res) {
         if (res.error) throw res.error;
         track("auth_login_ok", {});
-        window.location.href = DASHBOARD_URL;
+        window.location.href = postAuthUrl();
       })
       .catch(function (err) {
         setBusy(btn, false, "", "Entra");
@@ -521,7 +534,7 @@
         if (res.data && res.data.session) {
           // Conferma email disattivata nel progetto: sessione immediata.
           track("auth_register_ok", {});
-          window.location.href = DASHBOARD_URL;
+          window.location.href = postAuthUrl();
           return;
         }
 
@@ -619,7 +632,7 @@
         track("auth_reset_ok", {});
         setBusy(btn, false, "", "Salva la nuova password");
         showToast("Password aggiornata. Stai entrando…");
-        window.setTimeout(function () { window.location.href = DASHBOARD_URL; }, 900);
+        window.setTimeout(function () { window.location.href = postAuthUrl(); }, 900);
       })      .catch(function (err) {
         setBusy(btn, false, "", "Salva la nuova password");
         showAuthError(translateAuthError(err && err.message, errCode(err)));
@@ -733,7 +746,7 @@
       .then(function (res) {
         if (res.error) throw res.error;
         track("auth_verify_ok", {});
-        window.location.href = DASHBOARD_URL;
+        window.location.href = postAuthUrl();
       })
       .catch(function (err) {
         setBusy(btn, false, "", "Continua");
@@ -918,7 +931,7 @@
     return supabaseClient.auth.getUser().then(function (res) {
       if (res && res.data && res.data.user) {
         track("auth_redirect_active_session", {});
-        window.location.replace(DASHBOARD_URL);
+        window.location.replace(postAuthUrl());
         return true;
       }
       return false;

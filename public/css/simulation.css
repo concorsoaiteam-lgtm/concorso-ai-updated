@@ -50,6 +50,12 @@
 *::before,
 *::after { box-sizing: border-box; }
 
+/* Utility condivisa: nasconde un elemento che il JS marca come nascosto.
+   Senza questa regola gli elementi con class="hidden" (gate-resume-box,
+   prev-feedback, q-chip, q-text, sess-countdown) restano visibili come
+   contenitori vuoti che sembrano controlli. */
+.hidden { display: none !important; }
+
 html {
   -webkit-text-size-adjust: 100%;
   text-rendering: optimizeLegibility;
@@ -210,6 +216,58 @@ a { color: inherit; }
 .gate-resume-meta { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
 .gate-resume-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
+/* Micro-decisione di ingresso: due card selezionabili (stesso linguaggio
+   visivo delle mode-card del setup: bordi, hover, focus, radio). Mai un
+   bottone finto: sono veri elementi interattivi con focus visibile. */
+.gate-path {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--ink);
+  transition: border-color var(--t-base) var(--ease),
+              background var(--t-base) var(--ease),
+              transform var(--t-fast) var(--ease);
+}
+.gate-path:hover { border-color: var(--line-2); background: var(--bg); }
+.gate-path:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.gate-path:active { transform: scale(0.995); }
+.gate-path.is-primary { border-color: var(--ink); background: var(--bg); }
+.gate-path-icon {
+  width: 40px; height: 40px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--bg-2);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.gate-path.is-primary .gate-path-icon { background: var(--ink); color: var(--bg); }
+.gate-path-icon svg { width: 20px; height: 20px; }
+.gate-path-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.gate-path-name { font-size: 15px; font-weight: 600; color: var(--ink); }
+.gate-path-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+.gate-path-cta {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.gate-path.is-primary .gate-path-cta { color: var(--ink); }
+.gate-path-cta svg { width: 14px; height: 14px; }
+
 /* =========================================================================
    BUTTONS
    ========================================================================= */
@@ -357,6 +415,21 @@ a { color: inherit; }
   width: fit-content;
 }
 .bando-active-tag.hidden { display: none; }
+
+/* Via d'uscita dalla demo: link discreto, mai un bottone finto. La promessa
+   del gate ("puoi cambiare strada quando vuoi") vale anche nel setup. */
+.setup-alt-path {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: -14px 0 28px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+.setup-alt-path:hover { color: var(--ink); }
+.setup-alt-path:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 4px; }
 
 /* Modalità — radiogroup di card */
 .mode-label {

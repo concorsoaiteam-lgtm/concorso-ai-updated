@@ -123,10 +123,10 @@ window.eval(SIM_JS);
 (async () => {
   await sleep(400); // init async
 
-  // F1: siamo nel gate (nessun bando)
+  // F1: siamo nel gate (nessun bando) — micro-decisione round 55
   L("F1 gate-active=" + document.getElementById("view-gate").classList.contains("is-active"));
   L("F1 title='" + document.getElementById("gate-title").textContent + "'");
-  const gateFree = document.getElementById("gate-free");
+  const gateFree = document.getElementById("gate-path-demo");
   L("F1 gate-free-cta=" + (gateFree ? gateFree.textContent : "MANCANTE"));
   if (!gateFree) { console.log("FAIL F1: manca il CTA materia a caso"); process.exit(1); }
 
@@ -140,6 +140,15 @@ window.eval(SIM_JS);
   L("F2 change-btn='" + document.getElementById("setup-bando-change").textContent + "'");
   if (!document.getElementById("view-setup").classList.contains("is-active")) { console.log("FAIL F2"); process.exit(1); }
   if (!nameEl.textContent) { console.log("FAIL F2: materia non estratta"); process.exit(1); }
+
+  // F2b: nel setup della demo c'è la via d'uscita verso il bando
+  const altBando = document.getElementById("setup-alt-bando");
+  L("F2b alt-bando=" + (altBando ? altBando.textContent.trim() : "MANCANTE") +
+    " hidden=" + (altBando ? altBando.classList.contains("hidden") : "?"));
+  if (!altBando || altBando.classList.contains("hidden")) {
+    console.log("FAIL F2b: manca la via d'uscita verso il bando nel setup demo");
+    process.exit(1);
+  }
 
   // F3: Cambia materia → materia diversa (o almeno ristratta senza crash)
   const first = nameEl.textContent;
