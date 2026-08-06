@@ -68,7 +68,7 @@ function boot(used, plan, failFeedback) {
     getActiveBando: () => ({ id: 42, filename: "Bando Istruttore Comune di Milano.pdf", total_pages: 38, created_at: "2026-07-12T10:00:00Z" }),
     setActiveBando: () => {},
     initShell: () => {},
-    FREE_SIM_LIMIT: 3
+    FREE_SIM_LIMIT: 5
   };
 
   const bank = [{ testo: "Domanda uno?", argomento: "Diritto" }, { testo: "Domanda due?", argomento: "Diritto" }];
@@ -119,9 +119,9 @@ function L(s) { console.log("  " + s); }
 (async function run() {
   console.log("=== TEST STATI SPECIALI ===");
 
-  // --- SCENARIO 1: quota esaurita (free, used=3) → springboard ---
-  console.log("[1] quota 3/3 free → springboard");
-  const s1 = boot(3, "free", false);
+  // --- SCENARIO 1: quota esaurita (free, used=5) → springboard ---
+  console.log("[1] quota 5/5 free → springboard");
+  const s1 = boot(5, "free", false);
   await sleep(800);
   L("S1 active=" + active(s1.document));
   L("S1 start='" + s1.document.getElementById("setup-start").textContent + "'");

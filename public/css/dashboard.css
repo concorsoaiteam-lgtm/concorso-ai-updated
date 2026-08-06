@@ -1573,6 +1573,21 @@ select:focus-visible,
    Reduced motion
    ========================================================================= */
 
+/* ---- Diario di apprendimento (memoria sintetica) ---- */
+.diario-empty-text { font-size: 13.5px; line-height: 1.55; color: var(--muted); margin: 0 0 var(--s-4); max-width: 56ch; }
+.diario-section { padding: var(--s-3) 0 2px; }
+.diario-section + .diario-section { border-top: 1px solid var(--line); }
+.diario-section-title { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
+.diario-row { display: flex; align-items: baseline; gap: 10px; padding: 7px 0; }
+.diario-main { min-width: 0; flex: 1; }
+.diario-name { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.diario-note { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.45; }
+.diario-stars { flex-shrink: 0; color: var(--ink); font-size: 12px; letter-spacing: 2px; }
+.diario-stars .off { color: var(--muted); opacity: .35; }
+.diario-check { flex-shrink: 0; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #E7F2EA; color: #2E7D4F; font-size: 11px; align-self: center; }
+.diario-row.is-superato .diario-name { color: var(--muted); font-weight: 500; text-decoration: line-through; text-decoration-color: var(--line-2); }
+.diario-cta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--line); }
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

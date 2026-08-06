@@ -20,6 +20,7 @@
     user: null,                 // {id, email, displayName, plan}
     bando: null,                // bando attivo da localStorage
     subject: null,              // materia dell'allenamento libero (senza bando)
+    allenaIntent: /[?&]allena=1/.test(window.location.search), // "Allenati" dalla dashboard
     used: 0,                    // simulazioni usate questo mese
     mode: "standard",           // standard|rapida|difficile|ripasso
     questions: [],              // [{id, testo, argomento}]
@@ -408,6 +409,14 @@
      Gate
      ------------------------------------------------------------------ */
   function renderGate() {
+    // Intento "Allenati" dalla dashboard: si salta il gate e si arriva
+    // al setup con la CTA mirata (la materia resta un'ancora visiva).
+    if (S.allenaIntent && !S.bando && !S.resumeData) {
+      pickRandomSubject();
+      showPhase("setup");
+      renderSetup();
+      return;
+    }
     showPhase("gate");
     var title = $("gate-title");
     var text = $("gate-text");
@@ -498,6 +507,13 @@
         ", risposta libera e correzione della commissione.";
     }
 
+    // Banner "Allenati" dalla dashboard: intent dichiarato, CTA dedicata.
+    var allenaZone = $("setup-dynamic");
+    if (S.allenaIntent && allenaZone) {
+      allenaZone.innerHTML =
+        '<div class="setup-allena-hint" role="status">Allenamento mirato: le domande nascono dai punti deboli del tuo diario.</div>';
+    }
+
     // Modalità — radiogroup
     var list = $("mode-list");
     var isPro = S.user && S.user.plan === "pro";
@@ -561,6 +577,9 @@
     } else if (S.mode === "difficile" && !isPro) {
       start.textContent = "Difficile è un piano Pro — scopri di più";
       start.onclick = function () { renderProPreview(); };
+    } else if (S.allenaIntent) {
+      start.textContent = "Allenati sui punti deboli";
+      start.onclick = function () { startAllenati(); };
     } else {
       start.textContent = "Inizia la simulazione →";
       start.onclick = function () { beginSession(); };
@@ -568,10 +587,13 @@
   }
 
   function isPro() { return S.user && S.user.plan === "pro"; }
-  function isQuotaExhausted() { return !isPro() && S.used >= 3; }
+  function isQuotaExhausted() { return !isPro() && S.used >= 5; }
 
   function selectMode(mode, skipRender) {
     if (!MODES[mode]) return;
+    // Scelta esplicita dell'utente (click/tastiera): l'intento "Allenati"
+    // si azzera — chi sceglie una modalità vuole quella modalità.
+    if (!skipRender) S.allenaIntent = false;
     S.mode = mode;
     document.querySelectorAll(".mode-card").forEach(function (c) {
       c.setAttribute("aria-checked", String(c.getAttribute("data-mode") === mode));
@@ -596,6 +618,9 @@
       } else if (mode === "difficile" && !isPro()) {
         start.textContent = "Difficile è un piano Pro — scopri di più";
         start.onclick = function () { renderProPreview(); };
+      } else if (S.allenaIntent) {
+        start.textContent = "Allenati sui punti deboli";
+        start.onclick = function () { startAllenati(); };
       } else {
         start.textContent = "Inizia la simulazione →";
         start.onclick = function () { beginSession(); };
@@ -630,7 +655,7 @@
         "</ul>" +
         '<div class="pro-preview-sample"><b>Difficile:</b> 12 domande con interruzioni e richieste di fonte, come un orale tosto. Timer per domanda nelle ultime 3.</div>' +
         '<div class="pro-preview-actions">' +
-          '<a class="btn btn-primary btn-block" href="pricing.html" data-pro-cta="setup">Passa a Pro — 14,99€/mese</a>' +
+          '<a class="btn btn-primary btn-block" href="pricing.html" data-pro-cta="setup">Passa a Pro — 29€/mese</a>' +
           '<button type="button" class="btn btn-ghost btn-block" id="pro-preview-back">Continua con Standard</button>' +
         "</div>" +
       "</div>";
@@ -651,15 +676,16 @@
     zone.innerHTML =
       '<div class="springboard" role="region" aria-label="Quota del mese usata">' +
         '<p class="springboard-eyebrow">Quota del mese usata</p>' +
-        "<h2>Hai completato le 3 simulazioni gratuite.</h2>" +
+        "<h2>Hai completato le 5 simulazioni gratuite.</h2>" +
         '<p class="springboard-sub">Il Pro non toglie un limite: aggiunge potenza.</p>' +
         '<ul class="springboard-list">' +
           '<li><span class="sb-num">1</span>Simulazioni illimitate</li>' +
-          '<li><span class="sb-num">2</span>Piano settimanale generato dal tuo bando</li>' +
-          '<li><span class="sb-num">3</span>Ripasso automatico delle domande deboli</li>' +
+          '<li><span class="sb-num">2</span>Diario di apprendimento: la memoria che ti segue</li>' +
+          '<li><span class="sb-num">3</span>Piano settimanale generato dal tuo bando</li>' +
+          '<li><span class="sb-num">4</span>Ripasso automatico delle domande deboli</li>' +
         "</ul>" +
         '<div class="pro-preview-actions">' +
-          '<a class="btn btn-primary btn-block" href="pricing.html" data-pro-cta="springboard">Passa a Pro — 14,99€/mese</a>' +
+          '<a class="btn btn-primary btn-block" href="pricing.html" data-pro-cta="springboard">Passa a Pro — 29€/mese</a>' +
           '<a class="btn btn-ghost btn-block" href="dashboard.html">Torna alla dashboard</a>' +
         "</div>" +
         '<p class="springboard-anchor">Meno di una lezione privata (25-50€/ora). Rinnovo il ' +
@@ -678,6 +704,7 @@
   function beginSession() {
     if (isQuotaExhausted()) { renderSpringboard(); return; }
     if (S.mode === "difficile" && !isPro()) { renderProPreview(); return; }
+    if (S.allenaIntent) { showPhase("setup"); renderSetup(); return; }
     if (!S.bando && !S.subject) { renderGate(); return; }
 
     // La bank è già stata precaricata a init (path critico <1s se pronta).
@@ -693,7 +720,7 @@
     // Numero domande della modalità, con edge case bank piccola.
     // In modalità "ripasso" le domande sono GIÀ state selezionate dal
     // chiamante (retryWeak/retryTopic): non rifiltrarle qui.
-    var wanted = MODES[S.mode] ? MODES[S.mode].n : 12;
+    var wanted = S.mode === "allenati" ? ALLENATI_N : (MODES[S.mode] ? MODES[S.mode].n : 12);
     if (S.mode !== "ripasso") {
       var n = Math.min(wanted, S.questions.length);
       S.questions = S.questions.slice(0, n);
@@ -1320,6 +1347,8 @@
     if (D) D.track(abandoned ? "sim_abandoned" : "sim_completed", {
       sim_id: S.simId, voto: averageVoto(), duration_min: Math.round(S.elapsedMs / 60000)
     });
+    // Memoria di apprendimento: aggiornamento in background, mai blocca il report.
+    updateMemoryAfterSession();
     renderReport();
   }
 
@@ -1344,7 +1373,7 @@
     var voto = averageVoto();
     var wrap = $("report-wrap");
     var durata = Math.max(1, Math.round(S.elapsedMs / 60000));
-    var modeLabel = (MODES[S.mode] && MODES[S.mode].label) || "Ripasso";
+    var modeLabel = (MODES[S.mode] && MODES[S.mode].label) || (S.mode === "allenati" ? "Allenamento mirato" : "Ripasso");
     var etaLabel = voto < 6 ? "Da lavorare" : (voto < 8 ? "Solido" : "Forte");
     var avg3 = avgDimension("chiarezza", "struttura", "contenuto");
 
@@ -1446,19 +1475,20 @@
         "</div>";
       }).join("") + "</div></div>";
 
-    // CTA
+    // CTA — "Allenati" è l'azione principale: chiude i buchi del diario.
     var hasWeak = deboli.length > 0;
     html += '<div class="report-actions">' +
+      '<button type="button" class="btn btn-primary btn-lg btn-block" id="report-allena">Allenati sui punti deboli</button>' +
       (hasWeak
-        ? '<button type="button" class="btn btn-primary btn-lg btn-block" id="report-retry-weak">Rifai le domande deboli</button>'
-        : '<button type="button" class="btn btn-primary btn-lg btn-block" id="report-new">Nuova simulazione</button>') +
+        ? '<button type="button" class="btn btn-soft btn-lg btn-block" id="report-retry-weak">Rifai questa sessione</button>'
+        : '') +
       '<button type="button" class="btn btn-ghost btn-lg btn-block" id="report-new2">Nuova simulazione</button>' +
       (isPro()
         ? '<button type="button" class="btn btn-soft btn-lg btn-block" id="report-piano">Piano settimanale</button>'
         : '<div class="report-teaser"><h3>Il piano settimanale.</h3>' +
           '<p>Un piano di allenamento generato dal tuo bando, con ripasso automatico delle domande deboli. ' +
           "Il trend di questa sessione è il primo punto che il piano sfrutta.</p>" +
-          '<a class="btn btn-primary btn-block" href="pricing.html" data-pro-cta="report">Passa a Pro — 14,99€/mese</a></div>') +
+          '<a class="btn btn-primary btn-block" href="pricing.html" data-pro-cta="report">Passa a Pro — 29€/mese</a></div>') +
     "</div>";
 
     wrap.innerHTML = html;
@@ -1484,6 +1514,8 @@
     });
 
     // CTA
+    var allenaBtn = $("report-allena");
+    if (allenaBtn) allenaBtn.addEventListener("click", function () { startAllenati(); });
     var weakBtn = $("report-retry-weak");
     if (weakBtn) weakBtn.addEventListener("click", function () { retryWeak(); });
     var newBtn = $("report-new");
@@ -1644,6 +1676,141 @@
     renderQuestion();
     startTimer();
     if (D) D.track("sim_report_action", { action: "retry_topic" });
+  }
+
+  /* ------------------------------------------------------------------
+     Memoria di apprendimento (diario) + ALLENATI
+     Ogni sessione completa aggiorna la memoria sintetica via /api/memory
+     (modello piccolo lato server). "Allenati" genera una banca NUOVA sui
+     soli temi deboli del diario: non ripete la sessione, la chiude.
+     ------------------------------------------------------------------ */
+  var ALLENATI_N = 6;
+
+  function updateMemoryAfterSession() {
+    try {
+      var voto = averageVoto();
+      if (!voto) return; // sessione senza risposte valutate: niente segnale
+      var punti = buildPuntiForza();
+      var deboli = buildDaLavorare();
+      var argomenti = buildArgomentiDeboli();
+      var dims = {};
+      ["chiarezza", "struttura", "contenuto"].forEach(function (k) {
+        var v = avgDimension(k);
+        dims[k] = (v != null && isFinite(v)) ? Math.round(v * 10) / 10 : null;
+      });
+      var materia = S.subject ? S.subject.name : (S.bando ? (S.bando.filename || null) : null);
+      var body = {
+        sessione: {
+          voto: Math.round(voto * 10) / 10,
+          dimensioni: dims,
+          punti_forti: punti.slice(0, 8).map(function (p) { return { text: p.text, tag: p.tag }; }),
+          deboli: deboli.slice(0, 10).map(function (p) { return { text: p.text, tag: p.tag }; }),
+          argomenti: argomenti.slice(0, 10).map(function (a) { return { argomento: a.argomento, media: a.media }; }),
+          materia: materia,
+          durata_min: Math.max(1, Math.round(S.elapsedMs / 60000))
+        }
+      };
+      fetch("/api/memory", {
+        method: "POST",
+        headers: llmHeaders(),
+        body: JSON.stringify(body)
+      }).catch(function () { /* mai bloccare il report */ });
+    } catch (_) { /* ignora */ }
+  }
+
+  function readMemoria() {
+    return fetch("/api/memory", { method: "GET", headers: llmHeaders() })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) { return (data && data.memoria) ? data.memoria : null; })
+      .catch(function () { return null; });
+  }
+
+  function topWeakTopics(mem, k) {
+    if (!mem || !Array.isArray(mem.temi)) return [];
+    return mem.temi
+      .filter(function (t) { return t && t.stato === "attivo" && Number(t.livello) >= 3; })
+      .sort(function (a, b) {
+        if ((b.livello || 0) !== (a.livello || 0)) return (b.livello || 0) - (a.livello || 0);
+        return (b.occorrenze || 1) - (a.occorrenze || 1);
+      })
+      .slice(0, k)
+      .map(function (t) { return t.tema; });
+  }
+
+  function generateAllenaBank(topics) {
+    var sys = "Sei il preparatore di un candidato a un concorso pubblico italiano. " +
+      "Obiettivo di questa sessione: chiudere le lacune. Il candidato deve migliorare esattamente " +
+      "questi argomenti deboli: " + topics.join(", ") + ". " +
+      "Genera " + ALLENATI_N + " domande orali tipiche SOLO su questi argomenti, distribuite in modo uniforme. " +
+      "Ogni domanda deve essere una richiesta aperta di esposizione (mai a scelta multipla), " +
+      "come le farebbe una commissione, in italiano. " +
+      'Rispondi SOLO con un array JSON senza markdown: [{"testo":"Domanda?","argomento":"Materia"}]';
+    return llmJson(sys, [], 8000).then(function (parsed) {
+      if (!parsed || !Array.isArray(parsed)) return null;
+      var out = [];
+      parsed.forEach(function (item, i) {
+        var t = String(item && item.testo || "").trim();
+        var a = String(item && item.argomento || topics[0] || "Dal bando").trim();
+        if (t) out.push({ id: "llm-all-" + (i + 1), testo: t, argomento: a });
+      });
+      return out.length ? out : null;
+    }).catch(function () { return null; });
+  }
+
+  function startAllenaSession(qs) {
+    S.mode = "allenati";
+    S.questions = qs.slice(0, ALLENATI_N);
+    S.answers = [];
+    S.idx = 0;
+    S.simId = null;
+    S.simCreated = false;
+    S.startedAt = Date.now();
+    S.elapsedMs = 0;
+    S.sending = false;
+    S.feedbackDone = false;
+    beginSessionDb();
+    showPhase("session");
+    renderQuestion();
+    startTimer();
+    if (D) D.track("sim_report_action", { action: "allena" });
+  }
+
+  function startAllenati() {
+    // Il diario si aggiorna a ogni sessione; "Allenati" chiude i buchi.
+    if (isQuotaExhausted()) {
+      if (D) D.toast("Quota gratuita del mese esaurita: le simulazioni ripartono il " +
+        (D.nextRenewalLabel ? D.nextRenewalLabel() : "prossimo mese") + ".");
+      return;
+    }
+    var btn = $("report-allena") || $("setup-start");
+    if (btn && !btn.disabled) btn.disabled = true;
+    if (btn) btn.textContent = "Preparo l'allenamento…";
+    readMemoria().then(function (mem) {
+      var weak = topWeakTopics(mem, 4);
+      if (!weak.length) {
+        if (btn) { btn.disabled = false; btn.textContent = "Allenati sui punti deboli"; }
+        if (D) D.toast("Il diario è ancora vuoto: le prime simulazioni lo costruiscono.");
+        S.allenaIntent = false;
+        newSimulation();
+        return null;
+      }
+      return generateAllenaBank(weak).then(function (qs) {
+        if (btn) { btn.disabled = false; btn.textContent = "Allenati sui punti deboli"; }
+        if (!qs || !qs.length) {
+          if (D) D.toast("Non riesco a preparare le domande ora. Riprova.");
+          S.allenaIntent = false;
+          newSimulation();
+          return null;
+        }
+        S.allenaIntent = false;
+        startAllenaSession(qs);
+        return qs;
+      });
+    }).catch(function () {
+      if (btn) { btn.disabled = false; btn.textContent = "Allenati sui punti deboli"; }
+      S.allenaIntent = false;
+      newSimulation();
+    });
   }
 
   /* ------------------------------------------------------------------

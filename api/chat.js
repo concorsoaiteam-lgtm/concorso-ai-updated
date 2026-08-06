@@ -18,68 +18,22 @@ const { createClient } = require('@supabase/supabase-js');
 try { require('ws'); } catch (_) { /* opzionale */ }
 const crypto = require('crypto'); // hash per log metric (no PII)
 
-// --- Chiave pubblica (anon) di fallback se le env vars mancano.
-// NB: la anon key è pubblica per design (RLS protegge i dati); in
-// produzione le env vars SUPABASE_URL / SUPABASE_ANON_KEY hanno
-// sempre priorità e si ruotano da Vercel senza toccare il codice.
-var HARDCODED_ANON_CHAT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
-var HARDCODED_URL_CHAT = 'https://xhifnparcouxsypkjcmn.supabase.co';
+// Config progetto Supabase condivisa: env con fallback documentato e
+// verifica token resiliente (JWT-ref) — vedi _lib/auth.js (round 53).
+const auth = require('./_lib/auth');
 
-function resolveAnonKey() {
-  return process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY || HARDCODED_ANON_CHAT;
-}
-function resolveSupabaseUrl() {
-  return process.env.SUPABASE_URL || HARDCODED_URL_CHAT;
-}
-
-const SUPABASE_URL = resolveSupabaseUrl();
-const SUPABASE_ANON_KEY = resolveAnonKey();
-
-// --- Verifica token resiliente -------------------------------------------
-// Le env vars di Vercel possono puntare a un progetto Supabase vecchio
-// (stale) mentre il client usa il progetto corrente. In quel caso
-// auth.getUser() rifiuta il JWT → 401 anche con utente loggato.
-// Strategia: prova prima la config da env; se fallisce, deriva il progetto
-// dal JWT stesso (il payload contiene il `ref`) e riprova con la anon key
-// del progetto corrente. Così l'auth funziona in entrambi i casi e le env
-// restano la fonte primaria quando sono corrette.
-function projectRefOf(jwt) {
-  try {
-    var parts = String(jwt || '').split('.');
-    if (parts.length !== 3) return null;
-    var payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
-    return (payload && typeof payload.ref === 'string' && payload.ref) ? payload.ref : null;
-  } catch (_) { return null; }
-}
-
-async function verifySupabaseToken(jwt) {
-  var candidates = [];
-  candidates.push({ url: SUPABASE_URL, key: SUPABASE_ANON_KEY, source: 'env' });
-  var ref = projectRefOf(jwt);
-  if (ref && /^[a-z0-9]{16,32}$/.test(ref)) {
-    var urlFromRef = 'https://' + ref + '.supabase.co';
-    var keyForRef = (SUPABASE_URL === urlFromRef) ? SUPABASE_ANON_KEY : HARDCODED_ANON_CHAT;
-    var already = candidates.some(function (c) { return c.url === urlFromRef && c.key === keyForRef; });
-    if (!already) candidates.push({ url: urlFromRef, key: keyForRef, source: 'jwt-ref' });
-  }
-  var lastError = null;
-  for (var i = 0; i < candidates.length; i++) {
-    try {
-      var sb = createClient(candidates[i].url, candidates[i].key, { auth: { persistSession: false } });
-      var res = await sb.auth.getUser(jwt);
-      if (res && res.data && res.data.user && !res.error) {
-        return { user: res.data.user, source: candidates[i].source };
-      }
-      lastError = (res && res.error) || new Error('no user');
-    } catch (e) { lastError = e; }
-  }
-  return { error: lastError };
-}
+const SUPABASE_URL = auth.resolveSupabaseUrl();
+const SUPABASE_ANON_KEY = auth.resolveAnonKey();
 // Provider AI configurabile via env var (default: OpenRouter OpenAI-compatible API)
 const AI_API_URL = process.env.AI_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
 const AI_MODEL = process.env.AI_MODEL || 'google/gemini-2.5-flash';
 const AI_REFERRER = process.env.AI_REFERRER || 'https://concorso-ai.vercel.app';
 const AI_TITLE = process.env.AI_TITLE || 'ConcorsoAI';
+// Failover (round 53): se configurato, il fallback entra in gioco quando
+// il provider primario esaurisce i tentativi retryable (503/rete/timeout).
+const AI_FALLBACK_URL = process.env.AI_FALLBACK_URL;
+const AI_FALLBACK_KEY = String(process.env.AI_FALLBACK_KEY || '').trim();
+const AI_FALLBACK_MODEL = process.env.AI_FALLBACK_MODEL;
 const UPSTREAM_TIMEOUT_MS = 30000;
 const FIXED_MODEL = AI_MODEL;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
@@ -305,7 +259,7 @@ async function handleRequest(req, res) {
 
   let supabaseUser = null;
   try {
-    const authRes = await verifySupabaseToken(userJwt);
+    const authRes = await auth.verifySupabaseToken(userJwt);
     if (authRes.error || !authRes.user) {
       logMetric('auth_fail', { reason: 'supabase_rejected' });
       return res.status(401).json({ error: 'Token non valido o scaduto' });
@@ -380,7 +334,7 @@ async function handleRequest(req, res) {
   // 6) Decide modalita: stream vs buffer
   const wantsStream = req.body.stream === true;
 
-  // 7) Forward verso AI provider — retry 3x su 503/throw (backoff esponenziale)
+  // 7) Forward verso AI provider — retry + FAILOVER (round 53)
   // TURNO 33 (Fase 5): mode='piano' inietta il system prompt canonico dell'utente.
   // Sovrascrive/aggiunge la system message in posizione 0.
   var SYSTEM_PROMPT_PIANO = 'Sei un coach AI per concorsi pubblici italiani. Rispondi sempre in italiano. Sii diretto e concreto. Max 2-3 frasi per messaggio. Se modifichi il piano spiega brevemente perché.';
@@ -393,106 +347,121 @@ async function handleRequest(req, res) {
     } else {
       msgs[0] = { role: 'system', content: SYSTEM_PROMPT_PIANO };
     }
-    forwardBody = { ...req.body, model: FIXED_MODEL, stream: true, messages: msgs };
+    forwardBody = { ...req.body, stream: true, messages: msgs };
   } else {
-    forwardBody = { ...req.body, model: FIXED_MODEL, stream: true };
+    forwardBody = { ...req.body, stream: true };
   }
-  var MAX_RETRIES = 3;
-  function backoffMs(attempt) { return 1000 * Math.pow(2, attempt - 1); } // 1s, 2s, 4s
+  // Il modello è deciso per-provider (il fallback può usare un modello
+  // diverso, tipicamente più economico).
+  var providers = [{ url: AI_API_URL, key: apiKey, model: FIXED_MODEL, name: 'primary' }];
+  if (AI_FALLBACK_URL && AI_FALLBACK_KEY) {
+    providers.push({ url: AI_FALLBACK_URL, key: AI_FALLBACK_KEY, model: AI_FALLBACK_MODEL || FIXED_MODEL, name: 'fallback' });
+  }
+  var MAX_ATTEMPTS_PER_PROVIDER = 2;
   var overallStart = Date.now();
-  let upstream = null;
+  var upstream = null;
   var lastRetryableErr = null;
-  var attemptsMade = 0;
+  var usedProvider = null;
   // Dichiarati fuori dal loop così sono visibili dopo (sezioni 8 e 9)
   var activeController = null;
   var activeTimeoutId = null;
 
-  for (var attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    attemptsMade = attempt;
-    var ctrl = new AbortController();
-    var tId = setTimeout(function () { ctrl.abort(); }, UPSTREAM_TIMEOUT_MS);
-    activeController = ctrl;
-    activeTimeoutId = tId;
-    var tStart = Date.now();
+  outer:
+  for (var pi = 0; pi < providers.length; pi++) {
+    var provider = providers[pi];
+    for (var attempt = 1; attempt <= MAX_ATTEMPTS_PER_PROVIDER; attempt++) {
+      var ctrl = new AbortController();
+      var tId = setTimeout(function () { ctrl.abort(); }, UPSTREAM_TIMEOUT_MS);
+      activeController = ctrl;
+      activeTimeoutId = tId;
+      var tStart = Date.now();
 
-    try {
-      upstream = await fetch(AI_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + apiKey,
-          'HTTP-Referer': AI_REFERRER,
-          'X-Title': AI_TITLE
-        },
-        body: JSON.stringify(forwardBody),
-        signal: ctrl.signal
-      });
-      var tElapsed = Date.now() - tStart;
+      try {
+        upstream = await fetch(provider.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + provider.key,
+            'HTTP-Referer': AI_REFERRER,
+            'X-Title': AI_TITLE
+          },
+          body: JSON.stringify(Object.assign({}, forwardBody, { model: provider.model })),
+          signal: ctrl.signal
+        });
+        var tElapsed = Date.now() - tStart;
 
-      if (upstream.ok) {
-        // SUCCESSO — esce dal loop
-        clearTimeout(tId);
-        break;
-      }
-
-      // Non-ok: distingue 503 (retryable) dagli altri (fail immediato)
-      if (upstream.status === 503) {
-        var rawBody503;
-        try { rawBody503 = await upstream.text(); } catch (_) { rawBody503 = '(unreadable)'; }
-        lastRetryableErr = { status: 503, body: rawBody503, elapsedMs: tElapsed };
-        if (attempt < MAX_RETRIES) {
-          logMetric('upstream_503_retry', { userId: hashUserId(supabaseUser.id), attempt: attempt });
+        if (upstream.ok) {
+          // SUCCESSO — esce da entrambi i loop
+          usedProvider = provider.name;
           clearTimeout(tId);
-          await new Promise(function (r) { setTimeout(r, backoffMs(attempt)); });
-          continue;
+          break outer;
         }
-        // Ultimo tentativo: esce dal loop verso exhausted handler
-        logMetric('upstream_503_exhausted', { userId: hashUserId(supabaseUser.id), attempts: attempt });
+
+        // Non-ok: 5xx/429 sono retryable (stesso provider prima, poi fallback)
+        if (upstream.status === 503 || upstream.status === 502 || upstream.status === 500 || upstream.status === 429) {
+          var rawBodyRetry;
+          try { rawBodyRetry = await upstream.text(); } catch (_) { rawBodyRetry = '(unreadable)'; }
+          lastRetryableErr = { status: upstream.status, body: rawBodyRetry, elapsedMs: tElapsed, provider: provider.name };
+          if (attempt < MAX_ATTEMPTS_PER_PROVIDER) {
+            logMetric('upstream_retry', { userId: hashUserId(supabaseUser.id), provider: provider.name, status: upstream.status, attempt: attempt });
+            clearTimeout(tId);
+            await new Promise(function (r) { setTimeout(r, 800 * attempt); });
+            continue;
+          }
+          logMetric('upstream_provider_exhausted', { userId: hashUserId(supabaseUser.id), provider: provider.name, status: upstream.status, attempts: attempt });
+          clearTimeout(tId);
+          break; // passa al fallback (o termina)
+        }
+
+        // Non-retryable (400, 401, ...) — fail subito
         clearTimeout(tId);
-        break;
-      }
+        var rawBodyFail;
+        try { rawBodyFail = await upstream.text(); } catch (_) { rawBodyFail = '(unreadable)'; }
+        var parsedFail;
+        try { parsedFail = JSON.parse(rawBodyFail); } catch (_) { parsedFail = { raw_text: rawBodyFail.slice(0, 2000) }; }
+        logMetric('upstream_status_error', { userId: hashUserId(supabaseUser.id), status: upstream.status, provider: provider.name, elapsedMs: tElapsed });
+        return res.status(upstream.status).json({ error: 'Upstream error', upstream_status: upstream.status, upstream_body: parsedFail });
 
-      // Non-retryable (400, 401, 429, 500, ...) — fail subito
-      clearTimeout(tId);
-      var rawBodyFail;
-      try { rawBodyFail = await upstream.text(); } catch (_) { rawBodyFail = '(unreadable)'; }
-      var parsedFail;
-      try { parsedFail = JSON.parse(rawBodyFail); } catch (_) { parsedFail = { raw_text: rawBodyFail.slice(0, 2000) }; }
-      logMetric('upstream_status_error', { userId: hashUserId(supabaseUser.id), status: upstream.status, elapsedMs: tElapsed });
-      return res.status(upstream.status).json({ error: 'Upstream error', upstream_status: upstream.status, upstream_body: parsedFail });
+      } catch (fetchErr) {
+        clearTimeout(tId);
+        var tCatch = Date.now() - tStart;
+        var errName = (fetchErr && (fetchErr.name || fetchErr.code)) || 'unknown';
+        var errMsg = fetchErr ? (fetchErr.message || String(fetchErr)) : 'null';
 
-    } catch (fetchErr) {
-      clearTimeout(tId);
-      var tCatch = Date.now() - tStart;
-      var errName = (fetchErr && (fetchErr.name || fetchErr.code)) || 'unknown';
-      var errMsg = fetchErr ? (fetchErr.message || String(fetchErr)) : 'null';
+        if (errName === 'AbortError') {
+          lastRetryableErr = { name: 'AbortError', message: errMsg, elapsedMs: tCatch, provider: provider.name };
+          if (attempt < MAX_ATTEMPTS_PER_PROVIDER) {
+            await new Promise(function (r) { setTimeout(r, 800 * attempt); });
+            continue;
+          }
+          logMetric('upstream_timeout', { userId: hashUserId(supabaseUser.id), provider: provider.name, elapsedMs: tCatch, attempts: attempt });
+          break; // passa al fallback (o termina)
+        }
 
-      if (errName === 'AbortError') {
-        lastRetryableErr = { name: 'AbortError', message: errMsg, elapsedMs: tCatch };
-        if (attempt < MAX_RETRIES) {
-          await new Promise(function (r) { setTimeout(r, backoffMs(attempt)); });
+        // Errore di rete — retry sullo stesso provider, poi fallback
+        lastRetryableErr = { name: errName, message: errMsg, elapsedMs: tCatch, provider: provider.name };
+        logMetric('upstream_fetch_retry', { userId: hashUserId(supabaseUser.id), provider: provider.name, errType: errName, attempts: attempt });
+        if (attempt < MAX_ATTEMPTS_PER_PROVIDER) {
+          await new Promise(function (r) { setTimeout(r, 800 * attempt); });
           continue;
         }
-        logMetric('upstream_timeout', { userId: hashUserId(supabaseUser.id), elapsedMs: tCatch, attempts: attempt });
-        return res.status(504).json({ error: 'Timeout upstream', details: 'Il provider AI non ha risposto entro ' + (UPSTREAM_TIMEOUT_MS / 1000) + 's dopo ' + attempt + ' tentativi', elapsedMs: tCatch, attempts: attempt });
+        logMetric('upstream_provider_fail', { userId: hashUserId(supabaseUser.id), provider: provider.name, errType: errName, elapsedMs: tCatch, attempts: attempt });
+        break; // passa al fallback (o termina)
       }
-
-      // Errore di rete — retry
-      logMetric('upstream_fetch_retry', { userId: hashUserId(supabaseUser.id), errType: errName, attempts: attempt });
-      lastRetryableErr = { name: errName, message: errMsg, elapsedMs: tCatch };
-      if (attempt < MAX_RETRIES) {
-        await new Promise(function (r) { setTimeout(r, backoffMs(attempt)); });
-        continue;
-      }
-      logMetric('upstream_fetch_fail', { userId: hashUserId(supabaseUser.id), errType: errName, elapsedMs: tCatch, attempts: attempt });
-      return res.status(502).json({ error: 'Fetch upstream fallita', details: errMsg, errType: errName, elapsedMs: tCatch, attempts: attempt });
     }
   }
 
-  // Se arriviamo qui senza upstream.ok, ultimo errore era 503 esaurito
+  // Tutti i provider esauriti senza successo
   if (!upstream || !upstream.ok) {
-    logMetric('upstream_retries_exhausted', { userId: hashUserId(supabaseUser.id), attempts: attemptsMade, overallMs: Date.now() - overallStart });
-    return res.status(503).json({ error: 'Servizio di generazione temporaneamente sovraccarico', details: 'I server AI non rispondono dopo ' + attemptsMade + ' tentativi. Riprova tra qualche istante.', attempts: attemptsMade });
+    logMetric('upstream_retries_exhausted', { userId: hashUserId(supabaseUser.id), provider: usedProvider || 'none', overallMs: Date.now() - overallStart });
+    if (lastRetryableErr && lastRetryableErr.name === 'AbortError') {
+      return res.status(504).json({ error: 'Timeout upstream', details: 'I server AI non rispondono entro ' + (UPSTREAM_TIMEOUT_MS / 1000) + 's', elapsedMs: lastRetryableErr.elapsedMs });
+    }
+    if (lastRetryableErr && lastRetryableErr.name) {
+      // Errore di rete su tutti i provider (non uno status HTTP).
+      return res.status(502).json({ error: 'Fetch upstream fallita', details: lastRetryableErr.message || String(lastRetryableErr.name), errType: lastRetryableErr.name });
+    }
+    return res.status(503).json({ error: 'Servizio di generazione temporaneamente sovraccarico', details: 'I server AI non rispondono dopo più tentativi. Riprova tra qualche istante.', attempts: providers.length * MAX_ATTEMPTS_PER_PROVIDER });
   }
 
   // 8) MODALITA NON-STREAM (legacy client): bufferizza SSE upstream in JSON

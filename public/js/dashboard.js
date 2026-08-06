@@ -87,6 +87,7 @@
 
     renderRiprendi();
     renderMetriche();
+    renderDiario();
     renderUltime();
     renderQuotaProgress();
     renderPianoTeaser();
@@ -177,6 +178,108 @@
       (r != null ? ' data-count="' + r + '"' : "") + ">" + initial +
       '</div><div class="stat-label">' +
       Dash.escapeHtml(label) + "</div></div>";
+  }
+
+  /* ------------------------------------------------------------------
+     Diario di apprendimento — memoria sintetica (una riga per utente)
+     ------------------------------------------------------------------ */
+  function renderDiario() {
+    var el = $("pano-diario");
+    if (!el) return;
+    if (!supabase || !currentUser) return;
+    supabase.from("memoria")
+      .select("memoria")
+      .eq("user_id", currentUser.id)
+      .maybeSingle()
+      .then(function (res) {
+        if (res.error) { renderDiarioEmpty(); return; }
+        var mem = (res.data && res.data.memoria) ? res.data.memoria : null;
+        var temi = (mem && Array.isArray(mem.temi)) ? mem.temi : [];
+        if (!temi.length) { renderDiarioEmpty(); return; }
+        renderDiarioList(mem);
+      })
+      .catch(function () { renderDiarioEmpty(); });
+  }
+
+  function renderDiarioEmpty() {
+    var el = $("pano-diario");
+    if (!el) return;
+    el.innerHTML =
+      '<div class="card diario-card">' +
+        '<div class="card-head"><h2 class="card-title">Il tuo diario</h2><span class="chip">Memoria</span></div>' +
+        '<p class="diario-empty-text">Il diario si costruisce da solo: dopo ogni simulazione qui compaiono ' +
+        "i temi da ripassare e i miglioramenti. Basta una sessione per vedere la prima voce.</p>" +
+        '<button type="button" class="btn btn-primary" id="diario-first-sim">Fai la prima simulazione</button>' +
+      "</div>";
+    var btn = $("diario-first-sim");
+    if (btn) btn.addEventListener("click", startSimulation);
+  }
+
+  function starRow(livello) {
+    var filled = Math.max(0, Math.min(5, Math.round(Number(livello) || 0)));
+    var s = "";
+    for (var i = 1; i <= 5; i++) s += i <= filled ? "★" : '<span class="off">★</span>';
+    return s;
+  }
+
+  function renderDiarioList(mem) {
+    var el = $("pano-diario");
+    if (!el) return;
+    var temi = (mem && Array.isArray(mem.temi)) ? mem.temi : [];
+    // Robustezza: righe legacy senza `stato` contano come attive.
+    var attivi = temi.filter(function (t) { return t && t.stato !== "superato"; });
+    var superati = temi.filter(function (t) { return t && t.stato === "superato"; });
+    var progressi = (mem && Array.isArray(mem.progressi)) ? mem.progressi : [];
+
+    var html = '<div class="card diario-card">' +
+      '<div class="card-head"><h2 class="card-title">Il tuo diario</h2><span class="chip">Memoria</span></div>';
+
+    if (attivi.length) {
+      html += '<div class="diario-section">' +
+        '<div class="diario-section-title">Da ripassare</div>' +
+        attivi.slice(0, 5).map(function (t) {
+          var note = String(t.note || "").slice(0, 64);
+          return '<div class="diario-row">' +
+            '<div class="diario-main">' +
+              '<div class="diario-name">' + Dash.escapeHtml(t.tema) + "</div>" +
+              (note ? '<div class="diario-note">' + Dash.escapeHtml(note) + (String(t.note).length > 64 ? "…" : "") + "</div>" : "") +
+            "</div>" +
+            '<div class="diario-stars" aria-label="Debolezza ' + (t.livello || 0) + " su 5" +
+              ' su 5" title="Debolezza ' + (t.livello || 0) + ' su 5">' + starRow(t.livello) + '</div>' +
+          "</div>";
+        }).join("") +
+      "</div>";
+    }
+    if (superati.length) {
+      html += '<div class="diario-section">' +
+        '<div class="diario-section-title">Superati</div>' +
+        superati.slice(0, 3).map(function (t) {
+          return '<div class="diario-row is-superato">' +
+            '<span class="diario-check" aria-hidden="true">✓</span>' +
+            '<div class="diario-main"><div class="diario-name">' + Dash.escapeHtml(t.tema) + "</div></div>" +
+          "</div>";
+        }).join("") +
+      "</div>";
+    }
+    if (progressi.length) {
+      html += '<div class="diario-section">' +
+        '<div class="diario-section-title">Miglioramenti</div>' +
+        progressi.slice(0, 2).map(function (p) {
+          var txt = String(p.descrizione || p.tema || "").slice(0, 80);
+          return '<div class="diario-row is-superato">' +
+            '<span class="diario-check" aria-hidden="true">✓</span>' +
+            '<div class="diario-main"><div class="diario-note">' + Dash.escapeHtml(txt) + "</div></div>" +
+          "</div>";
+        }).join("") +
+      "</div>";
+    }
+
+    html += '<div class="diario-cta">' +
+      '<a class="btn btn-primary" href="simulation.html?allena=1">Allenati sui punti deboli</a>' +
+      '<a class="btn btn-ghost" href="history.html">Vedi lo storico</a>' +
+      "</div></div>";
+
+    el.innerHTML = html;
   }
 
   function renderUltime() {

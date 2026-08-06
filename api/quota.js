@@ -11,83 +11,19 @@
 //   SUPABASE_URL / SUPABASE_ANON_KEY — progetto Supabase
 // ============================================================
 
-const { createClient } = require('@supabase/supabase-js');
-// Safety: ws non piu' passato al client, ma lo teniamo per eventuali
-// dipendenze transitive di @supabase/realtime-js in Node.js
-try { require('ws'); } catch (_) { /* opzionale */ }
+// Config Supabase condivisa (env + fallback documentato + verifica token
+// resiliente via JWT-ref): vedi _lib/auth.js (round 53).
+const auth = require('./_lib/auth');
 
-// Chiave pubblica (anon) di fallback se le env vars mancano.
-// NB: la anon key è pubblica per design (RLS protegge i dati); in
-// produzione le env vars SUPABASE_URL / SUPABASE_ANON_KEY hanno
-// sempre priorità e si ruotano da Vercel senza toccare il codice.
-var HARDCODED_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWZucGFyY291eHN5cGtqY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDMxNTQsImV4cCI6MjA5ODE3OTE1NH0._NjGTkLfAVjCcaefEtx46lW15Twl7LHGoWLFxOPvRnM';
-var HARDCODED_URL = 'https://xhifnparcouxsypkjcmn.supabase.co';
-
-function resolveAnonKey() {
-  return process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY || HARDCODED_ANON;
-}
-function resolveSupabaseUrl() {
-  return process.env.SUPABASE_URL || HARDCODED_URL;
-}
-
-const SUPABASE_URL = resolveSupabaseUrl();
-const SUPABASE_ANON_KEY = resolveAnonKey();
-
-// --- Verifica token resiliente (stesso pattern di api/chat.js) -----------
-// Le env vars di Vercel possono puntare a un progetto Supabase vecchio;
-// in quel caso auth.getUser() rifiuta il JWT → 401 anche da loggati.
-// Prova prima la config da env; se fallisce deriva il progetto dal ref
-// contenuto nel JWT e riprova con l'anon key del progetto corrente.
-function projectRefOf(jwt) {
-  try {
-    var parts = String(jwt || '').split('.');
-    if (parts.length !== 3) return null;
-    var payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
-    return (payload && typeof payload.ref === 'string' && payload.ref) ? payload.ref : null;
-  } catch (_) { return null; }
-}
-
-async function verifySupabaseToken(jwt) {
-  var candidates = [
-    { url: SUPABASE_URL, key: SUPABASE_ANON_KEY },
-    { url: 'https://' + projectRefOf(jwt) + '.supabase.co', key: HARDCODED_ANON }
-  ];
-  if (!projectRefOf(jwt)) candidates.pop();
-  var lastError = null;
-  for (var i = 0; i < candidates.length; i++) {
-    try {
-      var sb = createClient(candidates[i].url, candidates[i].key, { auth: { persistSession: false } });
-      var res = await sb.auth.getUser(jwt);
-      if (res && res.data && res.data.user && !res.error) {
-        return { user: res.data.user };
-      }
-      lastError = (res && res.error) || new Error('no user');
-    } catch (e) { lastError = e; }
-  }
-  return { error: lastError };
-}
+const SUPABASE_URL = auth.resolveSupabaseUrl();
+const SUPABASE_ANON_KEY = auth.resolveAnonKey();
 
 const FREE_PLAN_QUOTA_MONTHLY = 5;
-
-const CRITICAL_PROJECT_REF = SUPABASE_URL
-  ? new URL(SUPABASE_URL).hostname.split('.')[0]
-  : 'xhifnparcouxsypkjcmn';
 
 function getStartOfMonthUTC() {
   const now = new Date();
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0)).toISOString();
 }
-
-function extractProjectRefFromJwt(jwt) {
-  try {
-    const parts = jwt.split('.');
-    if (parts.length !== 3) return null;
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
-    return payload.ref || null;
-  } catch (_) { return null; }
-}
-
-// === DEBUG: log all'avvio del modulo ===
 
 module.exports = async function handler(req, res) {
   try {
@@ -115,7 +51,7 @@ module.exports = async function handler(req, res) {
 
     let supabaseUser = null;
     try {
-      const authRes = await verifySupabaseToken(jwt);
+      const authRes = await auth.verifySupabaseToken(jwt);
       if (authRes.error || !authRes.user) {
         return res.status(401).json({ error: 'Token non valido' });
       }
@@ -139,10 +75,7 @@ module.exports = async function handler(req, res) {
     }
 
     try {
-      const supabase2 = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: { persistSession: false },
-        global: { headers: { Authorization: 'Bearer ' + jwt } }
-      });
+      const supabase2 = auth.userClient(jwt);
       const since = getStartOfMonthUTC();
       const { count, error } = await supabase2
         .from('simulazioni')

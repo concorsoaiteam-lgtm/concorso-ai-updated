@@ -1482,6 +1482,21 @@ a { color: inherit; }
 /* =========================================================================
    REDUCED MOTION — tutto istantaneo
    ========================================================================= */
+/* Banner "Allenati" dal diario (intento dichiarato dalla dashboard). */
+.setup-allena-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--line, #E6DFD2);
+  border-radius: 6px;
+  background: var(--bg-2, #F2EDE2);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-soft, #2A2D34);
+  margin: 0 0 16px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

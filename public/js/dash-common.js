@@ -37,7 +37,7 @@
   var REDUCED_MOTION = window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  var FREE_SIM_LIMIT = 3; // 3 simulazioni/mese per il Free (dashboard-master §2.2)
+  var FREE_SIM_LIMIT = 5; // 5 simulazioni/mese per il Free (allineato a api/quota.js, round 53)
 
   /* ------------------------------------------------------------------
      Helper
