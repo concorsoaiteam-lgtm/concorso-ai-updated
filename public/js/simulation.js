@@ -40,7 +40,10 @@
     helpCtrl: null,             // AbortController dell'aiuto corrente
     helpCache: {},              // spunto/risposta già generati per domanda (q.id → {spunto, risposta})
     resumeData: null,           // sessione da riprendere
-    bankLoading: null           // Promise generazione bank
+    bankLoading: null,          // Promise generazione bank
+    voiceMetrics: null,         // metriche paralinguistiche ultima risposta vocale
+    voiceTtsEndAt: 0,           // performance.now() quando la TTS della domanda è finita
+    voiceSpeaking: false        // la commissione sta ancora leggendo la domanda
   };
 
   /* ------------------------------------------------------------------
@@ -270,13 +273,16 @@
   }
 
   function persistAnswerLocal(q, risposta, scores, feedback, suggerimento) {
-    S.answers.push({
+    var entry = {
       q: { id: q.id, testo: q.testo, argomento: q.argomento },
       risposta: risposta,
       scores: scores,          // {chiarezza, struttura, contenuto, lessico, pertinenza}
       feedback: feedback,
       suggerimento: suggerimento
-    });
+    };
+    // Le metriche vocali fanno parte della risposta: mai perse.
+    if (S.voiceMetrics) entry.voice = S.voiceMetrics;
+    S.answers.push(entry);
     saveDraft();
   }
 
@@ -983,6 +989,8 @@
     hideFeedback();
     hidePrevFeedback();
     resetHelp();
+    resetVoiceForQuestion();
+    speakQuestion(q);
     ta.focus();
 
     if (S.mode === "difficile" && tot - S.idx <= 3) {
@@ -992,6 +1000,64 @@
     }
 
     if (D) D.track("sim_question_viewed", { sim_id: S.simId, idx: S.idx });
+  }
+
+  /* ------------------------------------------------------------------
+     Voce — stato per domanda + lettura della domanda da parte della
+     commissione (TTS on-device). Le metriche vocali della risposta
+     restano in S.voiceMetrics e diventano parte del feedback.
+     ------------------------------------------------------------------ */
+  function resetVoiceForQuestion() {
+    S.voiceMetrics = null;
+    S.voiceTtsEndAt = 0;
+    S.voiceSpeaking = false;
+    var m = $("voice-metrics");
+    if (m) { m.classList.remove("is-on"); m.innerHTML = ""; }
+    var st = $("voice-status");
+    if (st) { st.className = "voice-status"; st.textContent = ""; }
+    var vb = $("voice-btn");
+    if (vb) {
+      vb.disabled = false;
+      vb.classList.remove("is-busy");
+      vb.setAttribute("aria-pressed", "false");
+      var lbl = $("voice-btn-label");
+      if (lbl) lbl.textContent = "Rispondi a voce";
+    }
+    if (window.Voice && Voice.recording) Voice.cancel();
+  }
+
+  /* La commissione legge la domanda ad alta voce (se la voce è attiva).
+     Il timestamp di fine lettura serve a rilevare le interruzioni. */
+  function speakQuestion(q) {
+    if (!q || S.phase !== "session") return;
+    if (!window.Voice || !Voice.ttsEnabled) return;
+    S.voiceSpeaking = true;
+    Voice.speak("«" + q.testo + "»").then(function () {
+      S.voiceSpeaking = false;
+      S.voiceTtsEndAt = performance.now();
+    }).catch(function () {
+      S.voiceSpeaking = false;
+    });
+  }
+
+  function fmtVoiceMetrics(metrics) {
+    if (!metrics) return "";
+    var bits = [];
+    if (metrics.timeToAnswerMs != null) {
+      bits.push("risposta iniziata dopo " + Math.round(metrics.timeToAnswerMs / 1000) + "s");
+    }
+    if (metrics.speechMs) {
+      bits.push(Math.round(metrics.speechMs / 1000) + "s di parlato");
+    }
+    if (metrics.pauseCount) {
+      bits.push(metrics.pauseCount + (metrics.pauseCount === 1 ? " pausa" : " pause"));
+    }
+    if (metrics.wpm) bits.push(metrics.wpm + " parole/min");
+    if (metrics.fillerCount) {
+      bits.push(metrics.fillerCount + (metrics.fillerCount === 1 ? " riempitivo" : " riempitivi"));
+    }
+    if (metrics.interrupted) bits.push("domanda interrotta");
+    return bits.join(" · ");
   }
   /* ------------------------------------------------------------------
      Invio risposta
@@ -1261,6 +1327,15 @@
     if (S.subject) ctx += "La prova è di «" + S.subject.name + "». ";
     ctx += "Stai interrogando un candidato sulla domanda: «" + q.testo + "». " +
       "Il candidato ha risposto: «" + risposta.slice(0, 4000) + "». ";
+    // Il "come" conta quanto il "cosa": i dati di esposizione orale entrano
+    // nella valutazione (mai persi). Solo se ci sono, mai inventati.
+    if (S.voiceMetrics) {
+      var vd = fmtVoiceMetrics(S.voiceMetrics);
+      if (vd) {
+        ctx += " Esposizione orale del candidato (dalla voce): " + vd + ". ";
+        ctx += "Tienila in conto nel feedback solo se rilevante (es. troppe pause o risposta troppo lenta). ";
+      }
+    }
     var sys = ctx +
       "Valuta con precisione su 5 dimensioni (0-10, massimo 1 decimale): chiarezza, struttura, " +
       "contenuto, lessico, pertinenza. Poi scrivi un feedback di max 90 parole in italiano " +
@@ -1496,6 +1571,7 @@
 
   function nextQuestion() {
     hidePrevFeedback();
+    if (window.Voice && (Voice.recording || Voice.transcribing)) Voice.cancel();
     S.idx += 1;
     renderQuestion();
   }
@@ -1665,6 +1741,7 @@
     S.phase = "paused";
     stopTimer();
     stopCountdown();
+    if (window.Voice && (Voice.recording || Voice.transcribing)) Voice.cancel();
     saveDraft();
     if (D) D.track("sim_paused", { sim_id: S.simId });
     var overlay = $("pause-overlay");
@@ -1693,6 +1770,7 @@
   }
 
   function terminateSession() {
+    if (window.Voice) Voice.cancel();
     var html = "<h2>Vuoi terminare?</h2>" +
       "<p>Le risposte già date restano nello storico.</p>" +
       '<div class="modal-actions">' +
@@ -1713,6 +1791,7 @@
   function completeSession(abandoned) {
     stopTimer();
     stopCountdown();
+    if (window.Voice) Voice.cancel();
     $("pause-overlay").classList.remove("is-on");
     // La sessione si chiude sempre (anche se abbandonata): le risposte già
     // date restano nello storico, mai un blocco orfano in_progress.
@@ -2357,6 +2436,40 @@
     // Invia
     $("send-btn").addEventListener("click", function () { submitAnswer(false); });
 
+    // ----- Voce -----
+    // Inizializza il modulo vocale con i callback di stato (UI live,
+    // mai una UI vuota: lo stato di ascolto/trascrizione è sempre visibile).
+    if (window.Voice) {
+      Voice.init({
+        onStatus: onVoiceStatus,
+        onResult: onVoiceResult,
+        onTtsState: onVoiceTtsState
+      });
+
+      // Toggle "Rispondi a voce"
+      var vBtn = $("voice-btn");
+      if (vBtn) vBtn.addEventListener("click", onVoiceClick);
+
+      // Toggle "Voce della commissione"
+      var ttsBtn = $("voice-tts-toggle");
+      if (ttsBtn) {
+        ttsBtn.setAttribute("aria-pressed", Voice.ttsEnabled ? "true" : "false");
+        $("voice-tts-label").textContent = Voice.ttsEnabled ? "Voce: attiva" : "Voce della commissione";
+        ttsBtn.addEventListener("click", function () {
+          Voice.setTtsEnabled(!Voice.ttsEnabled);
+          var on = Voice.ttsEnabled;
+          ttsBtn.setAttribute("aria-pressed", on ? "true" : "false");
+          $("voice-tts-label").textContent = on ? "Voce: attiva" : "Voce della commissione";
+          if (D) D.track("sim_voice_tts", { on: on });
+        });
+      }
+
+      // Niente microfono → nascondi il controllo "Rispondi a voce".
+      if (!Voice.micSupported && vBtn) {
+        vBtn.closest(".voice-row").classList.add("hidden");
+      }
+    }
+
     // Pausa
     $("sess-pause").addEventListener("click", openPause);
     $("pause-resume").addEventListener("click", closePause);
@@ -2406,6 +2519,136 @@
     var ta = $("answer-textarea");
     var n = countWords(ta.value);
     $("word-count").textContent = n + (n === 1 ? " parola" : " parole");
+  }
+
+  /* ------------------------------------------------------------------
+     Voce — handler UI (stato, risultato trascrizione, stato TTS)
+     ------------------------------------------------------------------ */
+  function onVoiceClick() {
+    if (!window.Voice) return;
+    var btn = $("voice-btn");
+    if (Voice.recording) {
+      pressFx(btn);
+      Voice.stop();
+      return;
+    }
+    if (Voice.transcribing || S.sending || S.phase !== "session") return;
+    pressFx(btn);
+    btn.classList.add("is-busy");
+    // Interruzione = il mic parte mentre la commissione legge ancora.
+    Voice.start({ interruptedByUser: S.voiceSpeaking })
+      .catch(function (err) {
+        btn.classList.remove("is-busy");
+        var st = $("voice-status");
+        var msg = (err && err.message === "mic-unsupported")
+          ? "Il microfono non è supportato su questo browser."
+          : (err && err.message === "already-busy") ? ""
+          : "Microfono non disponibile: controlla i permessi e riprova.";
+        if (st && msg) {
+          st.className = "voice-status";
+          st.textContent = msg;
+        }
+        if (D) D.track("sim_voice_error", { reason: (err && err.message) || "unknown" });
+      });
+  }
+
+  /* Stato live della registrazione: la UI non è mai "vuota" mentre
+     la commissione ascolta o trascrive. */
+  function onVoiceStatus(s) {
+    var st = $("voice-status");
+    var btn = $("voice-btn");
+    if (!st) return;
+    var dot = '<span class="dot"></span>';
+    switch (s) {
+      case "recording":
+        st.className = "voice-status is-speaking";
+        st.innerHTML = dot + " Ti ascolto: rispondi come davanti alla commissione…";
+        if (btn) {
+          btn.classList.remove("is-busy");
+          btn.setAttribute("aria-pressed", "true");
+          $("voice-btn-label").textContent = "Ferma";
+        }
+        break;
+      case "speaking":
+        st.className = "voice-status is-speaking";
+        st.innerHTML = dot + " Ti ascolto…";
+        break;
+      case "listening":
+        st.className = "voice-status";
+        st.innerHTML = dot + " Ho sentito. Sto trascrivendo…";
+        break;
+      case "transcribing":
+        st.className = "voice-status is-busy";
+        st.textContent = "Trascrivo la risposta…";
+        if (btn) {
+          btn.classList.remove("is-busy");
+          btn.setAttribute("aria-pressed", "false");
+          $("voice-btn-label").textContent = "Rispondi a voce";
+        }
+        break;
+      default:
+        st.className = "voice-status";
+        st.textContent = "";
+        if (btn) {
+          btn.classList.remove("is-busy");
+          btn.setAttribute("aria-pressed", "false");
+          $("voice-btn-label").textContent = "Rispondi a voce";
+        }
+    }
+  }
+
+  /* Risultato della trascrizione: il testo riempie la textarea, le
+     metriche vocali restano per il feedback. Mai un vuoto silenzioso. */
+  function onVoiceResult(res) {
+    var st = $("voice-status");
+    var text = String(res.text || "").trim();
+    var metrics = res.metrics || {};
+    if (text) {
+      S.voiceMetrics = metrics;
+      var ta = $("answer-textarea");
+      ta.value = text;
+      ta.disabled = false;
+      updateWordCount();
+      autoSize(ta);
+      var send = $("send-btn");
+      send.disabled = false;
+      // Metriche visibili: il "come" ha parlato, non solo il "cosa".
+      var mEl = $("voice-metrics");
+      if (mEl) {
+        mEl.innerHTML = "Parlando: <strong>" + escHtml(fmtVoiceMetrics(metrics)) + "</strong>";
+        mEl.classList.add("is-on");
+      }
+      if (st) { st.className = "voice-status"; st.textContent = ""; }
+      if (D) D.track("sim_voice_result", {
+        words: countWords(text),
+        time_to_answer: metrics.timeToAnswerMs,
+        pauses: metrics.pauseCount,
+        wpm: metrics.wpm
+      });
+    } else {
+      if (st) {
+        st.className = "voice-status";
+        st.textContent = "Non ti ho sentito: riprova o scrivi la risposta.";
+      }
+      if (D) D.track("sim_voice_empty", {});
+    }
+  }
+
+  /* Stato TTS: mostra il caricamento della voce (una volta sola) e
+     il fallback in caso di errore: la UI non mente mai. */
+  function onVoiceTtsState(s) {
+    var ttsBtn = $("voice-tts-toggle");
+    var lbl = $("voice-tts-label");
+    if (!ttsBtn) return;
+    if (s === "loading") {
+      ttsBtn.classList.add("is-loading");
+      if (Voice.ttsEnabled) lbl.textContent = "Carico la voce…";
+    } else if (s === "error") {
+      ttsBtn.classList.remove("is-loading");
+      lbl.textContent = "Voce: modalità compatibilità";
+    } else {
+      ttsBtn.classList.remove("is-loading");
+    }
   }
 
   function autoSize(ta) {

@@ -910,6 +910,120 @@ a { color: inherit; }
 }
 .answer-hint-inner ol { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
 
+/* =========================================================================
+   VOCE — pipeline vocale della simulazione
+   (Rispondi a voce + voce della commissione + metriche paralinguistiche)
+   ========================================================================= */
+.voice-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  min-height: 40px;
+}
+.voice-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 40px;
+  padding: 0 16px;
+  transition: border-color var(--t-base) var(--ease), color var(--t-base) var(--ease),
+              background var(--t-base) var(--ease), transform var(--t-fast) var(--ease);
+}
+.voice-btn svg { width: 17px; height: 17px; }
+.voice-btn:hover { border-color: var(--ink); color: var(--ink); }
+.voice-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.voice-btn.is-pressing { transform: scale(0.97); }
+.voice-btn[aria-pressed="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+.voice-btn[aria-pressed="true"] .voice-btn-pulse { animation: voice-pulse 1.6s ease-out infinite; }
+.voice-btn.is-busy { opacity: 0.65; pointer-events: none; }
+
+@keyframes voice-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(31, 158, 92, 0.35); }
+  70%  { box-shadow: 0 0 0 9px rgba(31, 158, 92, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(31, 158, 92, 0); }
+}
+
+.voice-status {
+  font-size: 13px;
+  color: var(--muted);
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.voice-status .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ok-bright);
+  flex-shrink: 0;
+  animation: dot-blink 1.4s ease-in-out infinite;
+}
+.voice-status.is-speaking .dot { background: var(--error); }
+.voice-status.is-busy .dot { background: var(--warn); animation: none; }
+@keyframes dot-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+.voice-metrics {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  background: var(--bg-2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: none;
+  line-height: 1.5;
+}
+.voice-metrics.is-on { display: block; animation: view-in 200ms var(--ease); }
+.voice-metrics strong { font-weight: 700; color: var(--ink); }
+
+/* Toggle voce della commissione (card domanda) */
+.voice-tts-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 14px;
+  background: none;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 34px;
+  padding: 0 13px;
+  transition: border-color var(--t-base) var(--ease), color var(--t-base) var(--ease),
+              background var(--t-base) var(--ease);
+}
+.voice-tts-toggle svg { width: 15px; height: 15px; }
+.voice-tts-toggle:hover { border-color: var(--ink); color: var(--ink); }
+.voice-tts-toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.voice-tts-toggle[aria-pressed="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+.voice-tts-toggle.is-loading { opacity: 0.6; pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .voice-btn[aria-pressed="true"] .voice-btn-pulse { animation: none; }
+  .voice-status .dot { animation: none; }
+}
+
 .send-row {
   display: flex;
   align-items: flex-end;
