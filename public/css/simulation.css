@@ -967,9 +967,9 @@ a { color: inherit; }
 .recorder-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(15, 17, 21, 0.3);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  /* Niente blur: la domanda dietro resta leggibile durante la
+     registrazione. Solo una velatura appena percettibile. */
+  background: rgba(15, 17, 21, 0.05);
   opacity: 0;
   transition: opacity var(--t-base) var(--ease);
 }
@@ -977,13 +977,13 @@ a { color: inherit; }
 .recorder-sheet {
   position: relative;
   width: 100%;
-  max-width: 460px;
+  max-width: 400px;
   background: var(--bg);
   border: 1px solid var(--line);
   border-bottom: none;
-  border-radius: 22px 22px 0 0;
-  padding: 20px 24px calc(22px + env(safe-area-inset-bottom));
-  box-shadow: 0 -16px 48px rgba(15, 17, 21, 0.16);
+  border-radius: 18px 18px 0 0;
+  padding: 14px 20px calc(16px + env(safe-area-inset-bottom));
+  box-shadow: 0 -10px 32px rgba(15, 17, 21, 0.1);
   transform: translateY(24px);
   opacity: 0;
   transition: transform 260ms var(--ease), opacity 200ms var(--ease);
@@ -999,10 +999,10 @@ a { color: inherit; }
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 32px;
+  min-height: 28px;
 }
 .recorder-status {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--ink);
   letter-spacing: -0.01em;
@@ -1028,8 +1028,8 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   gap: 3px;
-  height: 72px;
-  margin: 20px 0 22px;
+  height: 48px;
+  margin: 12px 0 14px;
   padding: 0 2px;
 }
 .recorder-wave-bar {
@@ -1087,30 +1087,30 @@ a { color: inherit; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 .recorder-main {
   position: relative;
-  width: 72px;
-  height: 72px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   border: none;
   cursor: pointer;
   background: var(--ink);
   color: var(--bg);
-  box-shadow: 0 10px 26px rgba(15, 17, 21, 0.24);
+  box-shadow: 0 8px 20px rgba(15, 17, 21, 0.2);
   transition: transform var(--t-fast) var(--ease), background var(--t-base) var(--ease),
               box-shadow var(--t-base) var(--ease), color var(--t-base) var(--ease);
 }
-.recorder-main:hover { transform: translateY(-1px); box-shadow: 0 14px 30px rgba(15, 17, 21, 0.28); }
+.recorder-main:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(15, 17, 21, 0.24); }
 .recorder-main:active { transform: scale(0.96); }
-.recorder-main:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.recorder-main:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .rec-icon {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 26px;
-  height: 26px;
+  width: 20px;
+  height: 20px;
   transform: translate(-50%, -50%) scale(0.55);
   opacity: 0;
   transition: opacity 160ms var(--ease), transform 160ms var(--ease);
@@ -1148,7 +1148,7 @@ a { color: inherit; }
 
 .recorder-timer {
   font-variant-numeric: tabular-nums;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--muted);
   letter-spacing: 0.04em;
