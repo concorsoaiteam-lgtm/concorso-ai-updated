@@ -38,6 +38,8 @@
   /* Punti di ingresso CDN (verificati: tutti rispondono 200) */
   var CDN = {
     kokoroEsm: "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm",
+    ortUmd: "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.min.js",
+    vadUmd: "https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.7/dist/bundle.min.js",
     vadEsm: "https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.7/+esm",
     vadBase: "https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.7/dist/"
   };
@@ -47,6 +49,15 @@
 
   /* ---------------------------- Helpers ---------------------------- */
   function getToken() {
+    // Stessa fonte usata da simulation.js per /api/chat (il client già
+    // autenticato): è la più affidabile, il localStorage è il fallback.
+    try {
+      if (window.D && window.D.supabase && window.D.supabase.auth) {
+        var sess = window.D.supabase.auth.getSession();
+        var tk = sess && sess.data && sess.data.session && sess.data.session.access_token;
+        if (tk) return tk;
+      }
+    } catch (_) { /* noop */ }
     try {
       var raw = window.localStorage.getItem("sb-" + (window.__SUPABASE_URL || "").replace(/^https:\/\//, "").replace(/\.supabase\.co$/, "") + "-auth-token");
       if (raw) {
@@ -232,14 +243,93 @@
   var lastSpeechEnd = 0;
   var autoStopTimer = null;
   var vadModules = null;
+  var vadActive = false;        // VAD realmente operativo (auto-stop + metriche)
+  var silenceTimer = null;      // auto-stop su silenzio quando il VAD non c'è
+  var quietMs = 0;
   var levelBuf = null;            // buffer riusato per la waveform (zero allocazioni/frame)
 
-  function ensureVadModules() {
-    if (vadModules) return Promise.resolve(vadModules);
-    return import(/* webpackIgnore: true */ CDN.vadEsm).then(function (m) {
-      vadModules = m;
-      return vadModules;
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = src;
+      s.async = true;
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error("script-failed")); };
+      document.head.appendChild(s);
     });
+  }
+
+  /* Carica il VAD (Silero) nel modo documentato per il browser:
+     onnxruntime-web globale + bundle UMD. Il +esm si rompe in pagine
+     senza bundler (su Chrome: "Cannot read properties of undefined
+     (reading 'create')"), quindi è solo un ultimo tentativo.
+     Il VAD resta OTTIMALE, mai bloccante: se non si carica o non
+     parte, la registrazione continua lo stesso (auto-stop su silenzio). */
+  var vadLoading = null;
+  function loadVad() {
+    if (vadModules) return Promise.resolve(vadModules);
+    if (vadLoading) return vadLoading;
+    vadLoading = (async function () {
+      // Timeout DURA di 8s: se il CDN è lento o pende, la registrazione
+      // parte comunque senza VAD (auto-stop su silenzio). L'utente non
+      // deve MAI restare bloccato su un terzo-party.
+      var hard = new Promise(function (_, rej) {
+        setTimeout(function () { rej(new Error("vad-load-timeout")); }, 8000);
+      });
+      await Promise.race([
+        (async function () {
+          try {
+            if (typeof window.ort === "undefined") {
+              try { await loadScript(CDN.ortUmd); } catch (_) { /* continua */ }
+            }
+            if (typeof window.vad === "undefined") {
+              try { await loadScript(CDN.vadUmd); } catch (_) { /* continua */ }
+            }
+            if (window.vad && window.vad.MicVAD) { vadModules = window.vad; return; }
+          } catch (_) { /* continua al fallback esm */ }
+          var m = await import(/* webpackIgnore: true */ CDN.vadEsm);
+          if (m && m.MicVAD) { vadModules = m; return; }
+          throw new Error("vad-unavailable");
+        })(),
+        hard
+      ]);
+      return vadModules;
+    })();
+    vadLoading.catch(function () { vadLoading = null; });
+    return vadLoading;
+  }
+
+  /* Auto-stop senza VAD: solo DOPO aver sentito la voce, se l'analizzatore
+     non rileva suono per 2.5s, la risposta è finita e si trascrive.
+     Il requisito "heardSpeech" evita lo stop prematuro su chi parte con
+     calma: senza parlato rilevato non si ferma mai (resta il tasto Ferma).
+     Il watcher si rischedula sempre: un blip dell'analizzatore (tab switch)
+     non lo uccide. */
+  function startSilenceWatcher() {
+    stopSilenceWatcher();
+    quietMs = 0;
+    var heardSpeech = false;
+    var check = function () {
+      if (!V.recording || V._startPending) return;
+      if (V.hasAnalyser()) {
+        var lv = V.levels(1);
+        var level = lv ? lv[0] : 0;
+        if (level >= 0.05) {
+          heardSpeech = true;
+          quietMs = 0;
+        } else if (heardSpeech) {
+          quietMs += 250;
+          if (quietMs >= 2500) { V.stop(); return; }
+        }
+      }
+      silenceTimer = setTimeout(check, 250);
+    };
+    silenceTimer = setTimeout(check, 250);
+  }
+
+  function stopSilenceWatcher() {
+    if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
+    quietMs = 0;
   }
 
   function base64FromBlob(blob) {
@@ -296,15 +386,18 @@
     // ~1s, in cui la TTS potrebbe terminare e il segnale andrebbe perso.
     V._interrupted = !!opts.interruptedByUser;
     V._startPending = true;
+    // AudioContext creato in modo SINCRONO nel gestore del click (user
+    // gesture): altrimenti su Chrome parte "suspended" e la waveform
+    // non riceverebbe mai i livelli del microfono.
+    ensureAudioCtx();
     return (async function () {
       try {
-        // Carica i moduli VAD in parallelo alla richiesta del microfono.
-        var vadP = ensureVadModules();
+        // Carica il VAD in parallelo alla richiesta del microfono.
+        // Il VAD è opzionale: loadVad non fallisce mai (fallback interni).
+        var vadP = loadVad();
         mediaStream = await navigator.mediaDevices.getUserMedia({
           audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
         });
-        if (!V._startPending) { teardown(); return false; }
-        var m = await vadP;
         if (!V._startPending) { teardown(); return false; }
 
         // Waveform live: AnalyserNode collegato al microfono. La UI legge
@@ -343,40 +436,70 @@
         mediaRecorder.ondataavailable = function (e) {
           if (e.data && e.data.size > 0) speechChunks.push(e.data);
         };
+        // Parte SUBITO: niente audio perso mentre il VAD si carica.
+        mediaRecorder.start(250);
 
-        // VAD: metriche paralinguistiche in tempo reale (€0, client-side)
-        vadInstance = await m.MicVAD.new({
-          stream: mediaStream,
-          baseAssetURL: CDN.vadBase,
-          positiveSpeechThreshold: 0.7,
-          negativeSpeechThreshold: 0.4,
-          minSpeechFrames: 4,
-          onSpeechStart: function () {
-            var t = performance.now();
-            if (!firstSpeechAt) firstSpeechAt = t;
-            segStart = t;
-            // Nuovo segmento di parlato: annulla l'auto-stop pendente, così
-            // una pausa >1.8s seguita da una ripresa NON taglia la risposta.
-            if (autoStopTimer) { clearTimeout(autoStopTimer); autoStopTimer = null; }
-            if (V._onStatus) V._onStatus("speaking");
-          },
-          onSpeechEnd: function () {
-            var t = performance.now();
-            if (segStart) speechSegments.push({ start: segStart, end: t });
-            lastSpeechEnd = t;
-            // Auto-stop dopo ~1.8s di silenzio (la risposta è finita).
-            if (autoStopTimer) clearTimeout(autoStopTimer);
-            autoStopTimer = setTimeout(function () {
-              if (V.recording) V.stop();
-            }, 1800);
-            if (V._onStatus) V._onStatus("listening");
-          },
-          onVADMisfire: function () { /* troppo breve: ignora */ }
-        });
+        // VAD: metriche paralinguistiche in tempo reale (€0, client-side).
+        // OTTIMALE: se MicVAD non parte in 8s, continuiamo senza (auto-stop
+        // su silenzio). Un errore del VAD NON deve mai rompere la registrazione.
+        vadActive = false;
+        try {
+          var vadMod = await vadP;
+          if (vadMod && vadMod.MicVAD) {
+            // Timeout ANCHE su MicVAD.new: scarica il modello ONNX (~1.5MB)
+            // da un CDN terzo — se la rete pende, NON deve bloccare l'avvio.
+            // Il catch sotto ripulisce l'istanza e si passa all'auto-stop
+            // su silenzio.
+            var vadNewP = vadMod.MicVAD.new({
+              stream: mediaStream,
+              baseAssetURL: CDN.vadBase,
+              positiveSpeechThreshold: 0.7,
+              negativeSpeechThreshold: 0.4,
+              minSpeechFrames: 4,
+              onSpeechStart: function () {
+                var t = performance.now();
+                if (!firstSpeechAt) firstSpeechAt = t;
+                segStart = t;
+                // Nuovo segmento di parlato: annulla l'auto-stop pendente,
+                // così una pausa >1.8s seguita da una ripresa NON taglia
+                // la risposta.
+                if (autoStopTimer) { clearTimeout(autoStopTimer); autoStopTimer = null; }
+                if (V._onStatus) V._onStatus("speaking");
+              },
+              onSpeechEnd: function () {
+                var t = performance.now();
+                if (segStart) speechSegments.push({ start: segStart, end: t });
+                lastSpeechEnd = t;
+                // Auto-stop dopo ~1.8s di silenzio (la risposta è finita).
+                if (autoStopTimer) clearTimeout(autoStopTimer);
+                autoStopTimer = setTimeout(function () {
+                  if (V.recording) V.stop();
+                }, 1800);
+                if (V._onStatus) V._onStatus("listening");
+              },
+              onVADMisfire: function () { /* troppo breve: ignora */ }
+            });
+            vadInstance = await Promise.race([
+              vadNewP,
+              new Promise(function (_, rej) {
+                setTimeout(function () { rej(new Error("vad-new-timeout")); }, 10000);
+              })
+            ]);
+            await Promise.race([
+              vadInstance.start(),
+              new Promise(function (_, rej) {
+                setTimeout(function () { rej(new Error("vad-start-timeout")); }, 8000);
+              })
+            ]);
+            vadActive = true;
+          }
+        } catch (_) {
+          try { if (vadInstance) { vadInstance.destroy(); } } catch (_2) { /* noop */ }
+          vadInstance = null;
+        }
+        if (!vadActive) startSilenceWatcher();
 
         if (!V._startPending) { teardown(); return false; }
-        mediaRecorder.start(250);
-        await vadInstance.start();
         V._startPending = false;
         setStatus("recording");
         return true;
@@ -410,8 +533,10 @@
   V.stop = function () {
     if (V._startPending) {
       // Stop durante l'avvio: il start() in corso si chiude da sé al
-      // prossimo checkpoint (teardown + return false). Niente doppio teardown.
+      // prossimo checkpoint (teardown + return false). Niente doppio teardown,
+      // ma il flag di interruzione va comunque azzerato.
       V._startPending = false;
+      V._interrupted = false;
       setStatus("idle");
       return Promise.resolve({ text: "", words: [], metrics: computeMetrics() });
     }
@@ -500,6 +625,13 @@
     })();
   };
 
+  /* True se l'analizzatore sta ricevendo davvero il microfono.
+     La UI usa questo flag per scegliere tra dati reali e animazione
+     procedurale di riserva (mai linee morte). */
+  V.hasAnalyser = function () {
+    return !!(V._analyser && V._analyser.context && V._analyser.context.state === "running");
+  };
+
   /* Livello audio reale del microfono (0..1) per n barre della waveform.
      Senza AnalyserNode (browser molto vecchi) restituisce zeri: la UI
      mostra la linea di base, mai un errore. */
@@ -552,6 +684,8 @@
     V._startPending = false;
     V._analyser = null;
     if (autoStopTimer) { clearTimeout(autoStopTimer); autoStopTimer = null; }
+    stopSilenceWatcher();
+    vadActive = false;
     if (vadInstance) { try { vadInstance.destroy(); } catch (_) { /* noop */ } vadInstance = null; }
     if (mediaStream) { mediaStream.getTracks().forEach(function (t) { t.stop(); }); mediaStream = null; }
     mediaRecorder = null;

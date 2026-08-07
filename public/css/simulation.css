@@ -949,14 +949,16 @@ a { color: inherit; }
 }
 .voice-btn.is-busy { opacity: 0.65; pointer-events: none; }
 
-/* Blocco live: waveform + pill "Ascolto" + timer reale. La waveform
-   NON è decorativa: reagisce al volume reale del microfono (AnalyserNode)
-   e sparisce quando non si sta ascoltando. */
+/* Blocco live: waveform a linee colorate (stile ChatGPT/Gemini) + pill
+   "Ascolto" + timer reale. Le barre hanno il colore in inline-style
+   (gradiente grafite → verde dal design system) e reagiscono al volume
+   REALE del microfono via AnalyserNode. Partono SUBITO al click (fase
+   is-starting) così non esiste mai un click senza risposta visiva. */
 .voice-live {
-  margin-top: 10px;
+  margin-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   animation: view-in 180ms var(--ease);
 }
 .voice-live[hidden] { display: none; }
@@ -965,24 +967,35 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   gap: 3px;
-  height: 26px;
+  height: 40px;
   width: 100%;
+  padding: 0 2px;
 }
 .voice-wave-bar {
   flex: 1 1 0;
   height: 100%;
   min-width: 2px;
-  border-radius: 2px;
-  background: var(--line-2);
+  border-radius: 3px;
   transform: scaleY(0.12);
   transform-origin: center;
-  transition: transform 80ms linear, background 200ms var(--ease);
+  transition: transform 80ms linear, opacity 200ms var(--ease);
 }
-.voice-live.is-recording .voice-wave-bar { background: var(--ink); }
+/* Preparazione (permesso microfono/VAD in corso): onde morbide che
+   viaggiano lungo la striscia — feedback immediato al click. */
+.voice-live.is-starting .voice-wave-bar { animation: wave-breathe 1.3s ease-in-out infinite; }
+.voice-live.is-starting .voice-wave-bar:nth-child(3n + 1) { animation-delay: 0.15s; }
+.voice-live.is-starting .voice-wave-bar:nth-child(3n + 2) { animation-delay: 0.3s; }
+@keyframes wave-breathe {
+  0%, 100% { transform: scaleY(0.16); }
+  50%      { transform: scaleY(0.42); }
+}
+/* Elaborazione: le linee si abbassano e si attenuano (si sta
+   trascrivendo), nessuna animazione residua. */
 .voice-live.is-transcribing .voice-wave-bar {
-  background: var(--line-2);
-  transform: scaleY(0.16);
+  transform: scaleY(0.14);
+  opacity: 0.45;
   transition: none;
+  animation: none;
 }
 
 .voice-pill {
@@ -1077,6 +1090,7 @@ a { color: inherit; }
   .voice-wave-bar { transition: none; }
   .voice-pill .dot { animation: none; }
   .voice-live { animation: none; }
+  .voice-live.is-starting .voice-wave-bar { animation: none; }
 }
 
 .send-row {

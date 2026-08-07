@@ -1027,7 +1027,7 @@
     stopWaveLoop();
     setVoiceLive(false);
     var live = $("voice-live");
-    if (live) { live.classList.remove("is-recording", "is-transcribing"); }
+    if (live) { live.classList.remove("is-recording", "is-transcribing", "is-starting"); }
     var pill = $("voice-pill");
     if (pill) { pill.className = "voice-pill"; }
     if (window.Voice) { try { Voice.cancel(); } catch (_) { /* noop */ } }
@@ -2542,13 +2542,28 @@
     if (Voice.transcribing || S.sending || S.phase !== "session") return;
     pressFx(btn);
     btn.classList.add("is-busy");
+    // Feedback IMMEDIATO: le linee colorate partono subito, mentre il
+    // microfono si prepara (permesso + VAD). Mai un click senza risposta.
+    var st = $("voice-status");
+    if (st) { st.className = "voice-status"; st.textContent = ""; }
+    startWaveLoop();
+    setVoiceLive(true);
+    var live = $("voice-live");
+    if (live) { live.classList.remove("is-recording", "is-transcribing"); live.classList.add("is-starting"); }
+    var pill = $("voice-pill");
+    if (pill) { pill.className = "voice-pill is-busy"; }
+    var pl = $("voice-pill-label");
+    if (pl) pl.textContent = "Preparo il microfono…";
     // Interruzione = il mic parte mentre la commissione legge ancora.
     Voice.start({ interruptedByUser: S.voiceSpeaking })
       .catch(function (err) {
-        stopWaveLoop();
-        setVoiceLive(false);
+        // "already-busy" = doppio click durante l'avvio: il primo start è
+        // ancora in corso, NON nascondere la UI di preparazione.
+        if (!(err && err.message === "already-busy")) {
+          stopWaveLoop();
+          setVoiceLive(false);
+        }
         btn.classList.remove("is-busy");
-        var st = $("voice-status");
         var msg = (err && err.message === "mic-unsupported")
           ? "Il microfono non è supportato su questo browser."
           : (err && err.message === "already-busy") ? ""
@@ -2572,6 +2587,27 @@
   var waveLoopId = 0;
   var waveTimerShown = "";
 
+  // Gradiente "linee colorate" stile ChatGPT: grafite → verde profondo →
+  // verde vivo (dai token del design system: ink, ok, ok-bright).
+  var WAVE_COLORS = [
+    [15, 17, 21],    // #0F1115 ink
+    [34, 55, 47],
+    [63, 107, 79],   // #3F6B4F ok
+    [30, 158, 92]    // #1E9E5C ok-bright
+  ];
+
+  function waveColor(i, n) {
+    var t = n <= 1 ? 0 : i / (n - 1);
+    var seg = t * (WAVE_COLORS.length - 1);
+    var idx = Math.min(WAVE_COLORS.length - 2, Math.floor(seg));
+    var f = seg - idx;
+    var c1 = WAVE_COLORS[idx];
+    var c2 = WAVE_COLORS[idx + 1];
+    return "rgb(" + Math.round(c1[0] + (c2[0] - c1[0]) * f) + "," +
+      Math.round(c1[1] + (c2[1] - c1[1]) * f) + "," +
+      Math.round(c1[2] + (c2[2] - c1[2]) * f) + ")";
+  }
+
   function buildWave() {
     var w = $("voice-wave");
     if (!w || waveBars.length) return;
@@ -2579,6 +2615,7 @@
     for (var i = 0; i < n; i++) {
       var b = document.createElement("span");
       b.className = "voice-wave-bar";
+      b.style.background = waveColor(i, n);
       w.appendChild(b);
       waveBars.push(b);
     }
@@ -2593,12 +2630,27 @@
     buildWave();
     if (waveLoopId) return;
     var tick = function () {
-      if (!window.Voice || !Voice.recording) { stopWaveLoop(); return; }
-      var levels = Voice.levels ? Voice.levels(waveBars.length) : null;
-      if (levels) {
-        for (var i = 0; i < waveBars.length; i++) {
-          var v = Math.max(0.08, Math.min(1, levels[i] || 0));
-          waveBars[i].style.transform = "scaleY(" + v.toFixed(3) + ")";
+      if (!window.Voice || (!Voice.recording && !Voice._startPending)) { stopWaveLoop(); return; }
+      var i;
+      var live = $("voice-live");
+      // Fase di preparazione: le barre le anima il CSS (wave-breathe), qui
+      // aggiorniamo solo il timer.
+      if (!(live && live.classList.contains("is-starting"))) {
+        if (Voice.hasAnalyser && Voice.hasAnalyser()) {
+          // Volume REALE del microfono via AnalyserNode (Web Audio API).
+          var levels = Voice.levels(waveBars.length);
+          for (i = 0; i < waveBars.length; i++) {
+            var v = Math.max(0.08, Math.min(1, levels[i] || 0));
+            waveBars[i].style.transform = "scaleY(" + v.toFixed(3) + ")";
+          }
+        } else {
+          // Analizzatore non disponibile: onda dolce di riserva (mai linee
+          // morte, il feedback visivo non manca mai).
+          var t2 = performance.now();
+          for (i = 0; i < waveBars.length; i++) {
+            var v2 = 0.12 + 0.1 * Math.sin(t2 / 480 + i * 0.5);
+            waveBars[i].style.transform = "scaleY(" + v2.toFixed(3) + ")";
+          }
         }
       }
       var tEl = $("voice-timer");
@@ -2636,7 +2688,7 @@
       case "recording":
         startWaveLoop();
         setVoiceLive(true);
-        if (live) { live.classList.add("is-recording"); live.classList.remove("is-transcribing"); }
+        if (live) { live.classList.add("is-recording"); live.classList.remove("is-transcribing", "is-starting"); }
         if (pill) { pill.className = "voice-pill"; }
         if (pillLabel) pillLabel.textContent = "Ascolto";
         if (st) st.textContent = "";
@@ -2658,7 +2710,7 @@
         break;
       case "transcribing":
         setVoiceLive(true);
-        if (live) { live.classList.add("is-transcribing"); live.classList.remove("is-recording"); }
+        if (live) { live.classList.add("is-transcribing"); live.classList.remove("is-recording", "is-starting"); }
         if (pill) { pill.className = "voice-pill is-busy"; }
         if (pillLabel) pillLabel.textContent = "Elaboro…";
         if (st) st.textContent = "";
