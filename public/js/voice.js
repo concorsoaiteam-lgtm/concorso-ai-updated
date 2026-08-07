@@ -29,7 +29,11 @@
     _analyser: null,         // AnalyserNode del microfono → waveform live reale
     _onStatus: null,         // callback stato UI
     _onResult: null,         // callback risultato trascrizione {text, words, metrics}
-    _onTtsState: null        // callback cambio stato TTS
+    _onTtsState: null,       // callback stato TTS engine (loading/ready/error)
+    _onTtsPlay: null,        // callback stato player TTS (preparing/playing/paused/…)
+    ttsState: "idle",        // idle|preparing|playing|paused|done|stopped
+    ttsMode: null,           // 'audio' (Web Audio) | 'speech' (fallback)
+    ttsRate: 1               // velocità di lettura (1 | 1.25 | 1.5)
   };
 
   var K_TTS = "cai_voice_tts";       // persistenza toggle voce commissione
@@ -91,11 +95,22 @@
     try { window.localStorage.setItem(K_TTS, V.ttsEnabled ? "1" : "0"); } catch (_) { /* noop */ }
   }
 
-  /* ---------------------------- TTS: Kokoro ---------------------------- */
+  /* =====================================================================
+     TTS — voce della commissione. Architettura a provider INTERCAMBIABILI:
+     ogni provider implementa la stessa interfaccia e il player/UI non
+     cambiano se domani si passa a ElevenLabs, Cartesia o altro via API.
+     • kokoro — Kokoro-82M on-device (Apache-2.0, €0, italiano): PRIMARIO.
+     • speech — speechSynthesis del browser: SOLO fallback ultimo.
+     Player: Web Audio (AudioBufferSourceNode) con pausa/riprendi/stop/
+     replay e velocità live, waveform reale via AnalyserNode, segmenti
+     per frase con pause naturali tra una frase e l'altra.
+     ===================================================================== */
   var kokoroTts = null;          // istanza KokoroTTS
   var kokoroLoading = null;      // promise caricamento
   var audioCtx = null;
   var spokeViaSpeech = false;    // vero se almeno una volta è stato usato il fallback
+  var ttsGen = 0;                // generazione: invalida i synth in corso su stop/interruzione
+  var ttsResolve = null;         // resolve della speak() in corso
 
   function ensureAudioCtx() {
     if (!audioCtx) {
@@ -108,25 +123,14 @@
     return audioCtx;
   }
 
-  /* Creazione WAV dal Float32Array di Kokoro (sampleRate 24000) */
-  function floatToWav(samples, sampleRate) {
-    var buf = new ArrayBuffer(44 + samples.length * 2);
-    var view = new DataView(buf);
-    function writeStr(off, s) { for (var i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); }
-    writeStr(0, "RIFF"); view.setUint32(4, 36 + samples.length * 2, true); writeStr(8, "WAVE");
-    writeStr(12, "fmt "); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
-    view.setUint16(22, 1, true); view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true);
-    writeStr(36, "data"); view.setUint32(40, samples.length * 2, true);
-    var offset = 44;
-    for (var i = 0; i < samples.length; i++) {
-      var s = Math.max(-1, Math.min(1, samples[i]));
-      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-      offset += 2;
-    }
-    return new Blob([view], { type: "audio/wav" });
+  /* Stato del player segnalato alla UI (callback onTtsPlay). */
+  function onTtsPlay(s) {
+    V.ttsState = s;
+    if (V._onTtsPlay) V._onTtsPlay(s);
   }
 
+  /* Provider A — Kokoro on-device. Prima volta: download del modello
+     (~100MB, una tantum, cache HF). Poi quasi istantaneo. */
   function loadKokoro() {
     if (kokoroTts) return Promise.resolve(kokoroTts);
     if (kokoroLoading) return kokoroLoading;
@@ -157,78 +161,369 @@
     return kokoroLoading;
   }
 
-  /* TTS pubblico: legge il testo, risolve quando ha finito (per il
-     tempo di risposta) oppure rifiuta se impossibile.
-     Regola (decisione voce): Kokoro on-device è SEMPRE il primario.
-     speechSynthesis è SOLO un fallback, attivato se Kokoro non è
-     caricabile — mai la voce del browser al primo posto. */
+  /* Kokoro → AudioBuffer (niente blob WAV: il player Web Audio lavora
+     sul buffer per pausa/riprendi/velocità). */
+  function kokoroSynth(text) {
+    ensureAudioCtx();
+    return kokoroTts.tts.generate(text, { voice: kokoroTts.voice })
+      .then(function (result) {
+        var samples = result && result.audio ? result.audio : null;
+        var rate = result && result.sampleRate ? result.sampleRate : 24000;
+        if (!samples || !samples.length) return null;
+        var ctx = audioCtx || ensureAudioCtx();
+        if (!ctx) return null;
+        var buf = ctx.createBuffer(1, samples.length, rate);
+        var ch = buf.getChannelData(0);
+        for (var i = 0; i < samples.length; i++) {
+          var v = samples[i];
+          ch[i] = v < -1 ? -1 : (v > 1 ? 1 : v);
+        }
+        return buf;
+      });
+  }
+
+  /* ---------------- Player Web Audio: pausa/riprendi/stop/replay ---------------- */
+  var player = {
+    segments: [],      // [{ buf, gapMs }]
+    idx: 0,
+    source: null,      // AudioBufferSourceNode attivo
+    analyser: null,    // per la waveform reale della commissione
+    gain: null,
+    startedAt: 0,
+    offset: 0,         // secondi già riprodotti del segmento corrente
+    playing: false,
+    rate: 1,
+    gapTimer: null,
+    manualStop: false
+  };
+  var ttsLevelBuf = null;   // buffer riusato per la waveform (zero alloc/frame)
+
+  function ttsAnalyserChain() {
+    var ctx = audioCtx || ensureAudioCtx();
+    if (!player.analyser && ctx) {
+      player.analyser = ctx.createAnalyser();
+      player.analyser.fftSize = 128;
+      player.gain = ctx.createGain();
+      player.gain.gain.value = 1;
+      player.analyser.connect(player.gain);
+      player.gain.connect(ctx.destination);
+    }
+    return player.analyser;
+  }
+
+  function wireSource(src, seg, onAdvance) {
+    src.playbackRate.value = player.rate;
+    var an = ttsAnalyserChain();
+    if (an) src.connect(an);
+    src.onended = function () {
+      player.source = null;
+      if (player.manualStop) return;
+      player.offset = 0;
+      player.gapTimer = setTimeout(onAdvance, seg.gapMs || 0);
+    };
+    player.source = src;
+    player.playing = true;
+    var ctx = audioCtx || ensureAudioCtx();
+    player.startedAt = ctx ? ctx.currentTime : 0;
+  }
+
+  function playerPlaySegment(i) {
+    var ctx = audioCtx || ensureAudioCtx();
+    if (!ctx) return playerFinish();
+    var seg = player.segments[i];
+    if (!seg) return playerFinish();
+    player.idx = i;
+    var src = ctx.createBufferSource();
+    src.buffer = seg.buf;
+    player.manualStop = false;
+    player.offset = 0;
+    wireSource(src, seg, function () { playerPlaySegment(i + 1); });
+    src.start(0, 0);
+    onTtsPlay("playing");
+  }
+
+  function playerPause() {
+    var ctx = audioCtx;
+    if (!player.playing || !player.source || !ctx) return;
+    player.offset += ctx.currentTime - player.startedAt;
+    player.manualStop = true;
+    try { player.source.stop(); } catch (_) { /* noop */ }
+    try { player.source.disconnect(); } catch (_) { /* noop */ }
+    player.source = null;
+    player.playing = false;
+    onTtsPlay("paused");
+  }
+
+  function playerResume() {
+    var ctx = audioCtx || ensureAudioCtx();
+    if (!ctx || !player.segments.length || player.playing) return;
+    var seg = player.segments[player.idx];
+    if (!seg) return playerFinish();
+    if (player.offset >= seg.buf.duration) {
+      player.offset = 0;
+      playerPlaySegment(player.idx + 1);
+      return;
+    }
+    var src = ctx.createBufferSource();
+    src.buffer = seg.buf;
+    player.manualStop = false;
+    wireSource(src, seg, function () {
+      player.offset = 0;
+      playerPlaySegment(player.idx + 1);
+    });
+    src.start(0, player.offset);
+    onTtsPlay("playing");
+  }
+
+  function playerTeardown() {
+    if (player.gapTimer) { clearTimeout(player.gapTimer); player.gapTimer = null; }
+    if (player.source) {
+      player.manualStop = true;
+      try { player.source.stop(); } catch (_) { /* noop */ }
+      try { player.source.disconnect(); } catch (_) { /* noop */ }
+      player.source = null;
+    }
+    if (player.analyser) {
+      try { player.analyser.disconnect(); } catch (_) { /* noop */ }
+      player.analyser = null;
+    }
+    if (player.gain) {
+      try { player.gain.disconnect(); } catch (_) { /* noop */ }
+      player.gain = null;
+    }
+    player.playing = false;
+    player.segments = [];
+    player.idx = 0;
+    player.offset = 0;
+  }
+
+  function playerFinish() {
+    var done = ttsResolve;
+    ttsResolve = null;
+    playerTeardown();
+    onTtsPlay("done");
+    if (done) done();
+  }
+
+  function playSegments(built) {
+    return new Promise(function (resolve) {
+      player.segments = built;
+      player.idx = 0;
+      player.offset = 0;
+      ttsResolve = resolve;
+      playerPlaySegment(0);
+    });
+  }
+
+  /* ---------- Modalità speech (fallback): utterance con controlli ---------- */
+  var speechSeq = { texts: [], idx: 0, current: null, cancelled: true };
+
+  function speechNext() {
+    if (speechSeq.cancelled) return;
+    if (!window.speechSynthesis || speechSeq.idx >= speechSeq.texts.length) {
+      finishSpeech();
+      return;
+    }
+    var u = new SpeechSynthesisUtterance(speechSeq.texts[speechSeq.idx]);
+    u.lang = "it-IT";
+    u.rate = V.ttsRate;
+    var voices = window.speechSynthesis.getVoices();
+    var it = voices.find(function (v) { return /^it/i.test(v.lang); });
+    if (it) u.voice = it;
+    u.onend = function () {
+      if (speechSeq.cancelled) return;
+      speechSeq.current = null;
+      speechSeq.idx += 1;
+      if (!speechSeq.cancelled) onTtsPlay("playing");
+      speechNext();
+    };
+    u.onerror = function () { finishSpeech(); };
+    speechSeq.current = u;
+    onTtsPlay("playing");
+    window.speechSynthesis.speak(u);
+  }
+
+  function startSpeech(texts) {
+    return new Promise(function (resolve) {
+      speechSeq.texts = texts;
+      speechSeq.idx = 0;
+      speechSeq.current = null;
+      speechSeq.cancelled = false;
+      ttsResolve = resolve;
+      // Difensivo: un replay dopo una pausa non deve restare in stato
+      // "paused" su motori che non resettano lo stato con cancel().
+      if (window.speechSynthesis && window.speechSynthesis.paused) {
+        try { window.speechSynthesis.resume(); } catch (_) { /* noop */ }
+      }
+      speechNext();
+    });
+  }
+
+  function finishSpeech() {
+    speechSeq.cancelled = true;
+    speechSeq.current = null;
+    var done = ttsResolve;
+    ttsResolve = null;
+    onTtsPlay("done");
+    if (done) done();
+  }
+
+  /* ---------- Sintesi: split in frasi + scelta provider ---------- */
+  function splitSentences(text) {
+    var parts = String(text || "").split(/(?<=[.!?;:])\s+/);
+    var out = [];
+    parts.forEach(function (p) {
+      p = p.trim();
+      if (p) out.push(p);
+    });
+    return out.length ? out : [String(text || "").trim()];
+  }
+
+  function buildSegments(sentences, gen) {
+    if (kokoroTts) return buildKokoroSegments(sentences, gen);
+    if (spokeViaSpeech && window.speechSynthesis) return buildSpeechSegments(sentences, gen);
+    return loadKokoro()
+      .then(function () { return buildKokoroSegments(sentences, gen); })
+      .catch(function () {
+        spokeViaSpeech = true;
+        V.ttsKind = "speech";
+        return buildSpeechSegments(sentences, gen);
+      });
+  }
+
+  async function buildKokoroSegments(sentences, gen) {
+    V.ttsKind = "kokoro";
+    V.ttsMode = "audio";
+    var built = [];
+    for (var i = 0; i < sentences.length; i++) {
+      if (gen !== ttsGen) return [];   // fermato mentre sintetizzava
+      var buf = await kokoroSynth(sentences[i]);
+      if (buf) built.push({ buf: buf, gapMs: i < sentences.length - 1 ? 400 : 0 });
+    }
+    if (gen !== ttsGen) return [];
+    return built;
+  }
+
+  function buildSpeechSegments(sentences, gen) {
+    V.ttsKind = "speech";
+    V.ttsMode = "speech";
+    return Promise.resolve(sentences);
+  }
+
+  /* Ferma qualsiasi riproduzione in corso (es. microfono avviato, nuova
+     domanda). Non emette stato: lo fa il chiamante. */
+  function stopTtsPlayback(invalidate) {
+    if (invalidate) ttsGen += 1;
+    // Attivo anche in "preparing": se l'utente interrompe mentre il modello
+    // si carica o la frase si sintetizza, il player NON deve restare appeso.
+    var wasActive = V.ttsState !== "idle";
+    speechSeq.cancelled = true;
+    speechSeq.current = null;
+    if (window.speechSynthesis) {
+      try { window.speechSynthesis.cancel(); } catch (_) { /* noop */ }
+    }
+    playerTeardown();
+    var done = ttsResolve;
+    ttsResolve = null;
+    if (done) done();
+    if (wasActive) onTtsPlay("stopped");
+  }
+
+  /* TTS pubblico: legge il testo e risolve a riproduzione finita (o
+     interrotta). Kokoro SEMPRE primario; speech solo se non caricabile. */
   V.speak = function (text) {
     var str = String(text || "").trim();
     if (!str) return Promise.resolve();
     if (!V.ttsEnabled) return Promise.resolve();
-    // Kokoro pronto → usalo, senza se e senza ma.
-    if (kokoroTts) {
-      V.ttsKind = "kokoro";
-      return kokoroSpeak(str);
-    }
-    // Non ancora pronto: se il fallback è già stato usato (perché il
-    // caricamento Kokoro è fallito) usa speech; altrimenti carica Kokoro.
-    if (spokeViaSpeech && window.speechSynthesis) {
-      return speechSpeak(str);
-    }
-    return loadKokoro()
-      .then(function () {
-        V.ttsKind = "kokoro";
-        return kokoroSpeak(str);
+    // Ordine critico: prima si invalida il gen del precedente (stop), POI
+    // si crea il nuovo gen. Altrimenti il nuovo speak si auto-invaliderebbe.
+    stopTtsPlayback(true);
+    var gen = ++ttsGen;
+    onTtsPlay("preparing");
+    return buildSegments(splitSentences(str), gen)
+      .then(function (built) {
+        if (gen !== ttsGen) return;                    // superato da stop/interruzione
+        if (!built || !built.length) { onTtsPlay("stopped"); return; }
+        // Il provider decide il player: audio (Web Audio) o speech (utterance).
+        if (V.ttsMode === "speech") return startSpeech(built);
+        return playSegments(built);
       })
       .catch(function () {
-        spokeViaSpeech = true;
-        V.ttsKind = "speech";
-        return speechSpeak(str);
+        if (gen === ttsGen) onTtsPlay("stopped");
       });
   };
 
-  var currentAudioEl = null;
+  /* Controlli del player: pause | resume | stop | replay. */
+  V.ttsControl = function (cmd) {
+    if (V.ttsMode === "speech") {
+      if (!window.speechSynthesis) return;
+      if (cmd === "pause") { if (!speechSeq.cancelled) { window.speechSynthesis.pause(); onTtsPlay("paused"); } }
+      else if (cmd === "resume") { if (!speechSeq.cancelled) { window.speechSynthesis.resume(); onTtsPlay("playing"); } }
+      else if (cmd === "stop") { stopTtsPlayback(true); }
+      else if (cmd === "replay") {
+        var texts = speechSeq.texts.slice();
+        stopTtsPlayback(false);
+        if (texts.length) startSpeech(texts);
+      }
+      return;
+    }
+    if (cmd === "pause") playerPause();
+    else if (cmd === "resume") playerResume();
+    else if (cmd === "stop") { stopTtsPlayback(true); }
+    else if (cmd === "replay") {
+      var segs = player.segments.slice();
+      stopTtsPlayback(false);
+      if (segs.length) playSegments(segs);
+    }
+  };
 
-  function kokoroSpeak(text) {
-    ensureAudioCtx();
-    return kokoroTts.tts.generate(text, { voice: kokoroTts.voice }).then(function (result) {
-      var samples = result && result.audio ? result.audio : null;
-      var rate = result && result.sampleRate ? result.sampleRate : 24000;
-      if (!samples || !samples.length) return;
-      var ctx = audioCtx || ensureAudioCtx();
-      if (!ctx) return;
-      var wav = floatToWav(samples, rate);
-      var url = URL.createObjectURL(wav);
-      return new Promise(function (resolve) {
-        var el = new Audio(url);
-        currentAudioEl = el;
-        el.onended = function () { currentAudioEl = null; URL.revokeObjectURL(url); resolve(); };
-        el.onerror = function () { currentAudioEl = null; URL.revokeObjectURL(url); resolve(); };
-        el.play().catch(function () { currentAudioEl = null; URL.revokeObjectURL(url); resolve(); });
-      });
-    });
-  }
+  V.ttsSetRate = function (r) {
+    var v = r === 1.25 ? 1.25 : (r === 1.5 ? 1.5 : 1);
+    V.ttsRate = v;
+    if (player.source) player.source.playbackRate.value = v;   // cambio live
+    if (speechSeq.current) { try { speechSeq.current.rate = v; } catch (_) { /* noop */ } }
+  };
+  V.ttsGetRate = function () { return V.ttsRate; };
 
-  function speechSpeak(text) {
-    return new Promise(function (resolve) {
-      if (!window.speechSynthesis) { resolve(); return; }
-      var u = new SpeechSynthesisUtterance(text);
-      u.lang = "it-IT";
-      u.rate = 1;
-      var voices = window.speechSynthesis.getVoices();
-      var it = voices.find(function (v) { return /^it/i.test(v.lang); });
-      if (it) u.voice = it;
-      u.onend = resolve;
-      u.onerror = resolve;
-      window.speechSynthesis.speak(u);
-    });
-  }
+  /* Livelli REALI dell'audio della commissione (0..1 per n barre) per la
+     waveform. Se il player non è attivo o manca l'analizzatore, zeri: la
+     UI usa l'onda procedurale di riserva, mai un errore. */
+  V.ttsWaveLevels = function (n) {
+    var out = [];
+    for (var i = 0; i < n; i++) out.push(0);
+    if (!player.analyser || !player.playing) return out;
+    try {
+      if (!ttsLevelBuf || ttsLevelBuf.length !== player.analyser.frequencyBinCount) {
+        ttsLevelBuf = new Uint8Array(player.analyser.frequencyBinCount);
+      }
+      player.analyser.getByteFrequencyData(ttsLevelBuf);
+      var freq = ttsLevelBuf;
+      var per = freq.length / n;
+      for (i = 0; i < n; i++) {
+        var st = Math.floor(i * per);
+        var en = Math.max(st + 1, Math.floor((i + 1) * per));
+        var sum = 0;
+        for (var j = st; j < en; j++) sum += freq[j];
+        var avg = sum / (en - st);
+        out[i] = Math.pow(Math.min(1, avg / 255), 1.5);
+      }
+    } catch (_) { /* noop */ }
+    return out;
+  };
+
+  /* Pre-carica Kokoro in background (es. quando l'utente attiva la voce):
+     la prima domanda parte subito, senza attesa del modello. */
+  V.warmTts = function () {
+    if (kokoroTts || spokeViaSpeech) return;
+    loadKokoro().catch(function () { /* fallback automatico al primo speak */ });
+  };
 
   V.setTtsEnabled = function (on) {
-    V.ttsEnabled = !!on;
+    on = !!on;
+    if (V.ttsEnabled && !on) stopTtsPlayback(true);
+    V.ttsEnabled = on;
     persistTts();
-    if (V._onTtsState) V._onTtsState(V.ttsEnabled ? (V.ttsKind || "loading") : "off");
+    if (V._onTtsState) V._onTtsState(on ? (V.ttsKind || "loading") : "off");
   };
 
   /* ---------------------------- VAD + registrazione ---------------------------- */
@@ -385,6 +680,8 @@
     // Catturato in modo sincrono: la richiesta del microfono richiede
     // ~1s, in cui la TTS potrebbe terminare e il segnale andrebbe perso.
     V._interrupted = !!opts.interruptedByUser;
+    // L'utente sta per parlare: la commissione si zittisce subito.
+    stopTtsPlayback(true);
     V._startPending = true;
     // AudioContext creato in modo SINCRONO nel gestore del click (user
     // gesture): altrimenti su Chrome parte "suspended" e la waveform
@@ -707,6 +1004,7 @@
   V.cancel = function () {
     V._startPending = false;
     setStatus("idle");
+    stopTtsPlayback(true);
     return teardown();
   };
 
@@ -716,6 +1014,7 @@
     if (handlers.onStatus) V._onStatus = handlers.onStatus;
     if (handlers.onResult) V._onResult = handlers.onResult;
     if (handlers.onTtsState) V._onTtsState = handlers.onTtsState;
+    if (handlers.onTtsPlay) V._onTtsPlay = handlers.onTtsPlay;
     loadPersisted();
     V.micSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
     V.ready = true;

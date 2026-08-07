@@ -1033,7 +1033,8 @@
     if (!q || S.phase !== "session") return;
     if (!window.Voice || !Voice.ttsEnabled) return;
     S.voiceSpeaking = true;
-    Voice.speak("«" + q.testo + "»").then(function () {
+    // Niente « » in audio: puliti per la sintesi, restano a video.
+    Voice.speak(q.testo).then(function () {
       S.voiceSpeaking = false;
       S.voiceTtsEndAt = performance.now();
     }).catch(function () {
@@ -1533,6 +1534,7 @@
       S.feedbackDone = true;
       S.sending = false;
       $("help-trigger").disabled = false;
+      showFbListen(feedback, suggerimento);
       if (D) D.track("sim_feedback_received", {
         sim_id: S.simId, idx: S.idx,
         latency_ms: Date.now() - t0, scores: scores
@@ -1644,6 +1646,19 @@
 
   function hideFeedbackSkeleton() {
     $("feedback-skeleton").classList.remove("is-on");
+    var fl = $("fb-listen");
+    if (fl) fl.hidden = true;
+  }
+
+  /* Feedback ascoltabile: mostra il pulsante "Ascolta" e, se la voce
+     della commissione è attiva, legge il feedback ad alta voce. */
+  function showFbListen(fbText, sugg) {
+    var btn = $("fb-listen");
+    if (!btn) return;
+    btn.hidden = false;
+    btn.classList.remove("is-playing");
+    if (!window.Voice || !Voice.ttsEnabled || !fbText) return;
+    Voice.speak(fbText + (sugg ? " Suggerimento: " + sugg : ""));
   }
 
 
@@ -2437,6 +2452,29 @@
     // Invia
     $("send-btn").addEventListener("click", function () { submitAnswer(false); });
 
+    // Ascolta il feedback (voce della commissione)
+    var fbListen = $("fb-listen");
+    if (fbListen) {
+      fbListen.addEventListener("click", function () {
+        if (!window.Voice) return;
+        if (!Voice.ttsEnabled) {
+          // Attiva la voce al volo: il pulsante funziona anche se il
+          // toggle "Voce della commissione" è spento.
+          Voice.setTtsEnabled(true);
+          var ttsBtn = $("voice-tts-toggle");
+          if (ttsBtn) {
+            ttsBtn.setAttribute("aria-pressed", "true");
+            var lbl = $("voice-tts-label");
+            if (lbl) lbl.textContent = "Voce: attiva";
+          }
+          if (Voice.warmTts) Voice.warmTts();
+        }
+        var fb = $("feedback-text").textContent.trim();
+        var sugg = $("feedback-suggestion").textContent.trim();
+        if (fb) Voice.speak(fb + (sugg ? " Suggerimento: " + sugg : ""));
+      });
+    }
+
     // ----- Voce -----
     // Inizializza il modulo vocale con i callback di stato (UI live,
     // mai una UI vuota: lo stato di ascolto/trascrizione è sempre visibile).
@@ -2444,7 +2482,8 @@
       Voice.init({
         onStatus: onVoiceStatus,
         onResult: onVoiceResult,
-        onTtsState: onVoiceTtsState
+        onTtsState: onVoiceTtsState,
+        onTtsPlay: onTtsPlay
       });
 
       // Toggle "Rispondi a voce"
@@ -2461,6 +2500,9 @@
           var on = Voice.ttsEnabled;
           ttsBtn.setAttribute("aria-pressed", on ? "true" : "false");
           $("voice-tts-label").textContent = on ? "Voce: attiva" : "Voce della commissione";
+          // Primo download del modello in background: la prossima domanda
+          // parte subito, senza attesa della voce.
+          if (on && Voice.warmTts) Voice.warmTts();
           if (D) D.track("sim_voice_tts", { on: on });
         });
       }
@@ -2491,6 +2533,29 @@
         var rec = $("recorder");
         if (e.key === "Escape" && rec && !rec.hidden) closeRecorderSafe();
       });
+
+      // Player voce della commissione: pausa/riprendi, stop, replay,
+      // velocità 1x → 1.25x → 1.5x (ciclica).
+      var ttsPause = $("tts-pause");
+      if (ttsPause) {
+        ttsPause.addEventListener("click", function () {
+          if (Voice.ttsState === "playing") Voice.ttsControl("pause");
+          else if (Voice.ttsState === "paused") Voice.ttsControl("resume");
+        });
+      }
+      var ttsReplay = $("tts-replay");
+      if (ttsReplay) ttsReplay.addEventListener("click", function () { Voice.ttsControl("replay"); });
+      var ttsStop = $("tts-stop");
+      if (ttsStop) ttsStop.addEventListener("click", function () { Voice.ttsControl("stop"); });
+      var ttsRateBtn = $("tts-rate");
+      if (ttsRateBtn) {
+        ttsRateBtn.addEventListener("click", function () {
+          var cur = Voice.ttsGetRate ? Voice.ttsGetRate() : 1;
+          var next = cur >= 1.5 ? 1 : (cur >= 1.25 ? 1.5 : 1.25);
+          Voice.ttsSetRate(next);
+          ttsRateBtn.textContent = next === 1 ? "1x" : next + "x";
+        });
+      }
     }
 
     // Pausa
@@ -2897,6 +2962,117 @@
       lbl.textContent = "Voce: modalità compatibilità";
     } else {
       ttsBtn.classList.remove("is-loading");
+    }
+  }
+
+  /* ------------------------------------------------------------------
+     Player voce della commissione — UI. La waveform reagisce al volume
+     REALE dell'audio (AnalyserNode del player): si vede davvero la
+     commissione parlare. Stati: preparazione → riproduzione → pausa →
+     fine/stop. Compatto e silenzioso, mai effetti da assistente AI.
+     ------------------------------------------------------------------ */
+  var ttsBars = [];
+  var ttsWaveLoopId = 0;
+  var ttsHideTimer = null;
+
+  function buildTtsWave() {
+    var w = $("tts-wave");
+    if (!w || ttsBars.length) return;
+    var n = 24;
+    for (var i = 0; i < n; i++) {
+      var b = document.createElement("span");
+      b.className = "tts-wave-bar";
+      b.style.background = waveColor(i, n);   // grafite → verde (design system)
+      w.appendChild(b);
+      ttsBars.push(b);
+    }
+  }
+
+  function startTtsWaveLoop() {
+    if (ttsWaveLoopId) return;
+    var tick = function () {
+      if (!window.Voice || Voice.ttsState !== "playing") { stopTtsWaveLoop(); return; }
+      var levels = (Voice.ttsWaveLevels && ttsBars.length)
+        ? Voice.ttsWaveLevels(ttsBars.length) : null;
+      for (var i = 0; i < ttsBars.length; i++) {
+        var v = 0.1;
+        if (levels && levels[i] != null) {
+          v = Math.max(0.08, Math.min(1, levels[i] * 1.35));
+        } else {
+          v = 0.1 + 0.07 * Math.sin(performance.now() / 520 + i * 0.45);
+        }
+        ttsBars[i].style.transform = "scaleY(" + v.toFixed(3) + ")";
+      }
+      ttsWaveLoopId = requestAnimationFrame(tick);
+    };
+    ttsWaveLoopId = requestAnimationFrame(tick);
+  }
+
+  function stopTtsWaveLoop() {
+    if (ttsWaveLoopId) { cancelAnimationFrame(ttsWaveLoopId); ttsWaveLoopId = 0; }
+  }
+
+  function resetTtsBars() {
+    for (var i = 0; i < ttsBars.length; i++) ttsBars[i].style.transform = "scaleY(0.1)";
+  }
+
+  function setTtsPauseIcon(paused) {
+    var btn = $("tts-pause");
+    if (!btn) return;
+    var pi = btn.querySelector(".tts-pause-ic");
+    var pl = btn.querySelector(".tts-play-ic");
+    if (pi) pi.hidden = paused;
+    if (pl) pl.hidden = !paused;
+    btn.setAttribute("aria-label", paused ? "Riprendi" : "Pausa");
+  }
+
+  /* Stato del player segnalato da voice.js: la UI non mente mai. */
+  function onTtsPlay(state) {
+    var pl = $("tts-player");
+    if (!pl) return;
+    var note = $("tts-note");
+    if (state === "preparing") {
+      pl.hidden = false;
+      pl.classList.add("is-preparing");
+      pl.classList.remove("is-playing", "is-paused");
+      buildTtsWave();
+      if (note) note.textContent = "Preparo la voce…";
+      if (ttsHideTimer) { clearTimeout(ttsHideTimer); ttsHideTimer = null; }
+    } else if (state === "playing") {
+      pl.hidden = false;
+      pl.classList.add("is-playing");
+      pl.classList.remove("is-preparing", "is-paused");
+      buildTtsWave();
+      if (note) note.textContent = "";
+      setTtsPauseIcon(false);
+      startTtsWaveLoop();
+      var fb = $("fb-listen");
+      if (fb && !fb.hidden) fb.classList.add("is-playing");
+    } else if (state === "paused") {
+      pl.classList.add("is-paused");
+      pl.classList.remove("is-playing");
+      if (note) note.textContent = "In pausa";
+      setTtsPauseIcon(true);
+      stopTtsWaveLoop();
+      resetTtsBars();
+    } else {
+      // done | stopped
+      stopTtsWaveLoop();
+      resetTtsBars();
+      setTtsPauseIcon(false);
+      var fb2 = $("fb-listen");
+      if (fb2) fb2.classList.remove("is-playing");
+      if (pl.hidden) return;
+      if (ttsHideTimer) clearTimeout(ttsHideTimer);
+      if (state === "done") {
+        if (note) note.textContent = "";
+        ttsHideTimer = setTimeout(function () {
+          ttsHideTimer = null;
+          pl.hidden = true;
+        }, 1100);
+      } else {
+        pl.hidden = true;
+      }
     }
   }
 

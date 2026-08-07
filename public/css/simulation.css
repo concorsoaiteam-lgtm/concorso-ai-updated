@@ -1197,12 +1197,84 @@ body.rec-open { overflow: hidden; }
 }
 .voice-tts-toggle.is-loading { opacity: 0.6; pointer-events: none; }
 
+/* Player voce della commissione: waveform reale + controlli.
+   Compatto, silenzioso, mai effetti da assistente AI. */
+.tts-player {
+  margin-top: 12px;
+  padding: 10px 12px 8px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  animation: view-in 180ms var(--ease);
+}
+.tts-player[hidden] { display: none; }
+.tts-player-row { display: flex; align-items: center; gap: 10px; }
+.tts-wave {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 2.5px;
+  height: 26px;
+  min-width: 0;
+}
+.tts-wave-bar {
+  flex: 1 1 0;
+  min-width: 2px;
+  height: 100%;
+  border-radius: 2px;
+  transform: scaleY(0.1);
+  transform-origin: center;
+  transition: transform 90ms linear;
+}
+/* Preparazione: le barre respirano (stessa animazione del registratore). */
+.tts-player.is-preparing .tts-wave-bar { animation: rec-breathe 1.2s ease-in-out infinite; }
+.tts-player.is-preparing .tts-wave-bar:nth-child(3n + 1) { animation-delay: 0.12s; }
+.tts-player.is-preparing .tts-wave-bar:nth-child(3n + 2) { animation-delay: 0.24s; }
+.tts-player.is-paused .tts-wave-bar { opacity: 0.5; }
+.tts-ctrl { display: flex; align-items: center; gap: 2px; }
+.tts-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.tts-btn:hover { background: var(--surface); color: var(--ink); }
+.tts-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.tts-btn svg { width: 15px; height: 15px; }
+.tts-rate {
+  min-width: 38px;
+  height: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--surface);
+  font-variant-numeric: tabular-nums;
+}
+.tts-rate:hover { border-color: var(--ink); color: var(--ink); }
+.tts-note {
+  margin: 6px 2px 0;
+  font-size: 12px;
+  color: var(--muted);
+  min-height: 14px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .recorder-sheet, .recorder-overlay { transition: none; }
   .recorder.is-starting .recorder-wave-bar,
   .recorder.is-transcribing .recorder-wave::after,
-  .recorder.is-reviewing .recorder-wave::after { animation: none; }
+  .recorder.is-reviewing .recorder-wave::after,
+  .tts-player.is-preparing .tts-wave-bar { animation: none; }
   .rec-icon { transition: none; }
+  .tts-wave-bar { transition: none; }
 }
 
 .send-row {
@@ -1457,6 +1529,10 @@ body.rec-open { overflow: hidden; }
   margin-top: 24px;
 }
 .feedback-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: var(--tracking);
@@ -1464,6 +1540,27 @@ body.rec-open { overflow: hidden; }
   color: var(--muted);
   margin-bottom: 12px;
 }
+.fb-listen {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  cursor: pointer;
+  min-height: 30px;
+  padding: 0 11px;
+  transition: border-color var(--t-base) var(--ease), color var(--t-base) var(--ease);
+}
+.fb-listen svg { width: 14px; height: 14px; }
+.fb-listen:hover { border-color: var(--ink); color: var(--ink); }
+.fb-listen:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.fb-listen.is-playing { border-color: var(--ok); color: var(--ok); }
 .feedback-skeleton { display: none; }
 .feedback-skeleton.is-on { display: block; }
 .fb-sk-line {
