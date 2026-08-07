@@ -190,6 +190,32 @@
       <div class="volume-hint" id="volume-hint"></div>
     </section>
 
+    <!-- Aiuto se non sai rispondere: spunto o risposta modello, mai un muro.
+         Appare solo quando serve, non ingombra mai la schermata. -->
+    <section class="help-box" id="help-box" aria-label="Aiuto sulla domanda">
+      <button type="button" class="help-trigger" id="help-trigger" aria-expanded="false" aria-controls="help-panel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.2 9a2.8 2.8 0 0 1 5.6 0c0 1.9-2.8 2.4-2.8 4"/><path d="M12 17h.01"/></svg>
+        Non so rispondere
+      </button>
+      <div class="help-panel" id="help-panel">
+        <div class="help-panel-inner">
+          <p class="help-intro">Va bene fermarsi. Scegli quanto aiuto vuoi: uno spunto per ripartire, o una risposta modello da studiare.</p>
+          <div class="help-actions">
+            <button type="button" class="btn btn-soft" id="help-spunto">Dammi uno spunto</button>
+            <button type="button" class="btn btn-soft" id="help-risposta">Risposta modello</button>
+          </div>
+          <div class="help-result" id="help-result" hidden>
+            <div class="help-skeleton" id="help-skeleton" aria-hidden="true">
+              <div class="help-skel-line w100 shimmer"></div>
+              <div class="help-skel-line w92 shimmer"></div>
+              <div class="help-skel-line w78 shimmer"></div>
+            </div>
+            <p class="help-result-text" id="help-result-text"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <div class="send-row">
       <span class="sess-countdown hidden" id="sess-countdown" aria-live="polite"></span>
       <button type="button" class="send-btn" id="send-btn" aria-label="Invia risposta (Ctrl+Invio)" disabled>

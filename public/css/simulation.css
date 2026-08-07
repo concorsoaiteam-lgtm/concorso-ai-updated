@@ -957,6 +957,86 @@ a { color: inherit; }
 }
 .volume-hint.is-on { display: block; animation: view-in 200ms var(--ease); }
 
+/* --- Aiuto se non sai rispondere (spunto / risposta modello) ---
+   Sempre discreto: un trigger a filo, un pannello che si apre solo
+   su richiesta. Mai un elemento che sembra un bottone senza esserlo. */
+.help-box {
+  margin-top: 14px;
+}
+.help-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 40px;
+  padding: 0 4px;
+  border-radius: 8px;
+  transition: color var(--t-base) var(--ease), background var(--t-base) var(--ease);
+}
+.help-trigger:hover { color: var(--ink); background: var(--bg-2); }
+.help-trigger:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.help-trigger:disabled { opacity: 0.45; cursor: not-allowed; }
+.help-trigger svg { width: 16px; height: 16px; }
+.help-trigger[aria-expanded="true"] { color: var(--ink); }
+
+.help-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 240ms var(--ease);
+}
+.help-panel.is-open {
+  max-height: 900px;
+  overflow: visible;
+}
+.help-panel-inner {
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 16px 18px;
+}
+.help-intro {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+.help-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.help-result {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+.help-skeleton { display: none; }
+.help-skeleton.is-on { display: block; }
+.help-skel-line {
+  height: 10px;
+  border-radius: 4px;
+  background: var(--bg-2);
+  margin-bottom: 10px;
+}
+.help-skel-line.w100 { width: 100%; }
+.help-skel-line.w92 { width: 92%; }
+.help-skel-line.w78 { width: 78%; }
+.help-result-text {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  white-space: pre-wrap;
+  max-width: 60ch;
+}
+.help-result-text.is-spunto { border-left: 2px solid var(--warn); padding-left: 12px; }
+.help-result-text.is-risposta { border-left: 2px solid var(--ok-bright); padding-left: 12px; }
+
 /* --- Feedback --- */
 .feedback-panel {
   margin-top: 24px;
@@ -1550,6 +1630,8 @@ a { color: inherit; }
   .send-row { align-items: stretch; }
   .answer-hint-btn { white-space: nowrap; }
   .metric { grid-template-columns: 76px 24px 1fr; gap: 8px; }
+  .help-actions { flex-direction: column; }
+  .help-actions .btn { width: 100%; }
 }
 
 /* =========================================================================

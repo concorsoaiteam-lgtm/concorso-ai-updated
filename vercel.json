@@ -1,5 +1,7 @@
 {
   "outputDirectory": "public",
+  "installCommand": "npm install",
+  "buildCommand": "echo 'Progetto statico - nessuna build necessaria'",
   "rewrites": [
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/auth",       "destination": "/auth.html" },

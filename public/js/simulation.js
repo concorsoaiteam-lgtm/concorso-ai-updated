@@ -36,6 +36,8 @@
     sending: false,
     feedbackDone: false,
     streamCtrl: null,           // AbortController del fetch corrente
+    helpBusy: false,            // aiuto "non so rispondere" in corso
+    helpCtrl: null,             // AbortController dell'aiuto corrente
     resumeData: null,           // sessione da riprendere
     bankLoading: null           // Promise generazione bank
   };
@@ -436,6 +438,32 @@
         cleaned = cleaned.slice(startB, endB + 1);
       }
       return JSON.parse(cleaned);
+    });
+  }
+
+  /* Variante testo libero (niente parse JSON): per spunti e risposte modello
+     dell'aiuto "non so rispondere". Stesso proxy /api/chat, stream:false. */
+  function llmText(sys, maxTokens, userMsg, signal) {
+    return fetch("/api/chat", {
+      method: "POST",
+      headers: llmHeaders(),
+      body: JSON.stringify({
+        messages: [
+          { role: "system", content: sys },
+          { role: "user", content: userMsg || "Scrivi la risposta." }
+        ],
+        stream: false,
+        max_tokens: maxTokens || 700
+      }),
+      signal: signal || undefined
+    }).then(function (r) {
+      if (!r.ok) throw new Error("http-" + r.status);
+      return r.json();
+    }).then(function (data) {
+      var content = data && data.choices && data.choices[0] &&
+        data.choices[0].message && data.choices[0].message.content;
+      if (!content) throw new Error("empty");
+      return String(content).replace(/```/g, "").trim();
     });
   }
 
@@ -952,6 +980,7 @@
     feedbackRetries = 0;
     hideFeedback();
     hidePrevFeedback();
+    resetHelp();
     ta.focus();
 
     if (S.mode === "difficile" && tot - S.idx <= 3) {
@@ -974,6 +1003,7 @@
     S.sending = true;
     ta.disabled = true;
     $("answer-box").classList.add("is-disabled");
+    $("help-trigger").disabled = true;
     var send = $("send-btn");
     send.classList.add("is-busy");
     send.disabled = true;
@@ -997,6 +1027,126 @@
 
   function countWords(text) {
     return String(text || "").trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  /* ------------------------------------------------------------------
+     Aiuto "Non so rispondere" — spunto o risposta modello
+     ------------------------------------------------------------------ */
+  function toggleHelp() {
+    var panel = $("help-panel");
+    var open = panel.classList.toggle("is-open");
+    $("help-trigger").setAttribute("aria-expanded", String(open));
+    if (open) {
+      // Focus sul primo controllo utile, mai perso su elementi nascosti.
+      var spunto = $("help-spunto");
+      if (spunto) window.setTimeout(function () { spunto.focus({ preventScroll: true }); }, REDUCED ? 0 : 120);
+    }
+  }
+
+  function closeHelp() {
+    var panel = $("help-panel");
+    var wasOpen = panel && panel.classList.contains("is-open");
+    if (!panel) return;
+    panel.classList.remove("is-open");
+    $("help-trigger").setAttribute("aria-expanded", "false");
+    if (wasOpen) $("help-trigger").focus({ preventScroll: true });
+  }
+
+  function resetHelp() {
+    closeHelp();
+    if (S.helpCtrl) { S.helpCtrl.abort(); S.helpCtrl = null; }
+    S.helpBusy = false;
+    var result = $("help-result");
+    if (result) {
+      result.hidden = true;
+      result.classList.remove("is-on");
+    }
+    var skel = $("help-skeleton");
+    if (skel) skel.classList.remove("is-on");
+    var txt = $("help-result-text");
+    if (txt) txt.textContent = "";
+    var trig = $("help-trigger");
+    if (trig) trig.disabled = S.sending;
+    enableHelpButtons(true);
+  }
+
+  function enableHelpButtons(enabled) {
+    var s = $("help-spunto");
+    var r = $("help-risposta");
+    if (s) s.disabled = !enabled;
+    if (r) r.disabled = !enabled;
+  }
+
+  /* Chiede un aiuto via /api/chat: "spunto" (3 punti per ripartire) oppure
+     "risposta" (modello completo da studiare). Mai bloccante: skeleton
+     shimmer leggero, mai un muro; se la rete cade, bottone riprova. */
+  function helpRequest(kind) {
+    if (S.sending || S.helpBusy || S.feedbackDone || S.phase !== "session") return;
+    var q = S.questions[S.idx];
+    if (!q) return;
+
+    S.helpBusy = true;
+    enableHelpButtons(false);
+    var result = $("help-result");
+    result.hidden = false;
+    result.classList.add("is-on");
+    $("help-skeleton").classList.add("is-on");
+    var txt = $("help-result-text");
+    txt.textContent = "";
+    txt.classList.remove("is-spunto", "is-risposta");
+    txt.classList.add(kind === "spunto" ? "is-spunto" : "is-risposta");
+
+    if (S.helpCtrl) S.helpCtrl.abort();
+    S.helpCtrl = new AbortController();
+
+    var subjectName = S.subject ? S.subject.name : (q.argomento || "la materia");
+    var langRule = (S.subject && S.subject.id === "inglese")
+      ? "Scrivi la risposta in inglese."
+      : "Scrivi in italiano.";
+    var sys;
+    if (kind === "spunto") {
+      sys = "Sei il tutor di un candidato a un concorso pubblico italiano. " +
+        "Il candidato è bloccato sulla domanda: «" + q.testo + "». " +
+        "NON scrivere la risposta completa: dai SOLO 3 spunti sintetici per aiutarlo a partire " +
+        "(l'angolo di attacco, un riferimento normativo o istituto chiave, un esempio concreto da citare). " +
+        "Massimo 60 parole, elenco di 3 punti. " + langRule;
+    } else {
+      sys = "Sei un commissario di un concorso pubblico italiano. " +
+        "Stai interrogando un candidato sulla domanda: «" + q.testo + "». " +
+        "Scrivi una risposta modello da 200-250 parole come la darebbe un candidato eccellente: " +
+        "apri con la tesi, sviluppa con 2-3 punti e riferimenti normativi, chiudi riagganciandoti alla domanda. " +
+        "Solo il testo della risposta, nessun preambolo. " + langRule;
+    }
+
+    if (D) D.track("sim_help_clicked", { kind: kind, sim_id: S.simId, idx: S.idx });
+    var t0 = Date.now();
+    var userMsg = kind === "spunto" ? "Dammi solo lo spunto." : "Scrivi la risposta modello.";
+    llmText(sys, kind === "spunto" ? 400 : 700, userMsg, S.helpCtrl.signal)
+      .then(function (text) {
+        S.helpCtrl = null;
+        S.helpBusy = false;
+        $("help-skeleton").classList.remove("is-on");
+        txt.textContent = text;
+        enableHelpButtons(true);
+        if (D) D.track("sim_help_done", { kind: kind, latency_ms: Date.now() - t0 });
+      })
+      .catch(function (err) {
+        S.helpCtrl = null;
+        if (err && err.name === "AbortError") { S.helpBusy = false; return; }
+        S.helpBusy = false;
+        $("help-skeleton").classList.remove("is-on");
+        var code = (err && err.message) || "";
+        if (code === "http-401" || code === "http-403") {
+          txt.textContent = "La sessione è scaduta. Riprova dopo aver riaperto l'app.";
+        } else if (code === "http-429" || code === "http-402") {
+          txt.textContent = "Troppe richieste in questo momento. Aspetta qualche secondo e riprova.";
+        } else if (code.indexOf("http-5") !== -1) {
+          txt.textContent = "Il tutor è in ritardo. Riprova tra un momento.";
+        } else {
+          txt.textContent = "Non è arrivato nulla. Riprova: la domanda è ancora qui.";
+        }
+        enableHelpButtons(true);
+      });
   }
 
   /* ------------------------------------------------------------------
@@ -1206,6 +1356,7 @@
         }
         S.feedbackDone = true;
         S.sending = false;
+        $("help-trigger").disabled = false;
         if (D) D.track("sim_feedback_received", {
           sim_id: S.simId, idx: S.idx,
           latency_ms: Date.now() - t0, scores: scores
@@ -1367,6 +1518,7 @@
     var send = $("send-btn");
     send.classList.remove("is-busy");
     send.disabled = !ta.value.trim();
+    $("help-trigger").disabled = false;
     S.sending = false;
   }
 
@@ -2050,8 +2202,10 @@
           if (ta && ta.value.trim()) submitAnswer(false);
         }
       }
-      // Esc: pausa (o chiude overlay se aperto)
+      // Esc: chiude l'aiuto, poi l'overlay pausa, altrimenti pausa
       if (e.key === "Escape") {
+        var helpPanel = $("help-panel");
+        if (helpPanel && helpPanel.classList.contains("is-open")) { closeHelp(); return; }
         var overlay = $("pause-overlay");
         if (overlay && overlay.classList.contains("is-on")) { closePause(); return; }
         if (S.phase === "session" && !S.sending) openPause();
@@ -2073,6 +2227,11 @@
       var open = panel.classList.toggle("is-open");
       this.setAttribute("aria-expanded", String(open));
     });
+
+    // Aiuto "Non so rispondere"
+    $("help-trigger").addEventListener("click", toggleHelp);
+    $("help-spunto").addEventListener("click", function () { helpRequest("spunto"); });
+    $("help-risposta").addEventListener("click", function () { helpRequest("risposta"); });
 
     // Invia
     $("send-btn").addEventListener("click", function () { submitAnswer(false); });

@@ -6,7 +6,7 @@
     "node": "24.x"
   },
   "scripts": {
-    "dev": "echo 'Apri i file HTML direttamente nel browser o usa un server locale'",
+    "dev": "node server.js",
     "build": "echo 'Progetto statico HTML/CSS/JS - nessuna build necessaria'"
   },
   "dependencies": {
