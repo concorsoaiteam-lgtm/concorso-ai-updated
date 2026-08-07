@@ -43,7 +43,8 @@
     bankLoading: null,          // Promise generazione bank
     voiceMetrics: null,         // metriche paralinguistiche ultima risposta vocale
     voiceTtsEndAt: 0,           // performance.now() quando la TTS della domanda è finita
-    voiceSpeaking: false        // la commissione sta ancora leggendo la domanda
+    voiceSpeaking: false,       // la commissione sta ancora leggendo la domanda
+    interaction: lsGet("cai_interaction") === "vocale" ? "vocale" : "scritta" // scritta|vocale
   };
 
   /* ------------------------------------------------------------------
@@ -54,7 +55,11 @@
   var K_OPS = "cai_pending_ops";       // coda scritture fallite
   var K_LAST_SIM = "cai_last_sim";     // ultima simulazione (ripresa)
   var K_ONBOARD = "cai_onboard_choice"; // micro-decisione di ingresso: "demo" | "bando"
+  var K_INTERACTION = "cai_interaction"; // preferenza modalità risposta: "scritta" | "vocale"
   var BANK_TTL = 7 * 24 * 3600 * 1000; // 7 giorni
+  var REC_DONE_MS = 2500;   // "Messaggio pronto" visibile prima della chiusura
+  var REC_SUBMIT_MS = 2600; // invio automatico (solo modalità vocale), dopo il "pronto"
+  var recSubmitTimer = null; // invio automatico pendente: annullato se l'utente ri-registra
 
   var MODES = {
     standard: {
@@ -143,7 +148,8 @@
       }),
       bandoId: S.bando ? S.bando.id : null,
       subjectId: S.subject ? S.subject.id : null,
-      draftAnswer: (S.phase === "session") ? ($("answer-textarea").value || "") : ""
+      draftAnswer: (S.phase === "session") ? ($("answer-textarea").value || "") : "",
+      interaction: S.interaction
     };
     if (S.simId) lsSet(K_DRAFT + S.simId, payload);
     lsSet(K_LAST_SIM, payload);
@@ -593,14 +599,32 @@
       var modeName = (MODES[rd.mode] && MODES[rd.mode].label) || rd.mode;
       var tot = (rd.questions && rd.questions.length) || 12;
       var at = Math.min((rd.idx || 0) + 1, tot);
+      var interName = rd.interaction === "vocale" ? "in modalità vocale" : "in modalità scritta";
       text.textContent = "Hai interrotto «" + modeName + " · " + tot +
-        " domande» alla domanda " + at + ". Da dove riparti?";
+        " domande» alla domanda " + at + ", " + interName + ". Da dove riparti?";
       actions.innerHTML =
-        '<button type="button" class="btn btn-primary btn-block" id="resume-yes">Riprendi</button>';
+        '<button type="button" class="btn btn-primary btn-block" id="resume-yes">Continua ' +
+          (rd.interaction === "vocale" ? "in modalità vocale" : "in modalità scritta") + '</button>' +
+        '<button type="button" class="btn btn-ghost btn-block" id="resume-switch">' +
+          (rd.interaction === "vocale" ? "Passa alla modalità scritta" : "Passa alla modalità vocale") + '</button>' +
+        '<button type="button" class="btn btn-ghost btn-block" id="resume-new">Nuova simulazione</button>';
       resume.classList.add("hidden");
       var yes = $("resume-yes");
       if (yes) yes.addEventListener("click", function () { resumeSession(rd); });
-      if (D) D.track("sim_gate_resume", { mode: rd.mode, idx: rd.idx });
+      var sw = $("resume-switch");
+      if (sw) sw.addEventListener("click", function () {
+        rd.interaction = rd.interaction === "vocale" ? "scritta" : "vocale";
+        resumeSession(rd);
+      });
+      var nw = $("resume-new");
+      if (nw) nw.addEventListener("click", function () {
+        clearDraft();
+        S.resumeData = null;
+        showPhase("setup");
+        renderSetup();
+        if (D) D.track("sim_gate_resume_new", {});
+      });
+      if (D) D.track("sim_gate_resume", { mode: rd.mode, idx: rd.idx, interaction: rd.interaction });
       return;
     }
 
@@ -990,6 +1014,7 @@
     hidePrevFeedback();
     resetHelp();
     resetVoiceForQuestion();
+    applyInteractionUI();
     speakQuestion(q);
     ta.focus();
 
@@ -1097,6 +1122,39 @@
 
   function countWords(text) {
     return String(text || "").trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  /* ------------------------------------------------------------------
+     Modalità di interazione: scritta ↔ vocale.
+     Puro toggle di presentazione: cronologia, domanda e sessione non
+     si toccano — si cambia solo il modo di rispondere. Per questo il
+     passaggio non può mai perdere nulla.
+     ------------------------------------------------------------------ */
+  function setInteraction(m) {
+    if (m !== "scritta" && m !== "vocale") return;
+    S.interaction = m;
+    lsSet(K_INTERACTION, m);
+    // Si cambia modalità a sessione ferma, mai a microfono aperto.
+    if (window.Voice && (Voice.recording || Voice.transcribing)) Voice.cancel();
+    applyInteractionUI();
+    if (D) D.track("sim_interaction", { mode: m });
+  }
+
+  function applyInteractionUI() {
+    var box = $("answer-box");
+    if (!box) return;
+    var voc = S.interaction === "vocale";
+    box.classList.toggle("is-voice", voc);
+    var view = $("view-session");
+    if (view) view.classList.toggle("is-voice", voc);
+    var btScritta = $("interaction-scritta");
+    var btVocale = $("interaction-vocale");
+    if (btScritta) { btScritta.classList.toggle("is-on", !voc); btScritta.setAttribute("aria-pressed", String(!voc)); }
+    if (btVocale) { btVocale.classList.toggle("is-on", voc); btVocale.setAttribute("aria-pressed", String(voc)); }
+    var lbl = $("voice-btn-label");
+    if (lbl) lbl.textContent = voc ? "Premi e parla" : "Rispondi a voce";
+    var vb = $("voice-btn");
+    if (vb) vb.setAttribute("aria-label", voc ? "Premi e parla per rispondere a voce" : "Rispondi a voce");
   }
 
   /* ------------------------------------------------------------------
@@ -2313,6 +2371,8 @@
     S.sending = false;
     S.feedbackDone = false;
     S.resumeData = null;
+    S.interaction = rd.interaction === "vocale" ? "vocale" : "scritta";
+    lsSet(K_INTERACTION, S.interaction);
     showPhase("session");
     renderQuestion();
     startTimer();
@@ -2432,6 +2492,17 @@
           autoSize(ta);
         });
       }
+    });
+
+    // Modalità di interazione: si cambia solo durante la sessione,
+    // mai mentre una risposta è in volo.
+    var iScritta = $("interaction-scritta");
+    var iVocale = $("interaction-vocale");
+    if (iScritta) iScritta.addEventListener("click", function () {
+      if (S.phase === "session" && !S.sending) setInteraction("scritta");
+    });
+    if (iVocale) iVocale.addEventListener("click", function () {
+      if (S.phase === "session" && !S.sending) setInteraction("vocale");
     });
 
     // Hint accordion
@@ -2721,7 +2792,7 @@
       vb.classList.remove("is-busy");
       vb.setAttribute("aria-pressed", "false");
       var lbl = $("voice-btn-label");
-      if (lbl) lbl.textContent = "Rispondi a voce";
+      if (lbl) lbl.textContent = (S.interaction === "vocale") ? "Premi e parla" : "Rispondi a voce";
     }
     if (focusId) {
       // Destinazione esplicita: dopo "Messaggio pronto" il focus va
@@ -2750,6 +2821,9 @@
 
   function cancelRecorderClose() {
     if (recCloseTimer) { window.clearTimeout(recCloseTimer); recCloseTimer = null; }
+    // Annulla anche l'invio automatico pendente (modalità vocale):
+    // nuova registrazione o cambio modalità → niente submit dello zombie.
+    if (recSubmitTimer) { window.clearTimeout(recSubmitTimer); recSubmitTimer = null; }
   }
 
   function setRecorderState(state, label) {
@@ -2908,9 +2982,22 @@
         mEl.classList.add("is-on");
       }
       setRecorderState("done", "Messaggio pronto");
-      // 2.5s: tempo perché anche uno screen reader annunci lo stato
-      // (aria-live) prima dell'auto-chiusura. Focus alla textarea.
-      scheduleRecorderClose(2500, "answer-textarea");
+      if (S.interaction === "vocale") {
+        // Modalità vocale = orale vero: la risposta parte da sola.
+        // Il timer è tracciato: se l'utente ri-registra o cambia modalità
+        // nel frattempo, l'invio pendente viene annullato (mai zombie).
+        scheduleRecorderClose(REC_DONE_MS, null);
+        if (recSubmitTimer) window.clearTimeout(recSubmitTimer);
+        recSubmitTimer = window.setTimeout(function () {
+          recSubmitTimer = null;
+          var ta2 = $("answer-textarea");
+          if (ta2 && ta2.value.trim() && !S.sending && S.phase === "session" && S.feedbackDone !== true) {
+            submitAnswer(true);
+          }
+        }, REC_SUBMIT_MS);
+      } else {
+        scheduleRecorderClose(REC_DONE_MS, "answer-textarea");
+      }
       if (D) D.track("sim_voice_result", {
         words: countWords(finalText),
         time_to_answer: metrics.timeToAnswerMs,

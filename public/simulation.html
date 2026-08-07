@@ -198,6 +198,18 @@
 
     <!-- Area risposta -->
     <section class="answer-box" id="answer-box" aria-label="La tua risposta">
+      <!-- Modalità di interazione: scritta ↔ vocale. Si cambia in qualsiasi
+           momento, la sessione non si tocca: cambia solo il modo di rispondere. -->
+      <div class="interaction-toggle" role="group" aria-label="Come vuoi rispondere">
+        <button type="button" class="interaction-opt is-on" id="interaction-scritta" aria-pressed="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h7"/></svg>
+          Scritta
+        </button>
+        <button type="button" class="interaction-opt" id="interaction-vocale" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 1 0-7 0v5A3.5 3.5 0 0 0 12 15Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          Vocale
+        </button>
+      </div>
       <label class="answer-label" for="answer-textarea">La tua risposta</label>
       <textarea class="answer-textarea" id="answer-textarea" rows="4" maxlength="4000"
         placeholder="Rispondi come davanti alla commissione…" aria-describedby="word-count"></textarea>

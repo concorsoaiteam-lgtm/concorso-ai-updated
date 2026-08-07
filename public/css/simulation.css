@@ -2179,3 +2179,79 @@ body.rec-open { overflow: hidden; }
   .feedback-text.is-streaming::after { display: none; }
   .gauge-fill { transition: none; }
 }
+
+/* ============================================================
+   Modalità di interazione: scritta ↔ vocale.
+   Toggle compatto in testa all'area risposta. In modalità
+   vocale l'editor scritto sparisce e resta il grande microfono:
+   si parla, la trascrizione parte da sola. Zero perdita di
+   stato: è solo un cambio di presentazione.
+   ============================================================ */
+.interaction-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  margin-bottom: 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.interaction-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  padding: 6px 13px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease), color var(--t-base) var(--ease);
+}
+.interaction-opt svg { width: 14px; height: 14px; }
+.interaction-opt:hover { color: var(--ink); }
+.interaction-opt:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.interaction-opt.is-on {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(15, 17, 21, 0.08);
+}
+
+/* Modalità vocale: niente editor, solo il microfono grande.
+   Il timer per domanda (modalità difficile) resta visibile. */
+.answer-box.is-voice .answer-label,
+.answer-box.is-voice .answer-textarea,
+.answer-box.is-voice .answer-foot { display: none; }
+#view-session.is-voice .send-btn { display: none; }
+
+.answer-box.is-voice .voice-row {
+  justify-content: center;
+  margin-top: 6px;
+  min-height: 132px;
+}
+.answer-box.is-voice .voice-btn {
+  flex-direction: column;
+  justify-content: center;
+  width: 92px;
+  height: 92px;
+  padding: 0;
+  border-radius: 50%;
+  border-width: 1.5px;
+  gap: 9px;
+}
+.answer-box.is-voice .voice-btn svg { width: 26px; height: 26px; }
+.answer-box.is-voice .voice-btn #voice-btn-label { font-size: 12px; }
+.answer-box.is-voice .voice-btn[aria-pressed="true"] {
+  animation: voice-pulse 1.6s var(--ease) infinite;
+}
+@keyframes voice-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(15, 17, 21, 0.14); }
+  50% { box-shadow: 0 0 0 10px rgba(15, 17, 21, 0); }
+}
+.answer-box.is-voice.is-disabled .voice-btn {
+  opacity: 0.55;
+  pointer-events: none;
+}
