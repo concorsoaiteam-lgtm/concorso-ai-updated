@@ -111,6 +111,46 @@ module.exports = async function handler(req, res) {
 
   // TEST 3: se l'utente passa un token reale via ?token=xxx, provalo
   var realToken = req.query && req.query.token;
+
+  // TEST 4 (opt-in ?ai=1): chiamata reale al provider AI con max_tokens minimo
+  // per verificare che la chiave configurata funzioni davvero. Mai esposta la chiave.
+  var aiTest = req.query && req.query.ai;
+  if (aiTest === '1' || aiTest === 'true') {
+    var aiUrl = process.env.AI_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
+    var aiKey = String(process.env.AI_API_KEY || process.env.BLUESMINDS_API_KEY || '').trim();
+    var aiModel = process.env.AI_MODEL || 'google/gemini-2.5-flash';
+    if (aiKey && aiKey.length >= 10) {
+      try {
+        var aiResp = await fetch(aiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + aiKey,
+            'HTTP-Referer': process.env.AI_REFERRER || 'https://concorso-ai.vercel.app',
+            'X-Title': process.env.AI_TITLE || 'ConcorsoAI'
+          },
+          body: JSON.stringify({
+            model: aiModel,
+            messages: [{ role: 'user', content: 'ping' }],
+            max_tokens: 5,
+            stream: false
+          })
+        });
+        var aiRaw = await aiResp.text();
+        result.tests.ai_key = {
+          url: aiUrl,
+          model: aiModel,
+          status: aiResp.status,
+          ok: aiResp.ok,
+          body_snippet: aiRaw.slice(0, 200)
+        };
+      } catch (e) {
+        result.tests.ai_key = { url: aiUrl, model: aiModel, error: e.message || String(e) };
+      }
+    } else {
+      result.tests.ai_key = { skipped: 'nessuna chiave AI configurata' };
+    }
+  }
   if (realToken) {
     var urlForReal = envUrl || HARDCODED_URL;
     var keyForReal = envKey || HARDCODED_ANON;

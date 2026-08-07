@@ -26,7 +26,11 @@ function resolveProviders(modelOverride) {
   var providers = [];
   var primaryUrl = process.env.AI_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
   var primaryKey = String(process.env.AI_API_KEY || process.env.BLUESMINDS_API_KEY || '').trim();
-  if (primaryKey && primaryKey.length >= 10) {
+  // Chiave legacy BLUESMINDS senza AI_API_URL esplicita: verrebbe inviata a
+  // OpenRouter (default) e fallirebbe con 401. Coerente con la guardia in
+  // api/chat.js: in tal caso il provider non viene nemmeno aggiunto.
+  var legacyKeyWithoutUrl = !process.env.AI_API_KEY && process.env.BLUESMINDS_API_KEY && !process.env.AI_API_URL;
+  if (primaryKey && primaryKey.length >= 10 && !legacyKeyWithoutUrl) {
     providers.push({
       url: primaryUrl,
       key: primaryKey,

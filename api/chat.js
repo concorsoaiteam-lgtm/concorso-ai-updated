@@ -320,7 +320,20 @@ async function handleRequest(req, res) {
     logMetric('config_error', { reason: 'ai_api_key_invalid', source: keySource });
     return res.status(500).json({
       error: 'Configurazione server incompleta',
-      details: 'Chiave API AI mancante o troppo corta (env: ' + keySource + '). Controlla .env.example.'
+      details: 'Chiave API AI mancante o troppo corta (env: ' + keySource + '). ' +
+        'Imposta AI_API_KEY nel progetto Vercel: Settings → Environment Variables, ' +
+        'poi ridistribuisci. Il file .env locale non viene usato dal deploy.'
+    });
+  }
+  // Nota: se la chiave legacy BLUESMINDS_API_KEY è impostata ma non AI_API_KEY,
+  // viene usata contro l'URL di default (OpenRouter) e fallirà con 401 upstream.
+  if (keySource === 'BLUESMINDS_API_KEY' && !process.env.AI_API_URL) {
+    logMetric('config_error', { reason: 'bluesminds_key_without_url' });
+    return res.status(500).json({
+      error: 'Configurazione server incompleta',
+      details: 'È presente solo BLUESMINDS_API_KEY (legacy) ma AI_API_URL non è configurata: ' +
+        'la chiave verrebbe inviata a OpenRouter e fallirebbe. Imposta AI_API_KEY e AI_API_URL ' +
+        'nelle Environment Variables del progetto Vercel.'
     });
   }
 

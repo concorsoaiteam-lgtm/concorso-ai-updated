@@ -426,20 +426,23 @@
       if (!user) return null;
       var meta = (user.user_metadata || {});
       var display = meta.full_name || user.email || "Candidato";
-      // Legge il piano da profiles.plan se presente (default: free).
-      return supabaseClient.from("profiles").select("display_name, plan")
+      // Il piano vive in user_metadata.plan (scritto da stripe-webhook e
+      // letto anche da api/quota.js): la tabella profiles NON ha la colonna
+      // plan. Nome personalizzato opzionale da profiles.full_name (colonna
+      // esistente — display_name non esiste e causava un 400).
+      var plan = meta.plan || "free";
+      return supabaseClient.from("profiles").select("full_name")
         .eq("id", user.id).maybeSingle()
         .then(function (p) {
-          var plan = (p && p.data && p.data.plan) || "free";
           return {
             id: user.id,
             email: user.email,
-            displayName: (p && p.data && p.data.display_name) || display,
+            displayName: (p && p.data && p.data.full_name) || display,
             plan: plan
           };
         })
         .catch(function () {
-          return { id: user.id, email: user.email, displayName: display, plan: "free" };
+          return { id: user.id, email: user.email, displayName: display, plan: plan };
         });
     }).catch(function () { return null; });
   }
