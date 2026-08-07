@@ -966,28 +966,27 @@ a { color: inherit; }
 .help-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   background: var(--surface);
   border: 1px solid var(--line);
   color: var(--ink-soft);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  min-height: 44px;
-  padding: 4px 14px 4px 5px;
+  min-height: 48px;
+  padding: 4px 16px 4px 4px;
   border-radius: 999px;
   transition: border-color var(--t-base) var(--ease),
               background var(--t-base) var(--ease),
               color var(--t-base) var(--ease),
-              transform var(--t-fast) var(--ease);
+              transform var(--t-base) var(--ease);
 }
 .help-trigger:hover { border-color: var(--line-2); background: var(--bg-2); color: var(--ink); }
 .help-trigger:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .help-trigger:disabled { opacity: 0.45; cursor: not-allowed; }
-.help-trigger:active { transform: scale(0.985); }
 .help-trigger-icon {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
   border-radius: 50%;
   background: var(--bg-2);
@@ -995,10 +994,11 @@ a { color: inherit; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background var(--t-base) var(--ease), color var(--t-base) var(--ease);
+  transition: background var(--t-base) var(--ease), color var(--t-base) var(--ease),
+              transform var(--t-base) var(--ease);
 }
 .help-trigger:hover .help-trigger-icon { background: var(--ink); color: var(--bg); }
-.help-trigger-icon svg { width: 15px; height: 15px; }
+.help-trigger-icon svg { width: 19px; height: 19px; }
 .help-trigger[aria-expanded="true"] { border-color: var(--ink); background: var(--bg); }
 .help-trigger[aria-expanded="true"] .help-trigger-icon { background: var(--ink); color: var(--bg); }
 
@@ -1040,15 +1040,43 @@ a { color: inherit; }
   cursor: pointer;
   font-family: inherit;
   color: var(--ink);
+  position: relative;
+  overflow: hidden;
   -webkit-tap-highlight-color: transparent;
   transition: border-color var(--t-base) var(--ease),
               background var(--t-base) var(--ease),
-              transform var(--t-fast) var(--ease);
+              transform var(--t-base) var(--ease);
 }
 .help-action:hover { border-color: var(--line-2); background: var(--bg); }
 .help-action:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.help-action:active { transform: scale(0.995); }
 .help-action:disabled { opacity: 0.45; cursor: not-allowed; }
+/* Micro-interazione del click: compressione leggera e ritorno morbido.
+   200ms con l'easing del design system; la classe is-pressing viene
+   gestita da JS (pressFx) e rispetta prefers-reduced-motion. */
+.help-action.is-pressing {
+  animation: help-press 200ms var(--ease);
+}
+.help-trigger.is-pressing {
+  animation: help-press 200ms var(--ease);
+}
+@keyframes help-press {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+/* Micro-interazione di stato: barra 1px mentre l'aiuto sta arrivando.
+   Stesso pattern del btn-busy del design system: comunica il click
+   ricevuto senza animazioni vistose. */
+.help-action.is-busy::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1px;
+  background: currentColor;
+  transform: translateX(-100%);
+  animation: busy-loop 1.1s var(--ease) infinite;
+  opacity: 0.8;
+}
 .help-action-icon {
   width: 36px;
   height: 36px;
@@ -1105,7 +1133,29 @@ a { color: inherit; }
   white-space: pre-wrap;
   max-width: 60ch;
 }
-.help-result-text strong { color: var(--ink); font-weight: 700; }
+
+/* Spunto strutturato: gerarchia tipografica pulita (etichetta + testo),
+   mai markdown a video. Tre righe separate, leggibili d'un colpo. */
+.help-spunto-list { display: flex; flex-direction: column; }
+.help-spunto-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 0;
+}
+.help-spunto-row + .help-spunto-row { border-top: 1px solid var(--line); }
+.help-spunto-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--warn);
+}
+.help-spunto-text {
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
 
 /* --- Feedback --- */
 .feedback-panel {

@@ -38,7 +38,7 @@
     streamCtrl: null,           // AbortController del fetch corrente
     helpBusy: false,            // aiuto "non so rispondere" in corso
     helpCtrl: null,             // AbortController dell'aiuto corrente
-    helpCache: {},              // spunto/risposta già generati per domanda (idx → {spunto, risposta})
+    helpCache: {},              // spunto/risposta già generati per domanda (q.id → {spunto, risposta})
     resumeData: null,           // sessione da riprendere
     bankLoading: null           // Promise generazione bank
   };
@@ -1033,10 +1033,10 @@
 
   /* ------------------------------------------------------------------
      Aiuto "Non so rispondere" — spunto o risposta modello
-     UNA sola richiesta AI per domanda (cache in S.helpCache[idx]):
-     riaprire l'aiuto è istantaneo, zero chiamate extra. Se l'utente
-     chiede l'altro aiuto dopo averne già ricevuto uno, il frontend
-     cambia semplicemente vista e riusa il contenuto già generato.
+     Cache per tipo in S.helpCache[idx] = { spunto, risposta }: ogni
+     tipo viene generato UNA volta sola per domanda. Riaprire lo stesso
+     aiuto è istantaneo; chiedere l'altro tipo genera la sua richiesta
+     (indipendente), mai duplicati, mai contenuti scambiati.
      ------------------------------------------------------------------ */
   function toggleHelp() {
     var panel = $("help-panel");
@@ -1085,14 +1085,56 @@
     if (r) r.disabled = !enabled;
   }
 
-  /* Renderizza il testo dell'aiuto in modo sicuro: converte **grassetto**
-     (che i modelli usano spesso) in <strong> reali, niente asterischi a
-     video. Il resto del testo è sempre escapato: mai HTML grezzo. */
-  function renderHelpText(text) {
-    var escaped = String(text || "")
+  /* Micro-interazione del click: compressione morbida e ritorno (200ms,
+     easing del design system). Comunica che il click è stato ricevuto,
+     senza decorare. Niente effetto con prefers-reduced-motion. */
+  function pressFx(el) {
+    if (REDUCED || !el) return;
+    el.classList.add("is-pressing");
+    window.setTimeout(function () { el.classList.remove("is-pressing"); }, 220);
+  }
+
+  /* Escape HTML sempre: il contenuto dei modelli non è mai fidato.
+     niente markdown a video: il testo arriva già pulito o strutturato. */
+  function escHtml(s) {
+    return String(s == null ? "" : s)
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-    return escaped.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  }
+
+  /* Spunto: il modello restituisce 3 righe ["etichetta: testo"].
+     Le separiamo e le renderizziamo con una gerarchia tipografica vera
+     (etichetta piccola + testo), mai asterischi o markdown a video. */
+  function parseSpunto(text) {
+    var lines = String(text || "")
+      .replace(/^```[a-z]*\s*/i, "").replace(/\s*```$/, "")
+      .split(/\r?\n/)
+      .map(function (l) { return l.trim(); })
+      .filter(Boolean);
+    var items = [];
+    lines.forEach(function (line) {
+      // "Etichetta: testo", "Etichetta — testo" oppure testo libero
+      // Difesa: se arrivasse un asterisco residuo, via (mai markdown a video).
+      var m = line.match(/^(.{3,40}?)[:–—-]\s+(.+)$/);
+      if (m) {
+        items.push({ label: m[1].trim(), text: m[2].trim().replace(/\*\*/g, "") });
+      } else {
+        items.push({ label: "", text: line.replace(/\*\*/g, "") });
+      }
+    });
+    // Se il modello ha scritto un unico blocco senza etichette, lo si
+    // lascia come testo semplice: mai mostrare righe vuote inutili.
+    return items;
+  }
+
+  function renderSpunto(items) {
+    var rows = items.map(function (it) {
+      return '<div class="help-spunto-row">' +
+        (it.label ? '<span class="help-spunto-label">' + escHtml(it.label) + "</span>" : "") +
+        '<span class="help-spunto-text">' + escHtml(it.text) + "</span>" +
+        "</div>";
+    }).join("");
+    return '<div class="help-spunto-list">' + rows + "</div>";
   }
 
   function showHelpResult(kind, text) {
@@ -1106,7 +1148,11 @@
     var label = isSpunto ? "Uno spunto per partire" : "Risposta modello";
     lbl.innerHTML = '<span class="help-result-dot" style="background:' + color + '" aria-hidden="true"></span>' + label;
     var txt = $("help-result-text");
-    txt.innerHTML = renderHelpText(text);
+    if (isSpunto) {
+      txt.innerHTML = renderSpunto(parseSpunto(text));
+    } else {
+      txt.innerHTML = escHtml(text);
+    }
   }
 
   /* Chiede un aiuto via /api/chat: "spunto" (3 punti per ripartire) oppure
@@ -1119,12 +1165,13 @@
     var q = S.questions[S.idx];
     if (!q) return;
 
-    // Aiuto già generato per questa domanda? Riusa senza chiamate:
-    // se l'utente chiede l'altro tipo, mostra comunque ciò che c'è
-    // (vista diversa, stesso contenuto: mai una seconda richiesta AI).
-    var entry = S.helpCache[S.idx];
-    if (entry) {
-      showHelpResult(entry.kind, entry.text);
+    // Aiuto già generato per QUESTO tipo di QUESTA domanda? Riusa senza
+    // chiamate. La chiave è l'id della domanda (non l'indice): nei flussi
+    // retry/ripresa l'indice riparte da 0 ma la domanda è un'altra, quindi
+    // la cache non può mai mostrare l'aiuto della domanda sbagliata.
+    var entry = S.helpCache[q.id];
+    if (entry && entry[kind]) {
+      showHelpResult(kind, entry[kind]);
       if (D) D.track("sim_help_cached", { kind: kind, sim_id: S.simId, idx: S.idx });
       return;
     }
@@ -1153,8 +1200,10 @@
         "Non scrivere la risposta completa. Dagli 3 spunti, UNO per riga, corti e concreti " +
         "(max 12 parole ciascuno): il primo indica l'angolo di attacco, il secondo un riferimento " +
         "normativo o un istituto chiave, il terzo un esempio da citare. " +
-        "Niente introduzioni, niente frasi di contorno, niente elenchi numerati. " +
-        "Nel testo usa **grassetto** solo per le 2-3 parole chiave di ogni spunto. " + langRule;
+        "Ogni riga DEVE seguire questo formato esatto: «Etichetta: testo», dove l'etichetta è " +
+        "Angolo di attacco, Riferimento o Esempio. " +
+        "Niente introduzioni, niente frasi di contorno, niente elenchi numerati, " +
+        "niente asterischi, niente markdown, niente grassetto. " + langRule;
     } else {
       sys = "Sei un commissario d'esame con anni di orali alle spalle, che sa spiegare in modo " +
         "chiaro e naturale. La domanda è: «" + q.testo + "». " +
@@ -1173,7 +1222,8 @@
       .then(function (text) {
         S.helpCtrl = null;
         S.helpBusy = false;
-        S.helpCache[S.idx] = { kind: kind, text: text };
+        S.helpCache[q.id] = S.helpCache[q.id] || {};
+        S.helpCache[q.id][kind] = text;
         showHelpResult(kind, text);
         enableHelpButtons(true);
         if (D) D.track("sim_help_done", { kind: kind, latency_ms: Date.now() - t0 });
@@ -2298,7 +2348,10 @@
 
     // Aiuto "Non so rispondere"
     $("help-trigger").addEventListener("click", toggleHelp);
+    $("help-trigger").addEventListener("pointerdown", function () { pressFx($("help-trigger")); });
+    $("help-spunto").addEventListener("pointerdown", function () { pressFx($("help-spunto")); });
     $("help-spunto").addEventListener("click", function () { helpRequest("spunto"); });
+    $("help-risposta").addEventListener("pointerdown", function () { pressFx($("help-risposta")); });
     $("help-risposta").addEventListener("click", function () { helpRequest("risposta"); });
 
     // Invia
