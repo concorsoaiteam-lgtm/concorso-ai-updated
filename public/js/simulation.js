@@ -38,6 +38,7 @@
     streamCtrl: null,           // AbortController del fetch corrente
     helpBusy: false,            // aiuto "non so rispondere" in corso
     helpCtrl: null,             // AbortController dell'aiuto corrente
+    helpCache: {},              // spunto/risposta già generati per domanda (idx → {spunto, risposta})
     resumeData: null,           // sessione da riprendere
     bankLoading: null           // Promise generazione bank
   };
@@ -872,6 +873,7 @@
     S.sending = false;
     S.feedbackDone = false;
     feedbackRetries = 0;
+    S.helpCache = {};
 
     beginSessionDb();
     showPhase("session");
@@ -1031,6 +1033,10 @@
 
   /* ------------------------------------------------------------------
      Aiuto "Non so rispondere" — spunto o risposta modello
+     UNA sola richiesta AI per domanda (cache in S.helpCache[idx]):
+     riaprire l'aiuto è istantaneo, zero chiamate extra. Se l'utente
+     chiede l'altro aiuto dopo averne già ricevuto uno, il frontend
+     cambia semplicemente vista e riusa il contenuto già generato.
      ------------------------------------------------------------------ */
   function toggleHelp() {
     var panel = $("help-panel");
@@ -1065,6 +1071,8 @@
     if (skel) skel.classList.remove("is-on");
     var txt = $("help-result-text");
     if (txt) txt.textContent = "";
+    var lbl = $("help-result-label");
+    if (lbl) lbl.innerHTML = "";
     var trig = $("help-trigger");
     if (trig) trig.disabled = S.sending;
     enableHelpButtons(true);
@@ -1077,13 +1085,49 @@
     if (r) r.disabled = !enabled;
   }
 
+  /* Renderizza il testo dell'aiuto in modo sicuro: converte **grassetto**
+     (che i modelli usano spesso) in <strong> reali, niente asterischi a
+     video. Il resto del testo è sempre escapato: mai HTML grezzo. */
+  function renderHelpText(text) {
+    var escaped = String(text || "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    return escaped.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  }
+
+  function showHelpResult(kind, text) {
+    var result = $("help-result");
+    result.hidden = false;
+    result.classList.add("is-on");
+    $("help-skeleton").classList.remove("is-on");
+    var lbl = $("help-result-label");
+    var isSpunto = kind === "spunto";
+    var color = isSpunto ? "var(--warn)" : "var(--ok-bright)";
+    var label = isSpunto ? "Uno spunto per partire" : "Risposta modello";
+    lbl.innerHTML = '<span class="help-result-dot" style="background:' + color + '" aria-hidden="true"></span>' + label;
+    var txt = $("help-result-text");
+    txt.innerHTML = renderHelpText(text);
+  }
+
   /* Chiede un aiuto via /api/chat: "spunto" (3 punti per ripartire) oppure
-     "risposta" (modello completo da studiare). Mai bloccante: skeleton
-     shimmer leggero, mai un muro; se la rete cade, bottone riprova. */
+     "risposta" (modello completo da studiare). Se l'aiuto per questa
+     domanda è già in cache, lo mostra subito: una sola richiesta AI.
+     Mai bloccante: skeleton shimmer leggero, mai un muro; se la rete
+     cade, il testo onesto lascia i bottoni attivi per riprovare. */
   function helpRequest(kind) {
     if (S.sending || S.helpBusy || S.feedbackDone || S.phase !== "session") return;
     var q = S.questions[S.idx];
     if (!q) return;
+
+    // Aiuto già generato per questa domanda? Riusa senza chiamate:
+    // se l'utente chiede l'altro tipo, mostra comunque ciò che c'è
+    // (vista diversa, stesso contenuto: mai una seconda richiesta AI).
+    var entry = S.helpCache[S.idx];
+    if (entry) {
+      showHelpResult(entry.kind, entry.text);
+      if (D) D.track("sim_help_cached", { kind: kind, sim_id: S.simId, idx: S.idx });
+      return;
+    }
 
     S.helpBusy = true;
     enableHelpButtons(false);
@@ -1093,40 +1137,44 @@
     $("help-skeleton").classList.add("is-on");
     var txt = $("help-result-text");
     txt.textContent = "";
-    txt.classList.remove("is-spunto", "is-risposta");
-    txt.classList.add(kind === "spunto" ? "is-spunto" : "is-risposta");
+    var lbl = $("help-result-label");
+    lbl.innerHTML = "";
 
     if (S.helpCtrl) S.helpCtrl.abort();
     S.helpCtrl = new AbortController();
 
-    var subjectName = S.subject ? S.subject.name : (q.argomento || "la materia");
     var langRule = (S.subject && S.subject.id === "inglese")
-      ? "Scrivi la risposta in inglese."
+      ? "Scrivi in inglese."
       : "Scrivi in italiano.";
     var sys;
     if (kind === "spunto") {
-      sys = "Sei il tutor di un candidato a un concorso pubblico italiano. " +
-        "Il candidato è bloccato sulla domanda: «" + q.testo + "». " +
-        "NON scrivere la risposta completa: dai SOLO 3 spunti sintetici per aiutarlo a partire " +
-        "(l'angolo di attacco, un riferimento normativo o istituto chiave, un esempio concreto da citare). " +
-        "Massimo 60 parole, elenco di 3 punti. " + langRule;
+      sys = "Sei un tutor che prepara da anni candidati ai concorsi pubblici italiani. " +
+        "Il candidato è bloccato su questa domanda d'orale: «" + q.testo + "». " +
+        "Non scrivere la risposta completa. Dagli 3 spunti, UNO per riga, corti e concreti " +
+        "(max 12 parole ciascuno): il primo indica l'angolo di attacco, il secondo un riferimento " +
+        "normativo o un istituto chiave, il terzo un esempio da citare. " +
+        "Niente introduzioni, niente frasi di contorno, niente elenchi numerati. " +
+        "Nel testo usa **grassetto** solo per le 2-3 parole chiave di ogni spunto. " + langRule;
     } else {
-      sys = "Sei un commissario di un concorso pubblico italiano. " +
-        "Stai interrogando un candidato sulla domanda: «" + q.testo + "». " +
-        "Scrivi una risposta modello da 200-250 parole come la darebbe un candidato eccellente: " +
-        "apri con la tesi, sviluppa con 2-3 punti e riferimenti normativi, chiudi riagganciandoti alla domanda. " +
-        "Solo il testo della risposta, nessun preambolo. " + langRule;
+      sys = "Sei un commissario d'esame con anni di orali alle spalle, che sa spiegare in modo " +
+        "chiaro e naturale. La domanda è: «" + q.testo + "». " +
+        "Scrivi la risposta modello (180-220 parole) come la esporresti tu a voce: " +
+        "apri con la risposta netta, sviluppa in 2-3 punti con i riferimenti normativi giusti, " +
+        "chiudi tornando alla domanda. " +
+        "Usa frasi brevi e linguaggio semplice, mai da manuale universitario: niente \"è " +
+        "doveroso evidenziare\", niente incisi accademici. Il livello tecnico resta alto, " +
+        "ma deve sembrare facile da seguire. Solo il testo della risposta. " + langRule;
     }
 
     if (D) D.track("sim_help_clicked", { kind: kind, sim_id: S.simId, idx: S.idx });
     var t0 = Date.now();
     var userMsg = kind === "spunto" ? "Dammi solo lo spunto." : "Scrivi la risposta modello.";
-    llmText(sys, kind === "spunto" ? 400 : 700, userMsg, S.helpCtrl.signal)
+    llmText(sys, kind === "spunto" ? 350 : 700, userMsg, S.helpCtrl.signal)
       .then(function (text) {
         S.helpCtrl = null;
         S.helpBusy = false;
-        $("help-skeleton").classList.remove("is-on");
-        txt.textContent = text;
+        S.helpCache[S.idx] = { kind: kind, text: text };
+        showHelpResult(kind, text);
         enableHelpButtons(true);
         if (D) D.track("sim_help_done", { kind: kind, latency_ms: Date.now() - t0 });
       })
@@ -1340,33 +1388,42 @@
     renderMetrics(scores);
     renderPrevFeedback();
 
-    // Testo con typewriter e caret
+    // Testo con typewriter e caret. Batch di parole via rAF: un solo
+    // reflow per frame invece di un setTimeout per parola (meno lavoro
+    // per il browser, animazione più fluida).
     var fbEl = $("feedback-text");
     fbEl.classList.add("is-streaming");
     fbEl.textContent = "";
     var words = feedback.split(/(\s+)/);
     var i = 0;
-    function type() {
-      if (i >= words.length) {
-        fbEl.classList.remove("is-streaming");
-        var suggEl = $("feedback-suggestion");
-        if (suggerimento) {
-          suggEl.textContent = suggerimento;
-          suggEl.classList.add("is-on");
-        }
-        S.feedbackDone = true;
-        S.sending = false;
-        $("help-trigger").disabled = false;
-        if (D) D.track("sim_feedback_received", {
-          sim_id: S.simId, idx: S.idx,
-          latency_ms: Date.now() - t0, scores: scores
-        });
-        scheduleNext();
-        return;
+    var batch = Math.max(2, Math.min(5, Math.round(words.length / 40)));
+    var finish = function () {
+      fbEl.classList.remove("is-streaming");
+      var suggEl = $("feedback-suggestion");
+      if (suggerimento) {
+        suggEl.textContent = suggerimento;
+        suggEl.classList.add("is-on");
       }
-      fbEl.textContent += words[i];
-      i += 1;
-      window.setTimeout(type, REDUCED ? 0 : 14);
+      S.feedbackDone = true;
+      S.sending = false;
+      $("help-trigger").disabled = false;
+      if (D) D.track("sim_feedback_received", {
+        sim_id: S.simId, idx: S.idx,
+        latency_ms: Date.now() - t0, scores: scores
+      });
+      scheduleNext();
+    };
+    // prefers-reduced-motion: testo intero in un colpo, nessun loop.
+    if (REDUCED) {
+      fbEl.textContent = feedback;
+      finish();
+      return;
+    }
+    function type() {
+      if (i >= words.length) { finish(); return; }
+      var end = Math.min(i + batch, words.length);
+      for (; i < end; i += 1) fbEl.textContent += words[i];
+      window.requestAnimationFrame(type);
     }
     type();
   }
@@ -2212,13 +2269,24 @@
       }
     });
 
-    // Textarea: autosize + word count + abilita invio
+    // Textarea: autosize + word count + abilita invio.
+    // autoSize legge scrollHeight (reflow): throttlato via rAF, al più
+    // una misura per frame. Lo stato del bottone si confronta col DOM
+    // live (mai cache stantia: renderQuestion/onFeedbackError lo
+    // modificano fuori da questo listener).
     var ta = $("answer-textarea");
+    var sizeFrame = null;
     ta.addEventListener("input", function () {
-      autoSize(ta);
       updateWordCount();
+      var empty = !ta.value.trim();
       var send = $("send-btn");
-      send.disabled = !ta.value.trim();
+      if (send.disabled !== empty) send.disabled = empty;
+      if (sizeFrame === null) {
+        sizeFrame = window.requestAnimationFrame(function () {
+          sizeFrame = null;
+          autoSize(ta);
+        });
+      }
     });
 
     // Hint accordion
