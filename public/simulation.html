@@ -187,15 +187,6 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 1 0-7 0v5A3.5 3.5 0 0 0 12 15Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
           <span id="voice-btn-label">Rispondi a voce</span>
         </button>
-        <span class="voice-status" id="voice-status" role="status" aria-live="polite"></span>
-      </div>
-      <div class="voice-live" id="voice-live" hidden>
-        <div class="voice-wave" id="voice-wave" aria-hidden="true"></div>
-        <span class="voice-pill" id="voice-pill">
-          <span class="dot" aria-hidden="true"></span>
-          <span id="voice-pill-label">Ascolto</span>
-          <span class="voice-timer" id="voice-timer" aria-hidden="true">0:00</span>
-        </span>
       </div>
       <p class="voice-metrics" id="voice-metrics" aria-live="polite"></p>
       <div class="answer-hint-panel" id="answer-hint-panel">
@@ -338,5 +329,31 @@
 <script src="js/dash-common.js"></script>
 <script src="js/voice.js"></script>
 <script src="js/simulation.js"></script>
+
+<!-- Registratore vocale: pannello modale come un registratore
+     professionale. Apre al click sul microfono; la waveform reagisce
+     al volume reale (AnalyserNode). Stati: ascolto → trascrizione →
+     revisione finale → messaggio pronto. -->
+<div class="recorder" id="recorder" hidden>
+  <div class="recorder-overlay" id="recorder-overlay" aria-hidden="true"></div>
+  <section class="recorder-sheet" role="dialog" aria-modal="true" aria-labelledby="recorder-status">
+    <div class="recorder-head">
+      <span class="recorder-status" id="recorder-status" role="status" aria-live="polite"></span>
+      <button type="button" class="recorder-close" id="recorder-close" aria-label="Chiudi registratore">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="recorder-wave" id="recorder-wave" aria-hidden="true"></div>
+    <div class="recorder-foot">
+      <button type="button" class="recorder-main" id="recorder-main" aria-label="Ferma la registrazione">
+        <svg class="rec-icon rec-icon-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 1 0-7 0v5A3.5 3.5 0 0 0 12 15Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        <svg class="rec-icon rec-icon-stop" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>
+        <svg class="rec-icon rec-icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
+        <svg class="rec-icon rec-icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <span class="recorder-timer" id="recorder-timer" aria-hidden="true">0:00</span>
+    </div>
+  </section>
+</div>
 </body>
 </html>

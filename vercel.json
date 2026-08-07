@@ -4,7 +4,8 @@
   "buildCommand": "echo 'Progetto statico - nessuna build necessaria'",
   "functions": {
     "api/chat.js": { "maxDuration": 60 },
-    "api/stt.js": { "maxDuration": 60 }
+    "api/stt.js": { "maxDuration": 60 },
+    "api/stt/review.js": { "maxDuration": 60 }
   },
   "rewrites": [
     { "source": "/dashboard", "destination": "/dashboard.html" },

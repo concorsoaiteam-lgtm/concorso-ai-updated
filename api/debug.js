@@ -33,6 +33,9 @@ module.exports = async function handler(req, res) {
     AI_MODEL: process.env.AI_MODEL || 'NOT SET (default: deepseek/deepseek-chat)',
     AI_API_KEY: process.env.AI_API_KEY ? 'SET (' + process.env.AI_API_KEY.length + ' chars)' : 'NOT SET (checking BLUESMINDS_API_KEY...)',
     BLUESMINDS_API_KEY: process.env.BLUESMINDS_API_KEY ? 'SET (' + process.env.BLUESMINDS_API_KEY.length + ' chars)' : 'NOT SET',
+    DEEPGRAM_API_KEY: process.env.DEEPGRAM_API_KEY ? 'SET (' + process.env.DEEPGRAM_API_KEY.length + ' chars)' : 'NOT SET',
+    GROQ_API_KEY: process.env.GROQ_API_KEY ? 'SET (' + process.env.GROQ_API_KEY.length + ' chars)' : 'NOT SET',
+    AI_MEMORY_MODEL: process.env.AI_MEMORY_MODEL ? 'SET' : 'NOT SET (default: modello AI di sistema)',
   };
 
   var result = {

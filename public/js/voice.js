@@ -592,7 +592,18 @@
               signal: ctrl.signal
             });
           } finally { clearTimeout(t); }
-          if (!resp.ok) throw new Error("http-" + resp.status);
+          if (!resp.ok) {
+            // L'errore del server è leggibile (es. "Trascrizione non
+            // configurata su questo deployment…"): mai un opaco "http-500".
+            var ebody = "";
+            try {
+              var jbody = await resp.json();
+              if (jbody && jbody.error) ebody = String(jbody.error);
+            } catch (_) { /* noop */ }
+            var ferr = new Error(ebody || ("http-" + resp.status));
+            ferr.status = resp.status;
+            throw ferr;
+          }
           var data = await resp.json();
           var text = String(data.text || "").trim();
           var words = Array.isArray(data.words) ? data.words : [];
@@ -606,7 +617,7 @@
           break;
         } catch (err) {
           // Niente retry sui 4xx (token, payload): sarebbe inutile.
-          var retriable = !(err && err.message && /^http-4/.test(err.message));
+          var retriable = !(err && typeof err.status === "number" && err.status >= 400 && err.status < 500);
           if (attempts >= 2 || !retriable) {
             console.error("[voice] trascrizione fallita:", err && err.message);
             setStatus("idle");

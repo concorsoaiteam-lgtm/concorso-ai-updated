@@ -1013,8 +1013,9 @@
     S.voiceSpeaking = false;
     var m = $("voice-metrics");
     if (m) { m.classList.remove("is-on"); m.innerHTML = ""; }
-    var st = $("voice-status");
-    if (st) { st.className = "voice-status"; st.textContent = ""; }
+    stopWaveLoop();
+    cancelRecorderClose();
+    closeRecorder();
     var vb = $("voice-btn");
     if (vb) {
       vb.disabled = false;
@@ -1023,13 +1024,6 @@
       var lbl = $("voice-btn-label");
       if (lbl) lbl.textContent = "Rispondi a voce";
     }
-    // Reset blocco live: waveform, pill, timer e loop si azzerano.
-    stopWaveLoop();
-    setVoiceLive(false);
-    var live = $("voice-live");
-    if (live) { live.classList.remove("is-recording", "is-transcribing", "is-starting"); }
-    var pill = $("voice-pill");
-    if (pill) { pill.className = "voice-pill"; }
     if (window.Voice) { try { Voice.cancel(); } catch (_) { /* noop */ } }
   }
 
@@ -2475,6 +2469,28 @@
       if (!Voice.micSupported && vBtn) {
         vBtn.closest(".voice-row").classList.add("hidden");
       }
+
+      // Registratore vocale: chiusura (X, Escape, click fuori) e
+      // pulsante principale coerente con lo stato di ascolto.
+      var recClose = $("recorder-close");
+      if (recClose) recClose.addEventListener("click", closeRecorderSafe);
+      var recMain = $("recorder-main");
+      if (recMain) recMain.addEventListener("click", onRecorderMain);
+      var recOv = $("recorder-overlay");
+      if (recOv) {
+        recOv.addEventListener("click", function () {
+          var rec = $("recorder");
+          if (!rec || rec.hidden) return;
+          var stt = rec.getAttribute("data-state") || "";
+          if (stt === "error" || stt === "done" || stt === "transcribing" || stt === "reviewing") {
+            closeRecorderSafe();
+          }
+        });
+      }
+      document.addEventListener("keydown", function (e) {
+        var rec = $("recorder");
+        if (e.key === "Escape" && rec && !rec.hidden) closeRecorderSafe();
+      });
     }
 
     // Pausa
@@ -2541,47 +2557,33 @@
     }
     if (Voice.transcribing || S.sending || S.phase !== "session") return;
     pressFx(btn);
-    btn.classList.add("is-busy");
-    // Feedback IMMEDIATO: le linee colorate partono subito, mentre il
-    // microfono si prepara (permesso + VAD). Mai un click senza risposta.
-    var st = $("voice-status");
-    if (st) { st.className = "voice-status"; st.textContent = ""; }
+    // Apre il registratore: feedback immediato, mai un click senza risposta.
+    // Le linee partono subito mentre il microfono si prepara (permesso + VAD).
+    cancelRecorderClose();
+    openRecorder();
+    setRecorderState("starting", "Preparo il microfono…");
     startWaveLoop();
-    setVoiceLive(true);
-    var live = $("voice-live");
-    if (live) { live.classList.remove("is-recording", "is-transcribing"); live.classList.add("is-starting"); }
-    var pill = $("voice-pill");
-    if (pill) { pill.className = "voice-pill is-busy"; }
-    var pl = $("voice-pill-label");
-    if (pl) pl.textContent = "Preparo il microfono…";
     // Interruzione = il mic parte mentre la commissione legge ancora.
     Voice.start({ interruptedByUser: S.voiceSpeaking })
       .catch(function (err) {
         // "already-busy" = doppio click durante l'avvio: il primo start è
-        // ancora in corso, NON nascondere la UI di preparazione.
-        if (!(err && err.message === "already-busy")) {
-          stopWaveLoop();
-          setVoiceLive(false);
-        }
-        btn.classList.remove("is-busy");
+        // ancora in corso, NON chiudere il registratore.
+        if (err && err.message === "already-busy") return;
+        stopWaveLoop();
         var msg = (err && err.message === "mic-unsupported")
           ? "Il microfono non è supportato su questo browser."
-          : (err && err.message === "already-busy") ? ""
           : "Microfono non disponibile: controlla i permessi e riprova.";
-        if (st && msg) {
-          st.className = "voice-status";
-          st.textContent = msg;
-        }
+        setRecorderState("error", msg);
+        scheduleRecorderClose(3400);
         if (D) D.track("sim_voice_error", { reason: (err && err.message) || "unknown" });
       });
   }
 
   /* ------------------------------------------------------------------
-     Voce — UI live. La waveform NON è decorativa: ogni frame legge il
-     volume REALE del microfono via AnalyserNode (Web Audio API) e
-     disegna le barre. Pill "Ascolto" + timer reale danno il senso di
-     una commissione che ascolta davvero. Ogni stato (ascolto, parlato,
-     elaborazione, errore) è immediatamente riconoscibile.
+     Voce — registratore professionale. La waveform NON è decorativa:
+     ogni frame legge il volume REALE del microfono via AnalyserNode
+     (Web Audio API). Stati sempre chiari: ascolto → trascrizione →
+     revisione finale → messaggio pronto. Mai un click senza risposta.
      ------------------------------------------------------------------ */
   var waveBars = [];
   var waveLoopId = 0;
@@ -2609,33 +2611,129 @@
   }
 
   function buildWave() {
-    var w = $("voice-wave");
+    var w = $("recorder-wave");
     if (!w || waveBars.length) return;
-    var n = 28;
+    var n = 42;
     for (var i = 0; i < n; i++) {
       var b = document.createElement("span");
-      b.className = "voice-wave-bar";
+      b.className = "recorder-wave-bar";
       b.style.background = waveColor(i, n);
       w.appendChild(b);
       waveBars.push(b);
     }
   }
 
-  function setVoiceLive(show) {
-    var live = $("voice-live");
-    if (live) live.hidden = !show;
+  /* Pannello registratore: apre/chiude, gestisce stati e auto-chiusura.
+     Mai un click senza risposta visiva, mai un vuoto durante l'ascolto. */
+  var recCloseTimer = null;
+
+  function openRecorder() {
+    var rec = $("recorder");
+    if (!rec) return;
+    var firstOpen = rec.hidden;
+    rec.hidden = false;
+    buildWave();
+    var tEl = $("recorder-timer");
+    if (tEl) { tEl.textContent = "0:00"; waveTimerShown = ""; }
+    requestAnimationFrame(function () { rec.classList.add("is-open"); });
+    document.body.classList.add("rec-open");
+    // Focus solo al primo open: i cicli recording→listening non rubano
+    // il focus al pulsante della pagina.
+    if (firstOpen) {
+      var close = $("recorder-close");
+      if (close && close.focus) close.focus({ preventScroll: true });
+    }
+  }
+
+  function closeRecorder(restoreFocus, focusId) {
+    var rec = $("recorder");
+    if (!rec) return;
+    rec.classList.remove("is-open");
+    rec.hidden = true;
+    document.body.classList.remove("rec-open");
+    var vb = $("voice-btn");
+    if (vb) {
+      vb.classList.remove("is-busy");
+      vb.setAttribute("aria-pressed", "false");
+      var lbl = $("voice-btn-label");
+      if (lbl) lbl.textContent = "Rispondi a voce";
+    }
+    if (focusId) {
+      // Destinazione esplicita: dopo "Messaggio pronto" il focus va
+      // sulla textarea, dove l'utente correggerà la trascrizione.
+      var target = $(focusId);
+      if (target && target.focus) target.focus({ preventScroll: true });
+      return;
+    }
+    if (restoreFocus && vb && vb.focus) vb.focus({ preventScroll: true });
+  }
+
+  function closeRecorderSafe() {
+    if (window.Voice) { try { Voice.cancel(); } catch (_) { /* noop */ } }
+    stopWaveLoop();
+    closeRecorder(true);
+  }
+
+  function scheduleRecorderClose(ms, focusId) {
+    if (recCloseTimer) window.clearTimeout(recCloseTimer);
+    recCloseTimer = window.setTimeout(function () {
+      recCloseTimer = null;
+      stopWaveLoop();
+      closeRecorder(false, focusId);
+    }, ms);
+  }
+
+  function cancelRecorderClose() {
+    if (recCloseTimer) { window.clearTimeout(recCloseTimer); recCloseTimer = null; }
+  }
+
+  function setRecorderState(state, label) {
+    var rec = $("recorder");
+    if (!rec) return;
+    var states = ["starting", "recording", "listening", "transcribing", "reviewing", "done", "error"];
+    for (var i = 0; i < states.length; i++) {
+      rec.classList.toggle("is-" + states[i], states[i] === state);
+    }
+    rec.setAttribute("data-state", state);
+    var statusEl = $("recorder-status");
+    if (statusEl && label != null) statusEl.textContent = label;
+    var main = $("recorder-main");
+    if (main) {
+      // In trascrizione/revisione il pulsante è davvero inerte: non solo
+      // visivamente (disabled toglie anche dal tab order).
+      var inert = (state === "transcribing" || state === "reviewing");
+      main.disabled = inert;
+      main.setAttribute("aria-disabled", inert ? "true" : "false");
+      var aria = "Ferma la registrazione";
+      if (inert) aria = "Elaborazione in corso";
+      else if (state === "done") aria = "Messaggio pronto";
+      else if (state === "error") aria = "Chiudi";
+      main.setAttribute("aria-label", aria);
+    }
+  }
+
+  function onRecorderMain() {
+    var rec = $("recorder");
+    if (!rec || rec.hidden) return;
+    var state = rec.getAttribute("data-state") || "";
+    if (state === "recording" || state === "listening" || state === "starting") {
+      if (window.Voice) Voice.stop();
+    } else if (state === "error" || state === "done") {
+      stopWaveLoop();
+      closeRecorder(true);
+    }
+    // transcribing / reviewing: inerte (l'aria-label lo comunica).
   }
 
   function startWaveLoop() {
-    buildWave();
     if (waveLoopId) return;
     var tick = function () {
       if (!window.Voice || (!Voice.recording && !Voice._startPending)) { stopWaveLoop(); return; }
       var i;
-      var live = $("voice-live");
-      // Fase di preparazione: le barre le anima il CSS (wave-breathe), qui
+      var rec = $("recorder");
+      // Fase di preparazione: le barre le anima il CSS (rec-breathe), qui
       // aggiorniamo solo il timer.
-      if (!(live && live.classList.contains("is-starting"))) {
+      if (!(rec && rec.classList.contains("is-starting"))) {
         if (Voice.hasAnalyser && Voice.hasAnalyser()) {
           // Volume REALE del microfono via AnalyserNode (Web Audio API).
           var levels = Voice.levels(waveBars.length);
@@ -2653,7 +2751,7 @@
           }
         }
       }
-      var tEl = $("voice-timer");
+      var tEl = $("recorder-timer");
       if (tEl) {
         var sec = Math.floor((Voice.listenSince ? Voice.listenSince() : 0) / 1000);
         var label = Math.floor(sec / 60) + ":" + ("0" + (sec % 60)).slice(-2);
@@ -2669,94 +2767,70 @@
     waveTimerShown = "";
   }
 
-  /* Stato live della registrazione: la UI non è mai "vuota" mentre
-     la commissione ascolta o trascrive. */
+  /* Stato live della registrazione: ogni stato del registratore è
+     immediatamente riconoscibile. La UI non è mai "vuota" mentre la
+     commissione ascolta o trascrive. */
   function onVoiceStatus(s) {
-    var st = $("voice-status");
-    var btn = $("voice-btn");
-    var pill = $("voice-pill");
-    var pillLabel = $("voice-pill-label");
-    var live = $("voice-live");
-    var btnReset = function () {
-      if (!btn) return;
-      btn.classList.remove("is-busy");
-      btn.setAttribute("aria-pressed", "false");
-      var lbl = $("voice-btn-label");
-      if (lbl) lbl.textContent = "Rispondi a voce";
-    };
     switch (s) {
       case "recording":
+        // In ascolto: la waveform reagisce al volume reale (AnalyserNode).
+        cancelRecorderClose();
+        openRecorder();
         startWaveLoop();
-        setVoiceLive(true);
-        if (live) { live.classList.add("is-recording"); live.classList.remove("is-transcribing", "is-starting"); }
-        if (pill) { pill.className = "voice-pill"; }
-        if (pillLabel) pillLabel.textContent = "Ascolto";
-        if (st) st.textContent = "";
-        if (btn) {
-          btn.classList.remove("is-busy");
-          btn.setAttribute("aria-pressed", "true");
-          var lbl = $("voice-btn-label");
-          if (lbl) lbl.textContent = "Ferma";
-        }
+        setRecorderState("recording", "Ti stiamo ascoltando");
         break;
       case "speaking":
-        if (pill) { pill.className = "voice-pill is-speaking"; }
-        if (st) st.textContent = "";
+        // La commissione sta leggendo: nessun cambio di stato.
         break;
       case "listening":
         // Breve pausa tra i segmenti: restiamo in ascolto.
-        if (pill) { pill.className = "voice-pill"; }
-        if (st) st.textContent = "";
+        setRecorderState("listening", "Ti stiamo ascoltando");
         break;
       case "transcribing":
-        setVoiceLive(true);
-        if (live) { live.classList.add("is-transcribing"); live.classList.remove("is-recording", "is-starting"); }
-        if (pill) { pill.className = "voice-pill is-busy"; }
-        if (pillLabel) pillLabel.textContent = "Elaboro…";
-        if (st) st.textContent = "";
-        // Bottone visibilmente inerte finché la trascrizione è in corso:
-        // niente click che fanno "niente" in silenzio.
-        if (btn) {
-          btn.classList.add("is-busy");
-          btn.setAttribute("aria-pressed", "false");
-          var lbl = $("voice-btn-label");
-          if (lbl) lbl.textContent = "Rispondi a voce";
-        }
+        stopWaveLoop();
+        setRecorderState("transcribing", "Trascrizione…");
         break;
       case "error":
         stopWaveLoop();
-        setVoiceLive(false);
-        if (pill) { pill.className = "voice-pill"; if (pillLabel) pillLabel.textContent = "Ascolto"; }
-        if (st) { st.className = "voice-status is-error"; st.textContent = "Trascrizione non riuscita: riprova o scrivi la risposta."; }
-        btnReset();
+        setRecorderState("error", "Trascrizione non riuscita: riprova o scrivi la risposta.");
+        scheduleRecorderClose(3400);
         break;
       default:
         stopWaveLoop();
-        setVoiceLive(false);
-        if (st) { st.className = "voice-status"; st.textContent = ""; }
-        btnReset();
+        closeRecorder();
     }
   }
 
-  /* Risultato della trascrizione: il testo riempie la textarea, le
-     metriche vocali restano per il feedback. Mai un vuoto silenzioso. */
+  /* Risultato della trascrizione: prima una piccola revisione finale
+     (correzioni evidenti via modello economico), poi il testo riempie
+     la textarea e le metriche vocali restano per il feedback. La UI
+     non è mai "vuota": trascrizione → revisione → messaggio pronto. */
   function onVoiceResult(res) {
-    var st = $("voice-status");
     var text = String(res.text || "").trim();
     var metrics = res.metrics || {};
     stopWaveLoop();
-    setVoiceLive(false);
     // Errore di trascrizione: il messaggio "non ti ho sentito" sarebbe
     // fuorviante — l'utente è stato sentito, è il servizio che è fallito.
     if (res && res.error) {
-      if (st) { st.className = "voice-status is-error"; st.textContent = "Trascrizione non riuscita: riprova o scrivi la risposta."; }
+      setRecorderState("error", "Trascrizione non riuscita: riprova o scrivi la risposta.");
+      scheduleRecorderClose(3400);
       if (D) D.track("sim_voice_error", { reason: String(res.error).slice(0, 80) });
       return;
     }
-    if (text) {
+    if (!text) {
+      setRecorderState("error", "Non ti ho sentito: riprova o scrivi la risposta.");
+      scheduleRecorderClose(2600);
+      if (D) D.track("sim_voice_empty", {});
+      return;
+    }
+    // Revisione finale: una piccola passata su un modello economico
+    // corregge SOLO gli errori evidenti. Fail-open: se non risponde,
+    // la trascrizione resta quella che è, mai persa.
+    setRecorderState("reviewing", "Revisione finale…");
+    reviewTranscription(text).then(function (finalText) {
       S.voiceMetrics = metrics;
       var ta = $("answer-textarea");
-      ta.value = text;
+      ta.value = finalText;
       ta.disabled = false;
       updateWordCount();
       autoSize(ta);
@@ -2768,20 +2842,45 @@
         mEl.innerHTML = "Parlando: <strong>" + escHtml(fmtVoiceMetrics(metrics)) + "</strong>";
         mEl.classList.add("is-on");
       }
-      if (st) { st.className = "voice-status"; st.textContent = ""; }
+      setRecorderState("done", "Messaggio pronto");
+      // 2.5s: tempo perché anche uno screen reader annunci lo stato
+      // (aria-live) prima dell'auto-chiusura. Focus alla textarea.
+      scheduleRecorderClose(2500, "answer-textarea");
       if (D) D.track("sim_voice_result", {
-        words: countWords(text),
+        words: countWords(finalText),
         time_to_answer: metrics.timeToAnswerMs,
         pauses: metrics.pauseCount,
         wpm: metrics.wpm
       });
-    } else {
-      if (st) {
-        st.className = "voice-status";
-        st.textContent = "Non ti ho sentito: riprova o scrivi la risposta.";
-      }
-      if (D) D.track("sim_voice_empty", {});
-    }
+    });
+  }
+
+  /* Revisione finale della trascrizione via /api/stt/review (modello
+     piccolo, fail-open). Timeout client di 9s: anche con rete lenta
+     la trascrizione non viene mai persa. */
+  function reviewTranscription(text) {
+    var sess = (D && D.supabase && D.supabase.auth) ? D.supabase.auth.getSession() : null;
+    var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
+    var p = fetch("/api/stt/review", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token ? "Bearer " + token : ""
+      },
+      body: JSON.stringify({ text: text })
+    }).then(function (r) {
+      if (!r.ok) throw new Error("http-" + r.status);
+      return r.json();
+    }).then(function (data) {
+      if (data && typeof data.text === "string" && data.text.trim()) return data.text;
+      throw new Error("empty");
+    });
+    return new Promise(function (resolve) {
+      var done = false;
+      var finish = function (v) { if (!done) { done = true; resolve(v); } };
+      p.then(function (t) { finish(t); }, function () { finish(text); });
+      window.setTimeout(function () { finish(text); }, 9000);
+    });
   }
 
   /* Stato TTS: mostra il caricamento della voce (una volta sola) e

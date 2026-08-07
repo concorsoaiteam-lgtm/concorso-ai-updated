@@ -35,9 +35,25 @@ function setCors(req, res) {
   if (ALLOWED_ORIGINS.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Cache-Control', 'no-store');
+}
+
+// Stato di configurazione STT (SENZA esporre le chiavi): usato dal
+// client e dagli sviluppatori per capire subito se il deployment ha
+// le env vars giuste (il .env locale NON arriva mai su Vercel).
+function sttConfigStatus() {
+  var dg = !!process.env.DEEPGRAM_API_KEY;
+  var gq = !!process.env.GROQ_API_KEY;
+  return {
+    ok: true,
+    service: 'stt',
+    configured: { deepgram: dg, groq: gq },
+    hint: (dg || gq)
+      ? 'Provider STT configurati.'
+      : 'Nessuna chiave STT su questo deployment. Aggiungi DEEPGRAM_API_KEY (o GROQ_API_KEY) in Vercel → Project → Settings → Environment Variables e ridistribuisci. Chiavi gratuite: https://deepgram.com/pricing'
+  };
 }
 
 function timeoutSignal(ms) {
@@ -133,8 +149,15 @@ async function transcribeGroq(apiKey, audioBuffer, mimeType, deadline) {
 module.exports = async function handler(req, res) {
   setCors(req, res);
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  // GET → diagnostica configurazione: apri /api/stt nel browser per
+  // verificare che le chiavi STT siano presenti sul deployment.
+  if (req.method === 'GET') {
+    return res.json(sttConfigStatus());
+  }
+
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Solo POST permesso' });
+    return res.status(405).json({ error: 'Metodo non permesso (usa POST o GET)' });
   }
 
   try {
@@ -174,9 +197,9 @@ module.exports = async function handler(req, res) {
         return res.json(dg);
       } catch (err) {
         console.error('[stt] Deepgram fallito:', err.message);
-        // Se non c'è fallback, propaga l'errore con status 502.
+        // Se non c'è fallback, propaga l'errore con status 502 e DETTAGLIO.
         if (!groqKey) {
-          return res.status(502).json({ error: 'Trascrizione non disponibile: ' + err.message });
+          return res.status(502).json({ error: 'Trascrizione non disponibile.', detail: String(err.message).slice(0, 300) });
         }
       }
     }
@@ -188,11 +211,17 @@ module.exports = async function handler(req, res) {
         return res.json(gq);
       } catch (err) {
         console.error('[stt] Groq fallito:', err.message);
-        return res.status(502).json({ error: 'Trascrizione non disponibile: ' + err.message });
+        return res.status(502).json({ error: 'Trascrizione non disponibile.', detail: String(err.message).slice(0, 300) });
       }
     }
 
-    return res.status(500).json({ error: 'Nessuna chiave STT configurata (DEEPGRAM_API_KEY o GROQ_API_KEY). Ottienila gratis su deepgram.com' });
+    // Config mancante = problema di DEPLOYMENT, non errore interno:
+    // 503 con messaggio chiaro (il client lo mostra all'utente).
+    return res.status(503).json({
+      error: 'Trascrizione non configurata su questo deployment.',
+      detail: 'Manca DEEPGRAM_API_KEY (e GROQ_API_KEY). Aggiungile in Vercel → Project → Settings → Environment Variables e ridistribuisci. Chiavi gratuite: https://deepgram.com/pricing',
+      hint: 'GET /api/stt per lo stato di configurazione.'
+    });
 
   } catch (err) {
     console.error('[stt] Internal error:', err.message);
