@@ -1023,7 +1023,14 @@
       var lbl = $("voice-btn-label");
       if (lbl) lbl.textContent = "Rispondi a voce";
     }
-    if (window.Voice && Voice.recording) Voice.cancel();
+    // Reset blocco live: waveform, pill, timer e loop si azzerano.
+    stopWaveLoop();
+    setVoiceLive(false);
+    var live = $("voice-live");
+    if (live) { live.classList.remove("is-recording", "is-transcribing"); }
+    var pill = $("voice-pill");
+    if (pill) { pill.className = "voice-pill"; }
+    if (window.Voice) { try { Voice.cancel(); } catch (_) { /* noop */ } }
   }
 
   /* La commissione legge la domanda ad alta voce (se la voce è attiva).
@@ -2538,6 +2545,8 @@
     // Interruzione = il mic parte mentre la commissione legge ancora.
     Voice.start({ interruptedByUser: S.voiceSpeaking })
       .catch(function (err) {
+        stopWaveLoop();
+        setVoiceLive(false);
         btn.classList.remove("is-busy");
         var st = $("voice-status");
         var msg = (err && err.message === "mic-unsupported")
@@ -2552,48 +2561,128 @@
       });
   }
 
+  /* ------------------------------------------------------------------
+     Voce — UI live. La waveform NON è decorativa: ogni frame legge il
+     volume REALE del microfono via AnalyserNode (Web Audio API) e
+     disegna le barre. Pill "Ascolto" + timer reale danno il senso di
+     una commissione che ascolta davvero. Ogni stato (ascolto, parlato,
+     elaborazione, errore) è immediatamente riconoscibile.
+     ------------------------------------------------------------------ */
+  var waveBars = [];
+  var waveLoopId = 0;
+  var waveTimerShown = "";
+
+  function buildWave() {
+    var w = $("voice-wave");
+    if (!w || waveBars.length) return;
+    var n = 28;
+    for (var i = 0; i < n; i++) {
+      var b = document.createElement("span");
+      b.className = "voice-wave-bar";
+      w.appendChild(b);
+      waveBars.push(b);
+    }
+  }
+
+  function setVoiceLive(show) {
+    var live = $("voice-live");
+    if (live) live.hidden = !show;
+  }
+
+  function startWaveLoop() {
+    buildWave();
+    if (waveLoopId) return;
+    var tick = function () {
+      if (!window.Voice || !Voice.recording) { stopWaveLoop(); return; }
+      var levels = Voice.levels ? Voice.levels(waveBars.length) : null;
+      if (levels) {
+        for (var i = 0; i < waveBars.length; i++) {
+          var v = Math.max(0.08, Math.min(1, levels[i] || 0));
+          waveBars[i].style.transform = "scaleY(" + v.toFixed(3) + ")";
+        }
+      }
+      var tEl = $("voice-timer");
+      if (tEl) {
+        var sec = Math.floor((Voice.listenSince ? Voice.listenSince() : 0) / 1000);
+        var label = Math.floor(sec / 60) + ":" + ("0" + (sec % 60)).slice(-2);
+        if (label !== waveTimerShown) { tEl.textContent = label; waveTimerShown = label; }
+      }
+      waveLoopId = requestAnimationFrame(tick);
+    };
+    waveLoopId = requestAnimationFrame(tick);
+  }
+
+  function stopWaveLoop() {
+    if (waveLoopId) { cancelAnimationFrame(waveLoopId); waveLoopId = 0; }
+    waveTimerShown = "";
+  }
+
   /* Stato live della registrazione: la UI non è mai "vuota" mentre
      la commissione ascolta o trascrive. */
   function onVoiceStatus(s) {
     var st = $("voice-status");
     var btn = $("voice-btn");
-    if (!st) return;
-    var dot = '<span class="dot"></span>';
+    var pill = $("voice-pill");
+    var pillLabel = $("voice-pill-label");
+    var live = $("voice-live");
+    var btnReset = function () {
+      if (!btn) return;
+      btn.classList.remove("is-busy");
+      btn.setAttribute("aria-pressed", "false");
+      var lbl = $("voice-btn-label");
+      if (lbl) lbl.textContent = "Rispondi a voce";
+    };
     switch (s) {
       case "recording":
-        st.className = "voice-status is-speaking";
-        st.innerHTML = dot + " Ti ascolto: rispondi come davanti alla commissione…";
+        startWaveLoop();
+        setVoiceLive(true);
+        if (live) { live.classList.add("is-recording"); live.classList.remove("is-transcribing"); }
+        if (pill) { pill.className = "voice-pill"; }
+        if (pillLabel) pillLabel.textContent = "Ascolto";
+        if (st) st.textContent = "";
         if (btn) {
           btn.classList.remove("is-busy");
           btn.setAttribute("aria-pressed", "true");
-          $("voice-btn-label").textContent = "Ferma";
+          var lbl = $("voice-btn-label");
+          if (lbl) lbl.textContent = "Ferma";
         }
         break;
       case "speaking":
-        st.className = "voice-status is-speaking";
-        st.innerHTML = dot + " Ti ascolto…";
+        if (pill) { pill.className = "voice-pill is-speaking"; }
+        if (st) st.textContent = "";
         break;
       case "listening":
-        st.className = "voice-status";
-        st.innerHTML = dot + " Ho sentito. Sto trascrivendo…";
+        // Breve pausa tra i segmenti: restiamo in ascolto.
+        if (pill) { pill.className = "voice-pill"; }
+        if (st) st.textContent = "";
         break;
       case "transcribing":
-        st.className = "voice-status is-busy";
-        st.textContent = "Trascrivo la risposta…";
+        setVoiceLive(true);
+        if (live) { live.classList.add("is-transcribing"); live.classList.remove("is-recording"); }
+        if (pill) { pill.className = "voice-pill is-busy"; }
+        if (pillLabel) pillLabel.textContent = "Elaboro…";
+        if (st) st.textContent = "";
+        // Bottone visibilmente inerte finché la trascrizione è in corso:
+        // niente click che fanno "niente" in silenzio.
         if (btn) {
-          btn.classList.remove("is-busy");
+          btn.classList.add("is-busy");
           btn.setAttribute("aria-pressed", "false");
-          $("voice-btn-label").textContent = "Rispondi a voce";
+          var lbl = $("voice-btn-label");
+          if (lbl) lbl.textContent = "Rispondi a voce";
         }
         break;
+      case "error":
+        stopWaveLoop();
+        setVoiceLive(false);
+        if (pill) { pill.className = "voice-pill"; if (pillLabel) pillLabel.textContent = "Ascolto"; }
+        if (st) { st.className = "voice-status is-error"; st.textContent = "Trascrizione non riuscita: riprova o scrivi la risposta."; }
+        btnReset();
+        break;
       default:
-        st.className = "voice-status";
-        st.textContent = "";
-        if (btn) {
-          btn.classList.remove("is-busy");
-          btn.setAttribute("aria-pressed", "false");
-          $("voice-btn-label").textContent = "Rispondi a voce";
-        }
+        stopWaveLoop();
+        setVoiceLive(false);
+        if (st) { st.className = "voice-status"; st.textContent = ""; }
+        btnReset();
     }
   }
 
@@ -2603,6 +2692,15 @@
     var st = $("voice-status");
     var text = String(res.text || "").trim();
     var metrics = res.metrics || {};
+    stopWaveLoop();
+    setVoiceLive(false);
+    // Errore di trascrizione: il messaggio "non ti ho sentito" sarebbe
+    // fuorviante — l'utente è stato sentito, è il servizio che è fallito.
+    if (res && res.error) {
+      if (st) { st.className = "voice-status is-error"; st.textContent = "Trascrizione non riuscita: riprova o scrivi la risposta."; }
+      if (D) D.track("sim_voice_error", { reason: String(res.error).slice(0, 80) });
+      return;
+    }
     if (text) {
       S.voiceMetrics = metrics;
       var ta = $("answer-textarea");

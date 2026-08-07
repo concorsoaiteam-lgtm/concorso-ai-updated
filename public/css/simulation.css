@@ -917,8 +917,9 @@ a { color: inherit; }
 .voice-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 10px;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
   min-height: 40px;
 }
 .voice-btn {
@@ -946,43 +947,96 @@ a { color: inherit; }
   border-color: var(--ink);
   color: var(--bg);
 }
-.voice-btn[aria-pressed="true"] .voice-btn-pulse { animation: voice-pulse 1.6s ease-out infinite; }
 .voice-btn.is-busy { opacity: 0.65; pointer-events: none; }
 
-@keyframes voice-pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(31, 158, 92, 0.35); }
-  70%  { box-shadow: 0 0 0 9px rgba(31, 158, 92, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(31, 158, 92, 0); }
+/* Blocco live: waveform + pill "Ascolto" + timer reale. La waveform
+   NON è decorativa: reagisce al volume reale del microfono (AnalyserNode)
+   e sparisce quando non si sta ascoltando. */
+.voice-live {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: view-in 180ms var(--ease);
 }
+.voice-live[hidden] { display: none; }
 
-.voice-status {
-  font-size: 13px;
-  color: var(--muted);
-  min-height: 20px;
+.voice-wave {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 3px;
+  height: 26px;
+  width: 100%;
 }
-.voice-status .dot {
-  width: 8px;
-  height: 8px;
+.voice-wave-bar {
+  flex: 1 1 0;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 2px;
+  background: var(--line-2);
+  transform: scaleY(0.12);
+  transform-origin: center;
+  transition: transform 80ms linear, background 200ms var(--ease);
+}
+.voice-live.is-recording .voice-wave-bar { background: var(--ink); }
+.voice-live.is-transcribing .voice-wave-bar {
+  background: var(--line-2);
+  transform: scaleY(0.16);
+  transition: none;
+}
+
+.voice-pill {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: border-color var(--t-base) var(--ease), color var(--t-base) var(--ease);
+}
+.voice-pill .dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--ok-bright);
   flex-shrink: 0;
   animation: dot-blink 1.4s ease-in-out infinite;
 }
-.voice-status.is-speaking .dot { background: var(--error); }
-.voice-status.is-busy .dot { background: var(--warn); animation: none; }
+.voice-pill.is-speaking .dot { background: var(--ink); }
+.voice-pill.is-busy .dot { background: var(--warn); animation: none; }
+.voice-timer {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
 @keyframes dot-blink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.25; }
+  50% { opacity: 0.3; }
 }
 
+.voice-status {
+  font-size: 12.5px;
+  color: var(--muted);
+  min-height: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: right;
+  justify-content: flex-end;
+}
+.voice-status.is-error { color: var(--error); }
+
 .voice-metrics {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   font-size: 12.5px;
   color: var(--ink-soft);
   background: var(--bg-2);
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 8px 12px;
   display: none;
@@ -1020,8 +1074,9 @@ a { color: inherit; }
 .voice-tts-toggle.is-loading { opacity: 0.6; pointer-events: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .voice-btn[aria-pressed="true"] .voice-btn-pulse { animation: none; }
-  .voice-status .dot { animation: none; }
+  .voice-wave-bar { transition: none; }
+  .voice-pill .dot { animation: none; }
+  .voice-live { animation: none; }
 }
 
 .send-row {

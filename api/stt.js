@@ -96,7 +96,13 @@ async function transcribeDeepgram(apiKey, audioBuffer, mimeType, deadline) {
 
 // --- Groq Whisper: fallback economico (niente word timestamps) ---
 async function transcribeGroq(apiKey, audioBuffer, mimeType, deadline) {
-  var ext = String(mimeType || '').includes('wav') ? 'wav' : 'webm';
+  // Safari/iOS produce audio/mp4: l'estensione del file deve combaciare
+  // col contenuto reale, altrimenti Whisper rifiuta il file.
+  var m = String(mimeType || '').toLowerCase();
+  var ext = m.includes('wav') ? 'wav'
+    : (m.includes('mp4') || m.includes('m4a')) ? 'mp4'
+    : m.includes('ogg') ? 'ogg'
+    : 'webm';
   var blob = new Blob([audioBuffer], { type: mimeType || 'audio/webm' });
   var fd = new FormData();
   fd.append('file', blob, 'audio.' + ext);

@@ -25,6 +25,8 @@
     ttsStatus: "idle",       // idle|loading|ready|error
     recording: false,
     transcribing: false,
+    _startPending: false,    // avvio in corso (getUserMedia/VAD): stop/cancel sicuri
+    _analyser: null,         // AnalyserNode del microfono → waveform live reale
     _onStatus: null,         // callback stato UI
     _onResult: null,         // callback risultato trascrizione {text, words, metrics}
     _onTtsState: null        // callback cambio stato TTS
@@ -230,6 +232,7 @@
   var lastSpeechEnd = 0;
   var autoStopTimer = null;
   var vadModules = null;
+  var levelBuf = null;            // buffer riusato per la waveform (zero allocazioni/frame)
 
   function ensureVadModules() {
     if (vadModules) return Promise.resolve(vadModules);
@@ -279,73 +282,112 @@
 
   /* Avvia l'ascolto: microfono + VAD (metriche) + MediaRecorder (blob).
      `interruptedByUser` (bool) segnala l'interruzione: il mic parte
-     mentre la commissione sta ancora leggendo la domanda. */
+     mentre la commissione sta ancora leggendo la domanda.
+     _startPending rende safe lo stop durante l'avvio: se l'utente
+     clicca "Ferma" mentre getUserMedia/VAD sono in corso, l'ascolto
+     non parte mai (niente stato fantasma). */
   V.start = function (opts) {
     opts = opts || {};
-    if (V.recording || V.transcribing) return Promise.reject(new Error("already-busy"));
+    if (V.recording || V.transcribing || V._startPending) return Promise.reject(new Error("already-busy"));
     if (!V.micSupported) return Promise.reject(new Error("mic-unsupported"));
     // Interruzione = l'utente ha avviato il mic mentre la commissione
     // stava ancora leggendo la domanda (flag esplicito da simulation.js).
     // Catturato in modo sincrono: la richiesta del microfono richiede
     // ~1s, in cui la TTS potrebbe terminare e il segnale andrebbe perso.
     V._interrupted = !!opts.interruptedByUser;
+    V._startPending = true;
     return (async function () {
-      // Carica i moduli VAD in parallelo alla richiesta del microfono.
-      var vadP = ensureVadModules();
-      mediaStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
-      var m = await vadP;
+      try {
+        // Carica i moduli VAD in parallelo alla richiesta del microfono.
+        var vadP = ensureVadModules();
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+        });
+        if (!V._startPending) { teardown(); return false; }
+        var m = await vadP;
+        if (!V._startPending) { teardown(); return false; }
 
-      speechChunks = [];
-      speechSegments = [];
-      firstSpeechAt = 0;
-      segStart = 0;
-      lastSpeechEnd = 0;
-      listenStartedAt = performance.now();
+        // Waveform live: AnalyserNode collegato al microfono. La UI legge
+        // V.levels(n) a 60fps e disegna barre che reagiscono al volume REALE.
+        V._analyser = null;
+        var ac = ensureAudioCtx();
+        if (ac) {
+          try {
+            var src = ac.createMediaStreamSource(mediaStream);
+            var an = ac.createAnalyser();
+            an.fftSize = 1024;
+            an.smoothingTimeConstant = 0.55;
+            src.connect(an);
+            V._analyser = an;
+          } catch (_) { V._analyser = null; }
+        }
 
-      // MediaRecorder per il blob (webm/opus) da inviare a /api/stt
-      var mime = "audio/webm;codecs=opus";
-      if (typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported && !MediaRecorder.isTypeSupported(mime)) {
-        mime = "audio/webm";
+        speechChunks = [];
+        speechSegments = [];
+        firstSpeechAt = 0;
+        segStart = 0;
+        lastSpeechEnd = 0;
+        listenStartedAt = performance.now();
+
+        // MediaRecorder: catena di formati. Safari/iOS NON supporta webm:
+        // senza questo fallback la registrazione lancia un TypeError e la
+        // voce sarebbe rotta su iPhone. Il server riceve sempre il mime reale.
+        if (typeof MediaRecorder === "undefined") {
+          throw new Error("media-recorder-unsupported");
+        }
+        var mime = "audio/webm;codecs=opus";
+        if (typeof MediaRecorder.isTypeSupported === "function" && !MediaRecorder.isTypeSupported(mime)) {
+          mime = MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "";
+        }
+        mediaRecorder = new MediaRecorder(mediaStream, mime ? { mimeType: mime } : undefined);
+        mediaRecorder.ondataavailable = function (e) {
+          if (e.data && e.data.size > 0) speechChunks.push(e.data);
+        };
+
+        // VAD: metriche paralinguistiche in tempo reale (€0, client-side)
+        vadInstance = await m.MicVAD.new({
+          stream: mediaStream,
+          baseAssetURL: CDN.vadBase,
+          positiveSpeechThreshold: 0.7,
+          negativeSpeechThreshold: 0.4,
+          minSpeechFrames: 4,
+          onSpeechStart: function () {
+            var t = performance.now();
+            if (!firstSpeechAt) firstSpeechAt = t;
+            segStart = t;
+            // Nuovo segmento di parlato: annulla l'auto-stop pendente, così
+            // una pausa >1.8s seguita da una ripresa NON taglia la risposta.
+            if (autoStopTimer) { clearTimeout(autoStopTimer); autoStopTimer = null; }
+            if (V._onStatus) V._onStatus("speaking");
+          },
+          onSpeechEnd: function () {
+            var t = performance.now();
+            if (segStart) speechSegments.push({ start: segStart, end: t });
+            lastSpeechEnd = t;
+            // Auto-stop dopo ~1.8s di silenzio (la risposta è finita).
+            if (autoStopTimer) clearTimeout(autoStopTimer);
+            autoStopTimer = setTimeout(function () {
+              if (V.recording) V.stop();
+            }, 1800);
+            if (V._onStatus) V._onStatus("listening");
+          },
+          onVADMisfire: function () { /* troppo breve: ignora */ }
+        });
+
+        if (!V._startPending) { teardown(); return false; }
+        mediaRecorder.start(250);
+        await vadInstance.start();
+        V._startPending = false;
+        setStatus("recording");
+        return true;
+      } catch (err) {
+        V._startPending = false;
+        teardown();
+        setStatus("idle");
+        if (V._onStatus) V._onStatus("error");
+        if (V._onResult) V._onResult({ text: "", words: [], metrics: computeMetrics(), error: (err && err.message) || "start-failed" });
+        throw err;
       }
-      if (typeof MediaRecorder === "undefined") {
-        throw new Error("media-recorder-unsupported");
-      }
-      mediaRecorder = new MediaRecorder(mediaStream, { mimeType: mime });
-      mediaRecorder.ondataavailable = function (e) {
-        if (e.data && e.data.size > 0) speechChunks.push(e.data);
-      };
-
-      // VAD: metriche paralinguistiche in tempo reale (€0, client-side)
-      vadInstance = await m.MicVAD.new({
-        stream: mediaStream,
-        baseAssetURL: CDN.vadBase,
-        positiveSpeechThreshold: 0.7,
-        negativeSpeechThreshold: 0.4,
-        minSpeechFrames: 4,
-        onSpeechStart: function () {
-          var t = performance.now();
-          if (!firstSpeechAt) firstSpeechAt = t;
-          segStart = t;
-          if (V._onStatus) V._onStatus("speaking");
-        },
-        onSpeechEnd: function () {
-          var t = performance.now();
-          if (segStart) speechSegments.push({ start: segStart, end: t });
-          lastSpeechEnd = t;
-          // Auto-stop dopo ~1.6s di silenzio (la risposta è finita).
-          if (autoStopTimer) clearTimeout(autoStopTimer);
-          autoStopTimer = setTimeout(function () {
-            if (V.recording) V.stop();
-          }, 1600);
-          if (V._onStatus) V._onStatus("listening");
-        },
-        onVADMisfire: function () { /* troppo breve: ignora */ }
-      });
-
-      mediaRecorder.start(250);
-      await vadInstance.start();
-      setStatus("recording");
-      return true;
     })();
   };
 
@@ -363,8 +405,16 @@
 
   /* Ferma, trascrive e calcola le metriche. Non deve MAI lasciare la
      UI bloccata: ogni errore (rete, 401, provider) riporta a idle e
-     viene segnalato via onStatus. */
+     viene segnalato via onStatus. Un solo retry sui guasti di rete
+     (5xx/timeout): un singolo hiccup non perde l'intera risposta. */
   V.stop = function () {
+    if (V._startPending) {
+      // Stop durante l'avvio: il start() in corso si chiude da sé al
+      // prossimo checkpoint (teardown + return false). Niente doppio teardown.
+      V._startPending = false;
+      setStatus("idle");
+      return Promise.resolve({ text: "", words: [], metrics: computeMetrics() });
+    }
     if (!V.recording) return Promise.resolve({ text: "", words: [], metrics: computeMetrics() });
     return (async function () {
       if (autoStopTimer) clearTimeout(autoStopTimer);
@@ -373,14 +423,15 @@
       try {
         if (vadInstance) { try { await vadInstance.pause(); } catch (_) { /* noop */ } }
         if (mediaRecorder && mediaRecorder.state !== "inactive") {
+          var recMime = mediaRecorder.mimeType || "audio/webm";
           blob = await new Promise(function (resolve) {
             var done = false;
             var finish = function (b) { if (!done) { done = true; resolve(b); } };
             mediaRecorder.onstop = function () {
-              finish(new Blob(speechChunks, { type: mediaRecorder.mimeType || "audio/webm" }));
+              finish(new Blob(speechChunks, { type: recMime }));
             };
             try { mediaRecorder.stop(); } catch (_) { /* noop */ }
-            setTimeout(function () { finish(new Blob(speechChunks, { type: "audio/webm" })); }, 1200);
+            setTimeout(function () { finish(new Blob(speechChunks, { type: recMime })); }, 1200);
           });
         }
       } catch (_) { /* noop */ }
@@ -395,40 +446,91 @@
         setStatus("idle");
         return empty;
       }
-      try {
-        var b64 = await base64FromBlob(blob);
-        var token = getToken();
-        var resp = await fetch("/api/stt", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": token ? "Bearer " + token : ""
-          },
-          body: JSON.stringify({ audio: b64, mime: blob.type || "audio/webm" })
-        });
-        if (!resp.ok) throw new Error("http-" + resp.status);
-        var data = await resp.json();
-        var text = String(data.text || "").trim();
-        var words = Array.isArray(data.words) ? data.words : [];
-        var wpm = null;
-        if (words.length && metrics.speechMs > 0) {
-          wpm = Math.round(words.length / (metrics.speechMs / 60000));
+      var b64 = await base64FromBlob(blob);
+      var token = getToken();
+      var attempts = 0;
+      var out = null;
+      while (attempts < 2) {
+        attempts++;
+        try {
+          var ctrl = new AbortController();
+          var t = setTimeout(function () { ctrl.abort(); }, 40000);
+          var resp;
+          try {
+            resp = await fetch("/api/stt", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ? "Bearer " + token : ""
+              },
+              body: JSON.stringify({ audio: b64, mime: blob.type || "audio/webm" }),
+              signal: ctrl.signal
+            });
+          } finally { clearTimeout(t); }
+          if (!resp.ok) throw new Error("http-" + resp.status);
+          var data = await resp.json();
+          var text = String(data.text || "").trim();
+          var words = Array.isArray(data.words) ? data.words : [];
+          var wpm = null;
+          if (words.length && metrics.speechMs > 0) {
+            wpm = Math.round(words.length / (metrics.speechMs / 60000));
+          }
+          metrics.wpm = wpm;
+          metrics.fillerCount = countFillers(text);
+          out = { text: text, words: words, metrics: metrics };
+          break;
+        } catch (err) {
+          // Niente retry sui 4xx (token, payload): sarebbe inutile.
+          var retriable = !(err && err.message && /^http-4/.test(err.message));
+          if (attempts >= 2 || !retriable) {
+            console.error("[voice] trascrizione fallita:", err && err.message);
+            setStatus("idle");
+            if (V._onStatus) V._onStatus("error");
+            out = { text: "", words: [], metrics: metrics, error: (err && err.message) || "unknown" };
+            if (V._onResult) V._onResult(out);
+            return out;
+          }
+          // Backoff leggero prima del retry.
+          await new Promise(function (r) { setTimeout(r, 700 + Math.random() * 600); });
         }
-        metrics.wpm = wpm;
-        metrics.fillerCount = countFillers(text);
-        var out = { text: text, words: words, metrics: metrics };
-        if (V._onResult) V._onResult(out);
-        setStatus("idle");
-        return out;
-      } catch (err) {
-        console.error("[voice] trascrizione fallita:", err && err.message);
-        setStatus("idle");
-        if (V._onStatus) V._onStatus("error");
-        var failed = { text: "", words: [], metrics: metrics, error: (err && err.message) || "unknown" };
-        if (V._onResult) V._onResult(failed);
-        return failed;
       }
+      if (V._onResult) V._onResult(out);
+      setStatus("idle");
+      return out;
     })();
+  };
+
+  /* Livello audio reale del microfono (0..1) per n barre della waveform.
+     Senza AnalyserNode (browser molto vecchi) restituisce zeri: la UI
+     mostra la linea di base, mai un errore. */
+  V.levels = function (n) {
+    var out = [];
+    var i, j;
+    for (i = 0; i < n; i++) out.push(0);
+    if (!V._analyser || !V._analyser.context || V._analyser.context.state !== "running") return out;
+    try {
+      if (!levelBuf || levelBuf.length !== V._analyser.frequencyBinCount) {
+        levelBuf = new Uint8Array(V._analyser.frequencyBinCount);
+      }
+      V._analyser.getByteFrequencyData(levelBuf);
+      var freq = levelBuf;
+      var per = freq.length / n;
+      for (i = 0; i < n; i++) {
+        var start = Math.floor(i * per);
+        var end = Math.max(start + 1, Math.floor((i + 1) * per));
+        var sum = 0;
+        for (j = start; j < end; j++) sum += freq[j];
+        var avg = sum / (end - start);
+        // Curva: alza i valori bassi, smorza il rumore di fondo.
+        out[i] = Math.pow(Math.min(1, avg / 255), 1.5);
+      }
+    } catch (_) { /* noop */ }
+    return out;
+  };
+
+  /* Millisecondi dall'inizio dell'ascolto (per il timer live). */
+  V.listenSince = function () {
+    return listenStartedAt ? Math.max(0, performance.now() - listenStartedAt) : 0;
   };
 
   /* Solo filler NON lessicali: "allora"/"cioè"/"ecco" sono parole
@@ -447,6 +549,8 @@
 
   function teardown() {
     V._interrupted = false;
+    V._startPending = false;
+    V._analyser = null;
     if (autoStopTimer) { clearTimeout(autoStopTimer); autoStopTimer = null; }
     if (vadInstance) { try { vadInstance.destroy(); } catch (_) { /* noop */ } vadInstance = null; }
     if (mediaStream) { mediaStream.getTracks().forEach(function (t) { t.stop(); }); mediaStream = null; }
@@ -456,6 +560,7 @@
 
   /* Ferma tutto senza trascrivere (es. cambio domanda, pausa sessione). */
   V.cancel = function () {
+    V._startPending = false;
     setStatus("idle");
     return teardown();
   };
