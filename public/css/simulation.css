@@ -2484,3 +2484,51 @@ body.is-sim-voice #view-session .prev-feedback { display: none; }
   color: var(--warn);
 }
 .oral-stage[data-state="voice-unavailable"] .oral-dots { display: none; }
+
+/* Selettore voce della commissione (Piper on-device). Segmented control
+   minimale coerente con interaction-toggle: appare solo a voce attiva,
+   il progresso del download è una riga di testo (mai un loader enorme). */
+.voice-sel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-top: 10px;
+}
+.voice-sel[hidden] { display: none; }
+.voice-sel-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.voice-sel-opts {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.voice-sel-opt {
+  border: 0;
+  background: transparent;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease), color var(--t-base) var(--ease);
+}
+.voice-sel-opt:hover { color: var(--ink); }
+.voice-sel-opt:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.voice-sel-opt[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(15, 17, 21, 0.08);
+}
+.voice-sel-progress {
+  font-size: 11.5px;
+  color: var(--muted);
+}

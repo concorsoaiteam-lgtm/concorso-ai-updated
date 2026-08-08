@@ -1319,6 +1319,17 @@
     ttsBtn.setAttribute("aria-pressed", on ? "true" : "false");
     var lbl = $("voice-tts-label");
     if (lbl) lbl.textContent = on ? "Voce: attiva" : "Voce della commissione";
+    // Selettore voce Piper: visibile solo a voce attiva, con la voce
+    // scelta in evidenza (single source of truth per l'interfaccia).
+    var sel = $("voice-sel");
+    if (sel) sel.hidden = !on;
+    var selPaola = $("voice-sel-paola");
+    var selRiccardo = $("voice-sel-riccardo");
+    if (selPaola && selRiccardo && window.Voice) {
+      var v = Voice.getPiperVoice ? Voice.getPiperVoice() : "paola";
+      selPaola.setAttribute("aria-pressed", v === "paola" ? "true" : "false");
+      selRiccardo.setAttribute("aria-pressed", v === "riccardo" ? "true" : "false");
+    }
   }
 
   /* ------------------------------------------------------------------
@@ -2896,6 +2907,7 @@
         onTtsSentence: onTtsSentence,
         onInterim: onVoiceInterim
       });
+      syncTtsToggle();
 
       // Toggle "Rispondi a voce"
       var vBtn = $("voice-btn");
@@ -2909,13 +2921,29 @@
         ttsBtn.addEventListener("click", function () {
           Voice.setTtsEnabled(!Voice.ttsEnabled);
           var on = Voice.ttsEnabled;
-          ttsBtn.setAttribute("aria-pressed", on ? "true" : "false");
-          $("voice-tts-label").textContent = on ? "Voce: attiva" : "Voce della commissione";
-          // Primo download del modello in background: la prossima domanda
-          // parte subito, senza attesa della voce.
+          // Un solo sync: aria-pressed, etichetta e selettore voce.
+          syncTtsToggle();
+          // Primo download del modello in background (Piper): la prossima
+          // domanda parte subito, senza attesa della voce.
           if (on && Voice.warmTts) Voice.warmTts();
           if (D) D.track("sim_voice_tts", { on: on });
         });
+      }
+
+      // Selettore voce della commissione (Piper on-device): Paola ↔ Riccardo.
+      // La scelta è persistita; il cambio avvia il download dell'altro
+      // modello in background (mai un blocco: la voce di sistema copre).
+      var selPaola = $("voice-sel-paola");
+      var selRiccardo = $("voice-sel-riccardo");
+      if (selPaola && selRiccardo) {
+        var pickVoice = function (id) {
+          if (!window.Voice || !Voice.setPiperVoice) return;
+          Voice.setPiperVoice(id);
+          syncTtsToggle();
+          if (D) D.track("sim_voice_piper", { voce: id });
+        };
+        selPaola.addEventListener("click", function () { pickVoice("paola"); });
+        selRiccardo.addEventListener("click", function () { pickVoice("riccardo"); });
       }
 
       // Riprova voce: dopo un errore del provider, ritenta di predisporre
@@ -3413,27 +3441,48 @@
     });
   }
 
-  /* Stato TTS: mostra il caricamento della voce (una volta sola) e
-     il fallback in caso di errore: la UI non mente mai. */
+  /* Stato TTS: mostra la preparazione della voce con il progresso REALE
+     del download del modello (Piper in OPFS, una volta sola) e il
+     fallback in caso di errore: la UI non mente mai. Il testo cambia
+     solo quando cambia la percentuale (zero churn sul DOM). */
+  var ttsLoadingPct = -1;
   function onVoiceTtsState(s) {
     var ttsBtn = $("voice-tts-toggle");
     var lbl = $("voice-tts-label");
     if (!ttsBtn) return;
     var retry = $("voice-tts-retry");
+    var prog = $("voice-sel-progress");
     if (s === "loading") {
       ttsBtn.classList.add("is-loading");
-      if (Voice.ttsEnabled) lbl.textContent = "Carico la voce…";
+      var pct = window.Voice ? Math.round((Voice.piperProgress || 0) * 100) : 0;
+      if (pct !== ttsLoadingPct) {
+        ttsLoadingPct = pct;
+        if (Voice.ttsEnabled) {
+          lbl.textContent = (pct > 0 && pct < 100)
+            ? "Preparazione voce… " + pct + "%"
+            : "Carico la voce…";
+        }
+        if (prog) {
+          prog.textContent = "Download voce: " + pct + "% · una volta sola";
+          prog.hidden = !(pct > 0 && pct < 100);
+        }
+      }
     } else if (s === "error") {
       ttsBtn.classList.remove("is-loading");
+      ttsLoadingPct = -1;
       lbl.textContent = "Voce non disponibile";
       if (retry) retry.hidden = false;
+      if (prog) { prog.hidden = true; prog.textContent = ""; }
       // Mai un blocco: il turno continua, il testo resta la guida.
       if (S.interaction === "vocale" && S.phase === "session") {
         setOral("voice-unavailable", "Voce non disponibile — rispondi pure, seguiamo dal testo");
       }
     } else {
       ttsBtn.classList.remove("is-loading");
+      ttsLoadingPct = -1;
       if (retry) retry.hidden = true;
+      if (prog) { prog.hidden = true; prog.textContent = ""; }
+      syncTtsToggle();
     }
   }
 

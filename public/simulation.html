@@ -173,6 +173,18 @@
       </button>
       <button type="button" class="voice-tts-retry" id="voice-tts-retry" hidden>Riprova voce</button>
 
+      <!-- Voce della commissione: Piper on-device (Paola/Riccardo). Il
+           selettore appare solo a voce attiva; il progresso mostra il
+           download del modello (una volta sola, poi offline). -->
+      <div class="voice-sel" id="voice-sel" role="group" aria-label="Voce della commissione" hidden>
+        <span class="voice-sel-label">Voce:</span>
+        <div class="voice-sel-opts">
+          <button type="button" class="voice-sel-opt" id="voice-sel-paola" aria-pressed="true">Paola</button>
+          <button type="button" class="voice-sel-opt" id="voice-sel-riccardo" aria-pressed="false">Riccardo</button>
+        </div>
+        <span class="voice-sel-progress" id="voice-sel-progress" aria-live="polite" hidden></span>
+      </div>
+
       <!-- Player della commissione: waveform reale + controlli
            (pausa/riprendi, stop, replay, velocità). Appare solo
            quando la commissione parla. Mai effetti da assistente. -->

@@ -7,8 +7,11 @@
      il piano free non ha). Risposta: {text, words:[{word,start,end}]}.
    • VAD: Silero via @ricky0123/vad-web (WASM, client-side, €0) per le
      metriche paralinguistiche: tempo di risposta, pause, durata parlato.
-   • TTS: Kokoro-82M on-device (Apache 2.0, WASM, €0) con voci italiane;
-     fallback SOLO a speechSynthesis se Kokoro non è caricabile.
+   • TTS: Piper on-device via vits-web (MIT, WASM, €0) con voci italiane
+     vere (Paola / Riccardo) come voce realistica della commissione; la
+     voce di sistema it-IT (speechSynthesis) copre i turni mentre il
+     modello si prepara (primo download in OPFS, poi offline); Kokoro
+     resta come slot opzionale forzato.
    • Metriche: timeToAnswerMs, speechMs, pauseCount, wpm, fillerCount,
      interrupted → diventano parte del feedback (mai perse).
    Tutto lazy-loaded dal CDN al primo uso: la pagina resta leggera.
@@ -36,8 +39,10 @@
     ttsState: "idle",        // idle|preparing|playing|paused|done|stopped
     ttsMode: null,           // 'audio' (Web Audio) | 'speech' (fallback)
     ttsRate: 1,              // velocità di lettura (1 | 1.25 | 1.5)
-    ttsProvider: "auto",     // 'auto' | 'kokoro' | 'speech' (scelta voce commissione)
-    ttsProviderReason: ""    // perché è stato scelto il provider attivo (debug)
+    ttsProvider: "auto",     // 'auto' | 'piper' | 'kokoro' | 'speech'
+    ttsProviderReason: "",   // perché è stato scelto il provider attivo (debug)
+    piperStatus: "idle",     // piper: idle|loading|ready|error
+    piperProgress: 0         // 0..1 download modello on-device (OPFS)
   };
 
   var K_TTS = "cai_voice_tts";       // persistenza toggle voce commissione
@@ -54,6 +59,18 @@
 
   var VAD_MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX"; // modello ONNX ufficiale kokoro-js
   var KOKORO_VOICE = "if_sara"; // voce italiana femminile (fallback: prima voce disponibile)
+
+  /* Piper — voce realistica della commissione via vits-web (MIT). I
+     modelli italiani del repo ufficiale rhasspy/piper-voices si scaricano
+     una sola volta e restano in OPFS (cache persistente del browser,
+     offline). paola-medium va aggiunta alla PATH_MAP di vits-web (la
+     mappa base contiene solo riccardo-x_low). */
+  var K_PIPER_VOICE = "cai_piper_voice";
+  var PIPER_CDN = "https://cdn.jsdelivr.net/npm/@diffusionstudio/vits-web@1.0.3/+esm";
+  var PIPER_VOICES = {
+    paola: { id: "it_IT-paola-medium", path: "it/it_IT/paola/medium/it_IT-paola-medium.onnx" },
+    riccardo: { id: "it_IT-riccardo-x_low", path: "it/it_IT/riccardo/x_low/it_IT-riccardo-x_low.onnx" }
+  };
 
   /* ---------------------------- Helpers ---------------------------- */
   function getToken() {
@@ -130,6 +147,11 @@
      ===================================================================== */
   var kokoroTts = null;          // istanza KokoroTTS
   var kokoroLoading = null;      // promise caricamento
+  var piperMod = null;           // modulo vits-web caricato
+  var piperLoading = null;       // promise preparazione piper (modulo + modello)
+  var piperVoiceId = null;       // voiceId attivo (it_IT-paola-medium | it_IT-riccardo-x_low)
+  var piperLoadGen = 0;          // generazione: invalida le preparazioni vecchie al cambio voce
+  var piperLoadStart = 0;        // performance.now() inizio preparazione
   var audioCtx = null;
   var spokeViaSpeech = false;    // vero se almeno una volta è stato usato il fallback
   var ttsGen = 0;                // generazione: invalida i synth in corso su stop/interruzione
@@ -201,8 +223,10 @@
     if (V._onTtsSentence) V._onTtsSentence(i);
   }
 
-  /* Provider A — Kokoro on-device. Prima volta: download del modello
-     (~90MB, una tantum, cache HF). Poi quasi istantaneo. ATTENZIONE:
+  /* Provider A — Kokoro on-device (slot opzionale, non più il default:
+     l'italiano in kokoro-js ≤1.2.1 è impossibile). Prima volta: download
+     del modello (~90MB, una tantum, cache HF). Poi quasi istantaneo.
+     ATTENZIONE:
      kokoro-js ≤1.2.1 ha SOLO voci inglesi (af_, am_, bf_, bm_) e
      list_voices() restituisce undefined (fa solo console.table): la
      selezione voce qui NON deve mai chiamarla, o il modello appena
@@ -521,27 +545,219 @@
     return out.length ? out : [String(text || "").trim()];
   }
 
+  /* ------------------------------------------------------------------
+     Provider B — Piper on-device (vits-web, MIT). Voci italiane vere del
+     repo ufficiale rhasspy: paola-medium (femminile, ~63MB, default) e
+     riccardo-x_low (maschile, ~28MB). Il modello si scarica una volta
+     sola in OPFS; poi è offline e istantaneo. La scelta è persistita e
+     si cambia in-app dal selettore Paola/Riccardo.
+     ------------------------------------------------------------------ */
+  function getPiperVoice() {
+    try {
+      if (window.localStorage.getItem(K_PIPER_VOICE) === "riccardo") return "riccardo";
+    } catch (_) { /* noop */ }
+    return "paola";
+  }
+
+  /* Cambio voce: la preferenza è persistita e, se la nuova voce non è
+     già in cache, la preparazione riparte (download dell'altro modello
+     in background). Se fallisce, la voce di sistema copre i turni:
+     mai un silenzio. */
+  V.setPiperVoice = function (id) {
+    var v = id === "riccardo" ? "riccardo" : "paola";
+    var prev = getPiperVoice();
+    try { window.localStorage.setItem(K_PIPER_VOICE, v); } catch (_) { /* noop */ }
+    tdbg("PIPER_VOICE", "voce scelta", { voce: v });
+    if (v === prev && V.piperStatus === "ready") return v;
+    // Invalida la preparazione in corso e riparte per il nuovo modello.
+    // Il modulo si ri-importa dalla cache del browser (istanza stessa),
+    // il download è solo quello del modello nuovo.
+    piperLoadGen += 1;
+    piperLoading = null;
+    piperMod = null;
+    piperVoiceId = null;
+    V.piperStatus = "idle";
+    V.piperProgress = 0;
+    if (V._onTtsState) V._onTtsState("off");
+    if (V.ttsEnabled) loadPiper().catch(function () { /* resta speech finché pronto */ });
+    return v;
+  };
+
+  V.getPiperVoice = getPiperVoice;
+
+  /* Prepara Piper: import del modulo vits-web, estensione della PATH_MAP
+     (paola-medium non è nella mappa base) e download del modello in OPFS
+     con progresso reale (V.piperProgress 0..1). Deduplicata: se già
+     pronta o già in corso, restituisce la stessa promise. Non tocca la
+     UI direttamente: lo stato arriva via onTtsState. */
+  function loadPiper() {
+    if (V.piperStatus === "ready" && piperMod) return Promise.resolve(piperMod);
+    if (piperLoading) return piperLoading;
+    if (!navigator.storage || !navigator.storage.getDirectory) {
+      // Niente OPFS (browser/privacy): Piper non può tenere il modello.
+      return Promise.reject(new Error("opfs-unavailable"));
+    }
+    var gen = ++piperLoadGen;
+    V.piperStatus = "loading";
+    V.piperProgress = 0;
+    piperLoadStart = performance.now();
+    if (V._onTtsState) V._onTtsState("loading");
+    tdbg("PIPER_LOAD", "avvio piper (vits-web + modello on-device)");
+    piperLoading = (async function () {
+      var mod = await import(/* webpackIgnore: true */ PIPER_CDN);
+      if (gen !== piperLoadGen) return;
+      var voiceKey = getPiperVoice();
+      var vv = PIPER_VOICES[voiceKey];
+      mod.PATH_MAP[vv.id] = vv.path;   // binding live di vits-web
+      piperVoiceId = vv.id;
+      piperMod = mod;
+      tdbg("PIPER_MODULE", "vits-web pronto", { voce: vv.id });
+      // Modello già in OPFS? stored() elenca i .onnx in cache.
+      var cached = [];
+      try { cached = await mod.stored(); } catch (_) { cached = []; }
+      if (gen !== piperLoadGen) return;
+      if (cached.indexOf(vv.id) === -1) {
+        tdbg("PIPER_DOWNLOAD", "download modello " + vv.id);
+        var lastShown = -1;
+        await mod.download(vv.id, function (ev) {
+          V.piperProgress = ev && ev.total ? Math.min(1, ev.loaded / ev.total) : 0;
+          var pct = Math.round(V.piperProgress * 100);
+          if (pct !== lastShown) {
+            lastShown = pct;
+            tdbg("PIPER_DOWNLOAD", pct + "%");
+            if (V._onTtsState) V._onTtsState("loading");
+          }
+        });
+      } else {
+        V.piperProgress = 1;
+        tdbg("PIPER_DOWNLOAD", "modello già in cache (OPFS)");
+      }
+      if (gen !== piperLoadGen) return;
+      V.piperStatus = "ready";
+      V.ttsKind = "piper";
+      if (V._onTtsState) V._onTtsState("ready");
+      tdbg("PIPER_READY", "pronto", { voce: vv.id, ms: Math.round(performance.now() - piperLoadStart) });
+      return mod;
+    })();
+    piperLoading.catch(function (err) {
+      if (gen !== piperLoadGen) return;
+      V.piperStatus = "error";
+      V.ttsKind = null;
+      piperLoading = null;
+      if (V._onTtsState) V._onTtsState("error");
+      tdbg("PIPER_ERROR", (err && err.message) || String(err));
+    });
+    return piperLoading;
+  }
+
+  /* Frazioni di durata per frase ∝ lunghezza del testo. Il turno è
+     sintetizzato in UN'UNICA inferenza (veloce, il modello è in memoria)
+     e poi tagliato per frasi: la UI evidenzia la frase mentre la voce
+     la legge. Funzione pura → testabile. */
+  function sentenceBoundaries(sentences, totalLen) {
+    if (!sentences.length) return [0, 1];   // funzione totale anche su input vuoto
+    var out = [0];
+    var acc = 0;
+    var n = totalLen > 0 ? totalLen : 1;
+    for (var i = 0; i < sentences.length; i++) {
+      acc += sentences[i].length;
+      out.push(Math.min(1, acc / n));
+    }
+    out[out.length - 1] = 1;
+    return out;
+  }
+
+  function sliceBuffer(buf, fromSec, toSec) {
+    var ctx = audioCtx || ensureAudioCtx();
+    if (!ctx) return null;
+    var sr = buf.sampleRate;
+    var i0 = Math.max(0, Math.floor(fromSec * sr));
+    var i1 = Math.min(buf.length, Math.ceil(toSec * sr));
+    var n = i1 - i0;
+    if (n < Math.floor(sr * 0.05)) return null;   // < 50ms: non è una frase
+    var out = ctx.createBuffer(buf.numberOfChannels, n, sr);
+    for (var c = 0; c < buf.numberOfChannels; c++) {
+      out.copyToChannel(buf.getChannelData(c).subarray(i0, i1), c);
+    }
+    return out;
+  }
+
+  /* Piper → segmenti per frase. Stesso player Web Audio, stessa
+     evidenziazione sincronizzata: nessuna ri-sintesi per frase. */
+  async function buildPiperSegments(sentences, gen) {
+    V.ttsKind = "piper";
+    V.ttsMode = "audio";
+    var full = sentences.join(" ");
+    tdbg("PIPER_SYNTH", "sintesi turno", { caratteri: full.length, frasi: sentences.length });
+    var blob = await piperMod.predict({ text: full, voiceId: piperVoiceId });
+    if (gen !== ttsGen) return [];
+    var arr = await blob.arrayBuffer();
+    var ctx = ensureAudioCtx();
+    if (!ctx) return [];
+    var buf = await ctx.decodeAudioData(arr);
+    if (gen !== ttsGen) return [];
+    tdbg("AUDIO_RECEIVED", "turno sintetizzato", { secondi: +buf.duration.toFixed(2) });
+    var frac = sentenceBoundaries(sentences, full.length);
+    var built = [];
+    var prevF = 0;
+    for (var i = 0; i < sentences.length; i++) {
+      if (gen !== ttsGen) return [];
+      var fEnd = frac[i + 1];
+      var slice = sliceBuffer(buf, prevF * buf.duration, fEnd * buf.duration);
+      prevF = fEnd;
+      if (slice) built.push({ buf: slice, gapMs: i < sentences.length - 1 ? 400 : 0 });
+    }
+    if (!built.length) built.push({ buf: buf, gapMs: 0 });
+    if (gen !== ttsGen) return [];
+    tdbg("AUDIO_READY", built.length + " segmenti pronti");
+    return built;
+  }
+
   /* Scelta provider effettiva. Vincolo reale: la commissione parla in
-     ITALIANO. Kokoro-js 1.2.1 ha SOLO voci inglesi e il phonemizer
-     interno è hardcoded en/en-us: l'italiano via Kokoro in questa
-     versione è impossibile. Quindi in "auto" (default) la voce di
-     sistema it-IT (speechSynthesis) è il provider attivo: istantanea,
-     €0, italiano reale. Kokoro resta raggiungibile forzandolo
-     (V.ttsProvider="kokoro") o quando speechSynthesis manca del tutto. */
+     ITALIANO. Piper (on-device, voci italiane vere) è la voce realistica
+     in "auto"; finché il modello si prepara (primo download in OPFS) la
+     voce di sistema it-IT copre i turni — mai un silenzio. Kokoro-js
+     1.2.1 parla solo inglese: resta un slot opzionale forzato. */
   function effectiveProvider() {
     if (V.ttsProvider === "kokoro") return "kokoro";
     if (V.ttsProvider === "speech") return "speech";
+    if (V.ttsProvider === "piper") return V.piperStatus === "error" ? "speech" : "piper";
+    if (V.piperStatus === "ready") return "piper";
     if (window.speechSynthesis) return "speech";
     return "kokoro";
   }
 
   function buildSegments(sentences, gen) {
     var p = effectiveProvider();
-    V.ttsProviderReason = p === "kokoro"
-      ? (window.speechSynthesis ? "forzato" : "speechSynthesis non disponibile")
-      : "voce italiana di sistema";
+    V.ttsProviderReason = p === "piper"
+      ? "voce realistica on-device (Piper)"
+      : (p === "kokoro"
+          ? (window.speechSynthesis ? "forzato" : "speechSynthesis non disponibile")
+          : (V.piperStatus === "loading" ? "piper in preparazione — voce di sistema" : "voce italiana di sistema"));
     // TTS_RESPONSE = il provider che ha risposto alla TTS_REQUEST.
-    tdbg("TTS_RESPONSE", p, { kokoroLoaded: !!kokoroTts, speechSynth: !!window.speechSynthesis, forzato: V.ttsProvider });
+    tdbg("TTS_RESPONSE", p, { piper: V.piperStatus, kokoroLoaded: !!kokoroTts, speechSynth: !!window.speechSynthesis, forzato: V.ttsProvider });
+    if (p === "piper") {
+      // Piper pronto: sintesi on-device. In auto questo ramo è raggiunto
+      // solo a modello pronto (loadPiper risolve subito). Se forzato
+      // mentre il modello si scarica, l'attesa è CAPPATA: mai un turno
+      // bloccato sul download. Se la sintesi fallisse (modello corrotto,
+      // OPFS svuotata a metà), per QUESTO turno si scende a speech.
+      var lp = loadPiper();
+      if (V.ttsProvider === "piper" && V.piperStatus !== "ready") {
+        lp = Promise.race([lp, new Promise(function (_, rej) {
+          setTimeout(function () { rej(new Error("piper-load-timeout")); }, 12000);
+        })]);
+      }
+      return lp
+        .then(function () { return buildPiperSegments(sentences, gen); })
+        .catch(function (err) {
+          tdbg("TTS_FALLBACK", "piper fallito → speech", err && err.message);
+          spokeViaSpeech = true;
+          V.ttsKind = "speech";
+          V.ttsProviderReason = "piper-failed";
+          return buildSpeechSegments(sentences, gen);
+        });
+    }
     if (p === "kokoro") {
       if (kokoroTts) return buildKokoroSegments(sentences, gen);
       return loadKokoro()
@@ -688,14 +904,20 @@
     return out;
   };
 
-  /* Pre-carica il provider attivo in background. In "auto" il provider è
-     la voce di sistema it-IT (zero download): Kokoro (~90MB) NON si
-     scarica a meno che non sia davvero il provider (forzato o senza
-     speechSynthesis). */
+  /* Pre-carica il provider di destinazione in background. In "auto" il
+     provider è Piper (voce realistica): il modello si scarica in
+     background mentre la voce di sistema copre i turni. Kokoro (~90MB)
+     si scarica solo se forzato o senza speechSynthesis. Gli errori non
+     sono fatali: un errore fa solo riprovare al prossimo warmTts. */
   V.warmTts = function () {
-    if (effectiveProvider() !== "kokoro") return;
-    if (kokoroTts || spokeViaSpeech) return;
-    loadKokoro().catch(function () { /* fallback automatico al primo speak */ });
+    if (V.ttsProvider === "kokoro") {
+      if (kokoroTts || spokeViaSpeech) return;
+      loadKokoro().catch(function () { /* fallback automatico al primo speak */ });
+      return;
+    }
+    if (V.ttsProvider === "speech") return;
+    if (V.piperStatus === "ready" || V.piperStatus === "loading") return;
+    loadPiper().catch(function () { /* fallback speech al primo speak */ });
   };
 
   V.setTtsEnabled = function (on) {
@@ -1296,6 +1518,10 @@
   /* Selezione voce Kokoro (esposta per i test). */
   V._pickKokoroVoice = pickKokoroVoice;
 
+  /* Esposti per i test: preparazione piper e slicing proporzionale. */
+  V._loadPiper = loadPiper;
+  V._sentenceBoundaries = sentenceBoundaries;
+
   /* Diagnostica TTS on-demand: dump completo dello stato interno. */
   V.ttsDebug = function () {
     var nVoices = 0;
@@ -1309,6 +1535,9 @@
       forced: V.ttsProvider || "auto",
       kind: V.ttsKind,
       status: V.ttsStatus,
+      piper: V.piperStatus,
+      piperProgress: Math.round(V.piperProgress * 100),
+      piperVoice: getPiperVoice(),
       state: V.ttsState,
       mode: V.ttsMode,
       kokoroLoaded: !!kokoroTts,
