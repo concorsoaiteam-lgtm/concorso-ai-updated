@@ -30,6 +30,8 @@
     _onStatus: null,         // callback stato UI
     _onResult: null,         // callback risultato trascrizione {text, words, metrics}
     _onTtsState: null,       // callback stato TTS engine (loading/ready/error)
+    _onTtsSentence: null,    // callback frase corrente (testo sincronizzato con la voce)
+    _onInterim: null,        // callback trascrizione progressiva (solo display)
     _onTtsPlay: null,        // callback stato player TTS (preparing/playing/paused/…)
     ttsState: "idle",        // idle|preparing|playing|paused|done|stopped
     ttsMode: null,           // 'audio' (Web Audio) | 'speech' (fallback)
@@ -127,6 +129,12 @@
   function onTtsPlay(s) {
     V.ttsState = s;
     if (V._onTtsPlay) V._onTtsPlay(s);
+  }
+
+  /* Callback di frase: la UI evidenzia la frase corrente mentre la
+     commissione la legge (testo e voce sincronizzati, mai una chat). */
+  function onTtsSentence(i) {
+    if (V._onTtsSentence) V._onTtsSentence(i);
   }
 
   /* Provider A — Kokoro on-device. Prima volta: download del modello
@@ -240,6 +248,7 @@
     wireSource(src, seg, function () { playerPlaySegment(i + 1); });
     src.start(0, 0);
     onTtsPlay("playing");
+    onTtsSentence(i);
   }
 
   function playerPause() {
@@ -340,6 +349,7 @@
     u.onerror = function () { finishSpeech(); };
     speechSeq.current = u;
     onTtsPlay("playing");
+    onTtsSentence(speechSeq.idx);
     window.speechSynthesis.speak(u);
   }
 
@@ -537,6 +547,8 @@
   var segStart = 0;
   var lastSpeechEnd = 0;
   var autoStopTimer = null;
+  var interimRec = null;      // Web Speech interim (solo display progressivo)
+  var lastInterim = "";       // testo interim corrente (per l'endpointing dinamico)
   var vadModules = null;
   var vadActive = false;        // VAD realmente operativo (auto-stop + metriche)
   var silenceTimer = null;      // auto-stop su silenzio quando il VAD non c'è
@@ -614,7 +626,9 @@
           quietMs = 0;
         } else if (heardSpeech) {
           quietMs += 250;
-          if (quietMs >= 2500) { V.stop(); return; }
+          // Endpointing dinamico anche senza VAD: la pausa da attendere
+          // dipende dall'interim (frase chiusa vs filler), mai un tempo fisso.
+          if (quietMs >= endpointTimeout(lastInterim)) { V.stop(); return; }
         }
       }
       silenceTimer = setTimeout(check, 250);
@@ -625,6 +639,63 @@
   function stopSilenceWatcher() {
     if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
     quietMs = 0;
+  }
+
+  /* Endpointing DINAMICO (ricerca voce): il timeout di silenzio NON è
+     fisso. Se la trascrizione incrementale mostra una frase chiusa →
+     timeout breve (950ms); se mostra un filler o una frase incompleta
+     → timeout lungo (2600ms); in corso → 1500ms; senza testo → 1800ms.
+     Nessun modello: euristica sul testo, €0, la trascrizione finale
+     resta quella del server. */
+  var ENDPOINT_FILLERS = ["ehm", "uhm", "mmh", "cioè", "quindi", "allora", "ecco", "beh", "boh", "mah", "vabbeh", "insomma", "praticamente", "diciamo", "tipo"];
+  function endpointTimeout(text) {
+    var t = String(text || "").trim();
+    if (!t) return 1800;
+    if (/[.!?;:]$/.test(t)) return 950;                        // frase chiusa
+    var words = t.split(/\s+/);
+    var last = (words[words.length - 1] || "").toLowerCase().replace(/[^a-zà-ù]/g, "");
+    for (var i = 0; i < ENDPOINT_FILLERS.length; i++) {
+      if (last === ENDPOINT_FILLERS[i]) return 2600;            // sta cercando la parola
+    }
+    return 1500;                                                // ancora in corso
+  }
+
+  /* Trascrizione PROGRESSIVA (interim): Web Speech API in parallelo al
+     registratore. Puramente visiva — il candidato si vede ascoltato
+     mentre parla — mai autorevole: la trascrizione finale è quella
+     del server. Se il browser non la supporta, si continua senza
+     (waveform + stato del registratore). */
+  function startInterimRecognition() {
+    stopInterimRecognition();
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+    try {
+      var rec = new SR();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = "it-IT";
+      rec.onresult = function (e) {
+        var out = "";
+        for (var i = e.resultIndex; i < e.results.length; i++) {
+          var r = e.results[i];
+          out += r[0].transcript;
+          if (r.isFinal) out += " ";
+        }
+        lastInterim = out.trim();
+        if (V._onInterim) V._onInterim(lastInterim, false);
+      };
+      rec.onerror = function () { stopInterimRecognition(); };
+      rec.onend = function () { /* il server resta la fonte finale */ };
+      rec.start();
+      interimRec = rec;
+    } catch (_) { interimRec = null; }
+  }
+
+  function stopInterimRecognition() {
+    if (interimRec) {
+      try { interimRec.stop(); } catch (_) { /* noop */ }
+      interimRec = null;
+    }
   }
 
   function base64FromBlob(blob) {
@@ -735,6 +806,8 @@
         };
         // Parte SUBITO: niente audio perso mentre il VAD si carica.
         mediaRecorder.start(250);
+        // Interim live (opzionale): il testo si forma mentre parli.
+        startInterimRecognition();
 
         // VAD: metriche paralinguistiche in tempo reale (€0, client-side).
         // OTTIMALE: se MicVAD non parte in 8s, continuiamo senza (auto-stop
@@ -767,11 +840,12 @@
                 var t = performance.now();
                 if (segStart) speechSegments.push({ start: segStart, end: t });
                 lastSpeechEnd = t;
-                // Auto-stop dopo ~1.8s di silenzio (la risposta è finita).
+                // Auto-stop DINAMICO: la pausa da attendere dipende da ciò
+                // che il candidato ha appena detto (frase chiusa vs filler).
                 if (autoStopTimer) clearTimeout(autoStopTimer);
                 autoStopTimer = setTimeout(function () {
                   if (V.recording) V.stop();
-                }, 1800);
+                }, endpointTimeout(lastInterim));
                 if (V._onStatus) V._onStatus("listening");
               },
               onVADMisfire: function () { /* troppo breve: ignora */ }
@@ -840,6 +914,8 @@
     if (!V.recording) return Promise.resolve({ text: "", words: [], metrics: computeMetrics() });
     return (async function () {
       if (autoStopTimer) clearTimeout(autoStopTimer);
+      // L'interim smette con l'ascolto: da qui conta solo il server.
+      stopInterimRecognition();
       setStatus("transcribing");
       var blob = null;
       try {
@@ -973,6 +1049,9 @@
     return listenStartedAt ? Math.max(0, performance.now() - listenStartedAt) : 0;
   };
 
+  /* Esposto per i test: l'euristica dell'endpointing dinamico. */
+  V.endpointTimeout = endpointTimeout;
+
   /* Solo filler NON lessicali: "allora"/"cioè"/"ecco" sono parole
      normali del discorso italiano e falserebbero il conteggio. */
   function countFillers(text) {
@@ -991,6 +1070,8 @@
     V._interrupted = false;
     V._startPending = false;
     V._analyser = null;
+    stopInterimRecognition();
+    lastInterim = "";
     if (autoStopTimer) { clearTimeout(autoStopTimer); autoStopTimer = null; }
     stopSilenceWatcher();
     vadActive = false;
@@ -1015,6 +1096,8 @@
     if (handlers.onResult) V._onResult = handlers.onResult;
     if (handlers.onTtsState) V._onTtsState = handlers.onTtsState;
     if (handlers.onTtsPlay) V._onTtsPlay = handlers.onTtsPlay;
+    if (handlers.onTtsSentence) V._onTtsSentence = handlers.onTtsSentence;
+    if (handlers.onInterim) V._onInterim = handlers.onInterim;
     loadPersisted();
     V.micSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
     V.ready = true;

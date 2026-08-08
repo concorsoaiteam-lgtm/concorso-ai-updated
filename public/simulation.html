@@ -194,6 +194,23 @@
         </div>
         <p class="tts-note" id="tts-note" aria-live="polite"></p>
       </div>
+
+      <!-- Palco del colloquio (solo modalità vocale): chi parla ora è
+           sempre chiaro. La commissione legge la domanda → tocca a te →
+           riflette → risponde. La cronologia non domina mai la scena. -->
+      <div class="oral-stage hidden" id="oral-stage" role="status" aria-live="polite">
+        <span class="oral-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="oral-label" id="oral-label">La commissione sta parlando…</span>
+      </div>
+
+      <!-- Risposta della commissione nel palco (solo modalità vocale):
+           quando la commissione prende il turno, il testo appare qui,
+           sincronizzato con la voce. Durante l'orale il pannello
+           feedback non esiste: è la conversazione a essere protagonista. -->
+      <div class="oral-answer" id="oral-answer" hidden>
+        <p class="oral-speaker">La commissione</p>
+        <p class="oral-answer-text" id="oral-answer-text"></p>
+      </div>
     </section>
 
     <!-- Area risposta -->
@@ -337,6 +354,13 @@
         <div class="prev-feedback-inner" id="prev-feedback-inner"></div>
       </div>
     </div>
+
+    <!-- Cronologia del colloquio (modalità vocale): compatta e secondaria.
+         Si consulta senza mai dominare la scena; ogni scambio è una riga
+         espandibile, mai bubble di chat. -->
+    <section class="oral-history hidden" id="oral-history" aria-label="Cronologia della conversazione">
+      <p class="oral-history-title">Conversazione</p>
+    </section>
   </div>
 </main>
 
@@ -385,6 +409,10 @@
       </button>
     </div>
     <div class="recorder-wave" id="recorder-wave" aria-hidden="true"></div>
+    <!-- Trascrizione progressiva: mentre parli, il testo si forma qui.
+         Provvisorio (dimmed) finché l'utente parla; la trascrizione
+         finale (server) resta l'unica fonte vera. -->
+    <div class="recorder-interim" id="recorder-interim" aria-live="polite"></div>
     <div class="recorder-foot">
       <button type="button" class="recorder-main" id="recorder-main" aria-label="Ferma la registrazione">
         <svg class="rec-icon rec-icon-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 1 0-7 0v5A3.5 3.5 0 0 0 12 15Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
