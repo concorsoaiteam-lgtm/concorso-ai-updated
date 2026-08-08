@@ -2181,185 +2181,18 @@ body.rec-open { overflow: hidden; }
 }
 
 /* ============================================================
-   Modalità di interazione: scritta ↔ vocale.
-   Toggle compatto in testa all'area risposta. In modalità
-   vocale l'editor scritto sparisce e resta il grande microfono:
-   si parla, la trascrizione parte da sola. Zero perdita di
-   stato: è solo un cambio di presentazione.
-   ============================================================ */
-.interaction-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 3px;
-  margin-bottom: 14px;
-  background: var(--bg-2);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-}
-.interaction-opt {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 0;
-  background: transparent;
-  padding: 6px 13px;
-  border-radius: 999px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  transition: background var(--t-base) var(--ease), color var(--t-base) var(--ease);
-}
-.interaction-opt svg { width: 14px; height: 14px; }
-.interaction-opt:hover { color: var(--ink); }
-.interaction-opt:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.interaction-opt.is-on {
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: 0 1px 2px rgba(15, 17, 21, 0.08);
-}
-
-/* Modalità vocale: niente editor, solo il microfono grande.
-   Il timer per domanda (modalità difficile) resta visibile. */
-.answer-box.is-voice .answer-label,
-.answer-box.is-voice .answer-textarea,
-.answer-box.is-voice .answer-foot { display: none; }
-#view-session.is-voice .send-btn { display: none; }
-
-.answer-box.is-voice .voice-row {
-  justify-content: center;
-  margin-top: 6px;
-  min-height: 132px;
-}
-.answer-box.is-voice .voice-btn {
-  flex-direction: column;
-  justify-content: center;
-  width: 92px;
-  height: 92px;
-  padding: 0;
-  border-radius: 50%;
-  border-width: 1.5px;
-  gap: 9px;
-}
-.answer-box.is-voice .voice-btn svg { width: 26px; height: 26px; }
-.answer-box.is-voice .voice-btn #voice-btn-label { font-size: 12px; }
-.answer-box.is-voice .voice-btn[aria-pressed="true"] {
-  animation: voice-pulse 1.6s var(--ease) infinite;
-}
-@keyframes voice-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(15, 17, 21, 0.14); }
-  50% { box-shadow: 0 0 0 10px rgba(15, 17, 21, 0); }
-}
-.answer-box.is-voice.is-disabled .voice-btn {
-  opacity: 0.55;
-  pointer-events: none;
-}
-
-/* ============================================================
-   Colloquio orale — palco dei turni (solo modalità vocale).
-   La commissione è sempre in evidenza: chi parla ora è sempre
-   chiaro. Stati: q-speaking / user-turn / reflecting / fb-speaking.
-   ============================================================ */
-.oral-stage {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 14px;
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: var(--bg-2);
-  border: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 12.5px;
-  font-weight: 600;
-  min-height: 34px;
-  width: fit-content;
-  max-width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-}
-.oral-stage.hidden { display: none; }
-.oral-dots { display: inline-flex; gap: 3px; align-items: center; }
-.oral-dots i {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--ink-faint);
-  animation: oral-bounce 1.2s var(--ease) infinite;
-}
-.oral-dots i:nth-child(2) { animation-delay: 0.15s; }
-.oral-dots i:nth-child(3) { animation-delay: 0.3s; }
-@keyframes oral-bounce {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
-  30% { transform: translateY(-3px); opacity: 1; }
-}
-/* La riflessione è più lenta e raccolta: nessuna fretta percepita. */
-.oral-stage[data-state="reflecting"] .oral-dots i { animation-duration: 1.9s; }
-/* Turno del candidato: un punto fermo, niente attesa. */
-.oral-stage[data-state="user-turn"] .oral-dots i {
-  animation: none;
-  width: 7px;
-  height: 7px;
-  background: var(--ok-bright);
-}
-.oral-stage[data-state="user-turn"] .oral-label { color: var(--ink-soft); }
-
-/* Il microfono invita a parlare quando è il turno del candidato. */
-.answer-box.is-voice .voice-btn.is-awaiting {
-  border-color: var(--ink);
-  animation: mic-invite 1.8s var(--ease) infinite;
-}
-@keyframes mic-invite {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(15, 17, 21, 0); }
-  50% { box-shadow: 0 0 0 12px rgba(15, 17, 21, 0.1); }
-}
-
-/* ============================================================
    PALCO MULTIMODALE — testo e voce insieme (round 71)
    Le frasi si accendono mentre la commissione le legge: in corso =
    pieno, già letto = leggibile, non ancora letto = attenuato.
    Zero layout shift: le frasi occupano il loro spazio dall'inizio.
    ============================================================ */
-.q-sent {
-  opacity: 0.4;
-  transition: opacity 240ms var(--ease);
-}
-.q-sent.is-done { opacity: 0.82; }
-.q-sent.is-active { opacity: 1; }
-
-.oral-answer {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
-}
-.oral-answer[hidden] { display: none; }
-.oral-speaker {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: var(--tracking);
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 10px;
-}
-.oral-speaker::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--ok-bright);
-  flex: none;
-}
-.oral-answer-text {
-  font-size: 15.5px;
-  line-height: 1.65;
-  color: var(--ink);
-  max-width: 64ch;
-}
+.q-sent { opacity: 1; transition: opacity 240ms var(--ease); }
+/* La lettura sincronizzata (voce attiva) è un piacere in più: il testo è
+   attenuato SOLO mentre la commissione legge (is-reading sulla domanda).
+   A voce spenta ogni frase è sempre pienamente leggibile. */
+#q-text.is-reading .q-sent { opacity: 0.4; }
+#q-text.is-reading .q-sent.is-done { opacity: 0.82; }
+#q-text.is-reading .q-sent.is-active { opacity: 1; }
 
 /* Trascrizione progressiva nel registratore: il candidato si vede
    ascoltato mentre parla. Provvisorio e silenzioso, mai invasivo. */
@@ -2376,86 +2209,9 @@ body.rec-open { overflow: hidden; }
 }
 .recorder-interim.is-live { color: var(--ink); }
 
-/* Cronologia del colloquio (vocale): compatta, mai dominante. */
-.oral-history {
-  margin-top: 26px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
-}
-.oral-history.hidden { display: none; }
-.oral-history-title {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: var(--tracking);
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 10px;
-}
-.oral-ex {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  margin-bottom: 8px;
-  background: var(--bg);
-  overflow: hidden;
-}
-.oral-ex summary {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 11px 14px;
-  cursor: pointer;
-  list-style: none;
-  font-size: 13px;
-  color: var(--ink-soft);
-  line-height: 1.45;
-}
-.oral-ex summary::-webkit-details-marker { display: none; }
-.oral-ex summary:hover { background: var(--bg-2); }
-.oral-ex summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.oral-ex summary .oral-ex-n {
-  color: var(--muted);
-  font-weight: 600;
-  font-size: 11.5px;
-  flex: none;
-  min-width: 16px;
-  text-align: right;
-}
-.oral-ex[open] summary { border-bottom: 1px solid var(--line); }
-.oral-ex-body {
-  display: grid;
-  gap: 10px;
-  padding: 13px 14px;
-  font-size: 13.5px;
-  line-height: 1.6;
-  color: var(--ink-soft);
-}
-.oral-ex-body .oral-ex-q { color: var(--ink); font-weight: 500; }
-.oral-ex-body .oral-ex-a { color: var(--ink-soft); }
-
-/* Simulazione vocale: durante l'orale il pannello feedback non esiste.
-   La conversazione è l'unico protagonista; il report arriva alla fine. */
-body.is-sim-voice #view-session .feedback-panel,
-body.is-sim-voice #view-session .prev-feedback { display: none; }
-
-/* Stati del palco: ascolto / trascrizione — il sistema si vede vivo. */
-.oral-stage[data-state="listening"] .oral-dots i,
-.oral-stage[data-state="transcribing"] .oral-dots i {
-  background: var(--ok-bright);
-  animation: oral-breathe 1.6s var(--ease) infinite;
-}
-.oral-stage[data-state="listening"] .oral-label,
-.oral-stage[data-state="transcribing"] .oral-label { color: var(--ink-soft); }
-@keyframes oral-breathe {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.4); opacity: 1; }
-}
-.oral-stage[data-state="transcribing"] .oral-dots i { animation-duration: 1.1s; }
-
 /* Mobile: palco leggibile, risposta compatta. */
 @media (max-width: 560px) {
   .question-text { font-size: 16px; }
-  .oral-answer-text { font-size: 15px; }
-  .oral-ex summary { padding: 10px 12px; }
 }
 
 /* Round 72 — Riprova voce: compare solo dopo un errore del provider TTS. */
@@ -2477,16 +2233,7 @@ body.is-sim-voice #view-session .prev-feedback { display: none; }
 .voice-tts-retry:hover { border-color: var(--ink-soft); color: var(--ink-soft); }
 .voice-tts-retry:focus-visible { outline: 2px solid var(--warn); outline-offset: 2px; }
 
-/* Stato "voce non disponibile": tono warn ma rassicurante — il colloquio
-   prosegue comunque, i punti non decorativi del palco si fermano. */
-.oral-stage[data-state="voice-unavailable"] {
-  border-color: var(--warn);
-  color: var(--warn);
-}
-.oral-stage[data-state="voice-unavailable"] .oral-dots { display: none; }
-
-/* Selettore voce della commissione (Piper on-device). Segmented control
-   minimale coerente con interaction-toggle: appare solo a voce attiva,
+/* Selettore voce della commissione (Piper on-device). Appare solo a voce attiva:
    il progresso del download è una riga di testo (mai un loader enorme). */
 .voice-sel {
   display: flex;

@@ -42,11 +42,8 @@
     resumeData: null,           // sessione da riprendere
     bankLoading: null,          // Promise generazione bank
     voiceMetrics: null,         // metriche paralinguistiche ultima risposta vocale
-    voiceTtsEndAt: 0,           // performance.now() quando la TTS della domanda è finita
     voiceSpeaking: false,       // la commissione sta ancora leggendo la domanda
-    oralScope: null,            // 'question' | 'response' — testo attivo del palco
-    lastFeedback: null,         // {scores, feedback, suggerimento} dell'ultimo turno
-    interaction: lsGet("cai_interaction") === "vocale" ? "vocale" : "scritta" // scritta|vocale
+    lastFeedback: null          // {scores, feedback, suggerimento} dell'ultimo turno
   };
 
   /* ------------------------------------------------------------------
@@ -57,15 +54,8 @@
   var K_OPS = "cai_pending_ops";       // coda scritture fallite
   var K_LAST_SIM = "cai_last_sim";     // ultima simulazione (ripresa)
   var K_ONBOARD = "cai_onboard_choice"; // micro-decisione di ingresso: "demo" | "bando"
-  var K_INTERACTION = "cai_interaction"; // preferenza modalità risposta: "scritta" | "vocale"
   var BANK_TTL = 7 * 24 * 3600 * 1000; // 7 giorni
   var REC_DONE_MS = 2500;   // "Messaggio pronto" visibile prima della chiusura
-  var REC_SUBMIT_MS = 2600; // invio automatico (solo modalità vocale), dopo il "pronto"
-  var V_REC_DONE_MS = 1000;  // vocale: l'orale non aspetta — "pronto" breve, poi la commissione riflette
-  var V_REC_SUBMIT_MS = 1150;
-  var ORAL_NEXT_DELAY = 1000; // pausa naturale prima della domanda successiva (simulazione vocale)
-  var recSubmitTimer = null; // invio automatico pendente: annullato se l'utente ri-registra
-  var voiceNextTimer = null; // auto-avanzamento domanda dopo il feedback parlato
 
   var MODES = {
     standard: {
@@ -154,8 +144,7 @@
       }),
       bandoId: S.bando ? S.bando.id : null,
       subjectId: S.subject ? S.subject.id : null,
-      draftAnswer: (S.phase === "session") ? ($("answer-textarea").value || "") : "",
-      interaction: S.interaction
+      draftAnswer: (S.phase === "session") ? ($("answer-textarea").value || "") : ""
     };
     if (S.simId) lsSet(K_DRAFT + S.simId, payload);
     lsSet(K_LAST_SIM, payload);
@@ -533,7 +522,6 @@
     var title = $("gate-title");
     var text = $("gate-text");
     var actions = $("gate-actions");
-    var resume = $("gate-resume");
 
     if (!S.bando && !rd) {
       // Micro-decisione di ingresso (onboarding round 55): un solo punto di
@@ -563,9 +551,7 @@
             '<span class="gate-path-desc">Le domande nasceranno dal PDF che carichi: il programma reale del tuo concorso.</span>' +
           '</span>' +
           '<span class="gate-path-cta">Carica il bando<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>' +
-        '</div>' +
-        '<a class="btn btn-ghost btn-block" href="dashboard.html">Torna alla dashboard</a>';
-      resume.classList.add("hidden");
+        '</div>' +          '<a class="btn btn-ghost btn-block" href="dashboard.html">Torna alla dashboard</a>';
 
       var demo = $("gate-path-demo");
       if (demo) {
@@ -605,32 +591,23 @@
       var modeName = (MODES[rd.mode] && MODES[rd.mode].label) || rd.mode;
       var tot = (rd.questions && rd.questions.length) || 12;
       var at = Math.min((rd.idx || 0) + 1, tot);
-      var interName = rd.interaction === "vocale" ? "in modalità vocale" : "in modalità scritta";
       text.textContent = "Hai interrotto «" + modeName + " · " + tot +
-        " domande» alla domanda " + at + ", " + interName + ". Da dove riparti?";
+        " domande» alla domanda " + at + ". Da dove riparti?";
       actions.innerHTML =
-        '<button type="button" class="btn btn-primary btn-block" id="resume-yes">Continua ' +
-          (rd.interaction === "vocale" ? "in modalità vocale" : "in modalità scritta") + '</button>' +
-        '<button type="button" class="btn btn-ghost btn-block" id="resume-switch">' +
-          (rd.interaction === "vocale" ? "Passa alla modalità scritta" : "Passa alla modalità vocale") + '</button>' +
-        '<button type="button" class="btn btn-ghost btn-block" id="resume-new">Nuova simulazione</button>';
-      resume.classList.add("hidden");
+        '<button type="button" class="btn btn-primary btn-block" id="resume-yes">Continua la sessione</button>' +
+        '<button type="button" class="btn btn-ghost btn-block" id="resume-no">Non ora</button>';
       var yes = $("resume-yes");
       if (yes) yes.addEventListener("click", function () { resumeSession(rd); });
-      var sw = $("resume-switch");
-      if (sw) sw.addEventListener("click", function () {
-        rd.interaction = rd.interaction === "vocale" ? "scritta" : "vocale";
-        resumeSession(rd);
-      });
-      var nw = $("resume-new");
-      if (nw) nw.addEventListener("click", function () {
-        clearDraft();
+      // "Non ora": chiude il prompt senza riprendere. Il draft resta al
+      // sicuro in localStorage — la prossima visita riproporrà la ripresa.
+      var no = $("resume-no");
+      if (no) no.addEventListener("click", function () {
         S.resumeData = null;
         showPhase("setup");
         renderSetup();
-        if (D) D.track("sim_gate_resume_new", {});
+        if (D) D.track("sim_gate_resume_dismiss", {});
       });
-      if (D) D.track("sim_gate_resume", { mode: rd.mode, idx: rd.idx, interaction: rd.interaction });
+      if (D) D.track("sim_gate_resume", { mode: rd.mode, idx: rd.idx });
       return;
     }
 
@@ -915,7 +892,11 @@
     S.feedbackDone = false;
     feedbackRetries = 0;
     S.helpCache = {};
-    resetOralHistory();
+    resetQuestionReading();
+    // Sessione fresca: il draft di ripresa precedente ("Non ora") non deve
+    // riproporsi alla prossima visita. La nuova sessione riscrive il draft
+    // al primo salvataggio.
+    clearDraft();
 
     beginSessionDb();
     showPhase("session");
@@ -984,10 +965,10 @@
   }
 
   /* ------------------------------------------------------------------
-     Palco multimodale (modalità vocale): testo e voce insieme.
-     La domanda (e poi la risposta della commissione) è suddivisa in
-     frasi: ognuna si accende mentre viene letta. Il testo occupa il
-     suo spazio dall'inizio: zero layout shift, mai un vuoto.
+     Domanda come frasi evidenziabili: quando la commissione la legge
+     (voce attiva) ogni frase si accende mentre viene pronunciata.
+     A voce spenta il testo è sempre pienamente leggibile: la lettura
+     sincronizzata è un piacere in più, mai un modo di essere letti.
      ------------------------------------------------------------------ */
   function splitText(text) {
     var parts = String(text || "").split(/(?<=[.!?;:])\s+/);
@@ -999,25 +980,21 @@
     if (!qt) return;
     var q = S.questions[S.idx];
     if (!q) return;
-    if (S.interaction === "vocale") {
-      S.oralScope = "question";
-      qt.innerHTML = splitText(q.testo).map(function (s) {
-        return '<span class="q-sent">' + escHtml(s) + "</span> ";
-      }).join("");
-    } else {
-      S.oralScope = null;
-      qt.innerHTML = "";
-      qt.appendChild(document.createTextNode("«" + q.testo + "»"));
-    }
+    qt.innerHTML = splitText(q.testo).map(function (s) {
+      return '<span class="q-sent">' + escHtml(s) + "</span> ";
+    }).join("");
     qt.classList.remove("hidden");
   }
 
-  function resetOralPalco() {
-    var oa = $("oral-answer");
-    if (oa) oa.hidden = true;
-    var oat = $("oral-answer-text");
-    if (oat) oat.innerHTML = "";
-    S.oralScope = "question";
+  function resetQuestionReading() {
+    var qt = $("q-text");
+    if (!qt) return;
+    qt.classList.remove("is-reading");
+    var spans = qt.querySelectorAll(".q-sent");
+    for (var i = 0; i < spans.length; i++) {
+      spans[i].classList.remove("is-active");
+      spans[i].classList.remove("is-done");
+    }
   }
 
   function applySentHighlight(containerId, idx) {
@@ -1028,19 +1005,13 @@
     }
   }
 
-  function settleSentHighlights(containerId) {
-    var spans = document.querySelectorAll("#" + containerId + " .q-sent");
-    for (var i = 0; i < spans.length; i++) {
-      spans[i].classList.remove("is-active");
-      spans[i].classList.add("is-done");
-    }
-  }
-
   /* Callback da voice.js: la frase in corso si accende mentre la
-     commissione la legge (testo e voce sincronizzati). */
+     commissione la legge. L'effetto esiste solo durante la lettura
+     (classe is-reading sulla domanda); a fine lettura tutto torna
+     pienamente leggibile. */
   function onTtsSentence(idx) {
-    if (S.oralScope === "response") applySentHighlight("oral-answer-text", idx);
-    else if (S.oralScope === "question") applySentHighlight("q-text", idx);
+    var qt = $("q-text");
+    if (qt && qt.classList.contains("is-reading")) applySentHighlight("q-text", idx);
   }
 
   /* ------------------------------------------------------------------
@@ -1066,7 +1037,7 @@
     chip.textContent = q.argomento || "Dal bando";
     chip.classList.remove("hidden");
     $("q-skeleton").classList.remove("is-on");
-    resetOralPalco();
+    resetQuestionReading();
     renderQuestionText();
 
     // Reset area risposta
@@ -1085,10 +1056,7 @@
     hidePrevFeedback();
     resetHelp();
     resetVoiceForQuestion();
-    applyInteractionUI();
-    // Turno base del colloquio: se la commissione deve leggere la domanda,
-    // speakQuestion lo sovrascrive subito con "q-speaking".
-    setOral("user-turn", "Tocca a te");
+    // Se la voce della commissione è attiva, la domanda viene letta.
     speakQuestion(q);
     ta.focus();
 
@@ -1108,7 +1076,6 @@
      ------------------------------------------------------------------ */
   function resetVoiceForQuestion() {
     S.voiceMetrics = null;
-    S.voiceTtsEndAt = 0;
     S.voiceSpeaking = false;
     var m = $("voice-metrics");
     if (m) { m.classList.remove("is-on"); m.innerHTML = ""; }
@@ -1121,29 +1088,30 @@
       vb.classList.remove("is-busy");
       vb.setAttribute("aria-pressed", "false");
       var lbl = $("voice-btn-label");
-      if (lbl) lbl.textContent = (S.interaction === "vocale") ? "Premi e parla" : "Rispondi a voce";
+      if (lbl) lbl.textContent = "Rispondi a voce";
     }
     if (window.Voice) { try { Voice.cancel(); } catch (_) { /* noop */ } }
   }
 
   /* La commissione legge la domanda ad alta voce (se la voce è attiva).
-     Il timestamp di fine lettura serve a rilevare le interruzioni. */
+     Le frasi si accendono durante la lettura; a fine lettura il testo
+     torna pienamente leggibile. Il flag voiceSpeaking serve a rilevare
+     le interruzioni quando l'utente avvia il microfono a metà lettura. */
   function speakQuestion(q) {
     if (!q || S.phase !== "session") return;
     if (!window.Voice || !Voice.ttsEnabled) return;
     S.voiceSpeaking = true;
-    if (S.interaction === "vocale") {
-      setOral("q-speaking", "La commissione sta parlando…");
+    var qt = $("q-text");
+    if (qt) {
+      qt.classList.add("is-reading");
+      applySentHighlight("q-text", -1);   // reset: nessuna frase attiva
     }
-    // Niente « » in audio: puliti per la sintesi, restano a video.
     Voice.speak(q.testo).then(function () {
       S.voiceSpeaking = false;
-      S.voiceTtsEndAt = performance.now();
-      // Fine della lettura: ora tocca al candidato, il microfono invita.
-      if (S.interaction === "vocale") setOral("user-turn", "Tocca a te");
+      if (qt) qt.classList.remove("is-reading");
     }).catch(function () {
       S.voiceSpeaking = false;
-      if (S.interaction === "vocale") setOral("user-turn", "Tocca a te");
+      if (qt) qt.classList.remove("is-reading");
     });
   }
 
@@ -1193,10 +1161,6 @@
       vh.classList.remove("is-on");
     }
 
-    clearMicAwait();
-    // In modalità vocale l'attesa del feedback è una pausa naturale:
-    // la commissione "riflette" prima di rispondere, mai un vuoto.
-    if (S.interaction === "vocale") setOral("reflecting", "La commissione sta riflettendo…");
     showFeedbackSkeleton();
     if (D) D.track("sim_answer_sent", { sim_id: S.simId, idx: S.idx, words: words });
 
@@ -1213,103 +1177,6 @@
      finale). La simulazione vocale è un colloquio, non una chat. */
   function isTraining() {
     return S.mode === "ripasso" || S.mode === "allenati";
-  }
-
-  function isVoiceSim() {
-    return S.interaction === "vocale" && !isTraining();
-  }
-
-  /* ------------------------------------------------------------------
-     Modalità di interazione: scritta ↔ vocale.
-     Puro toggle di presentazione: cronologia, domanda e sessione non
-     si toccano — si cambia solo il modo di rispondere. Per questo il
-     passaggio non può mai perdere nulla.
-     ------------------------------------------------------------------ */
-  function setInteraction(m) {
-    if (m !== "scritta" && m !== "vocale") return;
-    if (m === S.interaction) { applyInteractionUI(); return; }
-    S.interaction = m;
-    lsSet(K_INTERACTION, m);
-    // Modalità vocale = la commissione parla, per contratto: non serve
-    // toccare il toggle "Voce della commissione", l'orale è sonoro.
-    if (m === "vocale") ensureCommissionVoice();
-    // Si cambia modalità a sessione ferma, mai a microfono aperto.
-    if (window.Voice && (Voice.recording || Voice.transcribing)) Voice.cancel();
-    // Post-feedback: cambiare modalità = passare avanti (mai uno stato
-    // appeso, mai un feedback perso: resta nel report finale).
-    if (S.phase === "session" && S.feedbackDone && !S.sending) {
-      if (voiceNextTimer) { clearTimeout(voiceNextTimer); voiceNextTimer = null; }
-      if (S.idx >= S.questions.length - 1) completeSession();
-      else nextQuestion();
-      return;
-    }
-    applyInteractionUI();
-    // Palco coerente al volo: la domanda cambia forma e, entrando in
-    // vocale a metà domanda, la commissione la legge.
-    if (S.phase === "session" && S.questions[S.idx]) {
-      renderQuestionText();
-      if (m === "vocale") speakQuestion(S.questions[S.idx]);
-    }
-    if (D) D.track("sim_interaction", { mode: m });
-  }
-
-  function applyInteractionUI() {
-    var box = $("answer-box");
-    if (!box) return;
-    var voc = S.interaction === "vocale";
-    box.classList.toggle("is-voice", voc);
-    var view = $("view-session");
-    if (view) view.classList.toggle("is-voice", voc);
-    var btScritta = $("interaction-scritta");
-    var btVocale = $("interaction-vocale");
-    if (btScritta) { btScritta.classList.toggle("is-on", !voc); btScritta.setAttribute("aria-pressed", String(!voc)); }
-    if (btVocale) { btVocale.classList.toggle("is-on", voc); btVocale.setAttribute("aria-pressed", String(voc)); }
-    var lbl = $("voice-btn-label");
-    if (lbl) lbl.textContent = voc ? "Premi e parla" : "Rispondi a voce";
-    var vb = $("voice-btn");
-    if (vb) vb.setAttribute("aria-label", voc ? "Premi e parla per rispondere a voce" : "Rispondi a voce");
-    // Simulazione vocale = colloquio: il pannello feedback non esiste
-    // durante l'orale (sparisce anche dalla pagina, mai un residuo).
-    document.body.classList.toggle("is-sim-voice", isVoiceSim());
-    var hist = $("oral-history");
-    if (hist) hist.classList.toggle("hidden", !voc || !S.answers.length);
-  }
-
-  /* ------------------------------------------------------------------
-     Palco del colloquio (modalità vocale): chi parla ora è sempre chiaro.
-     q-speaking → user-turn → (registrazione nel pannello) → reflecting
-     → fb-speaking → user-turn / domanda successiva. Mai un vuoto.
-     ------------------------------------------------------------------ */
-  function setOral(state, label) {
-    var el = $("oral-stage");
-    var ok = S.interaction === "vocale" && S.phase === "session";
-    if (!el) return;
-    if (!ok) { el.classList.add("hidden"); return; }
-    el.classList.remove("hidden");
-    el.setAttribute("data-state", state || "user-turn");
-    var lbl = $("oral-label");
-    if (lbl && label) lbl.textContent = label;
-    // Il microfono invita solo quando è davvero il turno del candidato.
-    var vb = $("voice-btn");
-    if (vb) vb.classList.toggle("is-awaiting", (state || "user-turn") === "user-turn");
-  }
-
-  function clearMicAwait() {
-    var vb = $("voice-btn");
-    if (vb) vb.classList.remove("is-awaiting");
-  }
-
-  /* La voce della commissione fa parte della modalità vocale: si attiva
-     da sola all'ingresso, con il modello precaricato in background. */
-  function ensureCommissionVoice() {
-    if (!window.Voice) return;
-    // In modalità vocale la commissione parla SEMPRE, per contratto della
-    // modalità. Un "0" residuo (voce disattivata in passato in modalità
-    // scritta) NON deve azzittare l'orale: il silenzio esplicito vale solo
-    // se l'utente lo sceglie ORA dal toggle.
-    Voice.setTtsEnabled(true);
-    if (Voice.warmTts) Voice.warmTts();
-    syncTtsToggle();
   }
 
   function syncTtsToggle() {
@@ -1579,18 +1446,6 @@
       sys += " Contesto della domanda precedente: «" + String(prevA.q.testo).slice(0, 200) + "». " +
         "La tua reazione è stata: «" + String(prevA.feedback || "").slice(0, 160) + "».";
     }
-    // Simulazione vocale = orale vero: il feedback non esiste durante la
-    // prova. Il campo "feedback" è la REAZIONE ORALE della commissione:
-    // breve, parlata, mai un monologo, mai un elenco.
-    if (isVoiceSim()) {
-      sys += " Sei in un orale vero: il candidato NON vede punteggi né correzioni durante la prova. " +
-        "Il campo \"feedback\" è ciò che dici AD ALTA VOCE: massimo 55 parole, in italiano parlato " +
-        "naturale, frasi complete e scorrevoli, rivolgiti al candidato con il Lei. Reagisci a ciò che " +
-        "ha appena detto citandolo una volta. Varia le formule di apertura e chiusura tra le domande " +
-        "(es. \"Bene.\", \"Va bene.\", \"Procediamo.\", \"Passiamo alla prossima domanda.\"). " +
-        "NON fare domande al candidato e non chiudere chiedendo se ha altro da dire: chiudi con una " +
-        "transizione naturale. Il campo \"suggerimento\" resta solo per il report finale.";
-    }
     sys += "Valuta con precisione su 5 dimensioni (0-10, massimo 1 decimale): chiarezza, struttura, " +
       "contenuto, lessico, pertinenza. Poi scrivi un feedback di max 90 parole in italiano " +
       "(se la materia è «Lingua inglese», scrivi il feedback in inglese): " +
@@ -1763,13 +1618,6 @@
 
     hideFeedbackSkeleton();
     S.lastFeedback = { scores: scores, feedback: feedback, suggerimento: suggerimento };
-    // SIMULAZIONE VOCALE: niente pannello feedback durante l'orale. La
-    // commissione risponde nel palco — a voce e a video — e il colloquio
-    // prosegue da solo. I punteggi restano salvati per il report finale.
-    if (isVoiceSim()) {
-      renderOralResponse(feedback, suggerimento, t0);
-      return;
-    }
     var content = $("feedback-content");
     content.classList.add("is-on");
     renderMetrics(scores);
@@ -1794,14 +1642,12 @@
       S.feedbackDone = true;
       S.sending = false;
       $("help-trigger").disabled = false;
-      if (S.interaction === "vocale") appendOralHistory(q, $("answer-textarea").value.trim());
       showFbListen(feedback, suggerimento);
       if (D) D.track("sim_feedback_received", {
         sim_id: S.simId, idx: S.idx,
         latency_ms: Date.now() - t0, scores: scores
       });
       scheduleNext();
-      speakFeedbackTurn(feedback, suggerimento);
     };
     // prefers-reduced-motion: testo intero in un colpo, nessun loop.
     if (REDUCED) {
@@ -1816,127 +1662,6 @@
       window.requestAnimationFrame(type);
     }
     type();
-  }
-
-  /* SIMULAZIONE VOCALE — la commissione risponde nel palco. Il testo
-     (reazione orale) appare per frasi, sincronizzato con la voce.
-     Niente punteggi, niente pannello: solo la conversazione. */
-  function renderOralResponse(feedback, suggerimento, t0) {
-    // lastFeedback con i punteggi reali è già stato salvato da
-    // finishFeedback (i punteggi restano per il report, mai null).
-    S.feedbackDone = true;
-    S.sending = false;
-    $("help-trigger").disabled = false;
-    appendOralHistory(S.questions[S.idx], $("answer-textarea").value.trim());
-    var oa = $("oral-answer");
-    if (oa) {
-      oa.hidden = false;
-      S.oralScope = "response";
-      var oat = $("oral-answer-text");
-      oat.innerHTML = splitText(feedback).map(function (s) {
-        return '<span class="q-sent">' + escHtml(s) + "</span> ";
-      }).join("");
-      // La prima frase subito visibile (mai un vuoto), le altre si
-      // accendono mentre vengono lette.
-      applySentHighlight("oral-answer-text", 0);
-    }
-    if (D) D.track("sim_feedback_received", {
-      sim_id: S.simId, idx: S.idx, latency_ms: Date.now() - (t0 || Date.now()), oral: true
-    });
-    speakOralTurn(feedback, S.idx);
-  }
-
-  /* La commissione prende il turno, a voce; a lettura finita il
-     colloquio prosegue da solo dopo una pausa naturale. */
-  function speakOralTurn(text, qAt) {
-    if (S.interaction !== "vocale") return;
-    if (!window.Voice || !Voice.ttsEnabled) {
-      setOral("user-turn", "Tocca a te");
-      scheduleOralNext(qAt);
-      return;
-    }
-    setOral("fb-speaking", "La commissione risponde…");
-    Voice.speak(text).then(function () {
-      if (S.phase !== "session" || S.idx !== qAt) return;
-      setOral("user-turn", "Tocca a te");
-      scheduleOralNext(qAt);
-    }).catch(function () {
-      if (S.phase !== "session" || S.idx !== qAt) return;
-      setOral("user-turn", "Tocca a te");
-      // Mai un blocco: anche se la voce fallisce, il colloquio avanza.
-      scheduleOralNext(qAt);
-    });
-  }
-
-  function scheduleOralNext(qAt) {
-    if (voiceNextTimer) clearTimeout(voiceNextTimer);
-    voiceNextTimer = window.setTimeout(function () {
-      voiceNextTimer = null;
-      if (S.phase !== "session" || S.sending || S.idx !== qAt) return;
-      if (S.idx >= S.questions.length - 1) completeSession();
-      else nextQuestion();
-    }, ORAL_NEXT_DELAY);
-  }
-
-  /* Cronologia del colloquio (modalità vocale): compatta e secondaria.
-     Ogni scambio è una riga espandibile, mai bubble di chat. */
-  function truncateText(t, n) {
-    var s = String(t || "");
-    return s.length > n ? s.slice(0, n - 1) + "…" : s;
-  }
-
-  function appendOralHistory(q, risposta) {
-    var hist = $("oral-history");
-    if (!hist) return;
-    hist.classList.remove("hidden");
-    var n = S.answers.length;
-    var el = document.createElement("details");
-    el.className = "oral-ex";
-    el.innerHTML = "<summary><span class=\"oral-ex-n\">" + n + "</span>" +
-      escHtml(truncateText(q.testo, 90)) + "</summary>" +
-      '<div class="oral-ex-body"><p class="oral-ex-q">' + escHtml(q.testo) + "</p>" +
-      '<p class="oral-ex-a">' + escHtml(risposta || "—") + "</p></div>";
-    hist.appendChild(el);
-    // Solo le ultime righe: la cronologia non deve mai dominare. Il
-    // titolo non viene mai contato né rimosso (query mirata sui details).
-    while (hist.querySelectorAll("details.oral-ex").length > 6) {
-      var firstEx = hist.querySelector("details.oral-ex");
-      if (!firstEx) break;
-      hist.removeChild(firstEx);
-    }
-  }
-
-  function resetOralHistory() {
-    var hist = $("oral-history");
-    if (hist) { hist.innerHTML = ""; hist.classList.add("hidden"); }
-    var oa = $("oral-answer");
-    if (oa) oa.hidden = true;
-    S.oralScope = "question";
-  }
-
-  /* La commissione risponde a voce (solo modalità vocale): parla il
-     feedback, poi — dopo una pausa naturale — il colloquio va avanti
-     da solo. In modalità scritta resta tutto manuale. */
-  function speakFeedbackTurn(feedback, suggerimento) {
-    if (S.interaction !== "vocale") return;
-    if (!window.Voice || !Voice.ttsEnabled) { setOral("user-turn", "Tocca a te"); return; }
-    setOral("fb-speaking", "La commissione risponde…");
-    var spoken = feedback + (suggerimento ? " Suggerimento: " + suggerimento : "");
-    var qAt = S.idx;
-    Voice.speak(spoken).then(function () {
-      if (S.phase !== "session" || S.idx !== qAt) return;
-      setOral("user-turn", "Tocca a te");
-      // Pausa naturale, poi la domanda successiva (o il risultato finale).
-      if (voiceNextTimer) clearTimeout(voiceNextTimer);
-      voiceNextTimer = window.setTimeout(function () {
-        voiceNextTimer = null;
-        if (S.phase !== "session" || S.sending || S.idx !== qAt) return;
-        if (S.idx >= S.questions.length - 1) { completeSession(); return; }
-        nextQuestion();
-      }, 1400);
-    }).catch(function () {
-      setOral("user-turn", "Tocca a te");
-    });
   }
 
   function scheduleNext() {
@@ -1956,7 +1681,6 @@
   }
 
   function nextQuestion() {
-    if (voiceNextTimer) { clearTimeout(voiceNextTimer); voiceNextTimer = null; }
     hidePrevFeedback();
     if (window.Voice && (Voice.recording || Voice.transcribing)) Voice.cancel();
     S.idx += 1;
@@ -2052,24 +1776,6 @@
   var feedbackRetries = 0;
 
   function onFeedbackError(err) {
-    // In vocale l'errore non blocca il colloquio: si torna al microfono.
-    if (S.interaction === "vocale") setOral("user-turn", "Tocca a te");
-    // Simulazione vocale: niente pannello errore da "app". La commissione
-    // resta nel colloquio: l'utente riprova parlando. La risposta non si
-    // perde mai (draft + coda locale).
-    if (isVoiceSim()) {
-      S.sending = false;
-      var ta0 = $("answer-textarea");
-      ta0.disabled = false;
-      $("answer-box").classList.remove("is-disabled");
-      var snd0 = $("send-btn");
-      snd0.classList.remove("is-busy");
-      snd0.disabled = !ta0.value.trim();
-      $("help-trigger").disabled = false;
-      setOral("user-turn", "Tocca a te");
-      if (D && D.toast) D.toast("La connessione è caduta: riprova parlando di nuovo.");
-      return;
-    }
     feedbackRetries += 1;
     hideFeedbackSkeleton();
     $("feedback-content").classList.remove("is-on");
@@ -2164,9 +1870,6 @@
     if (D) D.track("sim_paused", { sim_id: S.simId });
     var overlay = $("pause-overlay");
     overlay.classList.add("is-on");
-    // Il palco del colloquio non deve restare appeso dietro la pausa.
-    var os = $("oral-stage");
-    if (os) os.classList.add("hidden");
     var tot = S.questions.length;
     $("pause-meta").textContent = "«" + (MODES[S.mode] ? MODES[S.mode].label : S.mode) +
       " · " + tot + " domande» · domanda " + (S.idx + 1) + " di " + tot +
@@ -2178,10 +1881,6 @@
     $("pause-overlay").classList.remove("is-on");
     if (S.phase === "paused") S.phase = "session";
     startTimer();
-    // Simulazione vocale: se la pausa ha consumato la finestra di
-    // avanzamento, il colloquio riprende da dove era. In vocale non
-    // esiste il bottone "avanti": senza questo, un blocco. Mai.
-    if (isVoiceSim() && S.feedbackDone && !S.sending) scheduleOralNext(S.idx);
     if (D) D.track("sim_resumed", { sim_id: S.simId });
   }
 
@@ -2214,7 +1913,6 @@
      Completamento sessione → report
      ------------------------------------------------------------------ */
   function completeSession(abandoned) {
-    if (voiceNextTimer) { clearTimeout(voiceNextTimer); voiceNextTimer = null; }
     stopTimer();
     stopCountdown();
     if (window.Voice) Voice.cancel();
@@ -2506,7 +2204,7 @@
     S.simId = null;
     S.simCreated = false;
     S.resumeData = null;
-    resetOralHistory();
+    resetQuestionReading();
     S.mode = "standard";
     if (S.bando) S.subject = null;
     showPhase("setup");
@@ -2533,7 +2231,7 @@
     S.simId = null;
     S.simCreated = false;
     S.pendingDomande = [];
-    resetOralHistory();
+    resetQuestionReading();
     S.startedAt = Date.now();
     S.elapsedMs = 0;
     S.sending = false;
@@ -2555,7 +2253,7 @@
     S.simId = null;
     S.simCreated = false;
     S.pendingDomande = [];
-    resetOralHistory();
+    resetQuestionReading();
     S.startedAt = Date.now();
     S.elapsedMs = 0;
     S.sending = false;
@@ -2726,9 +2424,6 @@
     S.sending = false;
     S.feedbackDone = false;
     S.resumeData = null;
-    S.interaction = rd.interaction === "vocale" ? "vocale" : "scritta";
-    lsSet(K_INTERACTION, S.interaction);
-    if (S.interaction === "vocale") ensureCommissionVoice();
     showPhase("session");
     renderQuestion();
     startTimer();
@@ -2850,17 +2545,6 @@
       }
     });
 
-    // Modalità di interazione: si cambia solo durante la sessione,
-    // mai mentre una risposta è in volo.
-    var iScritta = $("interaction-scritta");
-    var iVocale = $("interaction-vocale");
-    if (iScritta) iScritta.addEventListener("click", function () {
-      if (S.phase === "session" && !S.sending) setInteraction("scritta");
-    });
-    if (iVocale) iVocale.addEventListener("click", function () {
-      if (S.phase === "session" && !S.sending) setInteraction("vocale");
-    });
-
     // Hint accordion
     $("answer-hint-btn").addEventListener("click", function () {
       var panel = $("answer-hint-panel");
@@ -2887,7 +2571,9 @@
         if (!Voice.ttsEnabled) {
           // Attiva la voce al volo: il pulsante funziona anche se il
           // toggle "Voce della commissione" è spento.
-          ensureCommissionVoice();
+          Voice.setTtsEnabled(true);
+          if (Voice.warmTts) Voice.warmTts();
+          syncTtsToggle();
         }
         var fb = $("feedback-text").textContent.trim();
         var sugg = $("feedback-suggestion").textContent.trim();
@@ -2953,7 +2639,7 @@
         ttsRetry.hidden = true;
         if (!window.Voice) return;
         if (Voice.warmTts) Voice.warmTts();
-        if (S.interaction === "vocale" && S.phase === "session" && !S.sending && !S.feedbackDone && S.questions[S.idx]) {
+        if (S.phase === "session" && !S.sending && !S.feedbackDone && S.questions[S.idx]) {
           speakQuestion(S.questions[S.idx]);
         }
       });
@@ -3073,7 +2759,6 @@
     }
     if (Voice.transcribing || S.sending || S.phase !== "session") return;
     pressFx(btn);
-    clearMicAwait();
     // Apre il registratore: feedback immediato, mai un click senza risposta.
     // Le linee partono subito mentre il microfono si prepara (permesso + VAD).
     cancelRecorderClose();
@@ -3177,7 +2862,7 @@
       vb.classList.remove("is-busy");
       vb.setAttribute("aria-pressed", "false");
       var lbl = $("voice-btn-label");
-      if (lbl) lbl.textContent = (S.interaction === "vocale") ? "Premi e parla" : "Rispondi a voce";
+      if (lbl) lbl.textContent = "Rispondi a voce";
     }
     if (focusId) {
       // Destinazione esplicita: dopo "Messaggio pronto" il focus va
@@ -3206,9 +2891,6 @@
 
   function cancelRecorderClose() {
     if (recCloseTimer) { window.clearTimeout(recCloseTimer); recCloseTimer = null; }
-    // Annulla anche l'invio automatico pendente (modalità vocale):
-    // nuova registrazione o cambio modalità → niente submit dello zombie.
-    if (recSubmitTimer) { window.clearTimeout(recSubmitTimer); recSubmitTimer = null; }
   }
 
   function setRecorderState(state, label) {
@@ -3302,7 +2984,6 @@
         openRecorder();
         startWaveLoop();
         setRecorderState("recording", "Ti stiamo ascoltando");
-        if (S.interaction === "vocale") setOral("listening", "Ti ascolto…");
         break;
       case "speaking":
         // La commissione sta leggendo: nessun cambio di stato.
@@ -3314,7 +2995,6 @@
       case "transcribing":
         stopWaveLoop();
         setRecorderState("transcribing", "Trascrizione…");
-        if (S.interaction === "vocale") setOral("transcribing", "Trascrivo la risposta…");
         break;
       case "error":
         stopWaveLoop();
@@ -3324,10 +3004,6 @@
       default:
         stopWaveLoop();
         closeRecorder();
-        // Il turno resta del candidato: il microfono torna a invitare.
-        if (S.interaction === "vocale" && S.phase === "session" && !S.sending) {
-          setOral("user-turn", "Tocca a te");
-        }
     }
   }
 
@@ -3354,16 +3030,12 @@
     if (res && res.error) {
       setRecorderState("error", "Trascrizione non riuscita: riprova o scrivi la risposta.");
       scheduleRecorderClose(3400);
-      // Il turno resta del candidato: il microfono torna a invitare.
-      if (S.interaction === "vocale") setOral("user-turn", "Tocca a te");
       if (D) D.track("sim_voice_error", { reason: String(res.error).slice(0, 80) });
       return;
     }
     if (!text) {
       setRecorderState("error", "Non ti ho sentito: riprova o scrivi la risposta.");
       scheduleRecorderClose(2600);
-      // Il turno resta del candidato: il microfono torna a invitare.
-      if (S.interaction === "vocale") setOral("user-turn", "Tocca a te");
       if (D) D.track("sim_voice_empty", {});
       return;
     }
@@ -3387,23 +3059,10 @@
         mEl.classList.add("is-on");
       }
       setRecorderState("done", "Messaggio pronto");
-      if (S.interaction === "vocale") {
-        // Modalità vocale = orale vero: la risposta parte da sola, con
-        // una finestra breve (l'orale non aspetta) poi la commissione
-        // "riflette". Timer tracciato: se l'utente ri-registra o cambia
-        // modalità, l'invio pendente viene annullato (mai zombie).
-        scheduleRecorderClose(V_REC_DONE_MS, null);
-        if (recSubmitTimer) window.clearTimeout(recSubmitTimer);
-        recSubmitTimer = window.setTimeout(function () {
-          recSubmitTimer = null;
-          var ta2 = $("answer-textarea");
-          if (ta2 && ta2.value.trim() && !S.sending && S.phase === "session" && S.feedbackDone !== true) {
-            submitAnswer(true);
-          }
-        }, V_REC_SUBMIT_MS);
-      } else {
-        scheduleRecorderClose(REC_DONE_MS, "answer-textarea");
-      }
+      // Il testo riempie la textarea esattamente come se fosse stato
+      // digitato: si corregge e si invia con lo stesso pulsante. Mai
+      // invio automatico: il microfono è uno strumento, non una modalità.
+      scheduleRecorderClose(REC_DONE_MS, "answer-textarea");
       if (D) D.track("sim_voice_result", {
         words: countWords(finalText),
         time_to_answer: metrics.timeToAnswerMs,
@@ -3474,9 +3133,6 @@
       if (retry) retry.hidden = false;
       if (prog) { prog.hidden = true; prog.textContent = ""; }
       // Mai un blocco: il turno continua, il testo resta la guida.
-      if (S.interaction === "vocale" && S.phase === "session") {
-        setOral("voice-unavailable", "Voce non disponibile — rispondi pure, seguiamo dal testo");
-      }
     } else {
       ttsBtn.classList.remove("is-loading");
       ttsLoadingPct = -1;
@@ -3582,8 +3238,7 @@
       resetTtsBars();
       setTtsPauseIcon(false);
       // Testo stabilizzato: dopo la lettura tutto resta leggibile.
-      settleSentHighlights("q-text");
-      settleSentHighlights("oral-answer-text");
+      resetQuestionReading();
       var fb2 = $("fb-listen");
       if (fb2) fb2.classList.remove("is-playing");
       if (pl.hidden) return;
@@ -3710,21 +3365,13 @@
       renderQuestion: renderQuestion,
       submitAnswer: submitAnswer,
       finishFeedback: finishFeedback,
-      setInteraction: setInteraction,
       onVoiceResult: onVoiceResult,
-      renderOralResponse: renderOralResponse,
       onTtsSentence: onTtsSentence,
       splitText: splitText,
       renderQuestionText: renderQuestionText,
-      isVoiceSim: isVoiceSim,
       isTraining: isTraining,
-      setOral: setOral,
-      appendOralHistory: appendOralHistory,
-      resetOralHistory: resetOralHistory,
-      scheduleOralNext: scheduleOralNext,
       closePause: closePause,
       openPause: openPause,
-      ensureCommissionVoice: ensureCommissionVoice,
       onVoiceTtsState: onVoiceTtsState,
       syncTtsToggle: syncTtsToggle
     };
