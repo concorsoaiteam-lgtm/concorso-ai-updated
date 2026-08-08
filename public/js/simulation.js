@@ -879,6 +879,11 @@
     if (S.allenaIntent) { showPhase("setup"); renderSetup(); return; }
     if (!S.bando && !S.subject) { renderGate(); return; }
 
+    // La voce della commissione parte da questa user gesture ("Inizia"):
+    // sblocchiamo subito l'AudioContext, altrimenti Chrome lo terrebbe
+    // sospeso e il Web Audio sarebbe muto ai turni successivi.
+    if (window.Voice && Voice.unlockAudio) Voice.unlockAudio();
+
     // La bank è già stata precaricata a init (path critico <1s se pronta).
     // In allenamento libero la bank si genera sulla materia scelta. Il
     // briefing (2.6s, skippabile) copre il caso in cui sia ancora in
@@ -1298,16 +1303,12 @@
      da sola all'ingresso, con il modello precaricato in background. */
   function ensureCommissionVoice() {
     if (!window.Voice) return;
-    // La voce si forza solo se l'utente non ha mai scelto (o la aveva
-    // attiva): un silenzio scelto esplicitamente resta rispettato.
-    var pref = null;
-    try { pref = window.localStorage.getItem("cai_voice_tts"); } catch (_) { /* noop */ }
-    if (!Voice.ttsEnabled && pref !== "0") {
-      Voice.setTtsEnabled(true);
-      if (Voice.warmTts) Voice.warmTts();
-    } else if (Voice.ttsEnabled && !Voice.ttsKind) {
-      if (Voice.warmTts) Voice.warmTts();
-    }
+    // In modalità vocale la commissione parla SEMPRE, per contratto della
+    // modalità. Un "0" residuo (voce disattivata in passato in modalità
+    // scritta) NON deve azzittare l'orale: il silenzio esplicito vale solo
+    // se l'utente lo sceglie ORA dal toggle.
+    Voice.setTtsEnabled(true);
+    if (Voice.warmTts) Voice.warmTts();
     syncTtsToggle();
   }
 
@@ -2917,6 +2918,18 @@
         });
       }
 
+      // Riprova voce: dopo un errore del provider, ritenta di predisporre
+      // la voce e rilegge la domanda corrente (mai un turno bloccato).
+      var ttsRetry = $("voice-tts-retry");
+      if (ttsRetry) ttsRetry.addEventListener("click", function () {
+        ttsRetry.hidden = true;
+        if (!window.Voice) return;
+        if (Voice.warmTts) Voice.warmTts();
+        if (S.interaction === "vocale" && S.phase === "session" && !S.sending && !S.feedbackDone && S.questions[S.idx]) {
+          speakQuestion(S.questions[S.idx]);
+        }
+      });
+
       // Niente microfono → nascondi il controllo "Rispondi a voce".
       if (!Voice.micSupported && vBtn) {
         vBtn.closest(".voice-row").classList.add("hidden");
@@ -3406,14 +3419,21 @@
     var ttsBtn = $("voice-tts-toggle");
     var lbl = $("voice-tts-label");
     if (!ttsBtn) return;
+    var retry = $("voice-tts-retry");
     if (s === "loading") {
       ttsBtn.classList.add("is-loading");
       if (Voice.ttsEnabled) lbl.textContent = "Carico la voce…";
     } else if (s === "error") {
       ttsBtn.classList.remove("is-loading");
-      lbl.textContent = "Voce: modalità compatibilità";
+      lbl.textContent = "Voce non disponibile";
+      if (retry) retry.hidden = false;
+      // Mai un blocco: il turno continua, il testo resta la guida.
+      if (S.interaction === "vocale" && S.phase === "session") {
+        setOral("voice-unavailable", "Voce non disponibile — rispondi pure, seguiamo dal testo");
+      }
     } else {
       ttsBtn.classList.remove("is-loading");
+      if (retry) retry.hidden = true;
     }
   }
 
@@ -3654,7 +3674,10 @@
       resetOralHistory: resetOralHistory,
       scheduleOralNext: scheduleOralNext,
       closePause: closePause,
-      openPause: openPause
+      openPause: openPause,
+      ensureCommissionVoice: ensureCommissionVoice,
+      onVoiceTtsState: onVoiceTtsState,
+      syncTtsToggle: syncTtsToggle
     };
   }
 })();

@@ -2457,3 +2457,30 @@ body.is-sim-voice #view-session .prev-feedback { display: none; }
   .oral-answer-text { font-size: 15px; }
   .oral-ex summary { padding: 10px 12px; }
 }
+
+/* Round 72 — Riprova voce: compare solo dopo un errore del provider TTS. */
+.voice-tts-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--ink-faint);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), color 0.15s var(--ease);
+}
+.voice-tts-retry:hover { border-color: var(--ink-soft); color: var(--ink-soft); }
+.voice-tts-retry:focus-visible { outline: 2px solid var(--warn); outline-offset: 2px; }
+
+/* Stato "voce non disponibile": tono warn ma rassicurante — il colloquio
+   prosegue comunque, i punti non decorativi del palco si fermano. */
+.oral-stage[data-state="voice-unavailable"] {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+.oral-stage[data-state="voice-unavailable"] .oral-dots { display: none; }
