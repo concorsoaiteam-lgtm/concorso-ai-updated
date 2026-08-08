@@ -764,12 +764,17 @@ a { color: inherit; }
 .sess-timer.is-warn { color: var(--warn); }
 
 .sess-countdown {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--ink);
+  padding: 3px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  background: var(--surface);
 }
-.sess-countdown.is-warn { color: var(--warn); }
+.sess-countdown.is-warn { color: var(--warn); border-color: var(--warn); background: var(--warn-bg); }
+.answer-head .sess-countdown { margin-left: auto; flex-shrink: 0; }
 
 .sess-progress-track {
   height: 2px;
@@ -868,17 +873,33 @@ a { color: inherit; }
   outline: none;
 }
 .answer-textarea::placeholder { color: var(--ink-faint); }
-.answer-foot {
+
+/* Intestazione area risposta: etichetta + countdown Difficile a destra. */
+.answer-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 36px;
 }
+
+/* Strumenti risposta: microfono e Invia restano SEMPRE accanto al campo.
+   Anche quando si apre l'aiuto (pannello sotto), l'azione principale
+   non scappa mai più in fondo alla pagina. */
+.answer-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+/* Pannello aiuto aperto: è lui a fare da separatore, niente doppia riga. */
+.answer-hint-panel.is-open + .answer-tools { border-top-color: transparent; }
 .word-count {
   font-size: 12.5px;
   color: var(--ink-faint);
   font-variant-numeric: tabular-nums;
+  margin-left: auto;
 }
 .answer-hint-btn {
   background: none;
@@ -888,7 +909,7 @@ a { color: inherit; }
   font-weight: 600;
   cursor: pointer;
   min-height: 36px;
-  padding: 0 4px;
+  padding: 0 2px;
   text-decoration: underline;
   text-underline-offset: 4px;
   transition: color var(--t-base) var(--ease);
@@ -911,21 +932,15 @@ a { color: inherit; }
 .answer-hint-inner ol { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
 
 /* =========================================================================
-   VOCE — pipeline vocale della simulazione
-   (Rispondi a voce + voce della commissione + metriche paralinguistiche)
+   VOCE — microfono (solo STT) + metriche paralinguistiche
+   Il microfono è uno strumento accanto alla textarea: si parla → si
+   trascrive → si corregge → si invia. Nessuna voce generata dall'app.
    ========================================================================= */
-.voice-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 12px;
-  min-height: 40px;
-}
 .voice-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 7px;
   background: var(--surface);
   border: 1px solid var(--line-2);
   border-radius: 999px;
@@ -933,12 +948,12 @@ a { color: inherit; }
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
-  min-height: 40px;
-  padding: 0 16px;
+  min-height: 42px;
+  padding: 0 14px;
   transition: border-color var(--t-base) var(--ease), color var(--t-base) var(--ease),
               background var(--t-base) var(--ease), transform var(--t-fast) var(--ease);
 }
-.voice-btn svg { width: 17px; height: 17px; }
+.voice-btn svg { width: 16px; height: 16px; }
 .voice-btn:hover { border-color: var(--ink); color: var(--ink); }
 .voice-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .voice-btn.is-pressing { transform: scale(0.97); }
@@ -1169,132 +1184,28 @@ body.rec-open { overflow: hidden; }
 .voice-metrics.is-on { display: block; animation: view-in 200ms var(--ease); }
 .voice-metrics strong { font-weight: 700; color: var(--ink); }
 
-/* Toggle voce della commissione (card domanda) */
-.voice-tts-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-top: 14px;
-  background: none;
-  border: 1px solid var(--line-2);
-  border-radius: 999px;
-  color: var(--muted);
-  font-size: 12.5px;
-  font-weight: 600;
-  cursor: pointer;
-  min-height: 34px;
-  padding: 0 13px;
-  transition: border-color var(--t-base) var(--ease), color var(--t-base) var(--ease),
-              background var(--t-base) var(--ease);
-}
-.voice-tts-toggle svg { width: 15px; height: 15px; }
-.voice-tts-toggle:hover { border-color: var(--ink); color: var(--ink); }
-.voice-tts-toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
-.voice-tts-toggle[aria-pressed="true"] {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--bg);
-}
-.voice-tts-toggle.is-loading { opacity: 0.6; pointer-events: none; }
-
-/* Player voce della commissione: waveform reale + controlli.
-   Compatto, silenzioso, mai effetti da assistente AI. */
-.tts-player {
-  margin-top: 12px;
-  padding: 10px 12px 8px;
-  background: var(--bg-2);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  animation: view-in 180ms var(--ease);
-}
-.tts-player[hidden] { display: none; }
-.tts-player-row { display: flex; align-items: center; gap: 10px; }
-.tts-wave {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 2.5px;
-  height: 26px;
-  min-width: 0;
-}
-.tts-wave-bar {
-  flex: 1 1 0;
-  min-width: 2px;
-  height: 100%;
-  border-radius: 2px;
-  transform: scaleY(0.1);
-  transform-origin: center;
-  transition: transform 90ms linear;
-}
-/* Preparazione: le barre respirano (stessa animazione del registratore). */
-.tts-player.is-preparing .tts-wave-bar { animation: rec-breathe 1.2s ease-in-out infinite; }
-.tts-player.is-preparing .tts-wave-bar:nth-child(3n + 1) { animation-delay: 0.12s; }
-.tts-player.is-preparing .tts-wave-bar:nth-child(3n + 2) { animation-delay: 0.24s; }
-.tts-player.is-paused .tts-wave-bar { opacity: 0.5; }
-.tts-ctrl { display: flex; align-items: center; gap: 2px; }
-.tts-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
-}
-.tts-btn:hover { background: var(--surface); color: var(--ink); }
-.tts-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.tts-btn svg { width: 15px; height: 15px; }
-.tts-rate {
-  min-width: 38px;
-  height: 30px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink-soft);
-  border: 1px solid var(--line-2);
-  border-radius: 8px;
-  background: var(--surface);
-  font-variant-numeric: tabular-nums;
-}
-.tts-rate:hover { border-color: var(--ink); color: var(--ink); }
-.tts-note {
-  margin: 6px 2px 0;
-  font-size: 12px;
-  color: var(--muted);
-  min-height: 14px;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .recorder-sheet, .recorder-overlay { transition: none; }
   .recorder.is-starting .recorder-wave-bar,
   .recorder.is-transcribing .recorder-wave::after,
-  .recorder.is-reviewing .recorder-wave::after,
-  .tts-player.is-preparing .tts-wave-bar { animation: none; }
+  .recorder.is-reviewing .recorder-wave::after { animation: none; }
   .rec-icon { transition: none; }
-  .tts-wave-bar { transition: none; }
 }
 
-.send-row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 14px;
-  margin-top: 14px;
-}
 .send-btn {
-  width: 48px;
-  height: 48px;
-  flex-shrink: 0;
-  border-radius: 12px;
-  border: none;
-  background: var(--ink);
-  color: var(--bg);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: none;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -1302,9 +1213,9 @@ body.rec-open { overflow: hidden; }
 }
 .send-btn:hover { background: var(--ink-soft); }
 .send-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
-.send-btn:active { transform: scale(0.96); }
+.send-btn:active { transform: scale(0.97); }
 .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.send-btn svg { width: 20px; height: 20px; }
+.send-btn svg { width: 17px; height: 17px; }
 .send-btn.is-busy::after {
   content: "";
   position: absolute;
@@ -1314,6 +1225,7 @@ body.rec-open { overflow: hidden; }
   transform: translateX(-100%);
   animation: busy-loop 1.1s var(--ease) infinite;
 }
+.send-btn.is-busy { pointer-events: none; }
 
 .volume-hint {
   display: none;
@@ -1326,10 +1238,12 @@ body.rec-open { overflow: hidden; }
 
 /* --- Aiuto se non sai rispondere (spunto / risposta modello) ---
    Sempre discreto: un trigger a filo, un pannello che si apre solo
-   su richiesta. Mai un elemento che sembra un bottone senza esserlo. */
+   su richiesta. Mai un elemento che sembra un bottone senza esserlo.
+   is-off: nascosto quando il feedback è arrivato (l'aiuto non serve più). */
 .help-box {
   margin-top: 14px;
 }
+.help-box.is-off { display: none; }
 .help-trigger {
   display: inline-flex;
   align-items: center;
@@ -1524,9 +1438,16 @@ body.rec-open { overflow: hidden; }
   line-height: 1.6;
 }
 
-/* --- Feedback --- */
+/* --- Feedback ---
+   Appare solo dopo l'invio: la sezione resta nascosta finché non c'è
+   un contenuto da leggere (mai una testata vuota in mezzo alla pagina). */
 .feedback-panel {
-  margin-top: 24px;
+  display: none;
+  margin-top: 20px;
+}
+.feedback-panel.is-on {
+  display: block;
+  animation: view-in 260ms var(--ease);
 }
 .feedback-head {
   display: flex;
@@ -1540,27 +1461,6 @@ body.rec-open { overflow: hidden; }
   color: var(--muted);
   margin-bottom: 12px;
 }
-.fb-listen {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid var(--line-2);
-  background: var(--surface);
-  border-radius: 999px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: normal;
-  cursor: pointer;
-  min-height: 30px;
-  padding: 0 11px;
-  transition: border-color var(--t-base) var(--ease), color var(--t-base) var(--ease);
-}
-.fb-listen svg { width: 14px; height: 14px; }
-.fb-listen:hover { border-color: var(--ink); color: var(--ink); }
-.fb-listen:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.fb-listen.is-playing { border-color: var(--ok); color: var(--ok); }
 .feedback-skeleton { display: none; }
 .feedback-skeleton.is-on { display: block; }
 .fb-sk-line {
@@ -1584,11 +1484,12 @@ body.rec-open { overflow: hidden; }
 .feedback-content.is-on { display: block; animation: view-in 260ms var(--ease); }
 
 .metrics { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+/* Barra vera: track discreta + fill proporzionato al voto (5 → 50%, 8 → 80%). */
 .metric {
   display: grid;
-  grid-template-columns: 96px 28px 1fr;
+  grid-template-columns: 110px 1fr;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 .metric-label {
   font-size: 11px;
@@ -1597,28 +1498,41 @@ body.rec-open { overflow: hidden; }
   text-transform: uppercase;
   color: var(--muted);
 }
+.metric-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.metric-track {
+  flex: 1;
+  min-width: 0;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  padding: 1px;
+}
+.metric-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: var(--ink);
+  transition: width 500ms var(--ease);
+}
+.metric-fill.is-ok { background: var(--ok-bright); }
+.metric-fill.is-warn { background: var(--warn); }
 .metric-num {
+  flex-shrink: 0;
+  min-width: 42px;
   font-size: 13px;
   font-weight: 700;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
-.metric-track {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--line);
-  overflow: hidden;
-}
-.metric-fill {
-  height: 100%;
-  width: 0%;
-  border-radius: 2px;
-  background: var(--ink);
-  transition: width 400ms var(--ease);
-}
-.metric-fill.is-ok { background: var(--ok-bright); }
-.metric-fill.is-warn { background: var(--warn); }
 
 .metrics-extra-toggle {
   background: none;
@@ -1890,15 +1804,18 @@ body.rec-open { overflow: hidden; }
 }
 .rm-track {
   flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--line);
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
   overflow: hidden;
+  padding: 1px;
 }
 .rm-fill {
+  display: block;
   height: 100%;
   width: 0%;
-  border-radius: 2px;
+  border-radius: 999px;
   background: var(--ink);
   transition: width 400ms var(--ease);
 }
@@ -2118,7 +2035,7 @@ body.rec-open { overflow: hidden; }
   .sess-progress-label { order: 1; }
   .sess-timer { order: 2; margin-left: auto; }
   .sess-pause-btn { order: 3; width: 100%; justify-content: flex-start; margin-left: 0; padding: 8px 0; }
-  .sess-body { padding: 22px 16px calc(140px + env(safe-area-inset-bottom)); }
+  .sess-body { padding: 22px 16px 56px; }
   .question-text { font-size: 15.5px; }
   .answer-textarea { min-height: 108px; }
 
@@ -2132,16 +2049,16 @@ body.rec-open { overflow: hidden; }
   .gauge-side { width: 100%; }
   .gauge-badge { justify-content: center; }
   .rm-label { width: 88px; font-size: 12.5px; }
-  .metric { grid-template-columns: 84px 26px 1fr; gap: 10px; }
+  .metric { grid-template-columns: 96px 1fr; gap: 12px; }
 
   .pause-card { padding: 24px 20px; }
   .briefing-card { font-size: 16.5px; padding: 22px 20px; }
 }
 
 @media (max-width: 400px) {
-  .send-row { align-items: stretch; }
   .answer-hint-btn { white-space: nowrap; }
-  .metric { grid-template-columns: 76px 24px 1fr; gap: 8px; }
+  .metric { grid-template-columns: 84px 1fr; gap: 10px; }
+  .send-btn { flex: 1; justify-content: center; }
 }
 
 @media (max-width: 480px) {
@@ -2180,20 +2097,6 @@ body.rec-open { overflow: hidden; }
   .gauge-fill { transition: none; }
 }
 
-/* ============================================================
-   PALCO MULTIMODALE — testo e voce insieme (round 71)
-   Le frasi si accendono mentre la commissione le legge: in corso =
-   pieno, già letto = leggibile, non ancora letto = attenuato.
-   Zero layout shift: le frasi occupano il loro spazio dall'inizio.
-   ============================================================ */
-.q-sent { opacity: 1; transition: opacity 240ms var(--ease); }
-/* La lettura sincronizzata (voce attiva) è un piacere in più: il testo è
-   attenuato SOLO mentre la commissione legge (is-reading sulla domanda).
-   A voce spenta ogni frase è sempre pienamente leggibile. */
-#q-text.is-reading .q-sent { opacity: 0.4; }
-#q-text.is-reading .q-sent.is-done { opacity: 0.82; }
-#q-text.is-reading .q-sent.is-active { opacity: 1; }
-
 /* Trascrizione progressiva nel registratore: il candidato si vede
    ascoltato mentre parla. Provvisorio e silenzioso, mai invasivo. */
 .recorder-interim {
@@ -2214,68 +2117,4 @@ body.rec-open { overflow: hidden; }
   .question-text { font-size: 16px; }
 }
 
-/* Round 72 — Riprova voce: compare solo dopo un errore del provider TTS. */
-.voice-tts-retry {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: 10px;
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--line-2);
-  background: transparent;
-  color: var(--ink-faint);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: border-color 0.15s var(--ease), color 0.15s var(--ease);
-}
-.voice-tts-retry:hover { border-color: var(--ink-soft); color: var(--ink-soft); }
-.voice-tts-retry:focus-visible { outline: 2px solid var(--warn); outline-offset: 2px; }
 
-/* Selettore voce della commissione (Piper on-device). Appare solo a voce attiva:
-   il progresso del download è una riga di testo (mai un loader enorme). */
-.voice-sel {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 8px;
-  margin-top: 10px;
-}
-.voice-sel[hidden] { display: none; }
-.voice-sel-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-}
-.voice-sel-opts {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 2px;
-  background: var(--bg-2);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-}
-.voice-sel-opt {
-  border: 0;
-  background: transparent;
-  padding: 4px 11px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  transition: background var(--t-base) var(--ease), color var(--t-base) var(--ease);
-}
-.voice-sel-opt:hover { color: var(--ink); }
-.voice-sel-opt:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.voice-sel-opt[aria-pressed="true"] {
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: 0 1px 2px rgba(15, 17, 21, 0.08);
-}
-.voice-sel-progress {
-  font-size: 11.5px;
-  color: var(--muted);
-}

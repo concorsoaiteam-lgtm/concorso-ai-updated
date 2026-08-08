@@ -162,65 +162,18 @@
       </div>
       <span class="question-chip hidden" id="q-chip"></span>
       <p class="question-text hidden" id="q-text"></p>
-      <button type="button" class="voice-tts-toggle" id="voice-tts-toggle" aria-pressed="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 6a9 9 0 0 1 0 12"/></svg>
-        <span id="voice-tts-label">Voce della commissione</span>
-      </button>
-      <button type="button" class="voice-tts-retry" id="voice-tts-retry" hidden>Riprova voce</button>
-
-      <!-- Voce della commissione: Piper on-device (Paola/Riccardo). Il
-           selettore appare solo a voce attiva; il progresso mostra il
-           download del modello (una volta sola, poi offline). -->
-      <div class="voice-sel" id="voice-sel" role="group" aria-label="Voce della commissione" hidden>
-        <span class="voice-sel-label">Voce:</span>
-        <div class="voice-sel-opts">
-          <button type="button" class="voice-sel-opt" id="voice-sel-paola" aria-pressed="true">Paola</button>
-          <button type="button" class="voice-sel-opt" id="voice-sel-riccardo" aria-pressed="false">Riccardo</button>
-        </div>
-        <span class="voice-sel-progress" id="voice-sel-progress" aria-live="polite" hidden></span>
-      </div>
-
-      <!-- Player della commissione: waveform reale + controlli
-           (pausa/riprendi, stop, replay, velocità). Appare solo
-           quando la commissione parla. Mai effetti da assistente. -->
-      <div class="tts-player" id="tts-player" hidden>
-        <div class="tts-player-row">
-          <div class="tts-wave" id="tts-wave" aria-hidden="true"></div>
-          <div class="tts-ctrl">
-            <button type="button" class="tts-btn" id="tts-pause" aria-label="Pausa">
-              <svg class="tts-pause-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>
-              <svg class="tts-play-ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M7 5.5v13l11-6.5-11-6.5Z"/></svg>
-            </button>
-            <button type="button" class="tts-btn" id="tts-replay" aria-label="Riascolta">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-            </button>
-            <button type="button" class="tts-btn" id="tts-stop" aria-label="Ferma">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="1.5"/></svg>
-            </button>
-            <button type="button" class="tts-btn tts-rate" id="tts-rate" aria-label="Velocità di lettura">1x</button>
-          </div>
-        </div>
-        <p class="tts-note" id="tts-note" aria-live="polite"></p>
-      </div>
-
     </section>
 
-    <!-- Area risposta -->
+    <!-- Area risposta: testo + strumenti (microfono, Invia) sempre vicini.
+         L'azione principale resta a portata di mano anche quando si apre
+         l'aiuto o la risposta modello. -->
     <section class="answer-box" id="answer-box" aria-label="La tua risposta">
-      <label class="answer-label" for="answer-textarea">La tua risposta</label>
+      <div class="answer-head">
+        <label class="answer-label" for="answer-textarea">La tua risposta</label>
+        <span class="sess-countdown hidden" id="sess-countdown" aria-live="polite"></span>
+      </div>
       <textarea class="answer-textarea" id="answer-textarea" rows="4" maxlength="4000"
         placeholder="Rispondi come davanti alla commissione…" aria-describedby="word-count"></textarea>
-      <div class="answer-foot">
-        <span class="word-count" id="word-count">0 parole</span>
-        <button type="button" class="answer-hint-btn" id="answer-hint-btn" aria-expanded="false" aria-controls="answer-hint-panel">Come si struttura una buona risposta</button>
-      </div>
-      <div class="voice-row" id="voice-row">
-        <button type="button" class="voice-btn" id="voice-btn" aria-pressed="false" aria-label="Rispondi a voce">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 1 0-7 0v5A3.5 3.5 0 0 0 12 15Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
-          <span id="voice-btn-label">Rispondi a voce</span>
-        </button>
-      </div>
-      <p class="voice-metrics" id="voice-metrics" aria-live="polite"></p>
       <div class="answer-hint-panel" id="answer-hint-panel">
         <div class="answer-hint-inner">
           <ol>
@@ -230,7 +183,55 @@
           </ol>
         </div>
       </div>
+      <div class="answer-tools">
+        <button type="button" class="answer-hint-btn" id="answer-hint-btn" aria-expanded="false" aria-controls="answer-hint-panel">Come strutturare una buona risposta</button>
+        <span class="word-count" id="word-count">0 parole</span>
+        <button type="button" class="voice-btn" id="voice-btn" aria-pressed="false" aria-label="Rispondi a voce">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 1 0-7 0v5A3.5 3.5 0 0 0 12 15Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          <span id="voice-btn-label">Parla</span>
+        </button>
+        <button type="button" class="send-btn" id="send-btn" aria-label="Invia risposta (Ctrl+Invio)" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          <span>Invia</span>
+        </button>
+      </div>
+      <p class="voice-metrics" id="voice-metrics" aria-live="polite"></p>
       <div class="volume-hint" id="volume-hint"></div>
+    </section>
+
+    <!-- Feedback del commissario: appare solo dopo l'invio, subito sotto
+         l'area risposta. Ordine pensato per la lettura: punteggi → perché
+         → cosa migliorare → cosa fare adesso. -->
+    <section class="feedback-panel" id="feedback-panel" aria-label="Feedback del commissario" aria-live="polite">
+      <div class="feedback-head"><span>Valutazione del commissario</span></div>
+
+      <div class="feedback-skeleton" id="feedback-skeleton">
+        <p class="fb-skel-label">Il commissario sta leggendo la tua risposta…</p>
+        <div class="fb-sk-line w1 shimmer"></div>
+        <div class="fb-sk-line w2 shimmer"></div>
+        <div class="fb-sk-line w3 shimmer"></div>
+        <div class="fb-sk-line w4 shimmer"></div>
+      </div>
+
+      <div class="feedback-content" id="feedback-content">
+        <div class="metrics" id="metrics-main"></div>
+        <button type="button" class="metrics-extra-toggle" id="metrics-extra-toggle" aria-expanded="false" aria-controls="metrics-extra">Mostra tutte e 5 le valutazioni</button>
+        <div class="metrics-extra" id="metrics-extra"></div>
+        <p class="feedback-text" id="feedback-text"></p>
+        <p class="feedback-suggestion" id="feedback-suggestion"></p>
+        <button type="button" class="btn btn-primary next-btn" id="next-btn"></button>
+      </div>
+
+      <div class="feedback-error" id="feedback-error">
+        <div class="report-card">
+          <h3>Non è arrivato</h3>
+          <p class="feedback-error-text" id="feedback-error-text"></p>
+          <div class="feedback-error-actions">
+            <button type="button" class="btn btn-primary" id="feedback-retry">Riprova</button>
+            <button type="button" class="btn btn-ghost" id="feedback-save">Salva e riprendi</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Aiuto se non sai rispondere: spunto o risposta modello, mai un muro.
@@ -273,52 +274,6 @@
             </div>
             <p class="help-result-label" id="help-result-label"></p>
             <div class="help-result-text" id="help-result-text"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="send-row">
-      <span class="sess-countdown hidden" id="sess-countdown" aria-live="polite"></span>
-      <button type="button" class="send-btn" id="send-btn" aria-label="Invia risposta (Ctrl+Invio)" disabled>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-      </button>
-    </div>
-
-    <!-- Feedback -->
-    <section class="feedback-panel" id="feedback-panel" aria-label="Feedback del commissario" aria-live="polite">
-      <div class="feedback-head">
-        <span>Commissario</span>
-        <button type="button" class="fb-listen" id="fb-listen" aria-label="Ascolta il feedback" hidden>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 6a9 9 0 0 1 0 12"/></svg>
-          <span>Ascolta</span>
-        </button>
-      </div>
-
-      <div class="feedback-skeleton" id="feedback-skeleton">
-        <p class="fb-skel-label">Il commissario sta leggendo la tua risposta…</p>
-        <div class="fb-sk-line w1 shimmer"></div>
-        <div class="fb-sk-line w2 shimmer"></div>
-        <div class="fb-sk-line w3 shimmer"></div>
-        <div class="fb-sk-line w4 shimmer"></div>
-      </div>
-
-      <div class="feedback-content" id="feedback-content">
-        <div class="metrics" id="metrics-main"></div>
-        <button type="button" class="metrics-extra-toggle" id="metrics-extra-toggle" aria-expanded="false" aria-controls="metrics-extra">Mostra tutte e 5 le valutazioni</button>
-        <div class="metrics-extra" id="metrics-extra"></div>
-        <p class="feedback-text" id="feedback-text"></p>
-        <p class="feedback-suggestion" id="feedback-suggestion"></p>
-        <button type="button" class="btn btn-primary next-btn" id="next-btn"></button>
-      </div>
-
-      <div class="feedback-error" id="feedback-error">
-        <div class="report-card">
-          <h3>Non è arrivato</h3>
-          <p class="feedback-error-text" id="feedback-error-text"></p>
-          <div class="feedback-error-actions">
-            <button type="button" class="btn btn-primary" id="feedback-retry">Riprova</button>
-            <button type="button" class="btn btn-ghost" id="feedback-save">Salva e riprendi</button>
           </div>
         </div>
       </div>

@@ -42,7 +42,6 @@
     resumeData: null,           // sessione da riprendere
     bankLoading: null,          // Promise generazione bank
     voiceMetrics: null,         // metriche paralinguistiche ultima risposta vocale
-    voiceSpeaking: false,       // la commissione sta ancora leggendo la domanda
     lastFeedback: null          // {scores, feedback, suggerimento} dell'ultimo turno
   };
 
@@ -892,7 +891,6 @@
     S.feedbackDone = false;
     feedbackRetries = 0;
     S.helpCache = {};
-    resetQuestionReading();
     // Sessione fresca: il draft di ripresa precedente ("Non ora") non deve
     // riproporsi alla prossima visita. La nuova sessione riscrive il draft
     // al primo salvataggio.
@@ -964,54 +962,13 @@
     if (el) el.classList.add("hidden");
   }
 
-  /* ------------------------------------------------------------------
-     Domanda come frasi evidenziabili: quando la commissione la legge
-     (voce attiva) ogni frase si accende mentre viene pronunciata.
-     A voce spenta il testo è sempre pienamente leggibile: la lettura
-     sincronizzata è un piacere in più, mai un modo di essere letti.
-     ------------------------------------------------------------------ */
-  function splitText(text) {
-    var parts = String(text || "").split(/(?<=[.!?;:])\s+/);
-    return parts.map(function (p) { return p.trim(); }).filter(Boolean);
-  }
-
   function renderQuestionText() {
     var qt = $("q-text");
     if (!qt) return;
     var q = S.questions[S.idx];
     if (!q) return;
-    qt.innerHTML = splitText(q.testo).map(function (s) {
-      return '<span class="q-sent">' + escHtml(s) + "</span> ";
-    }).join("");
+    qt.textContent = q.testo;
     qt.classList.remove("hidden");
-  }
-
-  function resetQuestionReading() {
-    var qt = $("q-text");
-    if (!qt) return;
-    qt.classList.remove("is-reading");
-    var spans = qt.querySelectorAll(".q-sent");
-    for (var i = 0; i < spans.length; i++) {
-      spans[i].classList.remove("is-active");
-      spans[i].classList.remove("is-done");
-    }
-  }
-
-  function applySentHighlight(containerId, idx) {
-    var spans = document.querySelectorAll("#" + containerId + " .q-sent");
-    for (var i = 0; i < spans.length; i++) {
-      spans[i].classList.toggle("is-active", i === idx);
-      spans[i].classList.toggle("is-done", i < idx);
-    }
-  }
-
-  /* Callback da voice.js: la frase in corso si accende mentre la
-     commissione la legge. L'effetto esiste solo durante la lettura
-     (classe is-reading sulla domanda); a fine lettura tutto torna
-     pienamente leggibile. */
-  function onTtsSentence(idx) {
-    var qt = $("q-text");
-    if (qt && qt.classList.contains("is-reading")) applySentHighlight("q-text", idx);
   }
 
   /* ------------------------------------------------------------------
@@ -1037,7 +994,6 @@
     chip.textContent = q.argomento || "Dal bando";
     chip.classList.remove("hidden");
     $("q-skeleton").classList.remove("is-on");
-    resetQuestionReading();
     renderQuestionText();
 
     // Reset area risposta
@@ -1056,8 +1012,6 @@
     hidePrevFeedback();
     resetHelp();
     resetVoiceForQuestion();
-    // Se la voce della commissione è attiva, la domanda viene letta.
-    speakQuestion(q);
     ta.focus();
 
     if (S.mode === "difficile" && tot - S.idx <= 3) {
@@ -1070,13 +1024,12 @@
   }
 
   /* ------------------------------------------------------------------
-     Voce — stato per domanda + lettura della domanda da parte della
-     commissione (TTS on-device). Le metriche vocali della risposta
-     restano in S.voiceMetrics e diventano parte del feedback.
+     Voce — stato per domanda. Il microfono è SOLO uno strumento per dare
+     la risposta (STT): le metriche paralinguistiche restano in
+     S.voiceMetrics e diventano parte del feedback.
      ------------------------------------------------------------------ */
   function resetVoiceForQuestion() {
     S.voiceMetrics = null;
-    S.voiceSpeaking = false;
     var m = $("voice-metrics");
     if (m) { m.classList.remove("is-on"); m.innerHTML = ""; }
     stopWaveLoop();
@@ -1088,31 +1041,9 @@
       vb.classList.remove("is-busy");
       vb.setAttribute("aria-pressed", "false");
       var lbl = $("voice-btn-label");
-      if (lbl) lbl.textContent = "Rispondi a voce";
+      if (lbl) lbl.textContent = "Parla";
     }
     if (window.Voice) { try { Voice.cancel(); } catch (_) { /* noop */ } }
-  }
-
-  /* La commissione legge la domanda ad alta voce (se la voce è attiva).
-     Le frasi si accendono durante la lettura; a fine lettura il testo
-     torna pienamente leggibile. Il flag voiceSpeaking serve a rilevare
-     le interruzioni quando l'utente avvia il microfono a metà lettura. */
-  function speakQuestion(q) {
-    if (!q || S.phase !== "session") return;
-    if (!window.Voice || !Voice.ttsEnabled) return;
-    S.voiceSpeaking = true;
-    var qt = $("q-text");
-    if (qt) {
-      qt.classList.add("is-reading");
-      applySentHighlight("q-text", -1);   // reset: nessuna frase attiva
-    }
-    Voice.speak(q.testo).then(function () {
-      S.voiceSpeaking = false;
-      if (qt) qt.classList.remove("is-reading");
-    }).catch(function () {
-      S.voiceSpeaking = false;
-      if (qt) qt.classList.remove("is-reading");
-    });
   }
 
   function fmtVoiceMetrics(metrics) {
@@ -1177,26 +1108,6 @@
      finale). La simulazione vocale è un colloquio, non una chat. */
   function isTraining() {
     return S.mode === "ripasso" || S.mode === "allenati";
-  }
-
-  function syncTtsToggle() {
-    var ttsBtn = $("voice-tts-toggle");
-    if (!ttsBtn) return;
-    var on = !!(window.Voice && Voice.ttsEnabled);
-    ttsBtn.setAttribute("aria-pressed", on ? "true" : "false");
-    var lbl = $("voice-tts-label");
-    if (lbl) lbl.textContent = on ? "Voce: attiva" : "Voce della commissione";
-    // Selettore voce Piper: visibile solo a voce attiva, con la voce
-    // scelta in evidenza (single source of truth per l'interfaccia).
-    var sel = $("voice-sel");
-    if (sel) sel.hidden = !on;
-    var selPaola = $("voice-sel-paola");
-    var selRiccardo = $("voice-sel-riccardo");
-    if (selPaola && selRiccardo && window.Voice) {
-      var v = Voice.getPiperVoice ? Voice.getPiperVoice() : "paola";
-      selPaola.setAttribute("aria-pressed", v === "paola" ? "true" : "false");
-      selRiccardo.setAttribute("aria-pressed", v === "riccardo" ? "true" : "false");
-    }
   }
 
   /* ------------------------------------------------------------------
@@ -1365,11 +1276,14 @@
     if (kind === "spunto") {
       sys = "Sei un tutor che prepara da anni candidati ai concorsi pubblici italiani. " +
         "Il candidato è bloccato su questa domanda d'orale: «" + q.testo + "». " +
-        "Non scrivere la risposta completa. Dagli 3 spunti, UNO per riga, corti e concreti " +
-        "(max 12 parole ciascuno): il primo indica l'angolo di attacco, il secondo un riferimento " +
-        "normativo o un istituto chiave, il terzo un esempio da citare. " +
+        "Non scrivere la risposta completa. Dagli 3 spunti che lo avvicinino davvero alla risposta " +
+        "senza regalarla, UNO per riga, corti e concreti (max 14 parole ciascuno): " +
+        "1) il primo dice DA QUALE CONCETTO partire e perché (l'idea chiave da ricordare); " +
+        "2) il secondo richiama UNA DISTINZIONE importante o il riferimento normativo giusto da citare; " +
+        "3) il terzo suggerisce UN ESEMPIO concreto o un caso tipico da portare. " +
+        "Lo spunto deve orientare il ragionamento: niente frasi generiche che ripetono la domanda. " +
         "Ogni riga DEVE seguire questo formato esatto: «Etichetta: testo», dove l'etichetta è " +
-        "Angolo di attacco, Riferimento o Esempio. " +
+        "Da dove partire, Da ricordare o Esempio. " +
         "Niente introduzioni, niente frasi di contorno, niente elenchi numerati, " +
         "niente asterischi, niente markdown, niente grassetto. " + langRule;
     } else {
@@ -1446,10 +1360,18 @@
       sys += " Contesto della domanda precedente: «" + String(prevA.q.testo).slice(0, 200) + "». " +
         "La tua reazione è stata: «" + String(prevA.feedback || "").slice(0, 160) + "».";
     }
-    sys += "Valuta con precisione su 5 dimensioni (0-10, massimo 1 decimale): chiarezza, struttura, " +
-      "contenuto, lessico, pertinenza. Poi scrivi un feedback di max 90 parole in italiano " +
+    var words = countWords(risposta);
+    sys += "Valuta su 5 dimensioni (0-10, massimo 1 decimale): chiarezza, struttura, " +
+      "contenuto, lessico, pertinenza. I voti devono essere CREDIBILI, come quelli di una " +
+      "commissione vera: la risposta è di " + words + " parole. " +
+      "Sotto le 40 parole una risposta non supera il 6; sotto le 60 difficilmente il 7. " +
+      "Il 9-10 è riservato a risposte complete: tesi netta, argomentazione, fonte normativa " +
+      "citata e chiusura. Non regalare voti: una risposta media merita 5-6, una mediocre 3-4. " +
+      "Poi scrivi un feedback di max 90 parole in italiano semplice e diretto " +
       "(se la materia è «Lingua inglese», scrivi il feedback in inglese): " +
-      "1 frase che cita la risposta, 1-2 di correzione specifica, un suggerimento concreto. " +
+      "1 frase che cita la risposta, 1-2 di correzione specifica e concreta, un suggerimento " +
+      "per la prossima volta. Frasi brevi, linguaggio naturale, come parlerebbe un commissario " +
+      "esperto: mai giri di parole da manuale. " +
       "Rispondi SOLO con JSON valido senza markdown: " +
       '{"chiarezza":7,"struttura":6,"contenuto":5,"lessico":7,"pertinenza":6,' +
       '"feedback":"testo del feedback","suggerimento":"la prossima volta prova a…"}';
@@ -1466,7 +1388,7 @@
       return streamSse(r);
     }).then(function (json) {
       S.streamCtrl = null;
-      var scores = normalizeScores(json);
+      var scores = normalizeScores(json, risposta);
       var feedback = String(json.feedback || "").trim();
       var sugg = String(json.suggerimento || "").trim();
       if (!feedback) feedback = fallbackFeedback(risposta, q);
@@ -1478,7 +1400,7 @@
       // mai lasciare l'utente senza risposta (matrice errori master §13).
       var code = (err && err.message) || "";
       if (code === "no-json" || code === "empty") {
-        var scores = heuristicScores(risposta);
+        var scores = applyCredibility(heuristicScores(risposta), risposta);
         var feedback = fallbackFeedback(risposta, q);
         finishFeedback(scores, feedback, "Riprova la prossima domanda con una struttura più marcata.", t0);
         return;
@@ -1563,34 +1485,49 @@
     return JSON.parse(json);
   }
 
-  function normalizeScores(json) {
+  function normalizeScores(json, risposta) {
     function n(v) {
       var x = Number(v);
       if (!isFinite(x)) return null;
       return Math.max(0, Math.min(10, x));
     }
-    return {
+    return applyCredibility({
       chiarezza: n(json.chiarezza),
       struttura: n(json.struttura),
       contenuto: n(json.contenuto),
       lessico: n(json.lessico) != null ? n(json.lessico) : n(json.chiarezza),
       pertinenza: n(json.pertinenza) != null ? n(json.pertinenza) : n(json.contenuto)
-    };
+    }, risposta);
+  }
+
+  /* Ancòra di credibilità: il voto e la barra devono raccontare la stessa
+     storia. Una risposta corta o vuota non può prendere voti alti: la
+     commissione vera non li darebbe. Il tetto si applica SEMPRE, anche
+     quando il modello è generoso (mai regalare voti). */
+  function applyCredibility(scores, risposta) {
+    var words = countWords(risposta || "");
+    var cap = 10;
+    if (words < 20) cap = 4;
+    else if (words < 40) cap = 5.5;
+    else if (words < 60) cap = 7;
+    if (cap >= 10) return scores;
+    var out = {};
+    Object.keys(scores).forEach(function (k) {
+      out[k] = scores[k] != null ? Math.min(cap, scores[k]) : null;
+    });
+    return out;
   }
 
   function fallbackFeedback(risposta, q) {
     var words = countWords(risposta);
     var hasLaw = /art\.|legge|decreto|l\.\s?\d+/i.test(risposta);
     if (words < 40) {
-      return "La risposta è troppo breve per l'orale. La commissione si aspetta argomentazione: " +
-        "apri con la tesi, sviluppa con un esempio e chiudi. Cita almeno una fonte normativa.";
+      return "La risposta è troppo corta per un orale. Apri con la tesi, sviluppa con un esempio e chiudi. Cita almeno una fonte normativa.";
     }
     if (!hasLaw) {
-      return "La risposta espone il ragionamento ma non cita fonti. " +
-        "Aggiungi il riferimento normativo: legge, articolo, principio.";
+      return "Qui manca il riferimento alla base giuridica. Aggiungi la fonte: legge, articolo, principio.";
     }
-    return "Risposta strutturata e con fonti. Rafforza il passaggio finale: " +
-      "chiudi riagganciando esplicitamente alla domanda della commissione.";
+    return "La risposta è strutturata e cita le fonti. Rafforza la chiusura: riaggancia all'ultima frase il tema della domanda.";
   }
 
   /* ------------------------------------------------------------------
@@ -1622,6 +1559,12 @@
     content.classList.add("is-on");
     renderMetrics(scores);
     renderPrevFeedback();
+    // Il feedback è il protagonista di questa fase: la pagina lo porta in
+    // vista e nasconde gli aiuti ormai inutili (la domanda ha già avuto
+    // risposta). L'azione principale resta la "Domanda successiva".
+    var helpBox = $("help-box");
+    if (helpBox) helpBox.classList.add("is-off");
+    scrollIntoViewSafe($("feedback-panel"));
 
     // Testo con typewriter e caret. Batch di parole via rAF: un solo
     // reflow per frame invece di un setTimeout per parola (meno lavoro
@@ -1642,7 +1585,6 @@
       S.feedbackDone = true;
       S.sending = false;
       $("help-trigger").disabled = false;
-      showFbListen(feedback, suggerimento);
       if (D) D.track("sim_feedback_received", {
         sim_id: S.simId, idx: S.idx,
         latency_ms: Date.now() - t0, scores: scores
@@ -1688,7 +1630,10 @@
   }
 
   /* ------------------------------------------------------------------
-     Metriche (3 + 2 avanzate)
+     Metriche (3 + 2 avanzate) — barre vere, proporzionate al voto.
+     Ogni barra è una track discreta con un fill che vale esattamente
+     voto/10 (5 → 50%, 8 → 80%, 10 → 100%): numero e barra raccontano
+     la stessa cosa, mai una barra decorativa.
      ------------------------------------------------------------------ */
   var METRIC_LABELS = [
     ["chiarezza", "Chiarezza"],
@@ -1697,6 +1642,12 @@
     ["lessico", "Lessico"],
     ["pertinenza", "Pertinenza"]
   ];
+
+  function fmtScore10(v) {
+    var n = Number(v);
+    if (!isFinite(n)) return "—";
+    return n.toLocaleString("it-IT", { maximumFractionDigits: 1 }) + "/10";
+  }
 
   function renderMetrics(scores) {
     var main = $("metrics-main");
@@ -1713,11 +1664,16 @@
   function metricRow(key, label, val) {
     var v = val != null ? val : 0;
     var cls = v >= 7 ? "is-ok" : (v >= 5 ? "is-warn" : "");
+    var pct = Math.max(0, Math.min(100, Math.round(v * 10)));
     return '<div class="metric">' +
       '<span class="metric-label">' + label + "</span>" +
-      '<span class="metric-num" id="mnum-' + key + '">0</span>' +
-      '<span class="metric-track"><span class="metric-fill ' + cls + '" id="mfill-' + key + '" style="width:0%"></span></span>' +
-      "</div>";
+      '<div class="metric-bar">' +
+        '<span class="metric-track" role="img" aria-label="' + label + " " + fmtScore10(v) + '">' +
+          '<span class="metric-fill ' + cls + '" id="mfill-' + key + '" style="width:0%"></span>' +
+        "</span>" +
+        '<span class="metric-num" id="mnum-' + key + '">' + fmtScore10(v) + "</span>" +
+      "</div>" +
+    "</div>";
   }
 
   function animateMetrics(scope) {
@@ -1730,13 +1686,15 @@
         // valore già salvato in answers (ultimo)
         var last = S.answers.length ? S.answers[S.answers.length - 1].scores : null;
         var v = last ? last[key] : 0;
-        num.textContent = (v != null ? v : 0).toLocaleString("it-IT", { maximumFractionDigits: 1 });
-        fill.style.width = (v != null ? v : 0) * 10 + "%";
+        num.textContent = fmtScore10(v);
+        fill.style.width = Math.max(0, Math.min(100, (v != null ? v : 0) * 10)) + "%";
       });
     }, 60);
   }
 
   function hideFeedback() {
+    var panel = $("feedback-panel");
+    if (panel) panel.classList.remove("is-on");
     $("feedback-skeleton").classList.remove("is-on");
     $("feedback-content").classList.remove("is-on");
     $("feedback-error").classList.remove("is-on");
@@ -1744,9 +1702,13 @@
     $("feedback-text").classList.remove("is-streaming");
     $("feedback-suggestion").classList.remove("is-on");
     $("metrics-extra").classList.remove("is-open");
+    var helpBox = $("help-box");
+    if (helpBox) helpBox.classList.remove("is-off");
   }
 
   function showFeedbackSkeleton() {
+    var panel = $("feedback-panel");
+    if (panel) panel.classList.add("is-on");
     $("feedback-skeleton").classList.add("is-on");
     $("feedback-content").classList.remove("is-on");
     $("feedback-error").classList.remove("is-on");
@@ -1754,21 +1716,17 @@
 
   function hideFeedbackSkeleton() {
     $("feedback-skeleton").classList.remove("is-on");
-    var fl = $("fb-listen");
-    if (fl) fl.hidden = true;
   }
 
-  /* Feedback ascoltabile: mostra il pulsante "Ascolta" e, se la voce
-     della commissione è attiva, legge il feedback ad alta voce. */
-  function showFbListen(fbText, sugg) {
-    var btn = $("fb-listen");
-    if (!btn) return;
-    btn.hidden = false;
-    btn.classList.remove("is-playing");
-    if (!window.Voice || !Voice.ttsEnabled || !fbText) return;
-    Voice.speak(fbText + (sugg ? " Suggerimento: " + sugg : ""));
-  }
 
+  /* Scroll morbido e sicuro: jsdom non implementa scrollIntoView (i test
+     non devono mai rompersi per uno scroll). */
+  function scrollIntoViewSafe(el) {
+    if (!el || typeof el.scrollIntoView !== "function") return;
+    try {
+      el.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "nearest" });
+    } catch (_) { /* noop */ }
+  }
 
   /* ------------------------------------------------------------------
      Errore feedback — mai un vicolo cieco
@@ -2003,7 +1961,7 @@
         return '<div class="rm-row">' +
           '<span class="rm-label">' + pair[1] + "</span>" +
           '<span class="rm-track"><span class="rm-fill ' + cls + '" id="rm-' + pair[0] + '" style="width:0%"></span></span>' +
-          '<span class="rm-num" id="rmn-' + pair[0] + '">' + fmtVoto(v) + "</span>" +
+          '<span class="rm-num" id="rmn-' + pair[0] + '">' + fmtScore10(v) + "</span>" +
         "</div>";
       }).join("") +
     "</div>";
@@ -2204,7 +2162,6 @@
     S.simId = null;
     S.simCreated = false;
     S.resumeData = null;
-    resetQuestionReading();
     S.mode = "standard";
     if (S.bando) S.subject = null;
     showPhase("setup");
@@ -2231,7 +2188,6 @@
     S.simId = null;
     S.simCreated = false;
     S.pendingDomande = [];
-    resetQuestionReading();
     S.startedAt = Date.now();
     S.elapsedMs = 0;
     S.sending = false;
@@ -2253,7 +2209,6 @@
     S.simId = null;
     S.simCreated = false;
     S.pendingDomande = [];
-    resetQuestionReading();
     S.startedAt = Date.now();
     S.elapsedMs = 0;
     S.sending = false;
@@ -2563,90 +2518,23 @@
     // Invia
     $("send-btn").addEventListener("click", function () { submitAnswer(false); });
 
-    // Ascolta il feedback (voce della commissione)
-    var fbListen = $("fb-listen");
-    if (fbListen) {
-      fbListen.addEventListener("click", function () {
-        if (!window.Voice) return;
-        if (!Voice.ttsEnabled) {
-          // Attiva la voce al volo: il pulsante funziona anche se il
-          // toggle "Voce della commissione" è spento.
-          Voice.setTtsEnabled(true);
-          if (Voice.warmTts) Voice.warmTts();
-          syncTtsToggle();
-        }
-        var fb = $("feedback-text").textContent.trim();
-        var sugg = $("feedback-suggestion").textContent.trim();
-        if (fb) Voice.speak(fb + (sugg ? " Suggerimento: " + sugg : ""));
-      });
-    }
-
-    // ----- Voce -----
+    // ----- Voce (solo microfono → STT) -----
     // Inizializza il modulo vocale con i callback di stato (UI live,
     // mai una UI vuota: lo stato di ascolto/trascrizione è sempre visibile).
     if (window.Voice) {
       Voice.init({
         onStatus: onVoiceStatus,
         onResult: onVoiceResult,
-        onTtsState: onVoiceTtsState,
-        onTtsPlay: onTtsPlay,
-        onTtsSentence: onTtsSentence,
         onInterim: onVoiceInterim
       });
-      syncTtsToggle();
 
-      // Toggle "Rispondi a voce"
+      // Toggle "Parla"
       var vBtn = $("voice-btn");
       if (vBtn) vBtn.addEventListener("click", onVoiceClick);
 
-      // Toggle "Voce della commissione"
-      var ttsBtn = $("voice-tts-toggle");
-      if (ttsBtn) {
-        ttsBtn.setAttribute("aria-pressed", Voice.ttsEnabled ? "true" : "false");
-        $("voice-tts-label").textContent = Voice.ttsEnabled ? "Voce: attiva" : "Voce della commissione";
-        ttsBtn.addEventListener("click", function () {
-          Voice.setTtsEnabled(!Voice.ttsEnabled);
-          var on = Voice.ttsEnabled;
-          // Un solo sync: aria-pressed, etichetta e selettore voce.
-          syncTtsToggle();
-          // Primo download del modello in background (Piper): la prossima
-          // domanda parte subito, senza attesa della voce.
-          if (on && Voice.warmTts) Voice.warmTts();
-          if (D) D.track("sim_voice_tts", { on: on });
-        });
-      }
-
-      // Selettore voce della commissione (Piper on-device): Paola ↔ Riccardo.
-      // La scelta è persistita; il cambio avvia il download dell'altro
-      // modello in background (mai un blocco: la voce di sistema copre).
-      var selPaola = $("voice-sel-paola");
-      var selRiccardo = $("voice-sel-riccardo");
-      if (selPaola && selRiccardo) {
-        var pickVoice = function (id) {
-          if (!window.Voice || !Voice.setPiperVoice) return;
-          Voice.setPiperVoice(id);
-          syncTtsToggle();
-          if (D) D.track("sim_voice_piper", { voce: id });
-        };
-        selPaola.addEventListener("click", function () { pickVoice("paola"); });
-        selRiccardo.addEventListener("click", function () { pickVoice("riccardo"); });
-      }
-
-      // Riprova voce: dopo un errore del provider, ritenta di predisporre
-      // la voce e rilegge la domanda corrente (mai un turno bloccato).
-      var ttsRetry = $("voice-tts-retry");
-      if (ttsRetry) ttsRetry.addEventListener("click", function () {
-        ttsRetry.hidden = true;
-        if (!window.Voice) return;
-        if (Voice.warmTts) Voice.warmTts();
-        if (S.phase === "session" && !S.sending && !S.feedbackDone && S.questions[S.idx]) {
-          speakQuestion(S.questions[S.idx]);
-        }
-      });
-
-      // Niente microfono → nascondi il controllo "Rispondi a voce".
+      // Niente microfono → nascondi il controllo "Parla".
       if (!Voice.micSupported && vBtn) {
-        vBtn.closest(".voice-row").classList.add("hidden");
+        vBtn.classList.add("hidden");
       }
 
       // Registratore vocale: chiusura (X, Escape, click fuori) e
@@ -2670,29 +2558,6 @@
         var rec = $("recorder");
         if (e.key === "Escape" && rec && !rec.hidden) closeRecorderSafe();
       });
-
-      // Player voce della commissione: pausa/riprendi, stop, replay,
-      // velocità 1x → 1.25x → 1.5x (ciclica).
-      var ttsPause = $("tts-pause");
-      if (ttsPause) {
-        ttsPause.addEventListener("click", function () {
-          if (Voice.ttsState === "playing") Voice.ttsControl("pause");
-          else if (Voice.ttsState === "paused") Voice.ttsControl("resume");
-        });
-      }
-      var ttsReplay = $("tts-replay");
-      if (ttsReplay) ttsReplay.addEventListener("click", function () { Voice.ttsControl("replay"); });
-      var ttsStop = $("tts-stop");
-      if (ttsStop) ttsStop.addEventListener("click", function () { Voice.ttsControl("stop"); });
-      var ttsRateBtn = $("tts-rate");
-      if (ttsRateBtn) {
-        ttsRateBtn.addEventListener("click", function () {
-          var cur = Voice.ttsGetRate ? Voice.ttsGetRate() : 1;
-          var next = cur >= 1.5 ? 1 : (cur >= 1.25 ? 1.5 : 1.25);
-          Voice.ttsSetRate(next);
-          ttsRateBtn.textContent = next === 1 ? "1x" : next + "x";
-        });
-      }
     }
 
     // Pausa
@@ -2765,8 +2630,7 @@
     openRecorder();
     setRecorderState("starting", "Preparo il microfono…");
     startWaveLoop();
-    // Interruzione = il mic parte mentre la commissione legge ancora.
-    Voice.start({ interruptedByUser: S.voiceSpeaking })
+    Voice.start()
       .catch(function (err) {
         // "already-busy" = doppio click durante l'avvio: il primo start è
         // ancora in corso, NON chiudere il registratore.
@@ -3100,161 +2964,6 @@
     });
   }
 
-  /* Stato TTS: mostra la preparazione della voce con il progresso REALE
-     del download del modello (Piper in OPFS, una volta sola) e il
-     fallback in caso di errore: la UI non mente mai. Il testo cambia
-     solo quando cambia la percentuale (zero churn sul DOM). */
-  var ttsLoadingPct = -1;
-  function onVoiceTtsState(s) {
-    var ttsBtn = $("voice-tts-toggle");
-    var lbl = $("voice-tts-label");
-    if (!ttsBtn) return;
-    var retry = $("voice-tts-retry");
-    var prog = $("voice-sel-progress");
-    if (s === "loading") {
-      ttsBtn.classList.add("is-loading");
-      var pct = window.Voice ? Math.round((Voice.piperProgress || 0) * 100) : 0;
-      if (pct !== ttsLoadingPct) {
-        ttsLoadingPct = pct;
-        if (Voice.ttsEnabled) {
-          lbl.textContent = (pct > 0 && pct < 100)
-            ? "Preparazione voce… " + pct + "%"
-            : "Carico la voce…";
-        }
-        if (prog) {
-          prog.textContent = "Download voce: " + pct + "% · una volta sola";
-          prog.hidden = !(pct > 0 && pct < 100);
-        }
-      }
-    } else if (s === "error") {
-      ttsBtn.classList.remove("is-loading");
-      ttsLoadingPct = -1;
-      lbl.textContent = "Voce non disponibile";
-      if (retry) retry.hidden = false;
-      if (prog) { prog.hidden = true; prog.textContent = ""; }
-      // Mai un blocco: il turno continua, il testo resta la guida.
-    } else {
-      ttsBtn.classList.remove("is-loading");
-      ttsLoadingPct = -1;
-      if (retry) retry.hidden = true;
-      if (prog) { prog.hidden = true; prog.textContent = ""; }
-      syncTtsToggle();
-    }
-  }
-
-  /* ------------------------------------------------------------------
-     Player voce della commissione — UI. La waveform reagisce al volume
-     REALE dell'audio (AnalyserNode del player): si vede davvero la
-     commissione parlare. Stati: preparazione → riproduzione → pausa →
-     fine/stop. Compatto e silenzioso, mai effetti da assistente AI.
-     ------------------------------------------------------------------ */
-  var ttsBars = [];
-  var ttsWaveLoopId = 0;
-  var ttsHideTimer = null;
-
-  function buildTtsWave() {
-    var w = $("tts-wave");
-    if (!w || ttsBars.length) return;
-    var n = 24;
-    for (var i = 0; i < n; i++) {
-      var b = document.createElement("span");
-      b.className = "tts-wave-bar";
-      b.style.background = waveColor(i, n);   // grafite → verde (design system)
-      w.appendChild(b);
-      ttsBars.push(b);
-    }
-  }
-
-  function startTtsWaveLoop() {
-    if (ttsWaveLoopId) return;
-    var tick = function () {
-      if (!window.Voice || Voice.ttsState !== "playing") { stopTtsWaveLoop(); return; }
-      var levels = (Voice.ttsWaveLevels && ttsBars.length)
-        ? Voice.ttsWaveLevels(ttsBars.length) : null;
-      for (var i = 0; i < ttsBars.length; i++) {
-        var v = 0.1;
-        if (levels && levels[i] != null) {
-          v = Math.max(0.08, Math.min(1, levels[i] * 1.35));
-        } else {
-          v = 0.1 + 0.07 * Math.sin(performance.now() / 520 + i * 0.45);
-        }
-        ttsBars[i].style.transform = "scaleY(" + v.toFixed(3) + ")";
-      }
-      ttsWaveLoopId = requestAnimationFrame(tick);
-    };
-    ttsWaveLoopId = requestAnimationFrame(tick);
-  }
-
-  function stopTtsWaveLoop() {
-    if (ttsWaveLoopId) { cancelAnimationFrame(ttsWaveLoopId); ttsWaveLoopId = 0; }
-  }
-
-  function resetTtsBars() {
-    for (var i = 0; i < ttsBars.length; i++) ttsBars[i].style.transform = "scaleY(0.1)";
-  }
-
-  function setTtsPauseIcon(paused) {
-    var btn = $("tts-pause");
-    if (!btn) return;
-    var pi = btn.querySelector(".tts-pause-ic");
-    var pl = btn.querySelector(".tts-play-ic");
-    if (pi) pi.hidden = paused;
-    if (pl) pl.hidden = !paused;
-    btn.setAttribute("aria-label", paused ? "Riprendi" : "Pausa");
-  }
-
-  /* Stato del player segnalato da voice.js: la UI non mente mai. */
-  function onTtsPlay(state) {
-    var pl = $("tts-player");
-    if (!pl) return;
-    var note = $("tts-note");
-    if (state === "preparing") {
-      pl.hidden = false;
-      pl.classList.add("is-preparing");
-      pl.classList.remove("is-playing", "is-paused");
-      buildTtsWave();
-      if (note) note.textContent = "Preparo la voce…";
-      if (ttsHideTimer) { clearTimeout(ttsHideTimer); ttsHideTimer = null; }
-    } else if (state === "playing") {
-      pl.hidden = false;
-      pl.classList.add("is-playing");
-      pl.classList.remove("is-preparing", "is-paused");
-      buildTtsWave();
-      if (note) note.textContent = "";
-      setTtsPauseIcon(false);
-      startTtsWaveLoop();
-      var fb = $("fb-listen");
-      if (fb && !fb.hidden) fb.classList.add("is-playing");
-    } else if (state === "paused") {
-      pl.classList.add("is-paused");
-      pl.classList.remove("is-playing");
-      if (note) note.textContent = "In pausa";
-      setTtsPauseIcon(true);
-      stopTtsWaveLoop();
-      resetTtsBars();
-    } else {
-      // done | stopped
-      stopTtsWaveLoop();
-      resetTtsBars();
-      setTtsPauseIcon(false);
-      // Testo stabilizzato: dopo la lettura tutto resta leggibile.
-      resetQuestionReading();
-      var fb2 = $("fb-listen");
-      if (fb2) fb2.classList.remove("is-playing");
-      if (pl.hidden) return;
-      if (ttsHideTimer) clearTimeout(ttsHideTimer);
-      if (state === "done") {
-        if (note) note.textContent = "";
-        ttsHideTimer = setTimeout(function () {
-          ttsHideTimer = null;
-          pl.hidden = true;
-        }, 1100);
-      } else {
-        pl.hidden = true;
-      }
-    }
-  }
-
   function autoSize(ta) {
     ta.style.height = "auto";
     var h = Math.min(ta.scrollHeight, 12 * 26);
@@ -3366,14 +3075,12 @@
       submitAnswer: submitAnswer,
       finishFeedback: finishFeedback,
       onVoiceResult: onVoiceResult,
-      onTtsSentence: onTtsSentence,
-      splitText: splitText,
       renderQuestionText: renderQuestionText,
       isTraining: isTraining,
       closePause: closePause,
       openPause: openPause,
-      onVoiceTtsState: onVoiceTtsState,
-      syncTtsToggle: syncTtsToggle
+      fmtScore10: fmtScore10,
+      applyCredibility: applyCredibility
     };
   }
 })();
